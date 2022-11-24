@@ -145,3 +145,47 @@ Released	14/06/2022
 Notes	_
 Changes	Edit: Made "MobileServicesToggle" switch between GMS & HMS automatically using "browser.userAgent"
 ___
+Creation DateTime	18/06/2022 01:40
+Version	0.4.8
+Version Code	20220618
+AppGyver Runtime Version	4.3.6
+Released OS	Web
+Released Build#	227363
+Released	18/06/2022
+Notes	_
+Changes	Edit: Changed "Open URL" component to "Open web browser" (a.k.a. "WebView") for files/websites but not apps, effectively creating an app. built-in browser 
+___
+Creation DateTime	30/06/2022 15:30
+Version	0.5.0
+Version Code	20220630
+AppGyver Runtime Version	4.3.6
+Released OS	Web
+Released Build#	229782
+Released	30/06/2022
+Notes	_
+Changes	"Add: ""InputTools"" icon button for Input Method Editor (IME) in case of no Arabic keyboard: displaying Google IME for GMS & VKboard for China/HMS, visible only if there's Arabic in ""PreferredLanguages"" (as ""pencil"" icon)
+Fix: ""osIcon"" for ""iOS"" & ""MacOS"" as ""apple"", ""Windows Phone"" as ""windows"", ""Unix"" as ""linux""
+Add: ""Supplications"" button
+Add: ""FoodScanner"" button for Halal foods
+Edit: some buttons colors to ""Secondary""
+Add: ""Maps4Mosques"" icon button to different Maps (as ""map"" icon)
+Add: ""QuranicResearcher"" button to a light online app. with extensive content, visible only for Android GMS (as ""search"" icon beside ""Quran"" button)
+Add: ""HadithResearcher"" button to a light online app. with extensive content, visible only for Android GMS (as ""search"" icon beside ""Hadith"" button)
+Edit: Updated ""About"" p. accordingly
+Edit: Updated ""About"" & ""Screenshots"" on all Stores!
+Add: ""Apple AppStore"" badge to ""AppStoresRow"""
+___
+Creation DateTime	03/07/2022 14:40
+Version	0.5.1
+Version Code	20220703
+AppGyver Runtime Version	4.5.7
+Released OS	Web
+Released Build#	230249
+Released	03/07/2022
+Notes	_
+Changes	"Edit: Changed Apple ""AppStore"" badge icon from ""https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"" to ""https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us""
+Add: Image placeholders for 3 App. Stores QR code
+Edit: Changed ""AppLink"" for Web from ""http://azhar.eg/magmaa"" to ""https://i360.appgyverapp.com/""
+Edit: Changed back ""Open web browser"" component (a.k.a. ""WebView"") to ""Open URL"" for files/websites but not apps to enable navigation
+Edit: changed PDF file storage from Box (seifadin@hotmail.com) to Box (i36O@outlook.com), as owner appeared in ""File Info.""!"
+___
