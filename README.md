@@ -189,3 +189,18 @@ Edit: Changed ""AppLink"" for Web from ""http://azhar.eg/magmaa"" to ""https://i
 Edit: Changed back ""Open web browser"" component (a.k.a. ""WebView"") to ""Open URL"" for files/websites but not apps to enable navigation
 Edit: changed PDF file storage from Box (seifadin@hotmail.com) to Box (i36O@outlook.com), as owner appeared in ""File Info.""!"
 ___
+Creation DateTime	06/07/2022 23:22
+Version	0.5.2
+Version Code	20220706
+AppGyver Runtime Version	4.5.7
+Released OS	Web
+Released Build#	230968
+Released	06/07/2022
+Notes	i360إ-MS1 (MS=MileStone)
+Changes	"Edit: Changed ""AppLink"" for Web from ""https://i360.appgyverapp.com/"" to ""https://i36O.wordpress.com/""
+Edit: Changed ""MobileServicesToggle"" disabling to when OS is Android & ""OS_WebToggle"" isn't Web
+Add: Created ""WordPress"" p. for support showing About (as ""About"" p.) FAQ & short Explanation (as is Toggle switches & IME); as per ""AppStore"" request
+Edit: ""About"" p. icon from ""?"" to ""!""
+Add: ""Support"" button on ""About"" p. (as ""question"" icon)
+Add: Spinned-off this version to another app.: i360إ-MS1 (MS=MileStone)"
+___
