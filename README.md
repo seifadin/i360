@@ -21,6 +21,3 @@ Add: ""PrayerTimes"" button
 Add: ""Mawareth"" button
 Add: ""DarAlIftaa"" button
 Add: Logic for Android op."
-
-Notes	" i360إ-OG (OG=Original)
-(before Magmaa meeting 2022/05/12)"
