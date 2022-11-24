@@ -8,7 +8,7 @@ AppGyver Runtime Version	4.3.6
 Released OS	Web
 Released Build#	230085
 Released	02/07/2022
-
+Notes _
 Changes	"Creation: i360إ-OG (Original)
 Add: ""Quran"" button
 Add: ""Hadith"" button
@@ -21,3 +21,4 @@ Add: ""PrayerTimes"" button
 Add: ""Mawareth"" button
 Add: ""DarAlIftaa"" button
 Add: Logic for Android op."
+___
