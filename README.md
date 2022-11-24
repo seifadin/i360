@@ -1,7 +1,7 @@
 # i360
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
-Creation DateTime	10/05/2022
+Creation DateTime	10/05/2022\n
 Version	0.1.0
 Version Code	20220510
 AppGyver Runtime Version	4.3.6
