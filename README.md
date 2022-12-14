@@ -16,7 +16,7 @@
 |     Notes | Excluded in Amazon AppStore: for _crashing!_|
 |     Changes | Fix: Set _InputToolsText_ with same logic & visibility|
 |     | Edit: To fix issue displaying Web content on non-Android/iOS using WebView|
-|     |   - Added a 5<sub>th</sub> output node to _Osfn_ flow function based on _useWeb_ (manually chosen) or non-Android/iOS detected thus switching to using normal web browser|
+|     |   - Added a 5<sup>th</sup> output node to _Osfn_ flow function based on _useWeb_ (manually chosen) or non-Android/iOS detected thus switching to using normal web browser|
 |     |   -  In _الرئيسية_ p. mount, set default value of _useWeb_ to be true for Anroid/iOS & false otherwise|
   
 </details>
