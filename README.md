@@ -85,7 +85,7 @@
 </details>
 
 <details>
-<summary>v 0.7.0</summary>
+<summary>v 0.7.0 (NG1)</summary>
 
 | Header | Details |
 |-----:|-----------|
