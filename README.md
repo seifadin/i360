@@ -11,7 +11,7 @@
 |     Version Code | 20220706|
 |     AppGyver Runtime Version | 4.5.7|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **iOS** (ipa)|
-|     Released Build# | 230968 – 230969 – 230969 – 230971|
+|     Released Build# | 230968 – 230969 – _ – 230971|
 |     Released | 06/07/2022|
 |     Notes | **i360إ-MS1 (MS=MileStone)**|
 |     Changes | Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)
