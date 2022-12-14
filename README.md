@@ -16,16 +16,16 @@
 |     Notes | i360إ-OG (OG=Original)
 |     | (before Magmaa meeting 2022/05/12)|
 |     Changes | - Creation: i360إ-OG (Original)
-- Add: _Quran_ button|
-- Add: _Hadith_ button|
-- Add: _Aqidah_ button|
-- Add: _Fiqh_ button|
-- Add: _Terminology_ button|
-- Add: _IslamicThoughtComponentBooks_ button|
-- Add: _Azkar_ button|
-- Add: _PrayerTimes_ button|
-- Add: _Mawareth_ button|
-- Add: _DarAlIftaa_ button|
+- Add: _Quran_ button
+- Add: _Hadith_ button
+- Add: _Aqidah_ button
+- Add: _Fiqh_ button
+- Add: _Terminology_ button
+- Add: _IslamicThoughtComponentBooks_ button
+- Add: _Azkar_ button
+- Add: _PrayerTimes_ button
+- Add: _Mawareth_ button
+- Add: _DarAlIftaa_ button
 - Add: Logic for Android op.|
   
 </details>
