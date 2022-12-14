@@ -1,25 +1,6 @@
 # i360
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
-Creation DateTime	29/08/2022 20:23
-Version	0.7.0
-Version Code	20220829
-AppGyver Runtime Version	4.5.10
-Released OS	Web
-Released Build#	240722
-Released	29/08/2022
-Notes	Excluded in Huawei AppGallery: China, India; for "privacy policy notification"
-Changes	"Edit: Decreased vertical gaps between all rows/buttons on all pages by half: from 16px to 8px
-Edit: Rearranged ""QuranReading"" in about page to be consistent with the rest of the info.
-Edit: Renamed ""i360privacy"" item to ""i360Privacy""
-Edit: Renamed ""Azkar"" button to ""Prayers""
-Add: Imported ""i360db.xlsx"" to Airtable base (online database)
-Add: ""i360db"" data resource linked to ""i360db.xlsx"" Airtable using REST API; NB - after 'getting collection', 'testing' & 'setting schema from response', change ""IconName"" field type from 'text' to 'icon name' for compatibility use
-Add: ""i360Records"" data variable, type: 'collection of data records', based on ""i360db"" data resource
-Add: ""ScienceCollapsibleGroupedIconList"" replacing all buttons/icons using ""OSfn"" flow function; NB - items were manually ordered as desired visually!
-Edit: Moved ""HedayahLearning"" image, ""IslamicThoughtComponentBooks"" button, ""Support"" & ""PrivacyPolicy"" icons from ""About"" to ""Main"" p.
-Edit: Changed ""Notes"" text to include app. ver. & release date
-Del: ""About"" p., including ""AppStoresRow""!
 <details>
 <summary>v 0.8.3</summary>
 
