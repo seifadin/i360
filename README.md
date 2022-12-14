@@ -6,7 +6,7 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation DateTime | 10/05/2022|
+|     Creation Date/Time | 10/05/2022|
 |     Version | 0.1.0|
 |     Version Code | 20220510|
 |     AppGyver Runtime Version | 4.3.6|
