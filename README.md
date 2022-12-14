@@ -10,8 +10,8 @@
 |     Version | 0.1.0|
 |     Version Code | 20220510|
 |     AppGyver Runtime Version | 4.3.6|
-|     Released OS | Web|
-|     Released Build# | 230085|
+|     Released OS | Web|     | |
+|     Released Build# | 230085|     | |
 |     Released | 02/07/2022|
 |     Notes | **i360إ-OG (OG=Original)**|
 |     | (before Magmaa meeting 2022/05/12)|
