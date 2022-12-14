@@ -14,6 +14,7 @@
 |     Released Build# | 230968 – 230969 – _ – 230971|
 |     Released | 06/07/2022|
 |     Notes | **i360إ-MS1 (MS=MileStone)**|
+|     | Last update for min. func. for iOS|
 |     Changes | Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)
 |     | Edit: Changed _MobileServicesToggle_ disabling to when OS is Android & _OS_WebToggle_ isn't Web|
 |     | Add: Created _WordPress_ p. for support showing About (as _About_ p.) FAQ & short Explanation (as is Toggle switches & IME); as per _AppStore_ request|
@@ -117,7 +118,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk)|
 |     Released Build# | 225942 – 225943 – 225944|
 |     Released | 11/06/2022|
-|     Notes | Last update for min. func. for Huawei|
+|     Notes | Last update for min. func. for Android - Huawei|
 |     Changes | Edit: Made _MobileServicesToggle_ switch visible only for Android|
   
 </details>
