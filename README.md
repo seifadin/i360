@@ -2,114 +2,195 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
-<summary>v 0.8.3</summary>
+<summary>v 0.4.5 (MS1)</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 10/09/2022 14:32|
-|     Version | 0.8.3|
-|     Version Code | 20220910|
-|     AppGyver Runtime Version | 4.6.11|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk) – **Android** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 243130 – 243131 – 243132 – 243131 – 243133|
-|     Released | 10/09/2022|
+|     Creation Date/Time | 11/06/2022 04:15|
+|     Version | 0.4.5|
+|     Version Code | 20220611|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk)|
+|     Released Build# | 225920 – 225922 – 225921|
+|     Released | 11/06/2022|
+|     Notes | **i360إ-MS1 (MS=MileStone)**|
+|     Changes | Add: _MobileServicesToggle_ (between Google & Huawei Mobile Services; a.k.a. GMS & HMS respectively) & linked it to app. var. _useHMS_|
+|     | Edit: Changed var. _defaultOS_ from (OS+Form) to OS only|
+|     | Edit: Changed all relevant buttons' _isChina_ to (_isChina_ or _useHMS_)|
+|     | Add: Spinned-off this version to another app.: i360إ-MS1 (MS=MileStone)|
+  
+</details>
+
+<details>
+<summary>v 0.4.4</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 10/06/2022 05:32|
+|     Version | 0.4.4|
+|     Version Code | 20220610|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk)|
+|     Released Build# | 225683 – 225684 – 225685|
+|     Released | 10/06/2022|
 |     Notes | _|
-|     Changes | Fix: Set _InputToolsText_ with same logic & visibility|
-|     | Edit: To fix issue displaying Web content on non-Android/iOS using WebView|
-|     |   - Added a 5<sup>th</sup> output node to _Osfn_ flow function based on _useWeb_ (manually chosen) or non-Android/iOS detected thus switching to using normal web browser|
-|     |   - In _الرئيسية_ p. mount, set default value of _useWeb_ to be true for Anroid/iOS & false otherwise|
-  
+|     Changes | Edit: Renamed _Theology_ button to _Creed_|
+|     | Edit: _AppLink_ button to proper Goggle Play/Huawei AppGallery Stores|
+|     | Add: _Goggle Play_/_Huawei AppGallery_ Stores badges to _AppStoresRow_|
+|     | Add: _osIcon_ icon next to _OS_WebToggle_ switch|
+
 </details>
 
 <details>
-<summary>v 0.8.2</summary>
+<summary>v 0.4.3</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 08/09/2022 14:00|
-|     Version | 0.8.2|
-|     Version Code | 20220908|
-|     AppGyver Runtime Version | 4.6.11|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk) – **iOS** (ipa)|
-|     Released Build# | 242758 – 242759 – 242760 – 242761|
-|     Released | 08/09/2022|
+|     Creation Date/Time | 03/06/2022 23:08|
+|     Version | 0.4.3|
+|     Version Code | 20220603|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk)|
+|     Released Build# | 224160 – 224495 – 224497|
+|     Released | 03/06/2022|
 |     Notes | _|
-|     Changes | Edit: Moved _HedayahLearning_ image, _IslamicThoughtComponentBooks_ button to _SciencesList_|
-|     | Edit: Moved _InputTools_ icon, _Notes_ text to _AppSupportRow_|
-|     | Add: _InputToolsText_ below _InputTools_ icon|
-|     | Del: _NotesRow_|
-|     | Edit: Enahanced app. ornaments by adding ornamented cells at the edges & including adding ornamented _HeaderRow_, _FooterRow_ rows|
-|     | Edit: Reduced sizes of _Support_, _PrivacyPolicy_ icons from _Title XL_ to _Title L_ (as _AppIcon_)|
-|     | Edit: Increased size of _InputTools_ icon from _Text XXL_ to _Title L_ (as _AppIcon_)|
-  
+|     Changes | Edit: Changed _Prayers_ link from (https://praytimes.org/) to (https://muslimpro.com/ar/prayer-times)|
+
 </details>
 
 <details>
-<summary>v 0.8.1</summary>
+<summary>v 0.4.2</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 06/09/2022 19:30|
-|     Version | 0.8.1|
-|     Version Code | 20220906|
-|     AppGyver Runtime Version | 4.5.10|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk) – **iOS** (ipa)|
-|     Released Build# | 242500 – 242483 – 242416 – 242420|
-|     Released | 06/09/2022|
-|     Notes | Excluded in Apple AppStore: China; for _content licensing_|
-|     Changes | Del: _compass_ icon to del. _Start compass poller_ that required _Location_ permission!|
-  
-</details>
-
-<details>
-<summary>v 0.8.0</summary>
-
-| Header | Details |
-|-----:|-----------|
-|     Creation Date/Time | 05/09/2022 20:23|
-|     Version | 0.8.0|
-|     Version Code | 20220905|
-|     AppGyver Runtime Version | 4.5.10|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk) – **iOS** (ipa)|
-|     Released Build# | 242235 – 242237 – 242238 – 242239|
-|     Released | 05/09/2022|
+|     Creation Date/Time | 03/06/2022 00:20|
+|     Version | 0.4.2|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web**|
+|     Released Build# | 223975|
+|     Released | 03/06/2022|
 |     Notes | _|
-|     Changes | Edit: Renamed _ScienceCollapsibleGroupedIconList_ Collapsible grouped icon list to _SciencesList_|
-|     | Edit: Renamed _Main_ p. to _الرئيسية_|
-|     | Add: _المتصفح_ p. including _WebView_; i.e. Changed _Open URL_ component to _Open web browser_ (a.k.a. _WebView_) for files/websites but not apps, effectively creating an app. built-in browser; expanding its height to 640 px to fit more content within _many_ mobile screens (too long will hide part of the displayed webpage)|
-|     | Add: In  _المتصفح_ p., _WebParam_ p. parameter|
-|     | Edit: In _الرئيسية_ p. mount, added setting _useWeb_ app. var. to true (so app.'s default is _web_ then local OS)|
-|     | Edit: In _SciencesList_ list, changed _OSfn_ Web node from _Open URL_ to _Open Page_, namely _المتصفح_ p.|
-|     | Add: _compass_ icon as visible indicator for existing device compass using _Start compass poller_|
+|     Changes | Edit: Changed _Theology_ links to web (only)|
+|     | Edit: Added _*_ to button linking to apps. & a footnote stating this|
 
 </details>
 
 <details>
-<summary>v 0.7.0 (NG1)</summary>
+<summary>v 0.4.1</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 29/08/2022 20:23|
-|     Version | 0.7.0|
-|     Version Code | 20220829|
-|     AppGyver Runtime Version | 4.5.10|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **iOS** (ipa)|
-|     Released Build# | 240722 – 240723 – 240723 – 241052|
-|     Released | 06/09/2022|
-|     Notes | **i360إ-NG1 (NG=Next Generation)**|
-|     | Excluded in Huawei AppGallery: China, India; for _privacy policy notification_|
-|     Changes | Edit: Decreased vertical gaps between all rows/buttons on all pages by half: from 16px to 8px|
-|     | Edit: Rearranged _QuranReading_ in about page to be consistent with the rest of the info.|
-|     | Edit: Renamed _i360privacy_ item to _i360Privacy_|
-|     | Edit: Renamed _Azkar_ button to _Prayers_|
-|     | Add: Imported _i360db.xlsx_ to Airtable base (online database)|
-|     | Add: _i360db_ data resource linked to _i360db.xlsx_ Airtable using REST API; NB - after 'getting collection', 'testing' & 'setting schema from response', change _IconName_ field type from 'text' to 'icon name' for compatibility use|
-|     | Add: _i360Records_ data variable, type: 'collection of data records', based on _i360db_ data resource|
-|     | Add: _ScienceCollapsibleGroupedIconList_ replacing all buttons/icons using _OSfn_ flow function; NB - items were manually ordered as desired visually!|
-|     | Edit: Moved _HedayahLearning_ image, _IslamicThoughtComponentBooks_ button, _Support_ & _PrivacyPolicy_ icons from _About_ to _Main_ p.|
-|     | Edit: Changed _Notes_ text to include app. ver. & release date|
-|     | Del: _About_ p., including _AppStoresRow_!|
-|     | Del: _QuranRecitation_, _defaultOS_, _iconOS_, _showStores_, _usedOS_ app variables|
-|     | Del: _QuranicResearcher_ & _HadithResearcher_ icons|
-  
+|     Creation Date/Time | 02/06/2022|
+|     Version | 0.4.1|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web**|
+|     Released Build# | 223789|
+|     Released | 02/06/2022|
+|     Notes | _|
+|     Changes | Edit: _Jurisprudence_ button color|
+|     | Edit: Hided _OS_WebToggle_ switch if not Android or iOS|
+
+</details>
+
+<details>
+<summary>v 0.4.0</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 01/06/2022|
+|     Version | 0.4.0|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | **Web**|
+|     Released Build# | 223760|
+|     Released | 01/06/2022|
+|     Notes | _|
+|     Changes | Edit: Added detailed app. description to _About_ p. |
+|     | Add: Logic for Android op. in China (using Huawei AppGallery) |
+|     | Edit: Changed Components layout to fit smaller/lower-resolution screens|
+|     | Edit: Changed _Jurisprudence_Search_ URL from online stored PDF to (https://shamela.ws/)|
+|     | Add: _JurisprudenceBookIcon_ icon to online stored PDF (as _book_ icon)|
+
+</details>
+
+<details>
+<summary>v 0.3.1</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 31/05/2022|
+|     Version | 0.3.1|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | _|
+|     Released Build# | _|
+|     Released | _|
+|     Notes | _|
+|     Changes | Del: _Qibla without Compass_ button|
+|     | Add: Logic for Prayer/Qibla App. depending on Compass sensor in _PrayerTimes_ button|
+
+</details>
+
+<details>
+<summary>v 0.3.0</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 26/05/2022|
+|     Version | 0.3.0|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | _|
+|     Released Build# | _|
+|     Released | _|
+|     Notes | _|
+|     Changes | Add: _PropheticBiography_ button|
+|     | Add: _Morals_ button|
+|     | Add: _Sufism_ button|
+|     | Add: _ComprehensiveTables_ button|
+|     | Del: _Fundamentalism_ button|
+|     | Edit: changed PDF file storage from OneDrive to Box|
+
+</details>
+
+<details>
+<summary>v 0.2.5</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 22/05/2022|
+|     Version | 0.2.5|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | _|
+|     Released Build# | _|
+|     Released | _|
+|     Notes | _|
+|     Changes | Add: _OS_WebToggle_ switch (between default OS & Web op.) & linked it to app. var. _useWeb_
+|     | Add: _About_ p.|
+
+</details>
+
+<details>
+<summary>v 0.2.0</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 14/05/2022|
+|     Version | 0.2.0|
+|     Version Code | _|
+|     AppGyver Runtime Version | 4.3.6|
+|     Released OS | _|
+|     Released Build# | _|
+|     Released | _|
+|     Notes | _|
+|     Changes | Add: Logic for Android/iOS/Web op. for each button|
+|     | Add: _Qibla without Compass_ button|
+|     | Add: _Fundamentalism_ button|
+|     | Edit: Renamed _Aqidah_ button to _Theology_|
+|     | Edit: Renamed _Fiqh_ button to _Jurisprudence_Search_|
+|     | Edit: Renamed _Mawareth_ button to _Inheritance_|
+
 </details>
