@@ -16,7 +16,7 @@
 |     Notes | **i360إ-MS2 (MS=MileStone)**|
 |     | Last update for min. func. for iOS|
 |     Changes | **Add: Created _WordPress_ p. for support showing About (as _About_ p.) FAQ & short Explanation (as is Toggle switches & IME); as per _AppStore_ request**|
-|     | Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)
+|     | ~~Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)~~|
 |     | Edit: Changed _MobileServicesToggle_ disabling to when OS is Android & _OS_WebToggle_ isn't Web|
 |     | Edit: _About_ p. icon from _?_ to _!_|
 |     | Add: _Support_ button on _About_ p. (as _question_ icon)|
