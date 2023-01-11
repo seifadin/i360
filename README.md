@@ -2,7 +2,7 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
-<summary>v 0.6.5 (MS2)</summary>
+<summary>v 0.6.5 (MS3)</summary>
 
 | Header | Details |
 |-----:|-----------|
@@ -13,11 +13,11 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **iOS** (ipa)|
 |     Released Build# | 237899 – 237894 – _ – _|
 |     Released | 14/08/2022|
-|     Notes | **i360إ-MS2 (MS=MileStone)**|
+|     Notes | **i360إ-MS3 (MS=MileStone)**|
 |     Changes | Add: _QuranRecitation_ dropdown adding 1 recitation item: _3[مصاحف التيسير] لسائر القراءات العشر المتواترة_
 |     | Edit: _Quran_ logic to include _QuranRecitation_ options|
 |     | Edit: Updated _About_ p. accordingly|
-|     | Add: Spinned-off this version to another app.: i360إ-MS2 (MS=MileStone)|
+|     | Add: Spinned-off this version to another app.: i360إ-MS3 (MS=MileStone)|
   
 </details>
 
