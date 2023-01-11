@@ -2,7 +2,7 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
-<summary>v 0.5.2 (MS1)</summary>
+<summary>v 0.5.2 (MS2)</summary>
 
 | Header | Details |
 |-----:|-----------|
@@ -13,14 +13,14 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **iOS** (ipa)|
 |     Released Build# | 230968 – 230969 – _ – 230971|
 |     Released | 06/07/2022|
-|     Notes | **i360إ-MS1 (MS=MileStone)**|
+|     Notes | **i360إ-MS2 (MS=MileStone)**|
 |     | Last update for min. func. for iOS|
-|     Changes | Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)
+|     Changes | **Add: Created _WordPress_ p. for support showing About (as _About_ p.) FAQ & short Explanation (as is Toggle switches & IME); as per _AppStore_ request**|
+|     | Edit: Changed _AppLink_ for Web from (https://i360.appgyverapp.com/) to (https://i36O.wordpress.com/)
 |     | Edit: Changed _MobileServicesToggle_ disabling to when OS is Android & _OS_WebToggle_ isn't Web|
-|     | Add: Created _WordPress_ p. for support showing About (as _About_ p.) FAQ & short Explanation (as is Toggle switches & IME); as per _AppStore_ request|
 |     | Edit: _About_ p. icon from _?_ to _!_|
 |     | Add: _Support_ button on _About_ p. (as _question_ icon)|
-|     | Add: Spinned-off this version to another app.: i360إ-MS1 (MS=MileStone)|
+|     | Add: Spinned-off this version to another app.: i360إ-MS2 (MS=MileStone)|
   
 </details>
 
