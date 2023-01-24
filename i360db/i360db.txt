@@ -1,4 +1,0 @@
-API key (full access): keyBo6e3xg2yfkC19
-API key (read-only): keyMQknIocrnxmLhM
-"i360db.xlsx" base ID: appwt98rt1i8Xq8St
-"Sciences" table ID: tblVvuCk9UPAEv8G2 (Table ids/names are interchangeable in API requests)
