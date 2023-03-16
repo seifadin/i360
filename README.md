@@ -2,7 +2,7 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
-<summary>v 0.8.3</summary>
+<summary>v 0.8.3 (MS4)</summary>
 
 | Header | Details |
 |-----:|-----------|
@@ -18,6 +18,7 @@
 |     | Edit: To fix issue displaying Web content on non-Android/iOS using WebView|
 |     |   - Added a 5<sup>th</sup> output node to _Osfn_ flow function based on _useWeb_ (manually chosen) or non-Android/iOS detected thus switching to using normal web browser|
 |     |   - In _الرئيسية_ p. mount, set default value of _useWeb_ to be true for Anroid/iOS & false otherwise|
+|     | Add: Spinned-off this version to another app.: i360إ-MS4 (MS=MileStone)|
   
 </details>
 
