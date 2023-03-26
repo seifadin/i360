@@ -17,7 +17,7 @@
 |     Changes | Add: _MobileServicesToggle_ (between Google & Huawei Mobile Services; a.k.a. GMS & HMS respectively) & linked it to app. var. _useHMS_|
 |     | Edit: Changed var. _defaultOS_ from (OS+Form) to OS only|
 |     | Edit: Changed all relevant buttons' _isChina_ to (_isChina_ or _useHMS_)|
-|     | Add: Spinned-off this version to another app.: **_i360إ-MS1_** (MS=MileStone)|
+|     | Add: Spinned-off this version to another app.: ***i360إ-MS1*** (MS=MileStone)|
   
 </details>
 
