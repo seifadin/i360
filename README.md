@@ -20,7 +20,7 @@
 |     | Edit: Changed _MobileServicesToggle_ disabling to when OS is Android & _OS_WebToggle_ isn't Web|
 |     | Edit: _About_ p. icon from _?_ to _!_|
 |     | Add: _Support_ button on _About_ p. (as _question_ icon)|
-|     | Add: Spinned-off this version to another app.: i360إ-MS2 (MS=MileStone)|
+|     | Add: Spinned-off this version to another app.: ***i360إ-MS2*** (MS=MileStone)|
   
 </details>
 
