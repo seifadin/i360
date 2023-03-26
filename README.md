@@ -17,7 +17,7 @@
 |     Changes | Add: _QuranRecitation_ dropdown adding 1 recitation item: _3[مصاحف التيسير] لسائر القراءات العشر المتواترة_
 |     | Edit: _Quran_ logic to include _QuranRecitation_ options|
 |     | Edit: Updated _About_ p. accordingly|
-|     | Add: Spinned-off this version to another app.: i360إ-MS3 (MS=MileStone)|
+|     | Add: Spinned-off this version to another app.: ***i360إ-MS3*** (MS=MileStone)|
   
 </details>
 
