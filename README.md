@@ -103,8 +103,8 @@
 |     | Edit: Rearranged _QuranReading_ in about page to be consistent with the rest of the info.|
 |     | Edit: Renamed _i360privacy_ item to _i360Privacy_|
 |     | Edit: Renamed _Azkar_ button to _Prayers_|
-|     | Add: Imported _i360db.xlsx_ to Airtable base (online database)|
-|     | Add: _i360db_ data resource linked to _i360db.xlsx_ Airtable using REST API; NB - after 'getting collection', 'testing' & 'setting schema from response', change _IconName_ field type from 'text' to 'icon name' for compatibility use|
+|     | Add:  Imported _i360db.xlsx_, _Sciences_ tab, to Airtable base (online database)|
+|     | Add: _i360db_ data resource linked to _i360db.xlsx - Sciences_ Airtable using REST API with API key (set as read-only by using composite share: primary user has full-access & secondary user based on first with read-only (as suggested by Airtable)!; NB - after 'getting collection', 'testing' & 'setting schema from response', change _IconName_ field type from 'text' to 'icon name' for compatibility use|
 |     | Add: _i360Records_ data variable, type: 'collection of data records', based on _i360db_ data resource|
 |     | Add: _ScienceCollapsibleGroupedIconList_ replacing all buttons/icons using _OSfn_ flow function; NB - items were manually ordered as desired visually!|
 |     | Edit: Moved _HedayahLearning_ image, _IslamicThoughtComponentBooks_ button, _Support_ & _PrivacyPolicy_ icons from _About_ to _Main_ p.|
