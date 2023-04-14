@@ -2,6 +2,29 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.2</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 14/04/2023  14:09|
+|     Version | 0.9.9|
+|     Version Code | 20230414|
+|     AppGyver Runtime Version | 4.7.36|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 277738 – 277739 – 277739 – 277739 – 277750|
+|     Released | 14/04/2023|
+|     Notes | – |
+|     Changes | Add: _i360k_ data resource linked to _Bing Web Search_, to enable _Bing Entity Search_ (Knowledge Graph Search) with required dynamic query term _q_ in _Get Collection_, created: 03/04/2023|
+|     |   Add: _i360kRecords_ data variable, type: 'collection of data records', based on _i360k_ data resource)|
+|     |   Add: _EntityQueryTerm_ App Variable linked to _i360kRecords'_ query term _q_|
+|     |   Add: In _الرئيسية_ p., in _EntityList_ large image list item (with _Repeat to_ _i360kRecords_ data variable)|
+|     |   Add: In _الرئيسية_ p., in _SearchBarRow_, _EntitySearch_ checkbox|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ to enable _Custom Search_ & _Entity Search_ based on _EntitySearch_|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث..._ to _بحث مخصص داخلي..._ for _Internal Custom Search_ & _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
+  
+</details>
+
+<details>
 <summary>v 0.9.1</summary>
 
 | Header | Details |
