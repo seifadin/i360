@@ -13,7 +13,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 277738 – 277739 – 277739 – 277739 – 277750|
 |     Released | 14/04/2023|
-|     Notes | – |
+|     Notes | _|
 |     Changes | Add: _i360k_ data resource linked to _Bing Web Search_, to enable _Bing Entity Search_ (Knowledge Graph Search) with required dynamic query term _q_ in _Get Collection_, created: 03/04/2023|
 |     |   Add: _i360kRecords_ data variable, type: 'collection of data records', based on _i360k_ data resource)|
 |     |   Add: _EntityQueryTerm_ App Variable linked to _i360kRecords'_ query term _q_|
