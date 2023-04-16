@@ -7,7 +7,7 @@
 | Header | Details |
 |-----:|-----------|
 |     Creation Date/Time | 14/04/2023  14:09|
-|     Version | 0.9.9|
+|     Version | 0.9.2|
 |     Version Code | 20230414|
 |     AppGyver Runtime Version | 4.7.36|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
@@ -64,7 +64,7 @@
 |     | Add: In _المتصفح_ p., _Share_ icon & _ShareText_|
 |     | Edit: In _الرئيسية_ p., in _SciencesList_, changed text & icon colors to blue (Primary) & changed text align (orientation) to right|
 |     | Edit: In _الرئيسية_ p., in _SciencesList_, decreased list item top & bottom gaps from 8px to 4px|
-|     | Add: In _الرئيسية_ p., _SearchBarRow_, to include _SearchBar_ based on _Bing Custom Search_ (https://customsearch.ai); created: 19/02/2023, activated: 26/02/2023|
+|     | Add: In _الرئيسية_ p., _SearchBarRow_, to include _SearchBar_ based on _Bing Custom Search_ (https://customsearch.ai); created: 15/02/2023, activated: 26/02/2023|
 |     | Edit: In _الرئيسية_ p., moved _InputTools_ icon to _SearchBarRow_|
 |     | Edit: In _الرئيسية_ p., moved _Support_, _PrivacyPolicy_ icons to _SciencesList_|
 |     | Del: In _الرئيسية_ p., _SupportRow_|
