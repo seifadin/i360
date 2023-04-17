@@ -2,6 +2,29 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.3</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 14/04/2023  13:33|
+|     Version | 0.9.3|
+|     Version Code | 20230417|
+|     AppGyver Runtime Version | 4.7.36|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 277738 – 277739 – 277739 – 277739 – 277750|
+|     Released | 17/04/2023|
+|     Notes | _|
+|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 (unfunctional)|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search (functional)|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث معرفي خارجي (بالإنجليزية)..._ to _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
+|     |   Edit: Renamed _i360db_ data resource to _i360dbs_ & related changed (for naming consistency)|
+|     |   Edit: Renamed _i360dbRecords_ data variable to _i360dbsVar_ & related changed|
+|     |   Edit: Renamed _i360dbcRecord_ data variable to _i360dbcVar_ & related changed|
+|     |   Edit: Renamed _i360kRecords_ data variable to _i360kVar_ & related changed|
+  
+</details>
+
+<details>
 <summary>v 0.9.2</summary>
 
 | Header | Details |
@@ -20,7 +43,7 @@
 |     |   Add: In _الرئيسية_ p., in _EntityList_ large image list item (with _Repeat to_ _i360kRecords_ data variable)|
 |     |   Add: In _الرئيسية_ p., in _SearchBarRow_, _EntitySearch_ checkbox|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ to enable _Custom Search_ & _Entity Search_ based on _EntitySearch_|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث..._ to _بحث مخصص داخلي..._ for _Internal Custom Search_ & _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث..._ to _بحث مخصص داخلي..._ for _Internal Custom Search_ & _بحث معرفي خارجي (بالإنجليزية)..._ for _External Knowledge Graph Entity Search_|
   
 </details>
 
