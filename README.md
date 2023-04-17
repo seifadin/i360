@@ -6,12 +6,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 14/04/2023  13:33|
+|     Creation Date/Time | 14/04/2023  13:41|
 |     Version | 0.9.3|
 |     Version Code | 20230417|
 |     AppGyver Runtime Version | 4.7.36|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 277738 – 277739 – 277739 – 277739 – 277750|
+|     Released Build# | 278064 – 278065 – 278065 – 278065 – 278067|
 |     Released | 17/04/2023|
 |     Notes | _|
 |     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 (unfunctional)|
