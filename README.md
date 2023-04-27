@@ -2,11 +2,30 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.4</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 27/04/2023  13:36|
+|     Version | 0.9.4|
+|     Version Code | 20230427|
+|     AppGyver Runtime Version | 4.7.37|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 279389 – 279390 – 279390 – 279390 – 279392|
+|     Released | 27/04/2023|
+|     Notes | _|
+|     |   Edit:  In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
+|     |   Edit:  In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a simple of knowledge) while entity searching, with 500ms delay|
+|     |   Edit: In _الرئيسية_ p., change _Web_ icon from _window-maximize_ to _dribbble_ (~globe) in _SciencesList_ & _OSIcon_|
+  
+</details>
+
+<details>
 <summary>v 0.9.3</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 14/04/2023  13:41|
+|     Creation Date/Time | 17/04/2023  13:33|
 |     Version | 0.9.3|
 |     Version Code | 20230417|
 |     AppGyver Runtime Version | 4.7.36|
