@@ -102,7 +102,7 @@
 |     Released Build# | 273739 – 273740 – 273740 – 273740 – 273742|
 |     Released | 16/03/2023|
 |     Notes | App. Ver. & Content Ed. info. are maintained within _i360db.xlsx_ & on Support p. (0.9.0)|
-|     Changes | Add: In _الرئيسية_ p., _InteractionRow_|
+|     Changes | Add: In _المتصفح_ p., _InteractionRow_|
 |     | Add: In _المتصفح_ p., _Share_ icon & _ShareText_|
 |     | Edit: In _الرئيسية_ p., in _SciencesList_, changed text & icon colors to blue (Primary) & changed text align (orientation) to right|
 |     | Edit: In _الرئيسية_ p., in _SciencesList_, decreased list item top & bottom gaps from 8px to 4px|
