@@ -2,6 +2,31 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.5</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 07/05/2023  23:28|
+|     Version | 0.9.5|
+|     Version Code | 20230507|
+|     AppGyver Runtime Version | 4.7.37|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 280703 – 280704 – 280704 – 280704 – 280704 – 280706|
+|     Released | 07/05/2023|
+|     Notes | _|
+|     |   Add:  In __المتصفح__ p., __CurrentWebView__ page variable of current webpage as Web URL|
+|     |   Fix: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
+|     |   Edit:  In __المتصفح__ p., __WebView__, set __CurrentWebView__ to customized __onChangeLocation__ __Receive event__ outputs|
+|     |   Add:  In __المتصفح__ p., __WebViewPages__ page variable of browsed webpages as List of Web URLs| 
+|     |   Edit:  In __المتصفح__ p., __WebView__, added __CurrentWebView__ to __WebViewPages__ incrementally, only if missing|
+|     |   Add:  In __المتصفح__ p., __CurrentWebViewIndex__ page variable of current webpage index in __WebViewPages__ as Number|
+|     |   Add: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
+|     |   Add: In __المتصفح__ p., navigation buttons, namely: __GoBack__, __GoForward__, __Home__ icons, setting __WebView__ URL to previous, next, home items in __WebViewPages__ list, respectively|
+
+  
+</details>
+
+<details>
 <summary>v 0.9.4</summary>
 
 | Header | Details |
@@ -10,8 +35,8 @@
 |     Version | 0.9.4|
 |     Version Code | 20230427|
 |     AppGyver Runtime Version | 4.7.37|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 279389 – 279390 – 279390 – 279390 – 279392|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 279389 – 279390 – 279390 – 279390 – 279390 – 279392|
 |     Released | 27/04/2023|
 |     Notes | _|
 |     |   Edit:  In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
