@@ -13,7 +13,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 280703 – 280704 – 280704 – 280704 – 280704 – 280706|
 |     Released | 07/05/2023|
-|     Notes | Sometimes, PDF files were downloaded not opened as intended, so I thought about changing WebView app variables data types from _Web URL_ to _URL_ as a possible solution but some sites already worked as is as of 07/05/2023, so no change was made!|
+|     Notes | Sometimes, PDF files were downloaded not opened as intended, so I thought about changing WebView app variables data types from _Web URL_ to _URL_ as a possible solution but some sites already worked as is-as of 07/05/2023, so no change was made!|
 |     |   Add:  In __المتصفح__ p., __CurrentWebView__ page variable of current webpage as Web URL|
 |     |   Fix: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
 |     |   Edit:  In __المتصفح__ p., __WebView__, set __CurrentWebView__ to customized __onChangeLocation__ __Receive event__ outputs|
