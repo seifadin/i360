@@ -106,7 +106,7 @@
 |     Notes | – App. Ver. info. is maintained within App., _i360db.xlsx_ & on Support p. (≥ 0.9.1)|
 |     | – Content Ed. info. is maintained within _i360db.xlsx_ & on Support p. (≥ 0.9.1)|
 |     Changes | Fix: Message for new content edition by:|
-|     |   - Renamed _Get item from storage_ for _i360Privacy_ & _i360Edition_ to _...Node_, respectively to be able to call their value|
+|     |   - Renamed _Get item from storage_ logic for _i360Privacy_ & _i360Edition_ to _...Node_, respectively to be able to call their value|
 |     |  - Triggered _i360Edition_ on data _i360cRecords_ changed, if DB edition > _i360EditionNode_|
 |     | Edit: In _i360db.xlsx - Complements_, added _Version_ field & reloaded DB schema|
 |     | Add: In _الرئيسية_ p., added _AppSupportRow_ to include _AppVersion_ info.|
