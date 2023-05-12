@@ -2,6 +2,25 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.6</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 12/05/2023  21:23|
+|     Version | 0.9.6|
+|     Version Code | 20230512|
+|     AppGyver Runtime Version | 4.7.37|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 281499 – 281500 – 281500 – 281500 – 281500 – 281502|
+|     Released | 12/05/2023|
+|     Notes | _|
+|     |   Edit:  In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
+|     |   Edit:  In _الرئيسية_ p., _SearchBar_, used _HTTP request_ for _Translator_ & _Entity Search_ to display error message(s), if any|
+|     |   Add: In _الرئيسية_ p., _SearchBar_, _HTTPrequest_ flow function (based on that of _Translator_ as it's more options) combining _HTTP request_ logic, with error handling mechanism|
+  
+</details>
+
+<details>
 <summary>v 0.9.5</summary>
 
 | Header | Details |
@@ -22,7 +41,6 @@
 |     |   Add:  In __المتصفح__ p., __CurrentWebViewIndex__ page variable of current webpage index in __WebViewPages__ as Number|
 |     |   Add: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
 |     |   Add: In __المتصفح__ p., navigation buttons, namely: __GoBack__, __GoForward__, __Home__ icons, setting __WebView__ URL to previous, next, home items in __WebViewPages__ list, respectively|
-
   
 </details>
 
