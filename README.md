@@ -2,6 +2,25 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.7</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 27/05/2023  00:00|
+|     Version | 0.9.7|
+|     Version Code | 20230527|
+|     AppGyver Runtime Version | 4.7.37|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
+|     Released | 27/05/2023|
+|     Notes | _|
+|     |   Add:  "WebErrata" app. variable of errata of related Web URL|
+|     |   Edit:  In "الرئيسية" p., "SciencesList", added "WebErrata" setting logic|
+|     |   Add: In "المتصفح" p., navigation button, namely: "Errata", setting "WebView" URL to "WebErrata", visible only if exists|
+  
+</details>
+
+<details>
 <summary>v 0.9.6</summary>
 
 | Header | Details |
