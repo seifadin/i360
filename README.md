@@ -14,9 +14,10 @@
 |     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
 |     Released | 27/05/2023|
 |     Notes | _|
-|     |   Add:  "WebErrata" app. variable of errata of related Web URL|
-|     |   Edit:  In "الرئيسية" p., "SciencesList", added "WebErrata" setting logic|
-|     |   Add: In "المتصفح" p., navigation button, namely: "Errata", setting "WebView" URL to "WebErrata", visible only if exists|
+|     |   Add:  _WebErrata_ app. variable of errata of related Web URL|
+|     |   Edit:  In _الرئيسية_ p., _SciencesList_, added _WebErrata_ setting logic|
+|     |   Add: In _المتصفح_ p., _InteractionRow_, navigation button, namely: _Errata_, setting _WebView_ URL to _WebErrata_, visible only if exists|
+|     |   Edit: In _المتصفح_ p., _InteractionRow_, adjusted cells widths in layout for better icons view|
   
 </details>
 
@@ -52,14 +53,14 @@
 |     Released Build# | 280703 – 280704 – 280704 – 280704 – 280704 – 280706|
 |     Released | 07/05/2023|
 |     Notes | Sometimes, PDF files were downloaded not opened as intended, so I thought about changing WebView app variables data types from _Web URL_ to _URL_ as a possible solution but some sites already worked as-is as of 07/05/2023, so no change was made!|
-|     |   Add:  In __المتصفح__ p., __CurrentWebView__ page variable of current webpage as Web URL|
-|     |   Fix: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
-|     |   Edit:  In __المتصفح__ p., __WebView__, set __CurrentWebView__ to customized __onChangeLocation__ __Receive event__ outputs|
-|     |   Add:  In __المتصفح__ p., __WebViewPages__ page variable of browsed webpages as List of Web URLs| 
-|     |   Edit:  In __المتصفح__ p., __WebView__, added __CurrentWebView__ to __WebViewPages__ incrementally, only if missing|
-|     |   Add:  In __المتصفح__ p., __CurrentWebViewIndex__ page variable of current webpage index in __WebViewPages__ as Number|
-|     |   Add: In __المتصفح__ p., set __Share__ to __CurrentWebView__, instead of __WebParam__!|
-|     |   Add: In __المتصفح__ p., navigation buttons, namely: __GoBack__, __GoForward__, __Home__ icons, setting __WebView__ URL to previous, next, home items in __WebViewPages__ list, respectively|
+|     |   Add:  In _المتصفح_ p., _CurrentWebView_ page variable of current webpage as Web URL|
+|     |   Fix: In _المتصفح_ p., set _Share_ to _CurrentWebView_, instead of _WebParam_!|
+|     |   Edit:  In _المتصفح_ p., _WebView_, set _CurrentWebView_ to customized _onChangeLocation_ _Receive event_ outputs|
+|     |   Add:  In _المتصفح_ p., _WebViewPages_ page variable of browsed webpages as List of Web URLs| 
+|     |   Edit:  In _المتصفح_ p., _WebView_, added _CurrentWebView_ to _WebViewPages_ incrementally, only if missing|
+|     |   Add:  In _المتصفح_ p., _CurrentWebViewIndex_ page variable of current webpage index in _WebViewPages_ as Number|
+|     |   Add: In _المتصفح_ p., set _Share_ to _CurrentWebView_, instead of _WebParam_!|
+|     |   Add: In _المتصفح_ p., _InteractionRow_, navigation buttons, namely: _GoBack_, _GoForward_, _Home_ icons, setting _WebView_ URL to previous, next, home items in _WebViewPages_ list, respectively|
   
 </details>
 
