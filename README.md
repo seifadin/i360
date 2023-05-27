@@ -6,12 +6,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 27/05/2023  00:00|
+|     Creation Date/Time | 27/05/2023  21:15|
 |     Version | 0.9.7|
 |     Version Code | 20230527|
 |     AppGyver Runtime Version | 4.7.37|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
+|     Released Build# | 283398 – 283399 – 283399 – 283399 – 283399 – 0|
 |     Released | 27/05/2023|
 |     Notes | _|
 |     |   Add:  _WebErrata_ app. variable of errata of related Web URL|
