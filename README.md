@@ -11,7 +11,7 @@
 |     Version Code | 20230527|
 |     AppGyver Runtime Version | 4.7.37|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 283398 – 283399 – 283399 – 283399 – 283399 – 0|
+|     Released Build# | 283398 – 283399 – 283399 – 283399 – 283399 – 283769|
 |     Released | 27/05/2023|
 |     Notes | _|
 |     |   Add:  _WebErrata_ app. variable of errata of related Web URL|
