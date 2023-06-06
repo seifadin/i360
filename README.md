@@ -15,7 +15,7 @@
 |     Released | 07/06/2023|
 |     Notes | _|
 |     |   Fix:  In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
-|     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in both app. components, _i360db.xlsx - Sciences_ Airtable, & data schema|
+|     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: app. components, _i360db.xlsx - Sciences_ Airtable, & data schema|
   
 </details>
 
