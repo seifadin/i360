@@ -2,6 +2,24 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.8</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 07/06/2023  00:45|
+|     Version | 0.9.8|
+|     Version Code | 20230607|
+|     AppGyver Runtime Version | 4.7.37|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
+|     Released | 07/06/2023|
+|     Notes | _|
+|     |   Fix:  In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
+|     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in both app. components, _i360db.xlsx - Sciences_ Airtable, & data schema|
+  
+</details>
+
+<details>
 <summary>v 0.9.7</summary>
 
 | Header | Details |
