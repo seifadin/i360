@@ -6,12 +6,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 07/06/2023  00:45|
+|     Creation Date/Time | 07/06/2023  14:48|
 |     Version | 0.9.8|
 |     Version Code | 20230607|
 |     AppGyver Runtime Version | 4.7.37|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
+|     Released Build# | 284795 – 284796 – 284796 – 284796 – 284796 – 284798|
 |     Released | 07/06/2023|
 |     Notes | _|
 |     |   Fix: In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
