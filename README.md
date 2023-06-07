@@ -16,7 +16,7 @@
 |     Notes | _|
 |     |   Fix:  In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
-|     |   Fix: _i360t_ data resource by changing _Record Properties_ binding type to _Formula_ (instead of default: _Object with properties_) then entering: [{_Text_:_صلاح الدين الأيوبي_}] **(functional)**|
+|     |   Fix: _i360t_ data resource by changing _Record Properties_ binding type to _Formula_ (instead of default: _Object with properties_) then entering: [{_Text_:_صلاح الدين الأيوبي_}] ***(functional)***|
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource) ***(unfunctional)***|
   
 </details>
@@ -116,8 +116,8 @@
 |     Released Build# | 278064 – 278065 – 278065 – 278065 – 278067|
 |     Released | 17/04/2023|
 |     Notes | _|
-|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 **(unfunctional**_; Error: JSON error response from server: {"error":{"code":400074,"message":"The body of the request is not valid JSON."}}.status: 400_**)**|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search **(functional)**|
+|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 ***(unfunctional***_; Error: JSON error response from server: {"error":{"code":400074,"message":"The body of the request is not valid JSON."}}.status: 400_***)***|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search ***(functional)***|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث معرفي خارجي (بالإنجليزية)..._ to _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
 |     |   Edit: Renamed _i360db_ data resource to _i360dbs_ & related changed (for naming consistency)|
 |     |   Edit: Renamed _i360Records_ data variable to _i360dbsVar_ & related changed|
