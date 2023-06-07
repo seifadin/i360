@@ -16,6 +16,8 @@
 |     Notes | _|
 |     |   Fix:  In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
+|     |   Fix: _i360t_ data resource by changing _Record Properties_ binding type to _Formula_ (instead of default: _Object with properties_) then entering: [{_Text_:_صلاح الدين الأيوبي_}] **(functional)**|
+|     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource) **(unfunctional)**|
   
 </details>
 
@@ -114,11 +116,11 @@
 |     Released Build# | 278064 – 278065 – 278065 – 278065 – 278067|
 |     Released | 17/04/2023|
 |     Notes | _|
-|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 (unfunctional)|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search (functional)|
+|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 **(unfunctional**_; Error: JSON error response from server: {"error":{"code":400074,"message":"The body of the request is not valid JSON."}}.status: 400_**)**|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search **(functional)**|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث معرفي خارجي (بالإنجليزية)..._ to _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
 |     |   Edit: Renamed _i360db_ data resource to _i360dbs_ & related changed (for naming consistency)|
-|     |   Edit: Renamed _i360dbRecords_ data variable to _i360dbsVar_ & related changed|
+|     |   Edit: Renamed _i360Records_ data variable to _i360dbsVar_ & related changed|
 |     |   Edit: Renamed _i360dbcRecord_ data variable to _i360dbcVar_ & related changed|
 |     |   Edit: Renamed _i360kRecords_ data variable to _i360kVar_ & related changed|
   
@@ -138,7 +140,7 @@
 |     Released | 14/04/2023|
 |     Notes | _|
 |     Changes | Add: _i360k_ data resource linked to _Bing Web Search_, to enable _Bing Entity Search_ (Knowledge Graph Search) with required dynamic query term _q_ in _Get Collection_, created: 03/04/2023|
-|     |   Add: _i360kRecords_ data variable, type: 'collection of data records', based on _i360k_ data resource)|
+|     |   Add: _i360kRecords_ data variable, type: 'Collection of data records', based on _i360k_ data resource)|
 |     |   Add: _EntityQueryTerm_ App Variable linked to _i360kRecords'_ query term _q_|
 |     |   Add: In _الرئيسية_ p., in _EntityList_ large image list item (with _Repeat to_ _i360kRecords_ data variable)|
 |     |   Add: In _الرئيسية_ p., in _SearchBarRow_, _EntitySearch_ checkbox|
@@ -197,6 +199,7 @@
 |     | Edit: On 07/03/2023, changed API key (to be deprecated on 01/02/2024) to personal token for _i360db.xlsx - Sciences_, namely _i360db-R_, that's read-only|
 |     | Add: Imported _i360db.xlsx_, _Complements_ tab, to Airtable base (online database), including fields: _CustomSearch_, _Google_VirtualKeyboard_, _Huawei_VirtualKeyboard_, _Edition_|
 |     | Add: _i360dbc_ data resource linked to _i360db.xlsx - Complements_, Airtable using REST API with personal token, namely _i360dbc-R_, that's read-only; NB - after 'getting collection', 'testing' & 'setting schema from response', change _Edition_ field type from 'text' to 'date text' for compatibility use|
+|     | Add: _i360dbcRecord_ data variable, type: 'Collection of data records', based on "i360dbc" data resource|
 |     | Add: _i360Edition_ storage item (as text)|
 |     | Add: message for new Content Edition to show after Policy message comparing _i360Edition_ to current date|
   
