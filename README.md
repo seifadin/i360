@@ -14,10 +14,11 @@
 |     Released Build# | 0 – 0 – 0 – 0 – 0 – 0|
 |     Released | 07/06/2023|
 |     Notes | _|
-|     |   Fix:  In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
+|     |   Fix: In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
-|     |   Fix: _i360t_ data resource by changing _Record Properties_ binding type to _Formula_ (instead of default: _Object with properties_) then entering: [{_Text_:_صلاح الدين الأيوبي_}] ***(functional)***|
+|     |   Fix: _i360t_ data resource by changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: [{_Text_:_صلاح الدين الأيوبي_}] ***(functional)***|
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource ***(unfunctional)***|
+|     |   Add: _EntityQueryTermRaw_ App Variable linked to _i360kVar_ _Record properties_|
   
 </details>
 
@@ -34,8 +35,8 @@
 |     Released Build# | 283398 – 283399 – 283399 – 283399 – 283399 – 283769|
 |     Released | 27/05/2023|
 |     Notes | _|
-|     |   Add:  _WebErrata_ app. variable of errata of related Web URL|
-|     |   Edit:  In _الرئيسية_ p., _SciencesList_, added _WebErrata_ setting logic|
+|     |   Add: _WebErrata_ app. variable of errata of related Web URL|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_, added _WebErrata_ setting logic|
 |     |   Add: In _المتصفح_ p., _InteractionRow_, navigation button, namely: _Errata_, setting _WebView_ URL to _WebErrata_, visible only if exists|
 |     |   Edit: In _المتصفح_ p., _InteractionRow_, adjusted cells widths in layout for better icons view|
   
@@ -54,8 +55,8 @@
 |     Released Build# | 281499 – 281500 – 281500 – 281500 – 281500 – 281502|
 |     Released | 12/05/2023|
 |     Notes | _|
-|     |   Edit:  In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
-|     |   Edit:  In _الرئيسية_ p., _SearchBar_, used _HTTP request_ for _Translator_ & _Entity Search_ to display error message(s), if any|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, used _HTTP request_ for _Translator_ & _Entity Search_ to display error message(s), if any|
 |     |   Add: In _الرئيسية_ p., _SearchBar_, _HTTPrequest_ flow function (based on that of _Translator_ as it's more options) combining _HTTP request_ logic, with error handling mechanism|
   
 </details>
@@ -73,12 +74,12 @@
 |     Released Build# | 280703 – 280704 – 280704 – 280704 – 280704 – 280706|
 |     Released | 07/05/2023|
 |     Notes | Sometimes, PDF files were downloaded not opened as intended, so I thought about changing WebView app variables data types from _Web URL_ to _URL_ as a possible solution but some sites already worked as-is as of 07/05/2023, so no change was made!|
-|     |   Add:  In _المتصفح_ p., _CurrentWebView_ page variable of current webpage as Web URL|
+|     |   Add: In _المتصفح_ p., _CurrentWebView_ page variable of current webpage as Web URL|
 |     |   Fix: In _المتصفح_ p., set _Share_ to _CurrentWebView_, instead of _WebParam_!|
-|     |   Edit:  In _المتصفح_ p., _WebView_, set _CurrentWebView_ to customized _onChangeLocation_ _Receive event_ outputs|
-|     |   Add:  In _المتصفح_ p., _WebViewPages_ page variable of browsed webpages as List of Web URLs| 
-|     |   Edit:  In _المتصفح_ p., _WebView_, added _CurrentWebView_ to _WebViewPages_ incrementally, only if missing|
-|     |   Add:  In _المتصفح_ p., _CurrentWebViewIndex_ page variable of current webpage index in _WebViewPages_ as Number|
+|     |   Edit: In _المتصفح_ p., _WebView_, set _CurrentWebView_ to customized _onChangeLocation_ _Receive event_ outputs|
+|     |   Add: In _المتصفح_ p., _WebViewPages_ page variable of browsed webpages as List of Web URLs| 
+|     |   Edit: In _المتصفح_ p., _WebView_, added _CurrentWebView_ to _WebViewPages_ incrementally, only if missing|
+|     |   Add: In _المتصفح_ p., _CurrentWebViewIndex_ page variable of current webpage index in _WebViewPages_ as Number|
 |     |   Add: In _المتصفح_ p., set _Share_ to _CurrentWebView_, instead of _WebParam_!|
 |     |   Add: In _المتصفح_ p., _InteractionRow_, navigation buttons, namely: _GoBack_, _GoForward_, _Home_ icons, setting _WebView_ URL to previous, next, home items in _WebViewPages_ list, respectively|
   
@@ -97,8 +98,8 @@
 |     Released Build# | 279389 – 279390 – 279390 – 279390 – 279390 – 279392|
 |     Released | 27/04/2023|
 |     Notes | _|
-|     |   Edit:  In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
-|     |   Edit:  In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a simple of knowledge) while entity searching, with 500ms delay|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a simple of knowledge) while entity searching, with 500ms delay|
 |     |   Edit: In _الرئيسية_ p., change _Web_ icon from _window-maximize_ to _dribbble_ (~globe) in _SciencesList_ & _OSIcon_|
   
 </details>
