@@ -20,7 +20,7 @@
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource ***(unfunctional)***|
 |     |   Add: _EntityQueryTermRaw_ App Variable linked to _i360kVar_ _Record properties_|
 |     |   Edit: _i360db.xlsx_, changed all _https://shamela.ws/_ sources to _https://ketabonline.com/_, except jurisprudence encyclopedias, for better consistency & visibility (04/07/2023)|
-|     |   Edit: _i360db.xlsx_, changed all _https://app.box.com/_ sources to _https://archive.org/_, except Quranic errata, for lighter experience without downloads (07/07/2023)|
+|     |   Edit: _i360db.xlsx_, changed all _https://app.box.com/_ sources to _https://archive.org/_, except Quranic interpretation errata, for lighter experience without downloads (07/07/2023)|
   
 </details>
 
