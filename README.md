@@ -2,6 +2,26 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.9</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 25/07/2023  04:00|
+|     Version | 0.9.9|
+|     Version Code | 20230725|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released | 25/07/2023|
+|     Notes | _|
+|     |   Fix: In _الرئيسية_ p., edited _i360kVar_ data variable logic to refresh data upon _EntityQueryTerm_ change (see _https://answers.sap.com/questions/13646962/appgyver-how-to-pass-url-filter-parameters-in-rest.html_ & _https://blogs.sap.com/2022/05/22/dadiambored-no-code-challenge/_) only & stop auto data refresh thus stop consuming service calls quota (see _https://answers.sap.com/questions/13648115/appgyver-how-to-stop-rest-api-calls-done-automatic.html_)|
+|     |   Edit: In _الرئيسية_ p., in _EntityList_ changed all _self.value_ to _Trim_WhiteSpace(self.value)_|
+|     |   Edit: In _الرئيسية_ p., in _EntityList_ added logic to check language (using Arabic can't be Lower-/Upper-cased) & hence translate from English to Arabic (if needed), instead of the other way around|
+|     |   Edit: In _الرئيسية_ p., in _EntityList_ changed text align (orientation) to right|
+  
+</details>
+
+<details>
 <summary>v 0.9.8</summary>
 
 | Header | Details |
