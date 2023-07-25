@@ -8,10 +8,10 @@
 |-----:|-----------|
 |     Creation Date/Time | 25/07/2023  16:14|
 |     Version | 0.9.9|
-|     Version Code | 20230725|
+|     Version Code | 20230725 (20230726 for Google)|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 292251 – 292252 – 292252 – 292252 – 292252 – ?|
+|     Released Build# | 292251 – 292337 – 292332 – 292332 – 292332 – ?|
 |     Released | 25/07/2023|
 |     Notes | _|
 |     |   Edit: In _i360k_ data resource, regenerated first key used by app to disable live version & enable isolated testing of under development version|
