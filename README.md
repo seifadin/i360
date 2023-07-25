@@ -6,12 +6,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 25/07/2023  04:00|
+|     Creation Date/Time | 25/07/2023  04:16|
 |     Version | 0.9.9|
 |     Version Code | 20230725|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released Build# | 292149 – 292150 – 292150 – 292150 – 292150 – ?|
 |     Released | 25/07/2023|
 |     Notes | _|
 |     |   Fix: In _الرئيسية_ p., edited _i360kVar_ data variable logic to refresh data upon _EntityQueryTerm_ change (see _https://answers.sap.com/questions/13646962/appgyver-how-to-pass-url-filter-parameters-in-rest.html_ & _https://blogs.sap.com/2022/05/22/dadiambored-no-code-challenge/_) only & stop auto data refresh thus stop consuming service calls quota (see _https://answers.sap.com/questions/13648115/appgyver-how-to-stop-rest-api-calls-done-automatic.html_)|
