@@ -14,6 +14,7 @@
 |     Released Build# | 292149 – 292150 – 292150 – 292150 – 292150 – ?|
 |     Released | 25/07/2023|
 |     Notes | _|
+|     |   Edit: In _i360k_ data resource, regenerated first key used by app to disable live version & enable isolated testing of under development version|
 |     |   Fix: In _الرئيسية_ p., edited _i360kVar_ data variable logic to refresh data upon _EntityQueryTerm_ change (see _https://answers.sap.com/questions/13646962/appgyver-how-to-pass-url-filter-parameters-in-rest.html_ & _https://blogs.sap.com/2022/05/22/dadiambored-no-code-challenge/_) only & stop auto data refresh thus stop consuming service calls quota (see _https://answers.sap.com/questions/13648115/appgyver-how-to-stop-rest-api-calls-done-automatic.html_)|
 |     |   Edit: In _الرئيسية_ p., in _EntityList_ changed all _self.value_ to _Trim_WhiteSpace(self.value)_|
 |     |   Edit: In _الرئيسية_ p., in _EntityList_ added logic to check language (using Arabic can't be Lower-/Upper-cased) & hence translate from English to Arabic (if needed), instead of the other way around|
