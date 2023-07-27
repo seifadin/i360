@@ -11,7 +11,7 @@
 |     Version Code | 20230725 (20230726 for Google)|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 292251 – 292337 – 292332 – 292332 – 292332 – ?|
+|     Released Build# | 292251 – 292337 – 292332 – 292332 – 292332 – 292498|
 |     Released | 26/07/2023|
 |     Notes | _|
 |     |   Edit: In _i360k_ data resource, regenerated first key used by app to disable live version & enable isolated testing of under development version|
