@@ -80,7 +80,7 @@
 |     Notes | _|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_, used _HTTP request_ for _Translator_ & _Entity Search_ to display error message(s), if any|
-|     |   Add: In _الرئيسية_ p., _SearchBar_, _HTTPrequest_ flow function (based on that of _Translator_ as it's more options) combining _HTTP request_ logic, with error handling mechanism|
+|     |   Add: In _الرئيسية_ p., _SearchBar_, _HTTPrequest_ flow function (based on that of _Translator_ as it's more options), named _HTTPflow_, combining _HTTP request_ logic, with error handling mechanism|
   
 </details>
 
