@@ -39,7 +39,7 @@
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
 |     |   Fix: _i360t_ data resource by changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: [{_Text_:_صلاح الدين الأيوبي_}] ***(functional)***|
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource ***(unfunctional)***|
-|     |   Add: _EntityQueryTermRaw_ App Variable linked to _i360kVar_ _Record properties_|
+|     |   Add: _EntityQueryTermRaw_ Page Variable linked to _i360kVar_ _Record properties_|
 |     |   Edit: _i360db.xlsx_, changed all _https://shamela.ws/_ sources to _https://ketabonline.com/_, except jurisprudence encyclopedias, for better consistency & visibility (04/07/2023)|
 |     |   Edit: _i360db.xlsx_, changed all _https://app.box.com/_ sources to _https://archive.org/_, except Quranic interpretation errata, for lighter experience without downloads (07/07/2023)|
   
@@ -165,7 +165,7 @@
 |     Notes | _|
 |     Changes | Add: _i360k_ data resource linked to _Bing Web Search_, to enable _Bing Entity Search_ (Knowledge Graph Search) with required dynamic query term _q_ in _Get Collection_, created: 03/04/2023|
 |     |   Add: _i360kRecords_ data variable, type: 'Collection of data records', based on _i360k_ data resource)|
-|     |   Add: _EntityQueryTerm_ App Variable linked to _i360kRecords'_ query term _q_|
+|     |   Add: _EntityQueryTerm_ Page Variable linked to _i360kRecords'_ query term _q_|
 |     |   Add: In _الرئيسية_ p., in _EntityList_ large image list item (with _Repeat to_ _i360kRecords_ data variable)|
 |     |   Add: In _الرئيسية_ p., in _SearchBarRow_, _EntitySearch_ checkbox|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ to enable _Custom Search_ & _Entity Search_ based on _EntitySearch_|
