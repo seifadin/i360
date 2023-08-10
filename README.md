@@ -2,6 +2,29 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.10</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 10/08/2023  14:50|
+|     Version | 0.9.10|
+|     Version Code | 20230810|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released | 10/08/2023|
+|     Notes | _|
+|     |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively|
+|     |   Edit: In _الرئيسية_ p., change _Web_ icon from _dribbble_ to _globe_ in _SciencesList_ & _OSIcon_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_ relinked logic to show _tripadvisor_ icon while entity searching even without translation|
+|     |   Edit: In _الرئيسية_ p., in _HTTPflow_ added showing toast message in case of _HTTP Request_ error output & linked it to second| (error) output|
+|     |   Add: _EntityQueryTermOld_ Page Variable linked to old _SearchBar_ value|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_ showed _exclamation_ icon if _SearchBar_ value is empty or unchanged (w.r.t. _EntityQueryTermOld_)|
+|     |   Fix: In _i360k_ data resource, removed query parameter _cc=SA_|
+  
+</details>
+
+<details>
 <summary>v 0.9.9</summary>
 
 | Header | Details |
