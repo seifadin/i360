@@ -6,12 +6,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 10/08/2023  14:50|
+|     Creation Date/Time | 10/08/2023  15:11|
 |     Version | 0.9.10|
 |     Version Code | 20230810|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released Build# | 294344 – 294332 – 294332 – 294332 – 294332 – 294334|
 |     Released | 10/08/2023|
 |     Notes | _|
 |     |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively|
