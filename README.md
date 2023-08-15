@@ -2,6 +2,23 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.10 (Updated)</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 15/08/2023  00:00|
+|     Version | 0.9.10|
+|     Version Code | 20230815|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | ? – 294700 – 294700 – 294700 – 294700 – 294707|
+|     Released | 15/08/2023|
+|     Notes | _|
+|     |   Add: In _الرئيسية_ p., in _AppSupportRow_ _AppDeveloper_ text to separate app.'s version from developer info. for better visibility|
+  
+</details>
+
+<details>
 <summary>v 0.9.10</summary>
 
 | Header | Details |
