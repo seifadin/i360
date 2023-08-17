@@ -31,7 +31,7 @@
 |     Released Build# | 294344 – 294332 – 294332 – 294332 – 294332 – 294334|
 |     Released | 10/08/2023|
 |     Notes | _|
-|     |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively|
+|     |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively; as _Bing Entity Search_ supported Arabic enquiries after _Bing_ incorporated OpenAI's ChatGPT into its services|
 |     |   Edit: In _الرئيسية_ p., change _Web_ icon from _dribbble_ to _globe_ in _SciencesList_ & _OSIcon_|
 |     |   Edit: In _الرئيسية_ p., in _SearchBar_ relinked logic to show _tripadvisor_ icon while entity searching even without translation|
 |     |   Edit: In _الرئيسية_ p., in _HTTPflow_ added showing toast message in case of _HTTP Request_ error output & linked it to second| (error) output|
