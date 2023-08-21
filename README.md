@@ -15,6 +15,7 @@
 |     Released | 15/08/2023|
 |     Notes | _|
 |     |   Add: In _الرئيسية_ p., in _AppSupportRow_ _AppDeveloper_ text to separate app.'s version from developer info. for better visibility|
+|     |   Edit: In _الرئيسية_ p., change _Web_ icon from _globe_ to data variable _WebIcon_ from _i360dbcVar_ data in _SciencesList_ & _OSIcon_, for better dynamic consistency between the two! ***(draft)***|
   
 </details>
 
