@@ -2,6 +2,24 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.11</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 23/08/2023  00:00|
+|     Version | 0.9.11|
+|     Version Code | 20230823|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released | 23/08/2023|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ p., change _Web_ icon from _globe_ to data variable _WebIcon_ from _i360dbcVar_ data in _SciencesList_ & _OSIcon_, for better dynamic consistency between the two!|
+|     |   Add: In _المتصفح_ p., _InteractionRow_, navigation button, namely: _Refresh_|
+  
+</details>
+
+<details>
 <summary>v 0.9.10 (Updated)</summary>
 
 | Header | Details |
@@ -11,11 +29,10 @@
 |     Version Code | 20230815|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | ? – 294700 – 294700 – 294700 – 294700 – 294707|
+|     Released Build# | 294743 – 294700 – 294700 – 294700 – 294700 – 294707|
 |     Released | 15/08/2023|
 |     Notes | _|
-|     |   Add: In _الرئيسية_ p., in _AppSupportRow_ _AppDeveloper_ text to separate app.'s version from developer info. for better visibility|
-|     |   Edit: In _الرئيسية_ p., change _Web_ icon from _globe_ to data variable _WebIcon_ from _i360dbcVar_ data in _SciencesList_ & _OSIcon_, for better dynamic consistency between the two! ***(draft)***|
+|     Changes |   Add: In _الرئيسية_ p., in _AppSupportRow_ _AppDeveloper_ text to separate app.'s version from developer info. for better visibility|
   
 </details>
 
@@ -32,7 +49,7 @@
 |     Released Build# | 294344 – 294332 – 294332 – 294332 – 294332 – 294334|
 |     Released | 10/08/2023|
 |     Notes | _|
-|     |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively; as _Bing Entity Search_ supported Arabic enquiries after _Bing_ incorporated OpenAI's ChatGPT into its services|
+|     Changes |   Edit: _i360t_ data resource by switch _from_/_to_ from _ar_/_en_ to _en_/_ar_, respectively; as _Bing Entity Search_ supported Arabic enquiries after _Bing_ incorporated OpenAI's ChatGPT into its services|
 |     |   Edit: In _الرئيسية_ p., change _Web_ icon from _dribbble_ to _globe_ in _SciencesList_ & _OSIcon_|
 |     |   Edit: In _الرئيسية_ p., in _SearchBar_ relinked logic to show _tripadvisor_ icon while entity searching even without translation|
 |     |   Edit: In _الرئيسية_ p., in _HTTPflow_ added showing toast message in case of _HTTP Request_ error output & linked it to second| (error) output|
@@ -55,7 +72,7 @@
 |     Released Build# | 292251 – 292337 – 292332 – 292332 – 292332 – 292498|
 |     Released | 26/07/2023|
 |     Notes | _|
-|     |   Edit: In _i360k_ data resource, regenerated first key used by app to disable live version & enable isolated testing of under development version|
+|     Changes |   Edit: In _i360k_ data resource, regenerated first key used by app to disable live version & enable isolated testing of under development version|
 |     |   Fix: In _الرئيسية_ p., edited _i360kVar_ data variable logic to refresh data upon _EntityQueryTerm_ change (see _https://answers.sap.com/questions/13646962/appgyver-how-to-pass-url-filter-parameters-in-rest.html_ & _https://blogs.sap.com/2022/05/22/dadiambored-no-code-challenge/_) only & stop auto data refresh thus stop consuming service calls quota (see _https://answers.sap.com/questions/13648115/appgyver-how-to-stop-rest-api-calls-done-automatic.html_)|
 |     |   Edit: In _الرئيسية_ p., in _SearchBar_ changed all _self.value_ to _Trim_WhiteSpace(self.value)_|
 |     |   Edit: In _الرئيسية_ p., in _SearchBar_ added logic to check language (using Arabic can't be Lower-/Upper-cased) & hence translate from English to Arabic (if needed), instead of the other way around|
@@ -76,7 +93,7 @@
 |     Released Build# | 284795 – 284796 – 284796 – 284796 – 284796 – 284798|
 |     Released | 07/06/2023|
 |     Notes | _|
-|     |   Fix: In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
+|     Changes |   Fix: In _الرئيسية_ p., _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
 |     |   Fix: _i360t_ data resource by changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: [{_Text_:_صلاح الدين الأيوبي_}] ***(functional)***|
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource ***(unfunctional)***|
@@ -99,7 +116,7 @@
 |     Released Build# | 283398 – 283399 – 283399 – 283399 – 283399 – 283769|
 |     Released | 27/05/2023|
 |     Notes | _|
-|     |   Add: _WebErrata_ app. variable of errata of related Web URL|
+|     Changes |   Add: _WebErrata_ app. variable of errata of related Web URL|
 |     |   Edit: In _الرئيسية_ p., _SciencesList_, added _WebErrata_ setting logic|
 |     |   Add: In _المتصفح_ p., _InteractionRow_, navigation button, namely: _Errata_, setting _WebView_ URL to _WebErrata_, visible only if exists|
 |     |   Edit: In _المتصفح_ p., _InteractionRow_, adjusted cells widths in layout for better icons view|
@@ -119,7 +136,7 @@
 |     Released Build# | 281499 – 281500 – 281500 – 281500 – 281500 – 281502|
 |     Released | 12/05/2023|
 |     Notes | _|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
+|     Changes |   Edit: In _الرئيسية_ p., _SearchBar_, added _HTTP request_ logic for _EntitySearch_|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_, used _HTTP request_ for _Translator_ & _Entity Search_ to display error message(s), if any|
 |     |   Add: In _الرئيسية_ p., _SearchBar_, _HTTPrequest_ flow function (based on that of _Translator_ as it's more options), named _HTTPflow_, combining _HTTP request_ logic, with error handling mechanism|
   
@@ -138,7 +155,7 @@
 |     Released Build# | 280703 – 280704 – 280704 – 280704 – 280704 – 280706|
 |     Released | 07/05/2023|
 |     Notes | Sometimes, PDF files were downloaded not opened as intended, so I thought about changing WebView app variables data types from _Web URL_ to _URL_ as a possible solution but some sites already worked as-is as of 07/05/2023, so no change was made!|
-|     |   Add: In _المتصفح_ p., _CurrentWebView_ page variable of current webpage as Web URL|
+|     Changes |   Add: In _المتصفح_ p., _CurrentWebView_ page variable of current webpage as Web URL|
 |     |   Fix: In _المتصفح_ p., set _Share_ to _CurrentWebView_, instead of _WebParam_!|
 |     |   Edit: In _المتصفح_ p., _WebView_, set _CurrentWebView_ to customized _onChangeLocation_ _Receive event_ outputs|
 |     |   Add: In _المتصفح_ p., _WebViewPages_ page variable of browsed webpages as List of Web URLs| 
@@ -162,7 +179,7 @@
 |     Released Build# | 279389 – 279390 – 279390 – 279390 – 279390 – 279392|
 |     Released | 27/04/2023|
 |     Notes | _|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
+|     Changes |   Edit: In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a simple of knowledge) while entity searching, with 500ms delay|
 |     |   Edit: In _الرئيسية_ p., change _Web_ icon from _window-maximize_ to _dribbble_ (~globe) in _SciencesList_ & _OSIcon_|
   
