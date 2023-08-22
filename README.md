@@ -11,7 +11,7 @@
 |     Version Code | 20230823|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | ? – ? – ? – ? – ? – ?|
+|     Released Build# | 295669 – 295670 – 295670 – 295670 – 295670 – 295671|
 |     Released | 23/08/2023|
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ p., change _Web_ icon from _globe_ to data variable _WebIcon_ from _i360dbcVar_ data in _SciencesList_ & _OSIcon_, for better dynamic consistency between the two!|
