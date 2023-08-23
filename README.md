@@ -8,7 +8,7 @@
 |-----:|-----------|
 |     Creation Date/Time | 23/08/2023  17:26|
 |     Version | 0.9.12|
-|     Version Code | 20230825|
+|     Version Code | 20230824|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 295784 – 295785 – 295785 – 295785 – 295785 – 295786|
