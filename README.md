@@ -2,12 +2,12 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
-<summary>v 0.9.11 (updated)</summary>
+<summary>v 0.9.12</summary>
 
 | Header | Details |
 |-----:|-----------|
 |     Creation Date/Time | 23/08/2023  17:00|
-|     Version | 0.9.11|
+|     Version | 0.9.12|
 |     Version Code | 20230825|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
@@ -16,7 +16,7 @@
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ p., in _SearchBar_ showed _exclamation_ icon if _SearchBar_ value is empty for _EntitySearch=False_|
 |     |   Edit: In _الرئيسية_ p., in _SciencesList_, changed text align (orientation) to right for _No Data_|
-|     |   Add: In _الرئيسية_ p., _ScrollView_ & moved _SciencesList_ inside it, to enable scrolling of the list without the whole page!|
+|     |   Add: In _الرئيسية_ p., _ScrollView_ & moved _SciencesList_ inside it, to enable scrolling of the list without the whole page, with dimensions to better fit screen size, namely: Width=Grow to width; Height=Screen viewport height - 200!|
   
 </details>
 
