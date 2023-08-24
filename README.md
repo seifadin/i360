@@ -8,10 +8,10 @@
 |-----:|-----------|
 |     Creation Date/Time | 23/08/2023  17:26|
 |     Version | 0.9.12|
-|     Version Code | 20230824|
+|     Version Code | 20230825|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 295784 – 295883 – 295883 – 295883 – 295883 – 295786|
+|     Released Build# | 295784 – 295927 – 295927 – 295927 – 295927 – 295786|
 |     Released | 23/08/2023|
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ p., in _SearchBar_ showed _exclamation_ icon if _SearchBar_ value is empty for _EntitySearch=False_|
