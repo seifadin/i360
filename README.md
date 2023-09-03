@@ -2,6 +2,23 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.13 (updated)</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 03/09/2023  12:19|
+|     Version | 0.9.13|
+|     Version Code | 20230903|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 297118 – 297119 – 297119 – 297119 – 297119 – 297120|
+|     Released | 03/09/2023|
+|     Notes | _|
+|     Changes |   Edit: Moved used databases from _Airtable.com_ to _Baserow.co_ ..., _SearchBar_, _InputTools_|
+  
+</details>
+
+<details>
 <summary>v 0.9.13</summary>
 
 | Header | Details |
@@ -16,7 +33,7 @@
 |     Notes | _|
 |     Changes |   Fix: In _الرئيسية_ p., edited _i360dbsVar_ & _i360dbcVar_ data variables logic to stop auto data refresh thus stop consuming service calls quota (as _i360kVar_; see v0.9.9)|
 |     |   Del: _Reset compass_ installed logic|
-|     |   Edit: Moved used databases from _Airtable.com_ to _Baserow.co_ due to new limitations imposed on free plan, mainly on API calls, & changed necessary app changes|
+|     |   Edit: Moved used databases from _Airtable.com_ to _Baserow.co_ due to new limitations imposed on free plan, mainly on API calls, & changed necessary app changes, namely in _الرئيسية_ p.: _i360dbcVar_ data variable, _SciencesList_, _OSIcon_, page logic<s>, _SearchBar_, _InputTools_</s>|
   
 </details>
 
