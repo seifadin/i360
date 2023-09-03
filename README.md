@@ -2,6 +2,23 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.13 (updated-sequel)</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 03/09/2023  22:34|
+|     Version | 0.9.13|
+|     Version Code | 20230905|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 297142 – 297143 – 297143 – 297143 – 297143 – 297144|
+|     Released | 03/09/2023|
+|     Notes | _|
+|     Changes |   Fix:  In _الرئيسية_ p., changed _id_ in _SciencesList_ component & logic (as _id_ in _Baserow.co_ is only an integer causing an app glitch of sorts)|
+  
+</details>
+
+<details>
 <summary>v 0.9.13 (updated)</summary>
 
 | Header | Details |
