@@ -14,7 +14,7 @@
 |     Released Build# | 297142 – 297143 – 297143 – 297143 – 297143 – 297144|
 |     Released | 03/09/2023|
 |     Notes | _|
-|     Changes |   Fix:  In _الرئيسية_ p., changed _id_ in _SciencesList_ component & logic (as _id_ in _Baserow.co_ is only an integer causing an app glitch of sorts)|
+|     Changes |   Fix:  In _الرئيسية_ p., changed _id_ in _SciencesList_ component & logic (as _id_ in _Baserow.io_ is only an integer causing an app glitch of sorts)|
   
 </details>
 
@@ -31,7 +31,7 @@
 |     Released Build# | 297118 – 297119 – 297119 – 297119 – 297119 – 297120|
 |     Released | 03/09/2023|
 |     Notes | _|
-|     Changes |   Edit: Moved used databases from _Airtable.com_ to _Baserow.co_ ..., _SearchBar_, _InputTools_|
+|     Changes |   Edit: Moved used databases from _Airtable.com_ to _Baserow.io_ ..., _SearchBar_, _InputTools_|
   
 </details>
 
@@ -50,7 +50,7 @@
 |     Notes | _|
 |     Changes |   Fix: In _الرئيسية_ p., edited _i360dbsVar_ & _i360dbcVar_ data variables logic to stop auto data refresh thus stop consuming service calls quota (as _i360kVar_; see v0.9.9)|
 |     |   Del: _Reset compass_ installed logic|
-|     |   Edit: Moved used databases from _Airtable.com_ to _Baserow.co_ due to new limitations imposed on free plan, mainly on API calls, & changed necessary app changes, namely in _الرئيسية_ p.: _i360dbcVar_ data variable, _SciencesList_, _OSIcon_, page logic<s>, _SearchBar_, _InputTools_</s>|
+|     |   Edit: Moved used databases from _Airtable.com_ to _Baserow.io_ due to new limitations imposed on free plan, mainly on API calls, & changed necessary app changes, namely in _الرئيسية_ p.: _i360dbcVar_ data variable, _SciencesList_, _OSIcon_, page logic<s>, _SearchBar_, _InputTools_</s>|
   
 </details>
 
