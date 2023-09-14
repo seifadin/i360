@@ -11,7 +11,7 @@
 |     Version Code | 20230914|
 |     AppGyver Runtime Version | 4.9.72|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298284|
+|     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298325|
 |     Released | 14/09/2023|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
