@@ -2,6 +2,25 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.9.14</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 14/09/2023  17:54|
+|     Version | 0.9.14|
+|     Version Code | 20230914|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
+|     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298284|
+|     Released | 14/09/2023|
+|     Notes | _|
+|     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
+|     |   Edit:  In _الرئيسية_ p., added _SelectWeb_ in _SciencesList_ logic setting as selected row's _Web_ field|
+|     |   Edit:  In _الرئيسية_ p., _Osfn_ flow function added condition to WebView use, namely: checking if webpage is non-secure (i.e. uses _http_ instead of _https_) & checking several websites lists (e.g. _facebook.com_) that require opening another tap to authenticate login then continues business-as-usual, to open in external browser as both cases of which fail in WebView (by design!)|
+  
+</details>
+
+<details>
 <summary>v 0.9.13 (updated-sequel)</summary>
 
 | Header | Details |
@@ -30,7 +49,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 297118 – 297119 – 297119 – 297119 – 297119 – 297120|
 |     Released | 03/09/2023|
-|     Notes | _|
+|     Notes | Some proxies (e.g. old _Kerio_) may cause Cross-Origin Resource Sharing (CORS) issues to using _Baserow.io_ as _https://baserow.io_ can't even open as a webpage|
 |     Changes |   Edit: Moved used databases from _Airtable.com_ to _Baserow.io_ ..., _SearchBar_, _InputTools_|
   
 </details>
