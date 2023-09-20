@@ -10,8 +10,8 @@
 |     Version | 0.9.14|
 |     Version Code | 20230914|
 |     AppGyver Runtime Version | 4.9.72|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
-|     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298325|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - UpToDown (apk) – **Android** - APKPure (apk) – **iOS** (ipa)|
+|     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298486 – 298486 – 298325|
 |     Released | 14/09/2023|
 |     Notes | Changed app file download link on _WordPress.com_ from _Box.com_ to _APKPure.com_ for smaller downloads on 20/09/2023|
 |     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
