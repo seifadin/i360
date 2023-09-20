@@ -13,7 +13,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298325|
 |     Released | 14/09/2023|
-|     Notes | _|
+|     Notes | Changed app file download link on _WordPress.com_ from _Box.com_ to _APKPure.com_ for smaller downloads on 20/09/2023|
 |     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
 |     |   Edit:  In _الرئيسية_ p., added _SelectWeb_ in _SciencesList_ logic setting as selected row's _Web_ field|
 |     |   Edit:  In _الرئيسية_ p., _Osfn_ flow function added condition to WebView use, namely: checking if webpage is non-secure (i.e. uses _http_ instead of _https_) & checking several websites lists (e.g. _facebook.com_) that require opening another tap to authenticate login then continues business-as-usual, to open in external browser as both cases of which fail in WebView (by design!)|
