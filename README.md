@@ -271,7 +271,7 @@
 |     Released | 27/04/2023|
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ p., in _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _language_ while translating|
-|     |   Edit: In _الرئيسية_ p., in _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a simple of knowledge) while entity searching, with 500ms delay|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_, changed _EntitySearch_ _checkedIcon_ to _tripadvisor_ (owl as a symbol of knowledge) while entity searching, with 500ms delay|
 |     |   Edit: In _الرئيسية_ p., changed _Web_ icon from _window-maximize_ to _dribbble_ (~globe) in _SciencesList_ & _OSIcon_|
   
 </details>
