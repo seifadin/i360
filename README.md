@@ -2,6 +2,29 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 
 <details>
+<summary>v 0.10.0</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 22/10/2023  18:03|
+|     Version | 0.10.0|
+|     Version Code | 20231022|
+|     AppGyver Runtime Version | 4.9.72|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - UpToDown (apk) – **Android** - APKPure (apk) – **iOS** (ipa)|
+|     Released Build# | 303425 – 303426 – 303426 – 303426 – 303426 – 303426 – _ – 303427|
+|     Released | 22/10/2023|
+|     Notes | _|
+|     Changes |   Add: In _الرئيسية_ p., _SearchSource_ page variable with initial value 0|
+|     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: Internal Custom, External Knowledge Graph Entity, Internal Knowledge Graph Entity Bot Searches|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ placeholder, added _بحث بوت معرفي داخلي..._ for _Internal Bot Knowledge Graph Entity Search_|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added _BotPress_ chatbot (based on _ChatGPT_) for _Internal Bot Knowledge Graph Entity Search_|
+|     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, to reflect last step changes|
+|     |   Edit:  In _الرئيسية_ p., in _EntityList_ visibility, to reflect last step changes|
+|     |   Edit:  In _الرئيسية_ p., in _EntityList_, added sharing of current text|
+  
+</details>
+
+<details>
 <summary>v 0.9.14</summary>
 
 | Header | Details |
