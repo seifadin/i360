@@ -15,7 +15,7 @@
 |     Released | 22/10/2023|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., _SearchSource_ page variable with initial value 0|
-|     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: Internal Custom, External Knowledge Graph Entity, Internal Knowledge Graph Entity Bot Searches|
+|     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: _Internal Custom_, _External Knowledge Graph Entity_, _Internal Knowledge Graph Entity Bot Searches_|
 |     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ placeholder, added _بحث بوت معرفي داخلي..._ for _Internal Bot Knowledge Graph Entity Search_|
 |     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added _BotPress_ chatbot (based on _ChatGPT_) for _Internal Bot Knowledge Graph Entity Search_|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, to reflect last step changes|
