@@ -11,8 +11,8 @@
 |     Version | 0.10.0|
 |     Version Code | 20231022|
 |     AppGyver Runtime Version | 4.9.72|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - UpToDown (apk) – **Android** - APKPure (apk) – **iOS** (ipa)|
-|     Released Build# | 303425 – 303426 – 303426 – 303426 – 303426 – 303426 – 303818 – 303427|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 303425 – 303426 – 303426 – 303426 – 303426 – _303426_ – 303427|
 |     Released | 22/10/2023|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., _SearchSource_ page variable with initial value 0|
