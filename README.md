@@ -21,7 +21,7 @@
 |     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added _BotPress_ chatbot (based on _ChatGPT_) for _Internal Bot Knowledge Graph Entity Search_|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, to reflect last step changes|
 |     |   Edit:  In _الرئيسية_ p., in _EntityList_ visibility, to reflect last step changes|
-|     |   Edit:  In _الرئيسية_ p., in _EntityList_, added sharing of current text|
+|     |   Edit:  In _الرئيسية_ p., in _EntityList_, added sharing of current text via native share dialog|
   
 </details>
 
