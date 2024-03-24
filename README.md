@@ -3,6 +3,27 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.2</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 20/03/2024  14:00|
+|     Version | 0.10.2|
+|     Version Code | 20240320|
+|     AppGyver Runtime Version | 4.9.201|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – ?|
+|     Released | 24/03/2024|
+|     Notes | **First release as: _SAP Build Apps_**|
+|     Changes |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (not in _Android_)|
+|     |   Fix: In _المتصفح_ p., _Share_ _CurrentWebView_ of first webpage by:|
+|     |   - Add: In _المتصفح_ p., _CurrentWebViewTemp_ page variable of current webpage as Web URL|
+|     |   - Edit: In _المتصفح_ p., _CurrentWebViewTemp_ equated to _CurrentWebView_ formula|
+|     |   - Edit: In _المتصفح_ p., _CurrentWebView_ equated to _CurrentWebViewTemp_ value only if not equal to _about:blank_ (as its value fluctuates between URL & _about:blank_ so and _if_ registers URL only)|
+  
+</details>
+
+<details>
 <summary>v 0.10.1</summary>
 
 | Header | Details |
@@ -15,7 +36,7 @@
 |     Released Build# | 304998 – 304999 – 304999 – 304999 – 304999 – _303426_ – 305000|
 |     Released | 10/11/2023|
 |     Notes | _|
-|     Changes |   Edit: _i360dbs_ data resource by adding query parameter _size_ set to 200 (default: 100) to allow maximum page size (row count) limit: 200
+|     Changes |   Edit: _i360dbs_ data resource by adding query parameter _size_ set to 200 (default: 100) to allow maximum page size (row count) limit: 200|
 |     |   Edit: In _الرئيسية_ p., in _EntityList_, added a new line between Entity name & its description in shared current text|
   
 </details>
