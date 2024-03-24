@@ -57,7 +57,7 @@
 |     | Add: _QuranRecitation_ dropdown adding 2 recitation items: _1حفص عن عاصم_, _2ورش عن نافع_, respectively
 |     | Edit: _Quran_ logic to include _QuranRecitation_ options|
 |     | Edit: Updated _About_ p. accordingly|
-|     | Add: Startup _Privacy Policy_ alert with short link, as per _Huawei AppGallery_, using _Set/Get/Delete item to/from Storage_ of _i360privacy_ item|
+|     | Add: Startup _Privacy Policy_ alert with short link https://bit.ly/3d1zeq8, as per _Huawei AppGallery_, using _Set/Get/Delete item to/from Storage_ of _i360privacy_ item|
 |     | Edit: Reordered Stores in _AppStoresRow_ as follows _Apple AppStore_/_Goggle Play_/_Huawei AppGallery_|
 |     | Edit: Updated _About_ p. accordingly|
 |     | Edit: Updated _About_ & _Screenshots_ on all Stores!|
