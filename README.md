@@ -33,7 +33,7 @@
 |     Version Code | 20231109|
 |     AppGyver Runtime Version | 4.9.110|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 304998 – 304999 – 304999 – 304999 – 304999 – _303426_ – 305000|
+|     Released Build# | 304998 – 304999 – 304999 – 304999 – 304999 – _304999_ – 305000|
 |     Released | 10/11/2023|
 |     Notes | _|
 |     Changes |   Edit: _i360dbs_ data resource by adding query parameter _size_ set to 200 (default: 100) to allow maximum page size (row count) limit: 200|
