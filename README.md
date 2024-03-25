@@ -15,7 +15,7 @@
 |     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – ?|
 |     Released | 24/03/2024|
 |     Notes | **First release as: _SAP Build Apps_**|
-|     Changes |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (not in _Android_)|
+|     Changes |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (missed in this _Android_ version)|
 |     |   Fix: In _المتصفح_ p., _Share_ _CurrentWebView_ of first webpage by:|
 |     |   - Add: In _المتصفح_ p., _CurrentWebViewTemp_ page variable of current webpage as Web URL|
 |     |   - Edit: In _المتصفح_ p., _CurrentWebViewTemp_ equated to _CurrentWebView_ formula|
