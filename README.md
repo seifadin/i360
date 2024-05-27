@@ -15,7 +15,7 @@
 |     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – 25776|
 |     Released | 24/03/2024|
 |     Notes | **First release as: _SAP Build Apps_**|
-|     Changes |   Edit: set _BotSearch_ field to _MindStudio.ai_, a.k.a. _YouAI.ai_, (based on model: _Claude_), using _Generate Prompt..._: _Arabic knowledge retrieval bot from given Arabic data sources_ [20/05/2024]|
+|     Changes |   Edit: set _BotSearch_ field to _MindStudio.ai_, a.k.a. _YouAI.ai_, (based on model: _ChatGPT_/_Claude_), using _Generate Prompt..._: _Arabic knowledge retrieval bot from given Arabic data sources_ [20/05/2024]|
 |     |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (missed in this _Android_ version)|
 |     |   Fix: In _المتصفح_ p., _Share_ _CurrentWebView_ of first webpage by:|
 |     |   - Add: In _المتصفح_ p., _CurrentWebViewTemp_ page variable of current webpage as Web URL|
