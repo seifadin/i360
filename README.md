@@ -12,10 +12,11 @@
 |     Version Code | 20240320|
 |     AppGyver Runtime Version | 4.9.201|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – ?|
+|     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – 25776|
 |     Released | 24/03/2024|
 |     Notes | **First release as: _SAP Build Apps_**|
-|     Changes |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (missed in this _Android_ version)|
+|     Changes |   Edit: set _BotSearch_ field to _MindStudio.ai_, a.k.a. _YouAI.ai_, (based on model: _Claude_), using _Generate Prompt..._: _Arabic knowledge retrieval bot from given Arabic data sources_ [20/05/2024]|
+|     |   Edit: In _الرئيسية_ p., _i360Privacy_ item message changed short link to https://tinyurl.com/i360Privacy (missed in this _Android_ version)|
 |     |   Fix: In _المتصفح_ p., _Share_ _CurrentWebView_ of first webpage by:|
 |     |   - Add: In _المتصفح_ p., _CurrentWebViewTemp_ page variable of current webpage as Web URL|
 |     |   - Edit: In _المتصفح_ p., _CurrentWebViewTemp_ equated to _CurrentWebView_ formula|
@@ -55,9 +56,11 @@
 |     Released | 22/10/2023|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., _SearchSource_ page variable with initial value 0|
-|     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: _Internal Custom_, _External Knowledge Graph Entity_, _Internal Knowledge Graph Entity Bot Searches_|
+|     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: _Internal Custom_, _External Knowledge Graph Entity_, _Internal Knowledge Graph Entity Bot_ Searches|
 |     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ placeholder, added _بحث بوت معرفي داخلي..._ for _Internal Bot Knowledge Graph Entity Search_|
-|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added _BotPress_ chatbot (based on _ChatGPT_) for _Internal Bot Knowledge Graph Entity Search_|
+|     |   Edit: In _i360db.xlsx - Complements_, added GenAI chatbot _BotSearch_ field & reloaded DB schema|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added from _BotSearch_ field|
+|     |   Edit: set _BotSearch_ field to _BotPress.com_ (based on model: _ChatGPT_)|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, to reflect last step changes|
 |     |   Edit:  In _الرئيسية_ p., in _EntityList_ visibility, to reflect last step changes|
 |     |   Edit:  In _الرئيسية_ p., in _EntityList_, added sharing of current text via native share dialog|
