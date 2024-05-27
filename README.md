@@ -59,7 +59,7 @@
 |     |   Add:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, along with _SearchSource_ page variable, to replace _EntitySearch_ Checkbox. This icon will serve as a 3-state component for: _Internal Custom_, _External Knowledge Graph Entity_, _Internal Knowledge Graph Entity Bot_ Searches|
 |     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ placeholder, added _بحث بوت معرفي داخلي..._ for _Internal Bot Knowledge Graph Entity Search_|
 |     |   Edit: In _i360db.xlsx - Complements_, added GenAI chatbot _BotSearch_ field & reloaded DB schema|
-|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added from _BotSearch_ field|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_ logic, added chatbot from _BotSearch_ field|
 |     |   Edit: set _BotSearch_ field to _BotPress.com_ (based on model: _ChatGPT_)|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, to reflect last step changes|
 |     |   Edit:  In _الرئيسية_ p., in _EntityList_ visibility, to reflect last step changes|
