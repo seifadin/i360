@@ -20,8 +20,8 @@
 |     |   - Add: In _المتصفح_ p., _CurrentWebViewTemp_ page variable of current webpage as Web URL|
 |     |   - Edit: In _المتصفح_ p., _CurrentWebViewTemp_ equated to _CurrentWebView_ formula|
 |     |   - Edit: In _المتصفح_ p., _CurrentWebView_ equated to _CurrentWebViewTemp_ value only if not equal to _about:blank_ (as its value fluctuates between URL & _about:blank_ so and _if_ registers URL only)|
-|     |   Edit: set _BotSearch_ field to _MindStudio.ai_, a.k.a. _YouAI.ai_, (based on model: _ChatGPT_/_Claude_); using _Generate Prompt_: _Arabic knowledge retrieval bot from given Arabic data sources_ [20/05/2024]|
-|     |   Edit: Changed _MindStudio.ai_ _Generate Prompt_ to: _clear, concise, informative, and professional Arabic knowledge retrieval bot using only uploaded Arabic data sources with citation and ability to handle complex queries in Arabic_, to ensure using only uploaded data sources [30/05/2024]|
+|     |   Edit: set _BotSearch_ field to _MindStudio.ai_, a.k.a. _YouAI.ai_, (based on model: _ChatGPT_/_Claude_); using _Generate Prompt_: _Arabic knowledge retrieval bot from given Arabic data sources_; created: 20/05/2024|
+|     |   Edit: Changed _MindStudio.ai_ _Generate Prompt_ to: _clear, concise, informative, and professional Arabic knowledge retrieval bot using only uploaded Arabic data sources with citation and ability to handle complex queries in Arabic_, to ensure using only uploaded data sources; created: 30/05/2024|
   
 </details>
 
