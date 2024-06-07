@@ -7,12 +7,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 07/06/2024  03:55|
+|     Creation Date/Time | 07/06/2024  03:58|
 |     Version | 0.10.3|
 |     Version Code | 20240607|
 |     AppGyver Runtime Version | 4.11.114|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – 25776|
+|     Released Build# | 28606 – 28607 – 28607 – 28607 – 28607 – _28607_ – 28608|
 |     Released | 07/06/2024|
 |     Notes | _|
 |     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, setting _StarRating_ values according to _SearchSource_ plus 1|
