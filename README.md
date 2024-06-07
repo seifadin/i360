@@ -7,18 +7,21 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 06/06/2024  23:11|
+|     Creation Date/Time | 07/06/2024  03:55|
 |     Version | 0.10.3|
-|     Version Code | 20240606|
+|     Version Code | 20240607|
 |     AppGyver Runtime Version | 4.11.114|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Build# | 21847 – 21836 – 21836 – 21836 – 21836 – _21836_ – 25776|
-|     Released | 06/06/2024|
+|     Released | 07/06/2024|
 |     Notes | _|
 |     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, setting _StarRating_ values according to _SearchSource_ plus 1|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _StarRating_ logic, added _Tap component_ logic to programmatically tap _SearchIcon_ component ***(unfunctional)***|
 |     |   Add: _i360g_ data resource linked to _Vectara.com_, to add GenAI with required dynamic Request body _text_ in _Create Record (Post)_; and changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: {query: [{"query":"الأشعرية","queryContext":"","start":0,"numResults":25,"contextConfig":{"charsBefore":0,"charsAfter":0,"sentencesBefore":2,"sentencesAfter":2,"startTag":"%START_SNIPPET%","endTag":"%END_SNIPPET%"},"rerankingConfig":{"rerankerId":272725718,"mmrConfig":{"diversityBias":0}},"corpusKey":[{"customerId":757392150,"corpusId":2,"semantics":0,"metadataFilter":"","lexicalInterpolationConfig":{"lambda":0.025},"dim":[]}],"summary":[{"debug":false,"chat":{"store":true,"conversationId":""},"maxSummarizedResults":5,"responseLang":"ara","summarizerPromptName":"vectara-summary-ext-v1.2.0","factualConsistencyScore":true}]}]} ***(functional; unused)***; created: 04/06/2024|
 |     |   Edit: set _BotSearch_ field to _BotSonic.com_ (based on model: _ChatGPT_); set: 05/06/2024|
+|     |   Edit: disabled _Navigation header bar_ as page name was now forcely displayed even on primary root page|
+|     |   Edit: In _المتصفح_ p., changed _WebView_ dimensions to better fit screen size, namely: Width=Grow to width; Height=Screen viewport height - 120|
+|     |   Edit: In _المتصفح_ p., added _NavigateBack_ icon to _HeaderRow_ to navigate back to app root p.|
   
 </details>
 
