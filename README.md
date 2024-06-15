@@ -276,7 +276,7 @@
 |     Notes | _|
 |     Changes |   Fix: In _الرئيسية_ p., in _SearchBar_, reordered logic to set _EntityQueryTerm_ before changing _EntitySearch_ icon as the earlier reads output of another node _HTTPflow_|
 |     |   Edit: Renamed _[...]Errata_ to _[...]Appendix_ in: _i360db.xlsx - Sciences_ Airtable, _i360dbs_ data resource schema, & app. components|
-|     |   Fix: _i360t_ data resource by changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: `[{_Text_:_صلاح الدين الأيوبي_}]` ***(functional)***|
+|     |   Fix: _i360t_ data resource by changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: `[{"Text":"صلاح الدين الأيوبي"}]` ***(functional)***|
 |     |   Add: _i360tVar_ data variable, type: 'New data record', based on _i360t_ data resource ***(unfunctional)***|
 |     |   Add: _EntityQueryTermRaw_ Page Variable linked to _i360kVar_ _Record properties_|
 |     |   Edit: _i360db.xlsx_, changed all _https://shamela.ws/_ sources to _https://ketabonline.com/_, except jurisprudence encyclopedias, for better consistency & visibility (04/07/2023)|
