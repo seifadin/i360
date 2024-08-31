@@ -7,6 +7,18 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 31/08/2024  04:14|
+|     Version | 0.10.3|
+|     Version Code | 20240831|
+|     AppGyver Runtime Version | 4.11.163|
+|     Released OS | **Android** - Google (aab)|
+|     Released Build# | 36573|
+|     Released | 31/08/2024|
+|     Notes | SAP Build Apps builds require Android SDK published on non-SAP site to be version 34 or higher. This change sets the minimum supported device version to Android 14.|
+|     Changes |   (as 20240607)|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 07/06/2024  03:58|
 |     Version | 0.10.3|
 |     Version Code | 20240607|
@@ -14,7 +26,8 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Build# | 28606 – 28607 – 28607 – 28607 – 28607 – _28607_ – 28608|
 |     Released | 07/06/2024|
-|     Notes | _|
+|     Notes | To date, SAP Build Apps (AppGyver) builds require Android SDK to be version 26 (Released in 2017). This change depreciates support for Android
+ 6 & 7 devices and sets the minimum version to Android 8 Oreo.|
 |     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, setting _StarRating_ values according to _SearchSource_ plus 1|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _StarRating_ logic, added _Tap component_ logic to programmatically tap _SearchIcon_ component ***(unfunctional)***|
 |     |   Add: _i360g_ data resource linked to _Vectara.com_, to add GenAI with required dynamic Request body _text_ in _Create Record (Post)_; and changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: `{query: [{"query":"الأشعرية","queryContext":"","start":0,"numResults":25,"contextConfig":{"charsBefore":0,"charsAfter":0,"sentencesBefore":2,"sentencesAfter":2,"startTag":"%START_SNIPPET%","endTag":"%END_SNIPPET%"},"rerankingConfig":{"rerankerId":272725718,"mmrConfig":{"diversityBias":0}},"corpusKey":[{"customerId":757392150,"corpusId":2,"semantics":0,"metadataFilter":"","lexicalInterpolationConfig":{"lambda":0.025},"dim":[]}],"summary":[{"debug":false,"chat":{"store":true,"conversationId":""},"maxSummarizedResults":5,"responseLang":"ara","summarizerPromptName":"vectara-summary-ext-v1.2.0","factualConsistencyScore":true}]}]}` ***(functional; unused)***; created: 04/06/2024|
