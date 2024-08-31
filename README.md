@@ -15,7 +15,7 @@
 |     Released Build# | 36573|
 |     Released | 31/08/2024|
 |     Notes | SAP Build Apps builds require Android SDK published on non-SAP site to be version 34 or higher. This change sets the minimum supported device version to Android 14.|
-|     Changes |   (as 20240607)|
+|     Changes |   (as Version Code: 20240607)|
 
 | Header | Details |
 |-----:|-----------|
