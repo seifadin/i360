@@ -3,6 +3,35 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.4</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 09/09/2024  20:45|
+|     Version | 0.10.4|
+|     Version Code | 20240909|
+|     AppGyver Runtime Version | 4.11.167|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 37670 – 37671 – 37671 – 37671 – 37671 – _21836_ – 37672|
+|     Released | 09/09/2024|
+|     Notes | _|
+|     Changes |   Add: In _الرئيسية_ p., in _SearchBarRow_, _BotSearchIcon_ icon, set to _magic_, & logic similar to that of _SearchBar_, to highlight GenAI bot|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, removed _Internal Knowledge Graph Entity Bot_ option|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _binoculars_, _external-link_ from _sign-in_, _sign-out_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, added setting _SearchSource_ page variable to 0 (as _SearchIcon_ counter now stops at 1!)|
+|     |   Edit: In _الرئيسية_ p., moved _EntityList_ to _ScrollView_, above _SciencesList_, to enable scrolling of the list|
+|     |   Edit: In _الرئيسية_ p., in _ScrollView_ _EntityList_, changed text color to _Primary_|
+|     |   Edit: In _المتصفح_ p., in _NavigateBack_, changed icon from _fast-backward_ in _Font Awesome_ icon set to _begin_ in _Fiori Icons_ icon set, rotated 180°|
+|     |   Edit: In _المتصفح_ p., in _Appendix_, changed icon from _link_ to _paperclip_|
+|     |   Edit: In _المتصفح_ p., in _Share_, changed icon from _share-square-o_ to _share-alt_|
+|     |   Add: _WebBrowserflow_ flow function combining _useWeb_, _WebParam_/_URL_ variables used to switch between: _WebView_, default web browser, respectively|
+|     |   Edit: In _الرئيسية_ p., in _BotSearchIcon_, _SearchBar_ logic, replaced relevant components with _WebBrowserflow_|
+|     |   Fix: In _الرئيسية_ p., in _ScrollView_ _EntityList_, changed _Image source_ to _current.image.hostPageUrl_ from _current.image.thumbnailUrl_|
+|     |   Edit: changed all applicable components background color to _Level 1 Background_ from _App Background_ as it's brighter white!|
+
+</details>
+
+<details>
 <summary>v 0.10.3</summary>
 
 | Header | Details |
