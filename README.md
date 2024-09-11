@@ -19,6 +19,7 @@
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, removed _Internal Knowledge Graph Entity Bot_ option|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _binoculars_, _external-link_ from _sign-in_, _sign-out_|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, added setting _SearchSource_ page variable to 0 (as _SearchIcon_ counter now stops at 1!)|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_, _Internal Knowledge Graph Entity Bot_ Searches to _binoculars_, _external-link_, _magic_ from _sign-in_, _sign-out_, _reddit-alien_|
 |     |   Edit: In _الرئيسية_ p., moved _EntityList_ to _ScrollView_, above _SciencesList_, to enable scrolling of the list|
 |     |   Edit: In _الرئيسية_ p., in _ScrollView_ _EntityList_, changed text color to _Primary_|
 |     |   Edit: In _المتصفح_ p., in _NavigateBack_, changed icon from _fast-backward_ in _Font Awesome_ icon set to _begin_ in _Fiori Icons_ icon set, rotated 180°|
