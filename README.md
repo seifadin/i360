@@ -3,6 +3,25 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.5</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 15/09/2024  21:32|
+|     Version | 0.10.5|
+|     Version Code | 20240915|
+|     AppGyver Runtime Version | 4.11.167|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 38222 – 38223 – 38223 – 38223 – 38223 – _38223_ – 38224|
+|     Released | 15/09/2024|
+|     Notes | _|
+|     Changes |   Edit: In _i360db.xlsx - Complements_, added GenAI chatbot _Huawei_BotSearch_ field & reloaded DB schema|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _BotSearchIcon_ logic, added chatbot from _Huawei_BotSearch_ field, for China, as _InputTools_ logic|
+|     |   Edit: set _BotSearch_ field to Chinese GenAI bot _ChatGLM.cn_ (based on model: _ChatGLM_); not bound to my own sources|
+
+</details>
+
+<details>
 <summary>v 0.10.4</summary>
 
 | Header | Details |
@@ -12,7 +31,7 @@
 |     Version Code | 20240909|
 |     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 37670 – 37671 – 37671 – 37671 – 37671 – _21836_ – 37672|
+|     Released Build# | 37670 – 37671 – 37671 – 37671 – 37671 – _37671_ – 37672|
 |     Released | 09/09/2024|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., in _SearchBarRow_, _BotSearchIcon_ icon, set to _magic_, & logic similar to that of _SearchBar_, to highlight GenAI bot|
