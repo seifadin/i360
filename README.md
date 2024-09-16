@@ -7,6 +7,18 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 16/09/2024  21:07|
+|     Version | 0.10.5|
+|     Version Code | 20240916|
+|     AppGyver Runtime Version | 4.11.163|
+|     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
+|     Released Build# | 38355|
+|     Released | 16/09/2024|
+|     Notes | _|
+|     Changes |   Fix: In "الرئيسية" p., "OSRow" "OS_WebToggle", added logic to set "MobileServicesToggle", with value: "useHMS" app variable, to false, i.e. to "Google", when "web", with value: "useWeb" app variable, is chosen again|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 15/09/2024  21:32|
 |     Version | 0.10.5|
 |     Version Code | 20240915|
