@@ -79,7 +79,7 @@
 |     | Edit: Renamed _Main_ p. to _الرئيسية_|
 |     | Add: _المتصفح_ p. including _WebView_; i.e. Changed _Open URL_ component to _Open web browser_ (a.k.a. _WebView_) for files/websites but not apps, effectively creating an app. built-in browser; expanding its height to 640 px to fit more content within _many_ mobile screens (too long will hide part of the displayed webpage)|
 |     | Add: In  _المتصفح_ p., _WebParam_ p. parameter|
-|     | Edit: In _الرئيسية_ p. mount, added setting _useWeb_ app. var. to true (so app.'s default is _web_ then local OS)|
+|     | Edit: In _الرئيسية_ p. mount, added setting _useWeb_ app. variable to true (so app.'s default is _web_ then local OS)|
 |     | Edit: In _SciencesList_ list, changed _OSfn_ Web node from _Open URL_ to _Open Page_, namely _المتصفح_ p.|
 |     | Add: _compass_ icon as visible indicator for existing device compass using _Start compass poller_|
 
