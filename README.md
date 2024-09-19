@@ -14,8 +14,8 @@
 |     Released Build# | 225920 – 225922 – 225921|
 |     Released | 11/06/2022|
 |     Notes | **i360إ-MS1 (MS=MileStone)**|
-|     Changes | Add: _MobileServicesToggle_ (between Google & Huawei Mobile Services; a.k.a. GMS & HMS respectively) & linked it to app. var. _useHMS_|
-|     | Edit: Changed var. _defaultOS_ from (OS+Form) to OS only|
+|     Changes | Add: _MobileServicesToggle_ (between Google & Huawei Mobile Services; a.k.a. GMS & HMS respectively) & linked it to app. variable _useHMS_|
+|     | Edit: Changed variable _defaultOS_ from (OS+Form) to OS only|
 |     | Edit: Changed all relevant buttons' _isChina_ to (_isChina_ or _useHMS_)|
 |     | Add: Spinned-off this version to another app.: ***i360إ-MS1*** (MS=MileStone)|
   
@@ -168,7 +168,7 @@
 |     Released Build# | _|
 |     Released | _|
 |     Notes | _|
-|     Changes | Add: _OS_WebToggle_ switch (between default OS & Web op.) & linked it to app. var. _useWeb_
+|     Changes | Add: _OS_WebToggle_ switch (between default OS & Web op.) & linked it to app. variable _useWeb_
 |     | Add: _About_ p.|
 
 </details>
