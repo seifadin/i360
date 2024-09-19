@@ -7,6 +7,19 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 19/09/2024  23:45|
+|     Version | 0.10.5|
+|     Version Code | 20240919|
+|     AppGyver Runtime Version | 4.11.163|
+|     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
+|     Released Build# | 38681 – 38681 – 38681 – 38681 – _38681_|
+|     Released | 19/09/2024|
+|     Notes | _|
+|     Changes |   Add: _useHMSdefault_ app. variable, set to _useHMS_ first value|
+|     |   Edit: In _الرئيسية_ p., _OSRow_ _OS_WebToggle_ (_useWeb_ variable), added logic to set _MobileServicesToggle_ (_useHMS_ variable) to (_isChina_ or _useHMSdefault_), i.e. to native _Google_/_Huawei_, when _web_ is chosen again|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 16/09/2024  21:07|
 |     Version | 0.10.5|
 |     Version Code | 20240916|
@@ -15,7 +28,7 @@
 |     Released Build# | 38355 – 38355 – 38355 – 38355 – _38355_|
 |     Released | 16/09/2024|
 |     Notes | _|
-|     Changes |   Fix: In "الرئيسية" p., "OSRow" "OS_WebToggle", added logic to set "MobileServicesToggle", with value: "useHMS" app variable, to false, i.e. to "Google", when "web", with value: "useWeb" app variable, is chosen again|
+|     Changes |   Fix: In _الرئيسية_ p., _OSRow_ _OS_WebToggle_ (_useWeb_ variable), added logic to set _MobileServicesToggle_ (_useHMS_ variable) to false, i.e. to _Google_, when _web_ is chosen again. This bug dates to version 0.4.5!|
 
 | Header | Details |
 |-----:|-----------|
