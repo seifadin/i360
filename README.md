@@ -100,7 +100,8 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Build# | 28606 – 28607 – 28607 – 28607 – 28607 – _28607_ – 28608|
 |     Released | 07/06/2024|
-|     Notes | To date, SAP Build Apps (AppGyver) builds require Android SDK to be version 26 (Released in 2017). This change depreciates support for Android 6 & 7 devices and sets the minimum version to Android 8 Oreo.|
+|     Notes | **i360إ old**|
+|     |   To date, SAP Build Apps (AppGyver) builds require Android SDK to be version 26 (Released in 2017). This change depreciates support for Android 6 & 7 devices and sets the minimum version to Android 8 Oreo.|
 |     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, setting _StarRating_ values according to _SearchSource_ plus 1|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _StarRating_ logic, added _Tap component_ logic to programmatically tap _SearchIcon_ component ***(unfunctional)***|
 |     |   Add: _i360g_ data resource linked to _Vectara.com_, to add GenAI with required dynamic Request body _text_ in _Create Record (Post)_; and changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: `{query: [{"query":"الأشعرية","queryContext":"","start":0,"numResults":25,"contextConfig":{"charsBefore":0,"charsAfter":0,"sentencesBefore":2,"sentencesAfter":2,"startTag":"%START_SNIPPET%","endTag":"%END_SNIPPET%"},"rerankingConfig":{"rerankerId":272725718,"mmrConfig":{"diversityBias":0}},"corpusKey":[{"customerId":757392150,"corpusId":2,"semantics":0,"metadataFilter":"","lexicalInterpolationConfig":{"lambda":0.025},"dim":[]}],"summary":[{"debug":false,"chat":{"store":true,"conversationId":""},"maxSummarizedResults":5,"responseLang":"ara","summarizerPromptName":"vectara-summary-ext-v1.2.0","factualConsistencyScore":true}]}]}` ***(functional; unused)***; created: 04/06/2024|
@@ -189,7 +190,8 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - UpToDown (apk) – **Android** - APKPure (apk) – **iOS** (ipa)|
 |     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298486 – 298486 – 298325|
 |     Released | 14/09/2023|
-|     Notes | Changed app file download link on _WordPress.com_ from _Box.com_ to _APKPure.com_ for smaller downloads on 20/09/2023|
+|     Notes | **testo**|
+|     |   Changed app file download link on _WordPress.com_ from _Box.com_ to _APKPure.com_ for smaller downloads on 20/09/2023|
 |     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
 |     |   Edit:  In _الرئيسية_ p., added _SelectWeb_ in _SciencesList_ logic setting as selected row's _Web_ field|
 |     |   Edit:  In _الرئيسية_ p., _Osfn_ flow function added condition to WebView use, namely: checking if webpage is non-secure (i.e. uses _http_ instead of _https_) & checking several websites lists (e.g. _facebook.com_) that require opening another tap to authenticate login then continues business-as-usual, to open in external browser as both cases of which fail in WebView (by design!)|
