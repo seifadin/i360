@@ -13,7 +13,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (apk) – **Android** - Amazon (aab) – **iOS** (ipa)|
 |     Released Build# | 243130 – 243131 – 243132 – 243131 – 243133|
 |     Released | 10/09/2022|
-|     Notes | _|
+|     Notes | **i360إ-MS4 (MS=MileStone)**|
 |     Changes | Fix: Set _InputToolsText_ with same logic & visibility|
 |     | Edit: To fix issue displaying Web content on non-Android/iOS using WebView|
 |     |   - Added a 5<sup>th</sup> output node to _Osfn_ flow function based on _useWeb_ (manually chosen) or non-Android/iOS detected thus switching to using normal web browser|
