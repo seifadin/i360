@@ -9,7 +9,7 @@
 |-----:|-----------|
 |     Creation Date/Time | 07/10/2024  01:31|
 |     Version | 0.10.5|
-|     Version Code | _|
+|     Version Code | 20241007|
 |     AppGyver Runtime Version | _|
 |     Released OS | _|
 |     Released Build# | _|
