@@ -7,10 +7,24 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 07/10/2024  01:31|
+|     Version | 0.10.5|
+|     Version Code | _|
+|     AppGyver Runtime Version | _|
+|     Released OS | _|
+|     Released Build# | _|
+|     Released | _|
+|     Notes | _|
+|     Changes |   Fix: In _الرئيسية_ p., _Osfn_ flow function, removed unnecessary input(s)|
+|     |   Fix: In _الرئيسية_ p., _HTTPflow_, _WebBrowserflow_ flow functions, unified capitalization scheme & set _Value is required_ as needed|
+
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 19/09/2024  23:45|
 |     Version | 0.10.5|
 |     Version Code | 20240919|
-|     AppGyver Runtime Version | 4.11.163|
+|     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
 |     Released Build# | 38681 – 38681 – 38681 – 38681 – _38681_|
 |     Released | 19/09/2024|
@@ -23,7 +37,7 @@
 |     Creation Date/Time | 16/09/2024  21:07|
 |     Version | 0.10.5|
 |     Version Code | 20240916|
-|     AppGyver Runtime Version | 4.11.163|
+|     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
 |     Released Build# | 38355 – 38355 – 38355 – 38355 – _38355_|
 |     Released | 16/09/2024|
