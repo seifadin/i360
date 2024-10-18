@@ -3,21 +3,29 @@
 • https://i36O.wordpress.com
 
 <details>
-<summary>v 0.10.5</summary>
+<summary>v 0.10.6</summary>
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 07/10/2024  01:31|
-|     Version | 0.10.5|
-|     Version Code | 20241007|
-|     AppGyver Runtime Version | _|
-|     Released OS | _|
-|     Released Build# | _|
-|     Released | _|
+|     Creation Date/Time | 18/10/2024  21:11|
+|     Version | 0.10.6|
+|     Version Code | 20241018|
+|     AppGyver Runtime Version | 4.12.107|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 41477 – 41475 – 41475 – 41475 – 41475 – _41475_ – 41476|
+|     Released | 18/10/2024|
 |     Notes | _|
 |     Changes |   Fix: In _الرئيسية_ p., _Osfn_ flow function, removed unnecessary input(s)|
 |     |   Fix: In _الرئيسية_ p., _HTTPflow_, _WebBrowserflow_ flow functions, unified capitalization scheme & set _Value is required_ as needed|
+|     |   Edit: In _i360db.xlsx - Complements_, added _WebsiteStatus_ field (as DownDetector.com) & reloaded DB schema|
+|     |   Add: _WebsiteStatus_ App Variable|
+|     |   Edit:  In _الرئيسية_ p., in _SciencesList_ list, added logic setting _WebsiteStatus_ App Variable  to _i360dbcVar.WebsiteStatus_|
+|     |   Edit: In _المتصفح_ p., added _WebsiteStatusReport_ icon, as _electronic-medical-record_ in _Fiori Icons_ icon set, to _HeaderRow_ to view current website status report|
 
+</details>
+
+<details>
+<summary>v 0.10.5</summary>
 
 | Header | Details |
 |-----:|-----------|
