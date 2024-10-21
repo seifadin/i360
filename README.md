@@ -15,7 +15,7 @@
 |     Released Build# | 41683 – 41683 – 41683 – 41683 – _41683_|
 |     Released | 21/10/2024|
 |     Notes | Firebase and last 4.12.107 Runtime Issues<https://community.sap.com/t5/sap-builders-discussions/firebase-and-last-4-12-107-runtime-issues/m-p/13902754>|
-|     Changes |      ***(as Version Code: 20241021)***|
+|     Changes |      ***(as Version Code: 20241018)***|
 
 | Header | Details |
 |-----:|-----------|
