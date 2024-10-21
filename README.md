@@ -7,12 +7,24 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 21/10/2024  20:50|
+|     Version | 0.10.6|
+|     Version Code | 20241018|
+|     AppGyver Runtime Version | 4.12.108|
+|     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
+|     Released Build# | 41683 – 41683 – 41683 – 41683 – _41683_|
+|     Released | 21/10/2024|
+|     Notes | Firebase and last 4.12.107 Runtime Issues<https://community.sap.com/t5/sap-builders-discussions/firebase-and-last-4-12-107-runtime-issues/m-p/13902754>|
+|     Changes |      ***(as Version Code: 20241021)***|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 18/10/2024  21:11|
 |     Version | 0.10.6|
 |     Version Code | 20241018|
 |     AppGyver Runtime Version | 4.12.107|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 41477 – 41475 – 41475 – 41475 – 41475 – _41475_ – 41476|
+|     Released OS | **Web** – **iOS** (ipa)|
+|     Released Build# | 41477 – 41476|
 |     Released | 18/10/2024|
 |     Notes | _|
 |     Changes |   Fix: In _الرئيسية_ p., _Osfn_ flow function, removed unnecessary input(s)|
