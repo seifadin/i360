@@ -20,6 +20,11 @@
 |     |   Edit: changed non-clickable components background color to _App Background_ from _Level 1 Background_!|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _compress_, _expand_ from _binoculars_, _external-link_|
 
+</details>
+
+<details>
+<summary>v 0.10.6</summary>
+
 | Header | Details |
 |-----:|-----------|
 |     Creation Date/Time | 21/10/2024  20:50|
