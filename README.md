@@ -3,7 +3,22 @@
 • https://i36O.wordpress.com
 
 <details>
-<summary>v 0.10.6</summary>
+<summary>v 0.10.7</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 09/12/2024  19:40|
+|     Version | 0.10.7|
+|     Version Code | 20241209|
+|     AppGyver Runtime Version | 4.12.156|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 46126 – 46127 – 46127 – 46127 – 46127 – _46127_ – 46128|
+|     Released | 09/12/2024|
+|     Notes | _|
+|     Changes |   Edit: In _i360db.xlsx - Complements_, added _URIschemes_ field (_http/https_, _mailto_, _geo_, ...) & reloaded DB schema|
+|     |   Edit:  In _الرئيسية_ p., in _SciencesList_ list, _Osfn_ flow function, added condition to WebView use to check URI scheme replacing _http_ only condition by more generic form|
+|     |   Edit: changed non-clickable components background color to _App Background_ from _Level 1 Background_!|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _compress_, _expand_ from _binoculars_, _external-link_|
 
 | Header | Details |
 |-----:|-----------|
