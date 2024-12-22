@@ -3,6 +3,27 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.8</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 23/12/2024  01:30|
+|     Version | 0.10.8|
+|     Version Code | 20241223|
+|     AppGyver Runtime Version | 4.12.166|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 47121 – 47119 – 47119 – 47119 – 47119 – _47119_ – 47120|
+|     Released | 23/12/2024|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ & _المتصفح_ p., changed page padding to 16px for both top & bottom to match right & left|
+|     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, added showing _question_ icon for unfound _Entity Search_ terms|
+|     |   Edit:  In _الرئيسية_ p., disabled show spinner on page load, as _المتصفح_ p.|
+|     |   Add: In _الرئيسية_ p., _iconSearchBot_, _iconSearchInternal_, _iconSearchExternal_ page variables, as Text, corresponding to icons of: _Internal Knowledge Graph Entity Bot_ Searches, _Internal Custom_, _External Knowledge Graph Entity_; with initial values: magic, compress, expand (without quotations!)|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ & _SearchIcon_ logic, changed constant aforementioned search icons to corresponding page variables; with _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ once!|
+
+</details>
+
+<details>
 <summary>v 0.10.7</summary>
 
 | Header | Details |
@@ -12,13 +33,13 @@
 |     Version Code | 20241209|
 |     AppGyver Runtime Version | 4.12.156|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 46126 – 46127 – 46127 – 46127 – 46127 – _46127_ – 46128|
+|     Released Build# | 46126 – 46127 – _46127_ – _46127_ – _46127_ – _46127_ – 46128|
 |     Released | 09/12/2024|
 |     Notes | _|
 |     Changes |   Edit: In _i360db.xlsx - Complements_, added _URIschemes_ field (_http/https_, _mailto_, _geo_, ...) & reloaded DB schema|
 |     |   Edit:  In _الرئيسية_ p., in _SciencesList_ list, _Osfn_ flow function, added condition to WebView use to check URI scheme replacing _http_ only condition by more generic form|
 |     |   Edit: changed non-clickable components background color to _App Background_ from _Level 1 Background_!|
-|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _compress_, _expand_ from _binoculars_, _external-link_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _compress_, _expand_ from _binoculars_, _external-link_|
 
 </details>
 
@@ -32,7 +53,7 @@
 |     Version Code | 20241018|
 |     AppGyver Runtime Version | 4.12.108|
 |     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
-|     Released Build# | 41683 – 41683 – 41683 – 41683 – _41683_|
+|     Released Build# | 41683 – 41683 – _41683_ – _41683_ – _41683_|
 |     Released | 21/10/2024|
 |     Notes | Firebase and last 4.12.107 Runtime Issues<https://community.sap.com/t5/sap-builders-discussions/firebase-and-last-4-12-107-runtime-issues/m-p/13902754>|
 |     Changes |      ***(as Version Code: 20241018)***|
@@ -66,7 +87,7 @@
 |     Version Code | 20240919|
 |     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
-|     Released Build# | 38681 – 38681 – 38681 – 38681 – _38681_|
+|     Released Build# | 38681 – 38681 – _38681_ – _38681_ – _38681_|
 |     Released | 19/09/2024|
 |     Notes | _|
 |     Changes |   Add: _useHMSdefault_ app. variable, set to _useHMS_ first value|
@@ -91,7 +112,7 @@
 |     Version Code | 20240915|
 |     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 38222 – 38223 – 38223 – 38223 – 38223 – _38223_ – 38224|
+|     Released Build# | 38222 – 38223 – _38223_ – _38223_ – _38223_ – _38223_ – 38224|
 |     Released | 15/09/2024|
 |     Notes | _|
 |     Changes |   Edit: In _i360db.xlsx - Complements_, added GenAI chatbot _Huawei_BotSearch_ field & reloaded DB schema|
@@ -110,7 +131,7 @@
 |     Version Code | 20240909|
 |     AppGyver Runtime Version | 4.11.167|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 37670 – 37671 – 37671 – 37671 – 37671 – _37671_ – 37672|
+|     Released Build# | 37670 – 37671 – _37671_ – _37671_ – _37671_ – _37671_ – 37672|
 |     Released | 09/09/2024|
 |     Notes | _|
 |     Changes |   Add: In _الرئيسية_ p., in _SearchBarRow_, _BotSearchIcon_ icon, set to _magic_, & logic similar to that of _SearchBar_, to highlight GenAI bot|
