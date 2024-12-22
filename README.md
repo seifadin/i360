@@ -12,7 +12,7 @@
 |     Version Code | 20241223|
 |     AppGyver Runtime Version | 4.12.166|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | 47121 – 47119 – 47119 – 47119 – 47119 – _47119_ – 47120|
+|     Released Build# | 47121 – 47119 – _47119_ – _47119_ – _47119_ – _47119_ – 47120|
 |     Released | 23/12/2024|
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ & _المتصفح_ p., changed page padding to 16px for both top & bottom to match right & left|
