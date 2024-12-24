@@ -7,6 +7,18 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 24/12/2024  10:25|
+|     Version | 0.10.8|
+|     Version Code | 20241224|
+|     AppGyver Runtime Version | 4.12.166|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
+|     Released Build# | 47188 – 47186 – _47186_ – _47186_ – _47186_ – _47186_|
+|     Released | 24/12/2024|
+|     Notes | _|
+|     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed aforementioned search icons binding type from _Icon_ to _Formula_; with removing _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ once!|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 23/12/2024  01:30|
 |     Version | 0.10.8|
 |     Version Code | 20241223|
