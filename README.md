@@ -19,7 +19,7 @@
 |     |   Edit: In _الرئيسية_ p., grouped Edition related flow in _fEdition_|
 |     |   Edit: In _الرئيسية_ p., grouped Version related flow in _fVersion_|
 |     |   Edit: In _الرئيسية_ p., renamed flow functions: _Osfn_ to _fOS_, _HTTPflow_ to _fHTTP_, _WebBrowserflow_ to _fWebBrowser_|
-|     |   Edit: In _الرئيسية_ p., in _SearchBar_ logic, named flow functions: Translator's _HTTPflow_ to _httpTranslator _, EntitySearch's _HTTPflow_ to _httpEntitySearch_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_ logic, named flow functions: Translator's _HTTPflow_ to _httpTranslator_, EntitySearch's _HTTPflow_ to _httpEntitySearch_|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, Y-rotated 180° (so that question mark be Arabic)|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, showing _question_ icon, replaced exact matching I/O _Entity Search_ terms by _CONTAINS_ of input in output or vice versa!|
 |     |   Del: Unused Installed _View Components_|
