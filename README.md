@@ -3,6 +3,32 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.9</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 12/01/2025  23:51|
+|     Version | 0.10.9|
+|     Version Code | 20250112|
+|     Runtime Version | 4.12.166|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | 48149 – 48150 – _48150_ – _48150_ – _48150_ – _48150_ – 48151|
+|     Released Date | 12/01/2025|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ p., grouped Privacy related flow in _fPrivacy_|
+|     |   Edit: In _الرئيسية_ p., grouped Edition related flow in _fEdition_|
+|     |   Edit: In _الرئيسية_ p., grouped Version related flow in _fVersion_|
+|     |   Edit: In _الرئيسية_ p., renamed flow functions: _Osfn_ to _fOS_, _HTTPflow_ to _fHTTP_, _WebBrowserflow_ to _fWebBrowser_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_ logic, named flow functions: Translator's _HTTPflow_ to _httpTranslator _, EntitySearch's _HTTPflow_ to _httpEntitySearch_|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_, Y-rotated 180° (so that question mark be Arabic)|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, showing _question_ icon, replaced exact matching I/O _Entity Search_ terms by _CONTAINS_ of input in output or vice versa!|
+|     |   Del: Unused Installed _View Components_|
+|     |   Del: _i360g_ data resource linked to _Vectara.com_|
+|     |   Fix: In _الرئيسية_ p. mounting, initially set _SearchIcon_ to _spinner_ again!|
+
+</details>
+
+<details>
 <summary>v 0.10.8</summary>
 
 | Header | Details |
@@ -15,7 +41,7 @@
 |     Released Build# | 47188 – 47186 – _47186_ – _47186_ – _47186_ – _47186_|
 |     Released Date | 24/12/2024|
 |     Notes | _|
-|     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed aforementioned search icons binding type from _Icon_ to _Formula_; with removing _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ once!|
+|     Changes |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed aforementioned search icons binding type from _Icon_ to _Formula_; with removing _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ to _moon_!|
 
 | Header | Details |
 |-----:|-----------|
@@ -28,10 +54,10 @@
 |     Released Date | 23/12/2024|
 |     Notes | _|
 |     Changes |   Edit: In _الرئيسية_ & _المتصفح_ p., changed page padding to 16px for both top & bottom to match right & left|
-|     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, added showing _question_ icon for unfound _Entity Search_ terms|
-|     |   Edit:  In _الرئيسية_ p., disabled show spinner on page load, as _المتصفح_ p.|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ logic, added showing _question_ icon for unmatching I/O _Entity Search_ terms|
+|     |   Edit: In _الرئيسية_ p., disabled show spinner on page load, as _المتصفح_ p.|
 |     |   Add: In _الرئيسية_ p., _iconSearchBot_, _iconSearchInternal_, _iconSearchExternal_ page variables, as Text, corresponding to icons of: _Internal Knowledge Graph Entity Bot_ Searches, _Internal Custom_, _External Knowledge Graph Entity_; with initial values: magic, compress, expand (without quotations!)|
-|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ & _SearchIcon_ logic, changed constant aforementioned search icons to corresponding page variables; with _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ once!|
+|     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchBar_ & _SearchIcon_ logic, changed constant aforementioned search icons to corresponding page variables; with _الرئيسية_ p. logic mounting used to initially set _SearchIcon_ to _moon_!|
 
 </details>
 
@@ -49,7 +75,7 @@
 |     Released Date | 09/12/2024|
 |     Notes | _|
 |     Changes |   Edit: In _i360db.xlsx - Complements_, added _URIschemes_ field (_http/https_, _mailto_, _geo_, ...) & reloaded DB schema|
-|     |   Edit:  In _الرئيسية_ p., in _SciencesList_ list, _Osfn_ flow function, added condition to WebView use to check URI scheme replacing _http_ only condition by more generic form|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ list, _Osfn_ flow function, added condition to WebView use to check URI scheme replacing _http_ only condition by more generic form|
 |     |   Edit: changed non-clickable components background color to _App Background_ from _Level 1 Background_!|
 |     |   Edit: In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, changed icons of: _Internal Custom_, _External Knowledge Graph Entity_ Searches to _compress_, _expand_ from _binoculars_, _external-link_|
 
@@ -84,7 +110,7 @@
 |     |   Fix: In _الرئيسية_ p., _HTTPflow_, _WebBrowserflow_ flow functions, unified capitalization scheme & set _Value is required_ as needed|
 |     |   Edit: In _i360db.xlsx - Complements_, added _WebsiteStatus_ field (as DownDetector.com) & reloaded DB schema|
 |     |   Add: _WebsiteStatus_ App Variable|
-|     |   Edit:  In _الرئيسية_ p., in _SciencesList_ list, added logic setting _WebsiteStatus_ App Variable  to _i360dbcVar.WebsiteStatus_|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ list, added logic setting _WebsiteStatus_ App Variable to _i360dbcVar.WebsiteStatus_|
 |     |   Edit: In _المتصفح_ p., added _WebsiteStatusReport_ icon, as _electronic-medical-record_ in _Fiori Icons_ icon set, to _HeaderRow_ to view current website status report|
 
 </details>
@@ -298,7 +324,7 @@
 |     Released Build# | 297142 – 297143 – 297143 – 297143 – 297143 – 297144|
 |     Released Date | 03/09/2023|
 |     Notes | _|
-|     Changes |   Fix:  In _الرئيسية_ p., changed _id_ in _SciencesList_ component & logic (as _id_ in _Baserow.io_ is only an integer causing an app glitch of sorts)|
+|     Changes |   Fix: In _الرئيسية_ p., changed _id_ in _SciencesList_ component & logic (as _id_ in _Baserow.io_ is only an integer causing an app glitch of sorts)|
   
 </details>
 
@@ -554,7 +580,7 @@
 |     Released Build# | 278064 – 278065 – 278065 – 278065 – 278067|
 |     Released Date | 17/04/2023|
 |     Notes | _|
-|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of  Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 ***(unfunctional***_; Error: JSON error response from server: {"error":{"code":400074,"message":"The body of the request is not valid JSON."}}.status: 400_***)***|
+|     Changes | Add: _i360t_ data resource linked to _Azure Translator_, to enable Translation of Entity search term with required dynamic Request body _text_ in _Create Record (Post)_, created: 15/04/2023 ***(unfunctional***_; Error: JSON error response from server: {"error":{"code":400074,"message":"The body of the request is not valid JSON."}}.status: 400_***)***|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ to add _HTTP Request_ for _Azure Translator_ for Entity search ***(functional)***|
 |     |   Edit: In _الرئيسية_ p., _SearchBar_ placeholder from _بحث معرفي خارجي (بالإنجليزية)..._ to _بحث معرفي خارجي..._ for _External Knowledge Graph Entity Search_|
 |     |   Edit: Renamed _i360db_ data resource to _i360dbs_ & related changed (for naming consistency)|
