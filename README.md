@@ -3,6 +3,27 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.10.10</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 21/01/2025  23:04|
+|     Version | 0.10.10|
+|     Version Code | 20250121|
+|     Runtime Version | 4.12.166|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Build# | ? – ? – _?_ – _?_ – _?_ – _?_ – ?|
+|     Released Date | ?|
+|     Notes | _|
+|     Changes |   Fix: In _i360dbs_ data resource, changed _WebAppendix_, _BotKB_, _CustomSearchAIKBlessBotKB_ value data type to _web URL_ from _text_|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ list logic, rewired setting _WebAppendix_ App Variable to be between setting _SelectWeb_ App Variable & _fOS_ flow from after _SelectWeb_ _Open page_ & _Open URL_|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ list logic, added _Open URL_ for _WebAppendix_ in case of _SelectWeb_ _Open URL_ (to show _WebAppendix_ in case of not using _WebView_!)|
+|     |   Edit: In _الرئيسية_ p., _i360Privacy_ item message modified message to indicate that no _(non-functional)_ data is collected or shared!|
+|     |   Edit: In _المتصفح_ p., _NavigateBack_ changed to navigate back (only) from navigate back to app root p.; to Del: _Navigate back to root_ view component|
+
+</details>
+
+<details>
 <summary>v 0.10.9</summary>
 
 | Header | Details |
@@ -201,7 +222,7 @@
 |     Released OS | **Android** - Google (aab)|
 |     Released Build# | 36573|
 |     Released Date | 31/08/2024|
-|     Notes | SAP Build Apps builds require Android SDK published on non-SAP site to be version 34 or higher. This change sets the minimum supported device version to Android 14.|
+|     Notes |   SAP Build Apps builds require Android SDK published on non-SAP site to be version 34 or higher. This change sets the minimum supported device version to Android 14.|
 |     Changes |   ***(as Version Code: 20240607)***|
 
 | Header | Details |
@@ -213,13 +234,12 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Build# | 28606 – 28607 – 28607 – 28607 – 28607 – _28607_ – 28608|
 |     Released Date | 07/06/2024|
-|     Notes | **i360إ old**|
-|     |   To date, SAP Build Apps (AppGyver) builds require Android SDK to be version 26 (Released in 2017). This change depreciates support for Android 6 & 7 devices and sets the minimum version to Android 8 Oreo.|
+|     Notes |   To date, SAP Build Apps (AppGyver) builds require Android SDK to be version 26 (Released in 2017). This change depreciates support for Android 6 & 7 devices and sets the minimum version to Android 8 Oreo.|
 |     Changes |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _SearchIcon_ logic, setting _StarRating_ values according to _SearchSource_ plus 1|
 |     |   Edit:  In _الرئيسية_ p., in _SearchBarRow_ _StarRating_ logic, added _Tap component_ logic to programmatically tap _SearchIcon_ component ***(unfunctional)***|
 |     |   Add: _i360g_ data resource linked to _Vectara.com_, to add GenAI with required dynamic Request body _text_ in _Create Record (Post)_; and changing _Record Properties_ (a.k.a. body) binding type to _Formula_ (instead of default: _Object with properties_) then setting it to: `{query: [{"query":"الأشعرية","queryContext":"","start":0,"numResults":25,"contextConfig":{"charsBefore":0,"charsAfter":0,"sentencesBefore":2,"sentencesAfter":2,"startTag":"%START_SNIPPET%","endTag":"%END_SNIPPET%"},"rerankingConfig":{"rerankerId":272725718,"mmrConfig":{"diversityBias":0}},"corpusKey":[{"customerId":757392150,"corpusId":2,"semantics":0,"metadataFilter":"","lexicalInterpolationConfig":{"lambda":0.025},"dim":[]}],"summary":[{"debug":false,"chat":{"store":true,"conversationId":""},"maxSummarizedResults":5,"responseLang":"ara","summarizerPromptName":"vectara-summary-ext-v1.2.0","factualConsistencyScore":true}]}]}` ***(functional; unused)***; created: 04/06/2024|
 |     |   Edit: set _BotSearch_ field to _BotSonic.com_ (based on model: _ChatGPT_); set: 05/06/2024|
-|     |   Edit: disabled _Navigation header bar_ as page name was now forcely displayed even on primary root page|
+|     |   Edit: disabled _Navigation header bar_ as page name was now forcibly displayed even on primary root page|
 |     |   Edit: In _المتصفح_ p., changed _WebView_ dimensions to better fit screen size, namely: Width=Grow to width; Height=Screen viewport height - 120|
 |     |   Edit: In _المتصفح_ p., added _NavigateBack_ icon to _HeaderRow_ to navigate back to app root p.|
   
@@ -303,7 +323,7 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - UpToDown (apk) – **Android** - APKPure (apk) – **iOS** (ipa)|
 |     Released Build# | 298282 – 298283 – 298283 – 298283 – 298283 – 298486 – 298486 – 298325|
 |     Released Date | 14/09/2023|
-|     Notes | **testo**|
+|     Notes |   **testo**|
 |     |   Changed app file download link on _WordPress.com_ from _Box.com_ to _APKPure.com_ for smaller downloads on 20/09/2023|
 |     Changes |   Add: In _الرئيسية_ p., _SelectWeb_ page variable|
 |     |   Edit:  In _الرئيسية_ p., added _SelectWeb_ in _SciencesList_ logic setting as selected row's _Web_ field|
