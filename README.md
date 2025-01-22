@@ -19,7 +19,7 @@
 |     |   Edit: In _الرئيسية_ p., in _SciencesList_ list logic, rewired setting _WebAppendix_ App Variable to be between setting _SelectWeb_ App Variable & _fOS_ flow from after _SelectWeb_ _Open page_ & _Open URL_|
 |     |   Edit: In _الرئيسية_ p., in _SciencesList_ list logic, added _Open URL_ for _WebAppendix_ in case of _SelectWeb_ _Open URL_ (to show _WebAppendix_ in case of not using _WebView_!)|
 |     |   Edit: In _الرئيسية_ p., _i360Privacy_ item message modified message to indicate that no _(non-functional)_ data is collected or shared!|
-|     |   Edit: In _المتصفح_ p., _NavigateBack_ changed to navigate back (only) from navigate back to app root p.; to Del: _Navigate back to root_ view component|
+|     |   Edit: In _المتصفح_ p., _NavigateBack_ changed to navigate back (only) from navigate back to app root p.; to Del: _Navigate back to root_ flow component|
 
 </details>
 
