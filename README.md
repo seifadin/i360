@@ -7,12 +7,11 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 21/01/2025  23:04|
+|     Creation Date/Time | 23/01/2025  21:51|
 |     Version | 0.10.10|
-|     Version Code | 20250121|
+|     Version Code | 20250123|
 |     Runtime Version | 4.12.166|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Build# | ? – ? – _?_ – _?_ – _?_ – _?_ – ?|
 |     Released Date | ?|
 |     Notes | _|
 |     Changes |   Fix: In _i360dbs_ data resource, changed _WebAppendix_, _BotKB_, _CustomSearchAIKBlessBotKB_ value data type to _web URL_ from _text_|
