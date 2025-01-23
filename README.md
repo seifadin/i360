@@ -12,7 +12,7 @@
 |     Version Code | 20250123|
 |     Runtime Version | 4.12.166|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
-|     Released Date | ?|
+|     Released Date | 23/01/2025|
 |     Notes | _|
 |     Changes |   Fix: In _i360dbs_ data resource, changed _WebAppendix_, _BotKB_, _CustomSearchAIKBlessBotKB_ value data type to _web URL_ from _text_|
 |     |   Edit: In _الرئيسية_ p., in _SciencesList_ list logic, rewired setting _WebAppendix_ App Variable to be between setting _SelectWeb_ App Variable & _fOS_ flow from after _SelectWeb_ _Open page_ & _Open URL_|
