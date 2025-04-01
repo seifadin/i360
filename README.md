@@ -3,6 +3,23 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.11.1</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 01/04/2025  20:01|
+|     Version | 0.11.1|
+|     Version Code | 20250401|
+|     Runtime Version | 4.12.220|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 01/04/2025|
+|     Notes | _|
+|     Changes |   Add: In _ المتصفح_  p., _ i360dbqEOF_  (EOF=End-of-File) Page Variable|
+|     |   Fix: In _ المتصفح_  p., _ i360dbqVar_  data variable logic, add _ i360dbqEOF_  to designate end (max.) of i360dbqVar Pages to terminate new non-existent pagination (stop continuously loading _ i360dbq_  records in vain)|
+
+</details>
+
+<details>
 <summary>v 0.11.0</summary>
 
 | Header | Details |
