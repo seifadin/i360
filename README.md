@@ -14,8 +14,8 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Date | 01/04/2025|
 |     Notes | _|
-|     Changes |   Add: In _ المتصفح_  p., _ i360dbqEOF_  (EOF=End-of-File) Page Variable|
-|     |   Fix: In _ المتصفح_  p., _ i360dbqVar_  data variable logic, add _ i360dbqEOF_  to designate end (max.) of i360dbqVar Pages to terminate new non-existent pagination (stop continuously loading _ i360dbq_  records in vain)|
+|     Changes |   Add: In _المتصفح_ p., _i360dbqEOF_ (EOF=End-of-File) Page Variable|
+|     |   Fix: In _المتصفح_ p., _i360dbqVar_ data variable logic, add _i360dbqEOF_ to designate end (max.) of i360dbqVar Pages to terminate new non-existent pagination (stop continuously loading _i360dbq_ records in vain)|
 
 </details>
 
@@ -31,14 +31,14 @@
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Date | 30/03/2025|
 |     Notes | _|
-|     Changes |   Add: _ ScienceMinorId_  App Variable|
-|     |   Edit: In _ الرئيسية_  p., in _ SciencesList_  logic, added setting _ ScienceMinorId_  App Variable to selected item _ ScienceMinorId_|
-|     |   Add: _ i360dbq_  data resource linked to _ i360db.xlsx - QuranIndexSum_  Baserow using REST API with API key with _ page_  as an unset query parameter defaulted to 1 (to enabled query pagination, i.e. loading different pages of _ i360dbq_  records)|
-|     |   Add: In _ المتصفح_  p., _ QuranID_ , _ QuranChapter_ , _ QuranVerse_ , _ ExegesisURL_ , _ i360dbqPages_  Page Variables|
-|     |   Add: In _ المتصفح_  p., _ i360dbqVar_  data variable, type: 'Collection of data records', based on _ i360dbq_  data resource using _ i360dbqPages_  incrementally to load all pages|
-|     |   Edit: In _ المتصفح_  p., in _ Appendix_  button logic, added condition for _ ScienceMinorId=1.010_  (Quran) to open differently|
-|     |   Edit: In _ المتصفح_  p., in _ Appendix_  button logic, added setting _ QuranID_ , _ QuranChapter_ , _ QuranVerse_  MANUALLY using _ Input Text_  prompt with numeric keybad|
-|     |   Edit: In _ المتصفح_  p., in _ Appendix_  button logic, added setting _ ExegesisURL_  from selected corresponding _ i360dbqVar_  records|
+|     Changes |   Add: _ScienceMinorId_ App Variable|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ logic, added setting _ScienceMinorId_ App Variable to selected item _ScienceMinorId_|
+|     |   Add: _i360dbq_ data resource linked to _i360db.xlsx - QuranIndexSum_ Baserow using REST API with API key with _page_ as an unset query parameter defaulted to 1 (to enabled query pagination, i.e. loading different pages of _i360dbq_ records)|
+|     |   Add: In _المتصفح_ p., _QuranID_, _QuranChapter_, _QuranVerse_, _ExegesisURL_, _i360dbqPages_ Page Variables|
+|     |   Add: In _المتصفح_ p., _i360dbqVar_ data variable, type: 'Collection of data records', based on _i360dbq_ data resource using _i360dbqPages_ incrementally to load all pages|
+|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added condition for _ScienceMinorId=1.010_ (Quran) to open differently|
+|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added setting _QuranID_, _QuranChapter_, _QuranVerse_ MANUALLY using _Input Text_ prompt with numeric keybad|
+|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added setting _ExegesisURL_ from selected corresponding _i360dbqVar_ records|
 
 </details>
 
