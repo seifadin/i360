@@ -7,6 +7,20 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 03/04/2025  12:39|
+|     Version | 0.11.1|
+|     Version Code | 20250403|
+|     Runtime Version | 4.12.220|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 03/04/2025|
+|     Notes | _|
+|     Changes |   Fix: In _الرئيسية_ p. logic, corrected _i360dbcRecord_ data variable to _i360dbcVar_|
+|     |   Edit: In _الرئيسية_ p. logic, added toast message _تحميل البيانات_ on _Page Mounted_ event|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ logic, changed toast message from _يوجد ملحق للصفحة_ to _هناك ملحق_|
+|     |   Fix: In _الرئيسية_ p. logic, _i360Edition_, _i360Version_ flows logic to read from _i360EditionNode_, _i360VersionNode_, respectively, as originally designed before creating _flow_|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 01/04/2025  20:01|
 |     Version | 0.11.1|
 |     Version Code | 20250401|
@@ -15,7 +29,7 @@
 |     Released Date | 01/04/2025|
 |     Notes | _|
 |     Changes |   Add: In _المتصفح_ p., _i360dbqEOF_ (EOF=End-of-File) Page Variable|
-|     |   Fix: In _المتصفح_ p., _i360dbqVar_ data variable logic, add _i360dbqEOF_ to designate end (max.) of i360dbqVar Pages to terminate new non-existent pagination (stop continuously loading _i360dbq_ records in vain)|
+|     |   Fix: In _المتصفح_ p., _i360dbqVar_ data variable logic, add _i360dbqEOF_ to designate end (max.) of _i360dbqVar_ Pages to terminate new non-existent pagination (stop continuously loading _i360dbq_ records in vain)|
 
 </details>
 
