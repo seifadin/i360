@@ -7,6 +7,17 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 04/04/2025  20:12|
+|     Version | 0.11.1|
+|     Version Code | 20250404|
+|     Runtime Version | 4.12.227|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_)|
+|     Released Date | 04/04/2025|
+|     Notes | _|
+|     Changes |   Fix: In _الرئيسية_ p., in _Appendix_ button logic, changed placeholder text from _<سورة#>.<آية#>_ to _[سورة#].[آية#]_ to avoid Arabic text orientation mishaps!|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 03/04/2025  12:39|
 |     Version | 0.11.1|
 |     Version Code | 20250403|
@@ -25,7 +36,7 @@
 |     Version | 0.11.1|
 |     Version Code | 20250401|
 |     Runtime Version | 4.12.220|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_)|
 |     Released Date | 01/04/2025|
 |     Notes | _|
 |     Changes |   Add: In _المتصفح_ p., _i360dbqEOF_ (EOF=End-of-File) Page Variable|
@@ -51,7 +62,7 @@
 |     |   Add: In _المتصفح_ p., _QuranID_, _QuranChapter_, _QuranVerse_, _ExegesisURL_, _i360dbqPages_ Page Variables|
 |     |   Add: In _المتصفح_ p., _i360dbqVar_ data variable, type: 'Collection of data records', based on _i360dbq_ data resource using _i360dbqPages_ incrementally to load all pages|
 |     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added condition for _ScienceMinorId=1.010_ (Quran) to open differently|
-|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added setting _QuranID_, _QuranChapter_, _QuranVerse_ MANUALLY using _Input Text_ prompt with numeric keybad|
+|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added setting _QuranID_, _QuranChapter_, _QuranVerse_ MANUALLY using _Input Text_ prompt with default keybad|
 |     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added setting _ExegesisURL_ from selected corresponding _i360dbqVar_ records|
 
 </details>
