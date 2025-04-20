@@ -3,6 +3,29 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.11.2</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 20/04/2025  11:10|
+|     Version | 0.11.2|
+|     Version Code | 20250420|
+|     Runtime Version | 4.12.232|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 20/04/2025|
+|     Notes | _|
+|     Changes |   Fix: In _الرئيسية_ p., _fWebBrowser_ flow logic, added nulling _WebAppendix_ when opening _WebView_ to avoid wrong mismatches|
+|     |   Fix: In _الرئيسية_ p., _fEdition_ flow logic, changed if condition _DATETIME_IS_AFTER_ function to _DATETIME_DIFFERENCE… != 0_ to ensure working properly|
+|     |   Edit: In _الرئيسية_ p., _fEdition_ flow logic, changed Alert from _تمت إضافة / تعديل محتوى مُحدث لإثراء تجربتك. شكرًا لك..._ to _تمت إضافة / تعديل محتوى مُحدَّث لإثراء تجربتك_|
+|     |   Edit: In _الرئيسية_ p., _fVersion_ flow logic, changed Alert from _ أطلق إصدار مُحدث لإثراء تجربتك. شكرًا لك..._ to _تم إطلاق إصدار مُحدَّث لإثراء تجربتك_|
+|     |   Fix: In _الرئيسية_ p., _fVersion_ flow logic, changed Alert Dismiss button label from _OK_ to _موافق_|
+|     |   Edit: In _الرئيسية_ p. logic, reduced toast message _تحميل البيانات_ show duration from 1,000ms to 500ms|
+|     |   Add: _SearchSourceOld_ Page Variable linked to old _SearchSource_ value|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_ showed _exclamation_ icon if _SearchSource_ value is empty or unchanged (w.r.t. _SearchSourceOld_), in addition to previous condition: _SearchBar_ value is empty or unchanged (w.r.t. _EntityQueryTermOld_) for _EntitySearch=True_|
+
+</details>
+
+<details>
 <summary>v 0.11.1</summary>
 
 | Header | Details |
