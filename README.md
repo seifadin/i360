@@ -3,6 +3,24 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.11.3</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 15/05/2025  11:10|
+|     Version | 0.11.2|
+|     Version Code | 20250515|
+|     Runtime Version | 4.12.237|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | _|
+|     Notes | _|
+|     Changes |   Add: In _المتصفح_ p., _fExegesis_ flow function for displaying Quran Exegesis, introduced in version 0.11.0|
+|     |   Edit: In _الرئيسية_ p., disabled _SearchIcon_ component tap event as only _Internal Custom_ (not with _Bing.CustomSearch_) functions whereas _External Knowledge Graph Entity_ (depending on _Bing Entity Search_, a.k.a. _Bing.Search.v7_) not, as both Bing Search APIs will retire on 11/08/2025! [FYI: _EntityList_ used to display the latter's results is kept]|
+|     |   Edit: In _الرئيسية_ p., _StarRating_ made invisible for same reason as: disabled _SearchIcon_!|
+
+</details>
+
+<details>
 <summary>v 0.11.2</summary>
 
 | Header | Details |
