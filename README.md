@@ -8,7 +8,7 @@
 | Header | Details |
 |-----:|-----------|
 |     Creation Date/Time | 15/05/2025  11:10|
-|     Version | 0.11.2|
+|     Version | 0.11.3|
 |     Version Code | 20250515|
 |     Runtime Version | 4.12.237|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
