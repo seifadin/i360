@@ -3,6 +3,42 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.12.0</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 21/05/2025  21:59|
+|     Version | 0.12.0|
+|     Version Code | 20250521|
+|     Runtime Version | 4.14.9|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 21/05/2025|
+|     Notes | _|
+|     Changes |   Del: In _الرئيسية_ p., _EntityList_, _StarRating_|
+|     |   Del: _Tap component_ logic canvas|
+|     |   Del: _i360k_ data resource linked to _Bing Entity Search_, a.k.a. _Bing.Search.v7_|
+|     |   Del: _i360kVar_ data variable linked to _i360k_ data resource|
+|     |   Del: _iconSearchExternal_ Page Variable|
+|     |   Del: _SearchSource_, _SearchSourceOld_ Page Variables|
+|     |   Del: In _الرئيسية_ p., in _SearchBar_, _SearchSource_, _SearchSourceOld_, _i360kVar_ logic|
+|     |   Edit: In _الرئيسية_ p., in _SearchBar_, reconnected logic nodes accordingly|
+|     |   [ ↑ see version 0.11.3 changes ↑ ]|
+|     |   Edit: In _الرئيسية_ & _المتصفح_ p., changed padding to 8px for all sides from 16px|
+|     |   Edit: In _الرئيسية_ p. logic, changed toast message _تحميل البيانات_ position to -144 from -20|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_ logic, changed toast message _هناك ملحق_ position to -144 from -20|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_ _List item_, changed padding to 4px for all sides from 8px|
+|     |   Edit: In _الرئيسية_ p., _OSRow_ _VersionMenu_ & _OSIcon_, changed cells' padding to 8px for right & left from 0|
+|     |   Edit: In _الرئيسية_ p., _OSRow_ _OS_WebToggle_ & _MobileServicesToggle_, changed padding to 8px for right & left from 0|
+|     |   Edit: In _الرئيسية_ p., _OSRow_ _OS_WebToggle_ & _MobileServicesToggle_, changed Label text align to center from left|
+|     |   Edit: In _الرئيسية_ p., _OSRow_ _OS_WebToggle_ & _MobileServicesToggle_, changed Toggle padding to 8px for left from 16px|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _SearchBar_, changed padding to 8px for right from 12px & to 16px for left from 20px|
+|     |   Edit: In _الرئيسية_ p., _SearchBarRow_ _InputTools_ & _BotSearchIcon_, changed cells' padding to 4px for right & left from 0|
+|     |   Edit: In _المتصفح_ p., _HeaderRow_ & _InteractionRow_, changed all filled cells' padding to 4px for right & left from 0|
+|     |   Edit: In _المتصفح_ p., changed _WebsiteStatusReport_ icon to _heartbeat_ in _Font Awesome_ icon set from _electronic-medical-record_ in _Fiori Icons_ icon set|
+
+</details>
+
+<details>
 <summary>v 0.11.3</summary>
 
 | Header | Details |
