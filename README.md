@@ -3,6 +3,24 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.12.1</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 25/05/2025  23:39|
+|     Version | 0.12.1|
+|     Version Code | 20250525|
+|     Runtime Version | 4.15.7|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 25/05/2025|
+|     Notes | _|
+|     Changes |   Edit: In _المتصفح_ p., _NavigateBack_ changed to navigate back to app root p. from navigate back (only); via Add: _Navigate back to root_ flow component|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_ _Group header_, changed padding to 8px for all sides except bottom 4px|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_ _List item_, changed padding to 8px for right & left & to 4px for top & bottom|
+
+</details>
+
+<details>
 <summary>v 0.12.0</summary>
 
 | Header | Details |
