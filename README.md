@@ -3,6 +3,32 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.12.2</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 26/05/2025  21:10|
+|     Version | 0.12.2|
+|     Version Code | 20250526|
+|     Runtime Version | 4.15.7|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 26/05/2025|
+|     Notes | _|
+|     Changes |   Fix: In _المتصفح_ p., _i360dbqVar_ data variable logic, missing link to close loop & some rearrangements!|
+|     |   Edit: In _المتصفح_ p., set _i360dbqPages_ initial value (manually) to 1|
+|     |   Edit: In _المتصفح_ p., set _i360dbqEOF_ initial value (manually) to 11 (as per data)|
+|     |   Edit: In _المتصفح_ p., _i360dbqVar_ data variable logic, added _i360dbqPages_ counter toast message|
+|     |   Edit: In _المتصفح_ p., _i360dbqVar_ data variable logic, changed _Appendix_ icon to _spinner_, from _paperclip_ during loading data|
+|     |   Edit: In _المتصفح_ p., _i360dbqVar_ data variable logic, added condition to only load data for _ScienceMinorId=1.010_ (Quran)|
+|     |   Edit: In _i360db.xlsx - Complements_, added _i360dbqEOF_ numeric field & reloaded DB schema|
+|     |   Del: _i360dbqEOF_ Page Variable|
+|     |   Add: _i360dbqEOF_ App Variable|
+|     |   Edit: In _الرئيسية_ p., in _SciencesList_ list, added logic setting _i360dbqEOF_ App Variable to _i360dbcVar.i360dbqEOF_|
+|     |   Edit: In _المتصفح_ p., _i360dbqVar_ data variable logic, changed _i360dbqEOF_ from Page to App Variable|
+
+</details>
+
+<details>
 <summary>v 0.12.1</summary>
 
 | Header | Details |
