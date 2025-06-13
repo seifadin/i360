@@ -3,7 +3,7 @@
 • https://i36O.wordpress.com
 
 <details>
-<summary>v 0.12.2</summary>
+<summary>v 0.12.3</summary>
 
 | Header | Details |
 |-----:|-----------|
