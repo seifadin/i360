@@ -7,6 +7,43 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 14/06/2025  01:20|
+|     Version | 0.12.3|
+|     Version Code | 20250613|
+|     Runtime Version | 4.15.15|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 14/06/2025|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ p., in _Appendix_ button logic, changed placeholder text to _[آية#].[سورة#]_ from _[سورة#].[آية#]_|
+|     |   Edit: In _المتصفح_ p., _i360dbqVar_ data variable logic, reduced _i360dbqPages_ counter toast message show duration from 200ms to 100ms|
+|     |   [ ↓ Adding _Quran Exegesis_ to Web ↓ ]|
+|     |   Add: In _الرئيسية_ p., _isMobile_ App. variable for Android / iOS systems|
+|     |   Edit: In _fExegesis_ flow logic, changed (unnecessary) inputs (for Prompt text) to static|
+|     |   Edit: In _المتصفح_ p., changed _i360dbqPages_, _QuranID_, _QuranChapter_, _QuranVerse_, _ExegesisURL_, _i360dbqPages_ to App. Variable from Page Variable|
+|     |   Edit: renamed _QuranID_ App. Variable to _QuranId_|
+|     |   Edit: In _fExegesis_ flow logic, changed according to variables type change|
+|     |   Edit: In _fExegesis_ flow logic, moved viewing _ExegesisURL_ outside flow to enable _Web/WebView_ use|
+|     |   Edit: In _المتصفح_ p., in _Appendix_ button logic, added viewing _ExegesisURL_ in _WebView_|
+|     |   Add: In _المتصفح_ p., _fi360dbqVar_ flow function for loading _i360dbq_ data (_i360dbqVar_ logic), introduced in version 0.11.0|
+|     |   Edit: In _الرئيسية_ p., moved logic setting _i360dbqEOF_ App Variable to _i360dbcVar.i360dbqEOF_ to Page logic's _on Data 'i360dbcVar' changed_ from _SciencesList_ list|
+|     |   Add: In _الرئيسية_ p., _i360dbqVar_ data variable, as in _المتصفح_ p., with added logic to wait for _i360dbqEOF_ App Variable setting|
+|     |   Edit: In _المتصفح_ p. logic, added resetting _i360dbqPages_ to 1 on page focus|
+|     |   Add: In _الرئيسية_ p., _QuranIdRow_, including _QuranIdBar_ & _QuranIdIcon_, as _SearchBar_ & _SearchIcon_ respectively, as _Prompt text_ doesn't support _Web_!|
+|     |   Add: In _الرئيسية_ p., _fSearchExegesis_ flow function for searching Quran Exegesis to use in Web (found in _SearchBar_ logic), introduced in version 0.12.3|
+|     |   Add: In _الرئيسية_ p., _fSearchCustom_ flow function for custom searching app. books (found in _SearchBar_ logic), introduced in version 0.9.0|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ logic, combining _fSearchExegesis_ & _fSearchCustom_ by _QuranIdCheckbox_ value condition|
+|     |   Add: In _الرئيسية_ p., _QuranIdCheckbox_ logic, flows to change _SearchBar_ placeholder & _SearchIcon_ by _QuranIdCheckbox_ value condition|
+|     |   Del: In _الرئيسية_ p., _QuranIdRow_ being replaced by _SearchRow_|
+|     |   Edit: In _الرئيسية_ p., _SciencesList_ _List item_, changed padding to 16px for right & left from 8px|
+|     |   Add: In _الرئيسية_ p., _fInfo_ flow merging _fEdition_ & _fVersion_ flows, by exposing used variables & unifying used condition|
+
+</details>
+
+<details>
+<summary>v 0.12.2</summary>
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 26/05/2025  21:10|
 |     Version | 0.12.2|
 |     Version Code | 20250526|
