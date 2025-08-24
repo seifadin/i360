@@ -3,6 +3,28 @@
 • https://i36O.wordpress.com
 
 <details>
+<summary>v 0.12.4</summary>
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 24/08/2025  23:07|
+|     Version | 0.12.4|
+|     Version Code | 20250824|
+|     Runtime Version | 4.17.0|
+|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
+|     Released Date | 24/08/2025|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ p., moved logic setting _WebsiteStatus_ App Variable to Page logic's _on Data 'i360dbcVar' changed_ from _SciencesList_ list (for better variables setting consistency)|
+|     |   Edit: In _الرئيسية_ p., in _Appendix_ button logic, changed dialog title text to _تفسير آية_ from _آية_|
+|     |   Fix: In _الرئيسية_ p., _fWebBrowser_ flow logic, added nulling _ScienceMinorId_ when opening _WebView_ to avoid wrong mismatches (loading _i360dbqVar_), as _WebAppendix_|
+|     |   Edit: In _المتصفح_ p. logic, changed resetting _i360dbqPages_ to 1 on page mounted|
+|     |   Edit: In _الرئيسية_ p., renamed _fEdition_ & _fVersion_ flows to _fInfo_Edition_ & _fInfo_Version_, respectively|
+|     |   Edit: In _i360db.xlsx - Complements_, added GenAI chatbot _Huawei_CustomSearch_ field & reloaded DB schema|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_ logic, in _fSearchCustom_ flow logic then in _fWebBrowser_ URL, added custom search from _Huawei_CustomSearch_ field, for China|
+
+</details>
+
+<details>
 <summary>v 0.12.3</summary>
 
 | Header | Details |
