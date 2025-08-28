@@ -13,7 +13,7 @@
 |     Runtime Version | 4.17.0|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_) – **iOS** (ipa)|
 |     Released Date | 24/08/2025|
-|     Notes | <https://support.google.com/googleplay/android-developer/answer/11926878>App must target Android 15 (API level 35) or higher</>|
+|     Notes | [App must target Android 15 (API level 35) or higher](https://support.google.com/googleplay/android-developer/answer/1192687)|
 |     Changes |   Edit: In _الرئيسية_ p., moved logic setting _WebsiteStatus_ App Variable to Page logic's _on Data 'i360dbcVar' changed_ from _SciencesList_ list (for better variables setting consistency)|
 |     |   Edit: In _الرئيسية_ p., in _Appendix_ button logic, changed dialog title text to _تفسير آية_ from _آية_|
 |     |   Fix: In _الرئيسية_ p., _fWebBrowser_ flow logic, added nulling _ScienceMinorId_ when opening _WebView_ to avoid wrong mismatches (loading _i360dbqVar_), as _WebAppendix_|
