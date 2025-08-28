@@ -358,7 +358,7 @@
 |     Released OS | **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - Amazon (aab) – **Windows** - Amazon (aab) – **Android** - APKPure (_apk_)|
 |     Released Build# | 41683 – 41683 – _41683_ – _41683_ – _41683_|
 |     Released Date | 21/10/2024|
-|     Notes | Firebase and last 4.12.107 Runtime Issues<https://community.sap.com/t5/sap-builders-discussions/firebase-and-last-4-12-107-runtime-issues/m-p/13902754>|
+|     Notes | [Firebase and last 4.12.107 Runtime Issues](https://community.sap.com/t5/sap-builders-discussions/firebase-and-last-4-12-107-runtime-issues/m-p/13902754)|
 |     Changes |      ***(as Version Code: 20241018)***|
 
 | Header | Details |
