@@ -14,9 +14,9 @@
 |     Released OS | **Web**|
 |     Released Date | 31/10/2025|
 |     Notes | _|
-|     Changes |   Edit: In _الرئيسية_ p., _SearchBar_, moved _QuranIdCheckbox_, Y-rotated 180°, to _SearchIcon_ cell & deleted its original cell|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _QuranIdCheckbox_ visibility to NOT(isMobile)|
-|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _SearchIcon_ visibility to (isMobile)|
+|     Changes |   Edit: In _الرئيسية_ p., _SearchBar_, moved _QuranIdCheckbox_ cell, Y-rotated 180°, next to _SearchIcon_ cell|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _QuranIdCheckbox_ cell visibility to NOT(isMobile)|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _SearchIcon_ cell visibility to (isMobile)|
 
 | Header | Details |
 |-----:|-----------|
