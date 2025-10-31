@@ -7,6 +7,19 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 31/10/2025  23:03|
+|     Version | 0.12.4|
+|     Version Code | 20251031|
+|     Runtime Version | 4.17.60|
+|     Released OS | **Web**|
+|     Released Date | 31/10/2025|
+|     Notes | _|
+|     Changes |   Edit: In _الرئيسية_ p., _SearchBar_, moved _QuranIdCheckbox_, Y-rotated 180°, to _SearchIcon_ cell & deleted its original cell|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _QuranIdCheckbox_ visibility to NOT(isMobile)|
+|     |   Edit: In _الرئيسية_ p., _SearchBar_, set _SearchIcon_ visibility to (isMobile)|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 24/08/2025  23:07|
 |     Version | 0.12.4|
 |     Version Code | 20250824|
