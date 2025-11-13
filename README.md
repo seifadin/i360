@@ -7,6 +7,20 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 13/11/2025  21:05|
+|     Version | 0.12.4|
+|     Version Code | 20251113|
+|     Runtime Version | 4.17.64|
+|     Released OS | **Web**|
+|     Released Date | 13/11/2025|
+|     Notes | _|
+|     Changes |   Add: In _الرئيسية_ p., restored _SearchSource_ Page Variable|
+|     |   Edit: In _الرئيسية_ p., restored _SearchIcon_ logic with modifications from _QuranIdCheckbox_ for NOT(isMobile) only|
+|     |   Del: In _الرئيسية_ p., _SearchBar_, _QuranIdCheckbox_ cell|
+
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 31/10/2025  23:56|
 |     Version | 0.12.4|
 |     Version Code | 20251031|
