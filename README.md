@@ -7,12 +7,12 @@
 
 | Header | Details |
 |-----:|-----------|
-|     Creation Date/Time | 28/11/2025  00:03|
+|     Creation Date/Time | 28/11/2025  06:00|
 |     Version | 0.12.4|
-|     Version Code | 20251127|
+|     Version Code | 20251128|
 |     Runtime Version | 4.18.15|
 |     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_)|
-|     Released Date | 27/11/2025|
+|     Released Date | 28/11/2025|
 |     Notes | App must support 16 KB memory page sizes|
 |     Changes |      ***(as Version Code: 20251113)***|
 
