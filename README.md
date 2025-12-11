@@ -7,11 +7,22 @@
 
 | Header | Details |
 |-----:|-----------|
+|     Creation Date/Time | 11/12/2025  19:41|
+|     Version | 0.12.4|
+|     Version Code | 20251211|
+|     Runtime Version | 4.18.23|
+|     Released OS | **Android** - Google (aab) – **Android** - APKPure (_apk_)|
+|     Released Date | 11/12/2025|
+|     Notes | Fix Photo & Video Permissions policy: _READ_MEDIA_IMAGES/READ_MEDIA_VIDEO_ use isn't related to app’s core purpose.|
+|     Changes |      ***(as Version Code: 20251113)***|
+
+| Header | Details |
+|-----:|-----------|
 |     Creation Date/Time | 28/11/2025  06:00|
 |     Version | 0.12.4|
 |     Version Code | 20251128|
 |     Runtime Version | 4.18.15|
-|     Released OS | **Web** – **Android** - Google (aab) – **Android** - Huawei (aab) – **Android** - APKPure (_apk_)|
+|     Released OS | **Web** – **Android** - Huawei (aab)|
 |     Released Date | 28/11/2025|
 |     Notes | App must support 16 KB memory page sizes|
 |     Changes |      ***(as Version Code: 20251113)***|
