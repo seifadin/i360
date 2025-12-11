@@ -13,6 +13,17 @@
 |     Runtime Version | 4.18.23|
 |     Released OS | **Android** - Google (aab) – **Android** - APKPure (_apk_)|
 |     Released Date | 11/12/2025|
+|     Notes | ***(as Version Code: 20251209)***|
+|     Changes |      ***(as Version Code: 20251113)***|
+
+| Header | Details |
+|-----:|-----------|
+|     Creation Date/Time | 09/12/2025  20:42|
+|     Version | 0.12.4|
+|     Version Code | 20251209|
+|     Runtime Version | 4.18.19|
+|     Released OS | **Android** - Google (aab) – **Android** - APKPure (_apk_)|
+|     Released Date | 09/12/2025|
 |     Notes | Fix Photo & Video Permissions policy: _READ_MEDIA_IMAGES/READ_MEDIA_VIDEO_ use isn't related to app’s core purpose|
 |     Changes |      ***(as Version Code: 20251113)***|
 
