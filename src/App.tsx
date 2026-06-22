@@ -1,8 +1,12 @@
+import { AppStateProvider } from '@/store/appState'
+
 function App() {
   return (
-    <div>
-      <h1>i360إ</h1>
-    </div>
+    <AppStateProvider>
+      <div>
+        <h1>i360إ</h1>
+      </div>
+    </AppStateProvider>
   )
 }
 
