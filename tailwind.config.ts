@@ -6,7 +6,16 @@ export default {
     './src/**/*.{ts,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          blue: '#0010CF',
+          green: '#1A5C38',
+          gold: '#C9A96E',
+          ivory: '#FAF7F2',
+        },
+      },
+    },
   },
   plugins: [],
 } satisfies Config

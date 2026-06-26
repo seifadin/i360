@@ -15,13 +15,19 @@ export interface Science {
   id: number
   ScienceMajor_Ar: string
   ScienceMajor_En: string
+  ScienceMajor_Icon: string
+  ScienceIntermediate_Ar: string
+  ScienceIntermediate_En: string
+  ScienceIntermediate_Icon: string
   ScienceMinor_Ar: string
   ScienceMinor_En: string
+  ScienceMinor_Icon: string
   Web: string
   AppleAppStore: string
   GooglePlayStore: string
   HuaweiAppGallery: string
   WebAppendix: string
+  IconName: string
 }
 
 export interface Resource {
@@ -32,6 +38,7 @@ export interface Resource {
   BotSearch: string
   Huawei_BotSearch: string
   URIschemes: string
+  inWebList: string
   CustomSearch: string
   Huawei_CustomSearch: string
   EntitySearch: string

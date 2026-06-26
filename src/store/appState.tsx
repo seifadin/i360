@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, JSX } from 'react'
 
 export interface AppState {
   useWeb: boolean
@@ -45,7 +45,7 @@ const defaultState: AppState = {
 
 const AppStateContext = createContext<AppStateContextType | null>(null)
 
-export function AppStateProvider({ children }: { children: ReactNode }) {
+export function AppStateProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, setStateRaw] = useState<AppState>(defaultState)
   const setState = (updates: Partial<AppState>) =>
     setStateRaw(prev => ({ ...prev, ...updates }))
