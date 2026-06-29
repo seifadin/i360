@@ -9,4 +9,12 @@
     font-family: 'Noto Naskh Arabic', serif;
     color: #0010CF;
   }
+
+  :root {
+    --color-blue: #0010CF;
+    --color-green: #1A5C38;
+    --color-gold: #C9A96E;
+    --color-ivory: #FAF7F2;
+    --color-selected: #EEF2FF;
+  }
 }

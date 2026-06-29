@@ -15,13 +15,14 @@ export interface Science {
   id: number
   ScienceMajor_Ar: string
   ScienceMajor_En: string
-  ScienceMajor_Icon: string
+  ScienceMajorIcon: string
+  ScienceIntermediateId: number | null
   ScienceIntermediate_Ar: string
   ScienceIntermediate_En: string
-  ScienceIntermediate_Icon: string
+  ScienceIntermediateIcon: string
   ScienceMinor_Ar: string
   ScienceMinor_En: string
-  ScienceMinor_Icon: string
+  ScienceMinorIcon: string
   Web: string
   AppleAppStore: string
   GooglePlayStore: string
@@ -88,8 +89,11 @@ export async function fetchSciences(): Promise<Science[]> {
   )
 }
 
-export async function fetchResources(scienceMinorId: number): Promise<Resource[]> {
-  const filter = `&filter__field_ScienceMinorId__equal=${scienceMinorId}`
+// scienceMinorId=0 → fetch all records (no filter) for global fields
+export async function fetchResources(scienceMinorId: number = 0): Promise<Resource[]> {
+  const filter = scienceMinorId > 0
+    ? `&filter__field_ScienceMinorId__equal=${scienceMinorId}`
+    : ''
   return fetchAllPages<Resource>(
     `${BASE_URL}${TABLE_RESOURCES}/?user_field_names=true${filter}`
   )

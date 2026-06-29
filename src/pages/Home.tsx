@@ -3,13 +3,13 @@ import SearchBar from '@/components/SearchBar'
 import ScienceGrid from '@/components/ScienceGrid'
 
 export default function Home() {
-  // Detect platform on Home mount — sets all 16 app state flags
   usePlatform()
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* App header — logo + title (RTL: icon on right) */}
-      <div className="flex items-center justify-center gap-2 bg-white px-4 py-3 shadow-sm">
+    <div className="flex flex-col h-screen bg-white">
+
+      {/* App header — logo + title */}
+      <div className="flex items-center justify-center gap-2 bg-white px-4 py-3 shadow-sm shrink-0">
         <img
           src="/assets/logo.png"
           alt="i360إ"
@@ -20,15 +20,16 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Search bar */}
-      <div className="sticky top-0 z-10 bg-white shadow-sm">
+      {/* Science accordion — scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <ScienceGrid />
+      </div>
+
+      {/* Search bar — fixed at bottom */}
+      <div className="shrink-0 border-t border-gray-200 bg-white">
         <SearchBar />
       </div>
 
-      {/* Science accordion */}
-      <div className="flex-1 overflow-y-auto bg-white">
-        <ScienceGrid />
-      </div>
     </div>
   )
 }

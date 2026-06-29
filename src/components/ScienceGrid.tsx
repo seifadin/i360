@@ -4,28 +4,20 @@ import * as Icons from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
 import { fetchSciences, fetchResources, Science, Resource } from '@/api/baserow'
-import { detectOS, resolveOpenMethod } from '@/hooks/usePlatform'
+import { detectOS, resolveOpenMethod, isDesktop } from '@/hooks/usePlatform'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface MinorItem {
-  science: Science
-}
-
+interface MinorItem { science: Science }
 interface IntermediateGroup {
   intermediate: string
   intermediateIcon: string
   items: MinorItem[]
 }
-
 interface MajorGroup {
   major: string
   majorIcon: string
   intermediates: IntermediateGroup[]
-  directItems: MinorItem[] // minors with no intermediate
+  directItems: MinorItem[]
 }
-
-// ─── Grouping ─────────────────────────────────────────────────────────────────
 
 function groupSciences(sciences: Science[]): MajorGroup[] {
   const majorMap = new Map<string, {
@@ -38,20 +30,16 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
     const majorKey = s.ScienceMajor_Ar
     if (!majorMap.has(majorKey)) {
       majorMap.set(majorKey, {
-        majorIcon: s.ScienceMajor_Icon ?? '',
+        majorIcon: s.ScienceMajorIcon ?? '',
         intMap: new Map(),
         directItems: [],
       })
     }
     const majorEntry = majorMap.get(majorKey)!
     const intKey = s.ScienceIntermediate_Ar ?? ''
-
     if (intKey) {
       if (!majorEntry.intMap.has(intKey)) {
-        majorEntry.intMap.set(intKey, {
-          icon: s.ScienceIntermediate_Icon ?? '',
-          items: [],
-        })
+        majorEntry.intMap.set(intKey, { icon: s.ScienceIntermediateIcon ?? '', items: [] })
       }
       majorEntry.intMap.get(intKey)!.items.push({ science: s })
     } else {
@@ -71,38 +59,38 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
   }))
 }
 
-// ─── Dynamic Icon ─────────────────────────────────────────────────────────────
-
 function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
   const Icon = (Icons as Record<string, any>)[name]
   if (!Icon) return null
   return <Icon size={size} />
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function ScienceGrid() {
   const { state, setState } = useAppState()
   const navigate = useNavigate()
   const [groups, setGroups] = useState<MajorGroup[]>([])
+  const [globalResource, setGlobalResource] = useState<Resource | null>(null)
   const [openMajor, setOpenMajor] = useState<string | null>(null)
   const [openIntermediate, setOpenIntermediate] = useState<string | null>(null)
+  const [selectedMinorId, setSelectedMinorId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchSciences()
-      .then(data => {
-        setGroups(groupSciences(data))
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('تعذّر تحميل العلوم')
-        setLoading(false)
-      })
+    // Fetch sciences + global i360dbc record (for inWebList/URIschemes) in parallel
+    Promise.all([
+      fetchSciences(),
+      fetchResources(0), // no filter = global fields
+    ]).then(([scienceData, resourceData]) => {
+      setGroups(groupSciences(scienceData))
+      setGlobalResource(resourceData[0] ?? null)
+      setLoading(false)
+    }).catch(() => {
+      setError('تعذّر تحميل العلوم')
+      setLoading(false)
+    })
   }, [])
 
-  // ─── Platform-aware URL resolution ─────────────────────────────────────────
   function resolveUrl(science: Science): string {
     const os = detectOS()
     if (os === 'android' && !state.useWeb) {
@@ -117,30 +105,30 @@ export default function ScienceGrid() {
     const url = resolveUrl(science)
     if (!url) return
 
+    setSelectedMinorId(science.id)
     setState({
       ScienceMinorId: science.id,
       WebAppendix: science.WebAppendix ?? null,
+      WebsiteStatus: globalResource?.WebsiteStatus ?? null,
     })
 
-    // Fetch i360dbc to check URIschemes + inWebList
-    let openMethod: 'tab' | 'webview' = 'webview'
-    if (state.useWeb) {
-      try {
-        const resources = await fetchResources(science.id)
-        const resource: Resource | undefined = resources[0]
-        if (resource) {
-          openMethod = resolveOpenMethod(
-            url,
-            resource.URIschemes ?? '',
-            resource.inWebList ?? ''
-          )
-        }
-      } catch {
-        openMethod = 'webview'
-      }
+    // Desktop → always open in new tab
+    if (isDesktop()) {
+      window.open(url, '_blank')
+      if (science.WebAppendix) window.open(science.WebAppendix, '_blank')
+      return
     }
 
-    // Navigate — open in new tab or WebView
+    // Mobile → check inWebList/URIschemes
+    let openMethod: 'tab' | 'webview' = 'webview'
+    if (state.useWeb && globalResource) {
+      openMethod = resolveOpenMethod(
+        url,
+        globalResource.URIschemes,
+        globalResource.inWebList
+      )
+    }
+
     if (openMethod === 'tab') {
       window.open(url, '_blank')
       if (science.WebAppendix) window.open(science.WebAppendix, '_blank')
@@ -156,70 +144,68 @@ export default function ScienceGrid() {
     <div className="divide-y divide-gray-100">
       {groups.map(group => (
         <div key={group.major}>
-          {/* Major header */}
           <button
             onClick={() => {
               setOpenMajor(openMajor === group.major ? null : group.major)
               setOpenIntermediate(null)
             }}
-            className="flex w-full items-center justify-between px-4 py-3 text-right font-semibold text-green-800 hover:bg-gray-50"
+            className="flex w-full items-center justify-between px-4 py-3 text-right font-semibold hover:bg-gray-50"
+            style={{ color: '#0010CF' }}
           >
             <div className="flex items-center gap-2">
+              {openMajor === group.major ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
               {group.majorIcon && (
-                <span className="text-green-700">
+                <span style={{ color: '#1A5C38' }}>
                   <DynamicIcon name={group.majorIcon} size={17} />
                 </span>
               )}
               <span>{group.major}</span>
             </div>
-            {openMajor === group.major
-              ? <ChevronDown size={18} />
-              : <ChevronLeft size={18} />
-            }
           </button>
 
           {openMajor === group.major && (
             <div className="divide-y divide-gray-50 bg-gray-50">
-
-              {/* Intermediate level */}
               {group.intermediates.map(intGroup => (
                 <div key={intGroup.intermediate}>
                   <button
                     onClick={() =>
                       setOpenIntermediate(
-                        openIntermediate === intGroup.intermediate
-                          ? null
-                          : intGroup.intermediate
+                        openIntermediate === intGroup.intermediate ? null : intGroup.intermediate
                       )
                     }
-                    className="flex w-full items-center justify-between px-5 py-2 text-right text-sm font-medium text-green-700 hover:bg-gray-100"
+                    className="flex w-full items-center justify-between px-8 py-2 text-right text-sm font-medium hover:bg-gray-100"
+                    style={{ color: '#0010CF' }}
                   >
                     <div className="flex items-center gap-2">
+                      {openIntermediate === intGroup.intermediate
+                        ? <ChevronDown size={14} />
+                        : <ChevronLeft size={14} />
+                      }
                       {intGroup.intermediateIcon && (
-                        <span className="text-green-600">
-                          <DynamicIcon name={intGroup.intermediateIcon} size={15} />
+                        <span style={{ color: '#1A5C38' }}>
+                          <DynamicIcon name={intGroup.intermediateIcon} size={14} />
                         </span>
                       )}
                       <span>{intGroup.intermediate}</span>
                     </div>
-                    {openIntermediate === intGroup.intermediate
-                      ? <ChevronDown size={15} />
-                      : <ChevronLeft size={15} />
-                    }
                   </button>
 
-                  {/* Minors under intermediate */}
                   {openIntermediate === intGroup.intermediate && (
                     <div className="divide-y divide-gray-100 bg-white">
                       {intGroup.items.map(({ science }) => (
                         <button
                           key={science.id}
                           onClick={() => handleMinorTap(science)}
-                          className="flex w-full items-center gap-2 px-7 py-2 text-right text-sm text-gray-700 hover:bg-gray-50"
+                          className="flex w-full items-center gap-2 px-12 py-2 text-right text-sm hover:bg-gray-50"
+                          style={{
+                            backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
+                            color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',
+                            fontWeight: selectedMinorId === science.id ? 600 : undefined,
+                          }}
                         >
-                          {science.ScienceMinor_Icon && (
-                            <span className="text-green-600">
-                              <DynamicIcon name={science.ScienceMinor_Icon} />
+                          {science.ScienceMinorIcon && (
+                            <span style={{ color: '#1A5C38' }}>
+                              <DynamicIcon name={science.ScienceMinorIcon} />
                             </span>
                           )}
                           <span className="flex-1">{science.ScienceMinor_Ar}</span>
@@ -230,16 +216,20 @@ export default function ScienceGrid() {
                 </div>
               ))}
 
-              {/* Direct minors (no intermediate) */}
               {group.directItems.map(({ science }) => (
                 <button
                   key={science.id}
                   onClick={() => handleMinorTap(science)}
-                  className="flex w-full items-center gap-2 px-6 py-2 text-right text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center gap-2 px-8 py-2 text-right text-sm hover:bg-gray-100"
+                  style={{
+                    backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
+                    color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',
+                    fontWeight: selectedMinorId === science.id ? 600 : undefined,
+                  }}
                 >
-                  {science.ScienceMinor_Icon && (
-                    <span className="text-green-600">
-                      <DynamicIcon name={science.ScienceMinor_Icon} />
+                  {science.ScienceMinorIcon && (
+                    <span style={{ color: '#1A5C38' }}>
+                      <DynamicIcon name={science.ScienceMinorIcon} />
                     </span>
                   )}
                   <span className="flex-1">{science.ScienceMinor_Ar}</span>

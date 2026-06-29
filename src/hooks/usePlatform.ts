@@ -10,6 +10,10 @@ export function detectOS(): OSType {
   return 'web'
 }
 
+export function isDesktop(): boolean {
+  return detectOS() === 'web'
+}
+
 export function usePlatform() {
   const { setState } = useAppState()
 
@@ -17,44 +21,30 @@ export function usePlatform() {
     const os = detectOS()
     const useWeb = os === 'web'
     const isMobile = os !== 'web'
-
-    // HMS detection — Huawei devices lack Google Play Services
     const ua = navigator.userAgent
     const useHMS = /huawei|hmscore|harmony/i.test(ua)
     const isChina = /china/i.test(navigator.language) ||
       Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Shanghai')
-
-    // GMS or Apple — standard Android or iOS
     const isGMSorApple = isMobile && !useHMS
-
-    // Huawei default — HMS without GMS fallback
     const useHMSdefault = useHMS && !isGMSorApple
 
-    setState({
-      useWeb,
-      isMobile,
-      isChina,
-      useHMS,
-      isGMSorApple,
-      useHMSdefault,
-    })
+    setState({ useWeb, isMobile, isChina, useHMS, isGMSorApple, useHMSdefault })
   }, [])
 }
 
 // ─── URL resolution ───────────────────────────────────────────────────────────
+// inWebList  → comma-separated domains that force browser tab
+// URIschemes → comma-separated schemes that force browser tab
+// Default    → WebView
 
 export function resolveOpenMethod(
   webUrl: string,
   uriSchemes: string,
   inWebList: string
 ): 'tab' | 'webview' {
-  // Extract scheme (e.g. "https") and domain (e.g. "tanzil.net")
-  const scheme = webUrl.split(':')[0] ?? ''
-  const domain = webUrl.split('/')[2] ?? ''
+  const scheme = webUrl.split(':')[0]?.trim() ?? ''
+  const domain = webUrl.split('/')[2]?.trim() ?? ''
 
-  const schemes = uriSchemes ? uriSchemes.split(',').map(s => s.trim()) : []
-  const domains = inWebList ? inWebList.split(',').map(d => d.trim()) : []
-
-  if (schemes.includes(scheme) || domains.includes(domain)) return 'webview'
-  return 'tab'
+  if (uriSchemes?.includes(scheme) || inWebList?.includes(domain)) return 'tab'
+  return 'webview'
 }
