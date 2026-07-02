@@ -90,19 +90,17 @@ export default function Browser() {
     const url = appState.WebAppendix
 
     let openMethod: 'tab' | 'webview' = 'webview'
-    if (appState.ScienceMinorId) {
-      try {
-        const resources = await fetchResources(appState.ScienceMinorId)
-        const resource = resources[0]
-        if (resource) {
-          openMethod = resolveOpenMethod(
-            url,
-            resource.URIschemes ?? '',
-            resource.inWebList ?? ''
-          )
-        }
-      } catch { openMethod = 'webview' }
-    }
+    try {
+      const resources = await fetchResources()
+      const resource = resources[0]
+      if (resource) {
+        openMethod = resolveOpenMethod(
+          url,
+          resource.URIschemes ?? '',
+          resource.inWebList ?? ''
+        )
+      }
+    } catch { openMethod = 'webview' }
 
     if (openMethod === 'tab') {
       window.open(url, '_blank')

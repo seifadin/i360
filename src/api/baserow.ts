@@ -13,39 +13,43 @@ const headers = {
 
 export interface Science {
   id: number
-  ScienceMajor_Ar: string
-  ScienceMajor_En: string
-  ScienceMajorIcon: string
+  ScienceMinorId: number
+  ScienceMinor_Ar: string
+  ScienceMinor_En: string
+  ScienceMinorIcon: string
   ScienceIntermediateId: number | null
   ScienceIntermediate_Ar: string
   ScienceIntermediate_En: string
   ScienceIntermediateIcon: string
-  ScienceMinor_Ar: string
-  ScienceMinor_En: string
-  ScienceMinorIcon: string
-  Web: string
-  AppleAppStore: string
+  ScienceMajorId: number
+  ScienceMajor_Ar: string
+  ScienceMajor_En: string
+  ScienceMajorIcon: string
+  IconName: string
   GooglePlayStore: string
   HuaweiAppGallery: string
+  AppleAppStore: string
+  Web: string
   WebAppendix: string
-  IconName: string
 }
 
 export interface Resource {
   id: number
-  Edition: string
-  Version: string
-  WebIcon: string
-  BotSearch: string
-  Huawei_BotSearch: string
-  URIschemes: string
-  inWebList: string
   CustomSearch: string
   Huawei_CustomSearch: string
   EntitySearch: string
-  WebsiteStatus: string
+  Translator: string
+  BotSearch: string
+  Huawei_BotSearch: string
   VirtualKeyboard: string
   Huawei_VirtualKeyboard: string
+  WebsiteStatus: string
+  Edition: string
+  Version: string
+  inWebList: string
+  WebIcon: string
+  URIschemes: string
+  i360dbqEOF: number | null
 }
 
 export interface QuranEntry {
@@ -89,13 +93,10 @@ export async function fetchSciences(): Promise<Science[]> {
   )
 }
 
-// scienceMinorId=0 → fetch all records (no filter) for global fields
-export async function fetchResources(scienceMinorId: number = 0): Promise<Resource[]> {
-  const filter = scienceMinorId > 0
-    ? `&filter__field_ScienceMinorId__equal=${scienceMinorId}`
-    : ''
+// i360dbc has no per-science filter field — always fetch the global record(s)
+export async function fetchResources(): Promise<Resource[]> {
   return fetchAllPages<Resource>(
-    `${BASE_URL}${TABLE_RESOURCES}/?user_field_names=true${filter}`
+    `${BASE_URL}${TABLE_RESOURCES}/?user_field_names=true`
   )
 }
 

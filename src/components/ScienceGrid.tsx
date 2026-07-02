@@ -8,11 +8,13 @@ import { detectOS, resolveOpenMethod, isDesktop } from '@/hooks/usePlatform'
 
 interface MinorItem { science: Science }
 interface IntermediateGroup {
+  intermediateId: number
   intermediate: string
   intermediateIcon: string
   items: MinorItem[]
 }
 interface MajorGroup {
+  majorId: number
   major: string
   majorIcon: string
   intermediates: IntermediateGroup[]
@@ -20,38 +22,46 @@ interface MajorGroup {
 }
 
 function groupSciences(sciences: Science[]): MajorGroup[] {
-  const majorMap = new Map<string, {
+  const majorMap = new Map<number, {
+    major: string
     majorIcon: string
-    intMap: Map<string, { icon: string; items: MinorItem[] }>
+    intMap: Map<number, { name: string; icon: string; items: MinorItem[] }>
     directItems: MinorItem[]
   }>()
 
   for (const s of sciences) {
-    const majorKey = s.ScienceMajor_Ar
+    const majorKey = s.ScienceMajorId
     if (!majorMap.has(majorKey)) {
       majorMap.set(majorKey, {
+        major: s.ScienceMajor_Ar,
         majorIcon: s.ScienceMajorIcon ?? '',
         intMap: new Map(),
         directItems: [],
       })
     }
     const majorEntry = majorMap.get(majorKey)!
-    const intKey = s.ScienceIntermediate_Ar ?? ''
-    if (intKey) {
-      if (!majorEntry.intMap.has(intKey)) {
-        majorEntry.intMap.set(intKey, { icon: s.ScienceIntermediateIcon ?? '', items: [] })
+    const intId = s.ScienceIntermediateId
+    if (intId) {
+      if (!majorEntry.intMap.has(intId)) {
+        majorEntry.intMap.set(intId, {
+          name: s.ScienceIntermediate_Ar,
+          icon: s.ScienceIntermediateIcon ?? '',
+          items: [],
+        })
       }
-      majorEntry.intMap.get(intKey)!.items.push({ science: s })
+      majorEntry.intMap.get(intId)!.items.push({ science: s })
     } else {
       majorEntry.directItems.push({ science: s })
     }
   }
 
-  return Array.from(majorMap.entries()).map(([major, entry]) => ({
-    major,
+  return Array.from(majorMap.entries()).map(([majorId, entry]) => ({
+    majorId,
+    major: entry.major,
     majorIcon: entry.majorIcon,
-    intermediates: Array.from(entry.intMap.entries()).map(([intermediate, { icon, items }]) => ({
-      intermediate,
+    intermediates: Array.from(entry.intMap.entries()).map(([intermediateId, { name, icon, items }]) => ({
+      intermediateId,
+      intermediate: name,
       intermediateIcon: icon,
       items,
     })),
@@ -70,8 +80,8 @@ export default function ScienceGrid() {
   const navigate = useNavigate()
   const [groups, setGroups] = useState<MajorGroup[]>([])
   const [globalResource, setGlobalResource] = useState<Resource | null>(null)
-  const [openMajor, setOpenMajor] = useState<string | null>(null)
-  const [openIntermediate, setOpenIntermediate] = useState<string | null>(null)
+  const [openMajorId, setOpenMajorId] = useState<number | null>(null)
+  const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
   const [selectedMinorId, setSelectedMinorId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -80,7 +90,7 @@ export default function ScienceGrid() {
     // Fetch sciences + global i360dbc record (for inWebList/URIschemes) in parallel
     Promise.all([
       fetchSciences(),
-      fetchResources(0), // no filter = global fields
+      fetchResources(), // global i360dbc record — no filter field exists
     ]).then(([scienceData, resourceData]) => {
       setGroups(groupSciences(scienceData))
       setGlobalResource(resourceData[0] ?? null)
@@ -143,17 +153,17 @@ export default function ScienceGrid() {
   return (
     <div className="divide-y divide-gray-100">
       {groups.map(group => (
-        <div key={group.major}>
+        <div key={group.majorId}>
           <button
             onClick={() => {
-              setOpenMajor(openMajor === group.major ? null : group.major)
-              setOpenIntermediate(null)
+              setOpenMajorId(openMajorId === group.majorId ? null : group.majorId)
+              setOpenIntermediateId(null)
             }}
-            className="flex w-full items-center justify-between px-4 py-3 text-right font-semibold hover:bg-gray-50"
+            className="flex w-full items-center justify-between px-4 py-1 text-right font-semibold hover:bg-gray-50"
             style={{ color: '#0010CF' }}
           >
             <div className="flex items-center gap-2">
-              {openMajor === group.major ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
+              {openMajorId === group.majorId ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
               {group.majorIcon && (
                 <span style={{ color: '#1A5C38' }}>
                   <DynamicIcon name={group.majorIcon} size={17} />
@@ -163,21 +173,21 @@ export default function ScienceGrid() {
             </div>
           </button>
 
-          {openMajor === group.major && (
+          {openMajorId === group.majorId && (
             <div className="divide-y divide-gray-50 bg-gray-50">
               {group.intermediates.map(intGroup => (
-                <div key={intGroup.intermediate}>
+                <div key={intGroup.intermediateId}>
                   <button
                     onClick={() =>
-                      setOpenIntermediate(
-                        openIntermediate === intGroup.intermediate ? null : intGroup.intermediate
+                      setOpenIntermediateId(
+                        openIntermediateId === intGroup.intermediateId ? null : intGroup.intermediateId
                       )
                     }
-                    className="flex w-full items-center justify-between px-8 py-2 text-right text-sm font-medium hover:bg-gray-100"
+                    className="flex w-full items-center justify-between px-8 py-1 text-right text-sm font-medium hover:bg-gray-100"
                     style={{ color: '#0010CF' }}
                   >
                     <div className="flex items-center gap-2">
-                      {openIntermediate === intGroup.intermediate
+                      {openIntermediateId === intGroup.intermediateId
                         ? <ChevronDown size={14} />
                         : <ChevronLeft size={14} />
                       }
@@ -190,13 +200,13 @@ export default function ScienceGrid() {
                     </div>
                   </button>
 
-                  {openIntermediate === intGroup.intermediate && (
+                  {openIntermediateId === intGroup.intermediateId && (
                     <div className="divide-y divide-gray-100 bg-white">
                       {intGroup.items.map(({ science }) => (
                         <button
                           key={science.id}
                           onClick={() => handleMinorTap(science)}
-                          className="flex w-full items-center gap-2 px-12 py-2 text-right text-sm hover:bg-gray-50"
+                          className="flex w-full items-center gap-2 px-12 py-1 text-right text-sm hover:bg-gray-50"
                           style={{
                             backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
                             color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',
@@ -220,7 +230,7 @@ export default function ScienceGrid() {
                 <button
                   key={science.id}
                   onClick={() => handleMinorTap(science)}
-                  className="flex w-full items-center gap-2 px-8 py-2 text-right text-sm hover:bg-gray-100"
+                  className="flex w-full items-center gap-2 px-8 py-1 text-right text-sm hover:bg-gray-100"
                   style={{
                     backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
                     color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',

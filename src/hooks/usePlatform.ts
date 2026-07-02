@@ -15,20 +15,26 @@ export function isDesktop(): boolean {
 }
 
 export function usePlatform() {
-  const { setState } = useAppState()
+  const { state, setState } = useAppState()
 
   useEffect(() => {
     const os = detectOS()
-    const useWeb = os === 'web'
     const isMobile = os !== 'web'
     const ua = navigator.userAgent
     const useHMS = /huawei|hmscore|harmony/i.test(ua)
     const isChina = /china/i.test(navigator.language) ||
-      Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Shanghai')
-    const isGMSorApple = isMobile && !useHMS
-    const useHMSdefault = useHMS && !isGMSorApple
+      Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Shanghai') ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Urumqi')
+    const useHMSdefault = useHMS
 
-    setState({ useWeb, isMobile, isChina, useHMS, isGMSorApple, useHMSdefault })
+    // useWeb is a manual toggle (OS_WebToggle, Sprint 6b) — defaults to TRUE
+    // on all OS per confirmed spec, NOT auto-derived from OS here.
+    // isGMSorApple depends on useWeb's current value (from state, not OS).
+    const isGMSorApple =
+      ((os === 'android' && !(isChina || useHMS)) || os === 'ios') &&
+      !state.useWeb
+
+    setState({ isMobile, isChina, useHMS, isGMSorApple, useHMSdefault })
   }, [])
 }
 

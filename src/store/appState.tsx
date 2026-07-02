@@ -1,22 +1,26 @@
 import { createContext, useContext, useState, ReactNode, JSX } from 'react'
 
 export interface AppState {
+  // Platform
   useWeb: boolean
   isMobile: boolean
   isChina: boolean
   useHMS: boolean
   isGMSorApple: boolean
   useHMSdefault: boolean
+
+  // Content
   ScienceMinorId: number
   WebsiteStatus: string | null
   WebAppendix: string | null
+
+  // Quran
   QuranChapter: number | null
   QuranVerse: number | null
   QuranId: string
   ExegesisURL: string | null
   i360dbqEOF: number | null
   i360dbqPages: number
-  VersionVisibility: boolean
 }
 
 export interface AppStateContextType {
@@ -25,22 +29,26 @@ export interface AppStateContextType {
 }
 
 const defaultState: AppState = {
-  useWeb: false,
+  // Platform — useWeb defaults TRUE on all OS (manual toggle via OS_WebToggle, Sprint 6b)
+  useWeb: true,
   isMobile: true,
   isChina: false,
   useHMS: false,
   isGMSorApple: false,
   useHMSdefault: false,
+
+  // Content
   ScienceMinorId: 0,
   WebsiteStatus: null,
   WebAppendix: null,
+
+  // Quran
   QuranChapter: null,
   QuranVerse: null,
   QuranId: '',
   ExegesisURL: null,
   i360dbqEOF: null,
   i360dbqPages: 1,
-  VersionVisibility: false,
 }
 
 const AppStateContext = createContext<AppStateContextType | null>(null)

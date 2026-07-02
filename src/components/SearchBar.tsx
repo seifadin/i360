@@ -21,7 +21,7 @@ export default function SearchBar() {
 
   // Fetch keyboard + bot URLs on mount from first i360dbc record
   useEffect(() => {
-    fetchResources(0)
+    fetchResources()
       .then(data => {
         const resource = data[0]
         if (!resource) return
