@@ -1,4 +1,5 @@
 import { usePlatform } from '@/hooks/usePlatform'
+import OSRow from '@/components/OSRow'
 import SearchBar from '@/components/SearchBar'
 import ScienceGrid from '@/components/ScienceGrid'
 
@@ -25,10 +26,13 @@ export default function Home() {
         <ScienceGrid />
       </div>
 
-      {/* Search bar — fixed at bottom */}
+      {/* Search bar */}
       <div className="shrink-0 border-t border-gray-200 bg-white">
         <SearchBar />
       </div>
+
+      {/* OSRow — OS_WebToggle, MobileServicesToggle, VersionMenu — bottom of page */}
+      <OSRow />
 
     </div>
   )
