@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Bot, Keyboard } from 'lucide-react'
+import { Search, Bot, Keyboard, Minimize2, Languages } from 'lucide-react'
 import { useAppState } from '@/store/appState'
 import { isArabic, translateToArabic } from '@/api/translator'
 import { fetchResources } from '@/api/baserow'
@@ -18,6 +18,16 @@ export default function SearchBar() {
   const [EntityQueryTermOld, setEntityQueryTermOld] = useState('')
   const [keyboardUrl, setKeyboardUrl] = useState<string>('')
   const [botUrl, setBotUrl] = useState<string>('')
+
+  // SearchIcon — desktop: toggles Minimize2 ↔ Languages (both placeholders, no-op
+  // until their respective future phases). Mobile: locked to Minimize2, disabled.
+  const [searchIconMode, setSearchIconMode] = useState<'internal' | 'languages'>('internal')
+
+  function handleSearchIconTap() {
+    if (state.isMobile) return // locked on mobile
+    setSearchIconMode(prev => (prev === 'internal' ? 'languages' : 'internal'))
+    // No functional action yet — both modes are placeholders for later phases.
+  }
 
   // Fetch keyboard + bot URLs on mount from first i360dbc record
   useEffect(() => {
@@ -81,8 +91,23 @@ export default function SearchBar() {
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-gray-200">
 
-      {/* Search input with Search icon inside LEFT — rightmost in RTL */}
+      {/* Search input with SearchIcon (right) + Search-execute icon (left) */}
       <div className="flex flex-1 items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 gap-2">
+        {/* SearchIcon — rightmost inside box. Mobile: locked (Minimize2 only).
+            Desktop: tap toggles Minimize2 ↔ Languages (placeholders, no-op) */}
+        <button
+          onClick={handleSearchIconTap}
+          className="shrink-0"
+          style={{ color: state.isMobile ? dimColor : iconColor }}
+          disabled={state.isMobile}
+          aria-label="خيارات البحث"
+        >
+          {searchIconMode === 'internal'
+            ? <Minimize2 size={17} />
+            : <Languages size={17} />
+          }
+        </button>
+
         <input
           type="text"
           value={EntityQueryTerm}
