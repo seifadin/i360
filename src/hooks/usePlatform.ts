@@ -14,9 +14,33 @@ export function isDesktop(): boolean {
   return detectOS() === 'web'
 }
 
+// On a genuine desktop browser there's no real "native app" identity to
+// resolve to — but toggling useWeb off is meant to let a desktop developer
+// preview mobile store-link behavior via MobileServicesToggle (Google/
+// Huawei). This treats that case as a simulated Android context so
+// resolveUrl actually resolves to a real store link, not a Web fallback.
+// Real mobile devices are never affected — this only kicks in when the
+// genuine OS is 'web' and useWeb is off.
+export function resolveEffectiveOS(useWeb: boolean): OSType {
+  const os = detectOS()
+  if (os === 'web' && !useWeb) return 'android'
+  return os
+}
+
+// Plain, synchronous — no React state involved, so callers always get a
+// fresh answer with zero lag. The stored appState.isGMSorApple (set via the
+// effect below) can trail one render behind useWeb changing; any
+// business-critical decision (e.g. resolveUrl) should call this directly
+// instead of reading the stored value.
+export function computeIsGMSorApple(useWeb: boolean, isChina: boolean, useHMS: boolean): boolean {
+  const os = resolveEffectiveOS(useWeb)
+  return ((os === 'android' && !(isChina || useHMS)) || os === 'ios') && !useWeb
+}
+
 export function usePlatform() {
   const { state, setState } = useAppState()
 
+  // OS/HMS/China detection — computed once on mount, doesn't depend on useWeb
   useEffect(() => {
     const os = detectOS()
     const isMobile = os !== 'web'
@@ -27,15 +51,17 @@ export function usePlatform() {
       Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Urumqi')
     const useHMSdefault = useHMS
 
-    // useWeb is a manual toggle (OS_WebToggle, Sprint 6b) — defaults to TRUE
-    // on all OS per confirmed spec, NOT auto-derived from OS here.
-    // isGMSorApple depends on useWeb's current value (from state, not OS).
-    const isGMSorApple =
-      ((os === 'android' && !(isChina || useHMS)) || os === 'ios') &&
-      !state.useWeb
-
-    setState({ isMobile, isChina, useHMS, isGMSorApple, useHMSdefault })
+    setState({ isMobile, isChina, useHMS, useHMSdefault })
   }, [])
+
+  // isGMSorApple depends on useWeb (a manual toggle that can change after
+  // mount) plus isChina/useHMS — recompute whenever any of them change,
+  // rather than freezing at whatever useWeb was on first render.
+  // NOTE: this stored value can still lag one render behind — see
+  // computeIsGMSorApple() above for the race-free alternative.
+  useEffect(() => {
+    setState({ isGMSorApple: computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS) })
+  }, [state.useWeb, state.isChina, state.useHMS])
 }
 
 // ─── URL resolution ───────────────────────────────────────────────────────────
@@ -48,6 +74,8 @@ export function resolveOpenMethod(
   uriSchemes: string,
   inWebList: string
 ): 'tab' | 'webview' {
+  if (isDesktop()) return 'tab'
+
   const scheme = webUrl.split(':')[0]?.trim() ?? ''
   const domain = webUrl.split('/')[2]?.trim() ?? ''
 

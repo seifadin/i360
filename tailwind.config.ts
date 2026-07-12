@@ -11,8 +11,9 @@ export default {
         brand: {
           blue: '#0010CF',
           green: '#1A5C38',
-          gold: '#C9A96E',
           ivory: '#FAF7F2',
+          highlight: '#EEF2FF',
+          disabled: '#CBD5E1',
         },
       },
     },

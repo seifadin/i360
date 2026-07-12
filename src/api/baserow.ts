@@ -41,11 +41,12 @@ export interface Resource {
   Translator: string
   BotSearch: string
   Huawei_BotSearch: string
-  VirtualKeyboard: string
+  Google_VirtualKeyboard: string
   Huawei_VirtualKeyboard: string
   WebsiteStatus: string
   Edition: string
   Version: string
+  Revision: string
   inWebList: string
   WebIcon: string
   URIschemes: string
@@ -89,7 +90,7 @@ async function fetchAllPages<T>(url: string): Promise<T[]> {
 
 export async function fetchSciences(): Promise<Science[]> {
   return fetchAllPages<Science>(
-    `${BASE_URL}${TABLE_SCIENCES}/?user_field_names=true`
+    `${BASE_URL}${TABLE_SCIENCES}/?user_field_names=true&exclude_fields=BotKB,CustomSearchAIKBlessBotKB`
   )
 }
 
@@ -100,16 +101,30 @@ export async function fetchResources(): Promise<Resource[]> {
   )
 }
 
-export async function fetchQuran(
+// Full table fetch — i360dbq is cached client-side (Phase 7a), so lookups
+// run locally against cached rows instead of a network round-trip per verse.
+export async function fetchQuran(): Promise<QuranEntry[]> {
+  return fetchAllPages<QuranEntry>(
+    `${BASE_URL}${TABLE_QURAN}/?user_field_names=true`
+  )
+}
+
+// Local lookup — mirrors old fExegesis: match chapter exactly, verse within
+// [QuranVerseMin, QuranVerseMax], take first match. Returns null if unmapped.
+// Explicit Number() coercion: Baserow's API commonly serializes Number-type
+// fields as strings in JSON despite QuranEntry declaring them as `number` —
+// that TS type is compile-time only and doesn't guarantee the runtime shape,
+// so strict equality against an un-coerced value would silently fail every lookup.
+export function findExegesisUrl(
+  rows: QuranEntry[],
   chapter: number,
   verse: number
-): Promise<QuranEntry | null> {
-  const filter =
-    `&filter__field_QuranChapter__equal=${chapter}` +
-    `&filter__field_QuranVerseMin__lower_than_or_equal=${verse}` +
-    `&filter__field_QuranVerseMax__higher_than_or_equal=${verse}`
-  const results = await fetchAllPages<QuranEntry>(
-    `${BASE_URL}${TABLE_QURAN}/?user_field_names=true${filter}`
+): string | null {
+  const match = rows.find(
+    row =>
+      Number(row.QuranChapter) === chapter &&
+      verse >= Number(row.QuranVerseMin) &&
+      verse <= Number(row.QuranVerseMax)
   )
-  return results[0] ?? null
+  return match?.ExegesisURL ?? null
 }

@@ -1,0 +1,18 @@
+{
+  "name": "الموسوعة الإسلامية i360إ",
+  "short_name": "i360إ",
+  "description": "موسوعة إسلامية لاكتشاف والبحث عن المصادر الإسلامية حسب التخصص",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#0010CF",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/assets/logo-512.png",
+      "sizes": "71x71",
+      "type": "image/png"
+    }
+  ]
+}

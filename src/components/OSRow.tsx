@@ -1,6 +1,7 @@
 import { useState, CSSProperties } from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { useAppState } from '@/store/appState'
+import { isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
 import Dialog from './Dialog'
 
 // AppVersion / AppDeveloper — constants, defined once, used app-wide (VersionMenu dialog)
@@ -32,8 +33,9 @@ function ToggleItem({
       {!labelOnly && (
         <button
           onClick={onToggle}
-          className="relative h-5 w-9 shrink-0 rounded-full transition-colors"
-          style={{ backgroundColor: active ? '#1A5C38' : '#CBD5E1' }}
+          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+            active ? 'bg-brand-green' : 'bg-brand-disabled'
+          }`}
           aria-pressed={active}
         >
           <span
@@ -42,7 +44,7 @@ function ToggleItem({
           />
         </button>
       )}
-      <span className="text-xs" style={{ color: '#0010CF' }}>
+      <span className="text-xs text-brand-blue">
         {label}
       </span>
     </div>
@@ -53,28 +55,42 @@ export default function OSRow() {
   const { state, setState } = useAppState()
   const [versionOpen, setVersionOpen] = useState(false)
 
-  const osLabel = state.useWeb ? 'web' : navigator.userAgent.toLowerCase().includes('android')
-    ? 'android'
-    : navigator.userAgent.toLowerCase().includes('iphone') || navigator.userAgent.toLowerCase().includes('ipad')
-      ? 'ios'
-      : 'web'
+  // Effective OS drives both the label and MobileServicesToggle's visibility.
+  // Real android/ios devices: unaffected by useWeb. Desktop + !useWeb:
+  // simulated as 'android' (see resolveEffectiveOS) — there's no "simulate
+  // iOS" option, since the whole point is previewing Google/Huawei links.
+  const effectiveOS = resolveEffectiveOS(state.useWeb)
+  const osLabel = state.useWeb ? 'web' : effectiveOS
 
   const hmsLabel = state.useHMS ? 'Huawei' : 'Google'
 
+  // MobileServicesToggle only ever applies to Android — iOS has exactly one
+  // store (AppleAppStore), so there's no Google/Huawei choice to show there.
+  const showMobileServicesToggle = !state.useWeb && effectiveOS === 'android'
+
+  // Desktop simulating mobile (native mode previewed without a real device)
+  // — flagged with a light-blue bar so it reads as a simulation, not reality.
+  const isSimulating = isDesktop() && !state.useWeb
+
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-1.5 bg-white border-b border-gray-100">
+    <div className={`flex items-center justify-between gap-3 px-4 py-1.5 border-b border-gray-100 ${
+      isSimulating ? 'bg-brand-highlight' : 'bg-brand-ivory'
+    }`}>
 
       {/* VersionMenu — rightmost (first in HTML for RTL) */}
       <button
         onClick={() => setVersionOpen(true)}
-        style={{ color: '#0010CF' }}
+        className="text-brand-blue"
         aria-label="معلومات الإصدار"
       >
         <EllipsisVertical size={18} />
       </button>
 
-      {/* MobileServicesToggle — middle — visible only when useWeb is false */}
-      {!state.useWeb && (
+      {/* MobileServicesToggle — middle — visible only for Android (real or
+          desktop-simulated). Never shown for iOS, which has no Google/Huawei
+          choice. Real Android: reflects genuine detection by default, still
+          manually overridable. Desktop: acts as a simulator (see isSimulating). */}
+      {showMobileServicesToggle && (
         <ToggleItem
           active={state.useHMS}
           label={hmsLabel}

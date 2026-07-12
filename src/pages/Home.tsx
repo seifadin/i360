@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useAppState } from '@/store/appState'
-import { fetchResources } from '@/api/baserow'
+import { useDataCache } from '@/store/dataCache'
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 import OSRow from '@/components/OSRow'
 import SearchBar from '@/components/SearchBar'
@@ -18,73 +18,74 @@ function checkPrivacyNotice(): boolean {
   return true // first time — show dialog
 }
 
-// ─── fInfo — generic "value changed since last seen" dialog trigger ───────────
-function checkChanged(itemKey: string, data2store: string | null | undefined): boolean {
-  if (!data2store) return false
-  const stored = getStoredItem(itemKey)
-  const changed = stored !== null && stored !== data2store
-  setStoredItem(itemKey, data2store)
-  return changed
-}
-
 export default function Home() {
   usePlatform()
   const { setState } = useAppState()
+  const { resource, changeFlags, loading: cacheLoading } = useDataCache()
 
-  const [showLoadingToast, setShowLoadingToast] = useState(false)
   const [privacyOpen, setPrivacyOpen] = useState(false)
   const [editionOpen, setEditionOpen] = useState(false)
   const [versionOpen, setVersionOpen] = useState(false)
+  const [revisionOpen, setRevisionOpen] = useState(false)
   const [versionPending, setVersionPending] = useState(false)
+  const [revisionPending, setRevisionPending] = useState(false)
 
-  // Mount: loading toast + privacy notice
+  // Mount: privacy notice (one-time)
   useEffect(() => {
-    setShowLoadingToast(true)
     if (checkPrivacyNotice()) setPrivacyOpen(true)
   }, [])
 
-  // i360dbc data change: sync i360dbqEOF, watch Edition/Version
+  // i360dbc resolved by dataCache: sync i360dbqEOF, show Edition/Version/Revision
+  // dialogs per changeFlags (checkChanged already ran once, inside dataCache.tsx)
   useEffect(() => {
-    fetchResources()
-      .then(data => {
-        const resource = data[0]
-        if (!resource) return
+    if (cacheLoading || !resource) return
 
-        setState({ i360dbqEOF: resource.i360dbqEOF ?? null })
+    setState({ i360dbqEOF: resource.i360dbqEOF ?? null })
 
-        const editionChanged = checkChanged('i360Edition', resource.Edition)
-        const versionChanged = checkChanged('i360Version', resource.Version)
-
-        // Serialize dialogs — never show both at once
-        if (editionChanged) {
-          setEditionOpen(true)
-          if (versionChanged) setVersionPending(true)
-        } else if (versionChanged) {
-          setVersionOpen(true)
-        }
-      })
-      .catch(() => {})
-  }, [])
+    // Serialize dialogs — never show more than one at once.
+    // Order: Edition → Version → Revision (broadest scope first, Quran-specific last)
+    if (changeFlags.editionChanged) {
+      setEditionOpen(true)
+      if (changeFlags.versionChanged) setVersionPending(true)
+      else if (changeFlags.revisionChanged) setRevisionPending(true)
+    } else if (changeFlags.versionChanged) {
+      setVersionOpen(true)
+      if (changeFlags.revisionChanged) setRevisionPending(true)
+    } else if (changeFlags.revisionChanged) {
+      setRevisionOpen(true)
+    }
+  }, [cacheLoading, resource, changeFlags])
 
   function handleEditionClose() {
     setEditionOpen(false)
     if (versionPending) {
       setVersionPending(false)
       setVersionOpen(true)
+    } else if (revisionPending) {
+      setRevisionPending(false)
+      setRevisionOpen(true)
+    }
+  }
+
+  function handleVersionClose() {
+    setVersionOpen(false)
+    if (revisionPending) {
+      setRevisionPending(false)
+      setRevisionOpen(true)
     }
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-brand-ivory">
 
       {/* App header — logo + title */}
-      <div className="flex items-center justify-center gap-2 bg-white px-4 py-3 shadow-sm shrink-0">
+      <div className="flex items-center justify-center gap-2 bg-brand-ivory px-4 py-3 shadow-sm shrink-0">
         <img
-          src="/assets/logo.png"
+          src="/assets/logo-512.png"
           alt="i360إ"
           className="h-8 w-8 object-contain"
         />
-        <span className="text-lg font-bold" style={{ color: '#0010CF' }}>
+        <span className="text-lg font-bold text-brand-blue">
           الموسوعة الإسلامية إi360
         </span>
       </div>
@@ -94,16 +95,14 @@ export default function Home() {
         <ScienceGrid />
       </div>
 
-      {/* Loading toast — above search bar */}
+      {/* Loading toast — visible exactly as long as data cache is fetching */}
       <Toast
         message="تحميل البيانات"
-        show={showLoadingToast}
-        durationMs={3000}
-        onHide={() => setShowLoadingToast(false)}
+        show={cacheLoading}
       />
 
       {/* Search bar */}
-      <div className="shrink-0 border-t border-gray-200 bg-white">
+      <div className="shrink-0 border-t border-gray-200 bg-brand-ivory">
         <SearchBar />
       </div>
 
@@ -131,7 +130,15 @@ export default function Home() {
         open={versionOpen}
         title="إصدار جديد"
         message="تم إطلاق إصدار مُحدَّث لإثراء تجربتك"
-        onClose={() => setVersionOpen(false)}
+        onClose={handleVersionClose}
+      />
+
+      {/* Revision changed notice — i360dbq exegesis index */}
+      <Dialog
+        open={revisionOpen}
+        title="مراجعة جديدة"
+        message="تم إضافة / تعديل فهرسة تفسير مُحدَّث لإثراء تجربتك"
+        onClose={() => setRevisionOpen(false)}
       />
 
     </div>

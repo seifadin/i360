@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState, lazy, Suspense, ComponentType } from 'react'
 import { ChevronDown, ChevronLeft } from 'lucide-react'
-import * as Icons from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
-import { fetchSciences, fetchResources, Science, Resource } from '@/api/baserow'
-import { detectOS, resolveOpenMethod, isDesktop } from '@/hooks/usePlatform'
+import { useDataCache } from '@/store/dataCache'
+import { Science } from '@/api/baserow'
+import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS } from '@/hooks/usePlatform'
 
 interface MinorItem { science: Science }
 interface IntermediateGroup {
@@ -30,7 +30,10 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
   }>()
 
   for (const s of sciences) {
-    const majorKey = s.ScienceMajorId
+    // Explicit Number() coercion — Baserow may serialize these as strings
+    // despite the TS type declaring `number` (see Section 4's callout).
+    // Guarantees Map keys are genuine numbers regardless of runtime type.
+    const majorKey = Number(s.ScienceMajorId)
     if (!majorMap.has(majorKey)) {
       majorMap.set(majorKey, {
         major: s.ScienceMajor_Ar,
@@ -40,7 +43,7 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
       })
     }
     const majorEntry = majorMap.get(majorKey)!
-    const intId = s.ScienceIntermediateId
+    const intId = s.ScienceIntermediateId != null ? Number(s.ScienceIntermediateId) : null
     if (intId) {
       if (!majorEntry.intMap.has(intId)) {
         majorEntry.intMap.set(intId, {
@@ -69,45 +72,61 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
   }))
 }
 
+// PascalCase (as stored in Baserow, matching lucide-react's named exports) →
+// kebab-case (matching lucide-react's individual icon file names).
+function toKebabCase(name: string): string {
+  return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+// Caches each lazy component so repeated renders of the same icon name don't
+// recreate a new lazy() wrapper (and re-trigger Suspense) every render.
+const iconCache = new Map<string, ComponentType<{ size?: number }>>()
+
 function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
-  const Icon = (Icons as Record<string, any>)[name]
-  if (!Icon) return null
-  return <Icon size={size} />
+  const LazyIcon = useMemo(() => {
+    if (!iconCache.has(name)) {
+      iconCache.set(
+        name,
+        lazy(() =>
+          import(`lucide-react/dist/esm/icons/${toKebabCase(name)}.mjs`)
+            .then(mod => ({ default: mod.default }))
+            .catch(() => ({ default: () => null }))
+        )
+      )
+    }
+    return iconCache.get(name)!
+  }, [name])
+
+  return (
+    <Suspense fallback={null}>
+      <LazyIcon size={size} />
+    </Suspense>
+  )
+}
+
+// Shared className for minor-science buttons — hover is the only feedback
+// now (pure CSS light-blue affordance). The brief green-bold tap-confirmation
+// flash was removed — at 500ms it was negligibly brief to register.
+function minorButtonClass(): string {
+  return 'hover:bg-brand-highlight text-brand-blue'
 }
 
 export default function ScienceGrid() {
   const { state, setState } = useAppState()
+  const { sciences, resource: globalResource, loading, error } = useDataCache()
   const navigate = useNavigate()
-  const [groups, setGroups] = useState<MajorGroup[]>([])
-  const [globalResource, setGlobalResource] = useState<Resource | null>(null)
   const [openMajorId, setOpenMajorId] = useState<number | null>(null)
   const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
-  const [selectedMinorId, setSelectedMinorId] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Fetch sciences + global i360dbc record (for inWebList/URIschemes) in parallel
-    Promise.all([
-      fetchSciences(),
-      fetchResources(), // global i360dbc record — no filter field exists
-    ]).then(([scienceData, resourceData]) => {
-      setGroups(groupSciences(scienceData))
-      setGlobalResource(resourceData[0] ?? null)
-      setLoading(false)
-    }).catch(() => {
-      setError('تعذّر تحميل العلوم')
-      setLoading(false)
-    })
-  }, [])
+  const groups = useMemo(() => groupSciences(sciences), [sciences])
 
   function resolveUrl(science: Science): string {
-    const os = detectOS()
-    if (os === 'android' && !state.useWeb) {
-      if (state.isChina || state.useHMS) return science.HuaweiAppGallery ?? ''
-      return science.GooglePlayStore ?? ''
+    if (computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS)) {
+      return resolveEffectiveOS(state.useWeb) === 'ios' ? science.AppleAppStore ?? '' : science.GooglePlayStore ?? ''
     }
-    if (os === 'ios' && !state.useWeb) return science.AppleAppStore ?? ''
+    if (!state.useWeb && (state.isChina || state.useHMS)) {
+      return science.HuaweiAppGallery ?? ''
+    }
     return science.Web ?? ''
   }
 
@@ -115,33 +134,27 @@ export default function ScienceGrid() {
     const url = resolveUrl(science)
     if (!url) return
 
-    setSelectedMinorId(science.id)
     setState({
-      ScienceMinorId: science.id,
+      ScienceMinorId: science.ScienceMinorId,
       WebAppendix: science.WebAppendix ?? null,
       WebsiteStatus: globalResource?.WebsiteStatus ?? null,
     })
 
-    // Desktop → always open in new tab
-    if (isDesktop()) {
-      window.open(url, '_blank')
-      if (science.WebAppendix) window.open(science.WebAppendix, '_blank')
-      return
-    }
-
-    // Mobile → check inWebList/URIschemes
-    let openMethod: 'tab' | 'webview' = 'webview'
-    if (state.useWeb && globalResource) {
-      openMethod = resolveOpenMethod(
-        url,
-        globalResource.URIschemes,
-        globalResource.inWebList
-      )
-    }
+    // Desktop and native app-store mode (!useWeb) always open a new tab —
+    // app-store links can't meaningfully render inside the WebView iframe.
+    // Only mobile + useWeb consults inWebList/URIschemes via resolveOpenMethod.
+    const openMethod: 'tab' | 'webview' =
+      isDesktop() || !state.useWeb
+        ? 'tab'
+        : globalResource
+          ? resolveOpenMethod(url, globalResource.URIschemes, globalResource.inWebList)
+          : 'webview'
 
     if (openMethod === 'tab') {
       window.open(url, '_blank')
-      if (science.WebAppendix) window.open(science.WebAppendix, '_blank')
+      // WebAppendix is a companion to the Web resource specifically — it
+      // doesn't make sense alongside an app-store link (native !useWeb mode).
+      if (state.useWeb && science.WebAppendix) window.open(science.WebAppendix, '_blank')
     } else {
       navigate('/browser', { state: { url } })
     }
@@ -159,13 +172,12 @@ export default function ScienceGrid() {
               setOpenMajorId(openMajorId === group.majorId ? null : group.majorId)
               setOpenIntermediateId(null)
             }}
-            className="flex w-full items-center justify-between px-4 py-1 text-right font-semibold hover:bg-gray-50"
-            style={{ color: '#0010CF' }}
+            className="flex w-full items-center justify-between px-4 py-1 text-right font-semibold text-brand-blue hover:bg-gray-50"
           >
             <div className="flex items-center gap-2">
               {openMajorId === group.majorId ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
               {group.majorIcon && (
-                <span style={{ color: '#1A5C38' }}>
+                <span className="text-brand-green">
                   <DynamicIcon name={group.majorIcon} size={17} />
                 </span>
               )}
@@ -183,8 +195,7 @@ export default function ScienceGrid() {
                         openIntermediateId === intGroup.intermediateId ? null : intGroup.intermediateId
                       )
                     }
-                    className="flex w-full items-center justify-between px-8 py-1 text-right text-sm font-medium hover:bg-gray-100"
-                    style={{ color: '#0010CF' }}
+                    className="flex w-full items-center justify-between px-8 py-1 text-right text-sm font-medium text-brand-blue hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-2">
                       {openIntermediateId === intGroup.intermediateId
@@ -192,7 +203,7 @@ export default function ScienceGrid() {
                         : <ChevronLeft size={14} />
                       }
                       {intGroup.intermediateIcon && (
-                        <span style={{ color: '#1A5C38' }}>
+                        <span className="text-brand-green">
                           <DynamicIcon name={intGroup.intermediateIcon} size={14} />
                         </span>
                       )}
@@ -201,20 +212,15 @@ export default function ScienceGrid() {
                   </button>
 
                   {openIntermediateId === intGroup.intermediateId && (
-                    <div className="divide-y divide-gray-100 bg-white">
+                    <div className="divide-y divide-gray-100 bg-brand-ivory">
                       {intGroup.items.map(({ science }) => (
                         <button
-                          key={science.id}
+                          key={science.ScienceMinorId}
                           onClick={() => handleMinorTap(science)}
-                          className="flex w-full items-center gap-2 px-12 py-1 text-right text-sm hover:bg-gray-50"
-                          style={{
-                            backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
-                            color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',
-                            fontWeight: selectedMinorId === science.id ? 600 : undefined,
-                          }}
+                          className={`flex w-full items-center gap-2 px-12 py-1 text-right text-sm ${minorButtonClass()}`}
                         >
                           {science.ScienceMinorIcon && (
-                            <span style={{ color: '#1A5C38' }}>
+                            <span className="text-brand-green">
                               <DynamicIcon name={science.ScienceMinorIcon} />
                             </span>
                           )}
@@ -228,17 +234,12 @@ export default function ScienceGrid() {
 
               {group.directItems.map(({ science }) => (
                 <button
-                  key={science.id}
+                  key={science.ScienceMinorId}
                   onClick={() => handleMinorTap(science)}
-                  className="flex w-full items-center gap-2 px-8 py-1 text-right text-sm hover:bg-gray-100"
-                  style={{
-                    backgroundColor: selectedMinorId === science.id ? '#EEF2FF' : undefined,
-                    color: selectedMinorId === science.id ? '#1A5C38' : '#0010CF',
-                    fontWeight: selectedMinorId === science.id ? 600 : undefined,
-                  }}
+                  className={`flex w-full items-center gap-2 px-8 py-1 text-right text-sm ${minorButtonClass()}`}
                 >
                   {science.ScienceMinorIcon && (
-                    <span style={{ color: '#1A5C38' }}>
+                    <span className="text-brand-green">
                       <DynamicIcon name={science.ScienceMinorIcon} />
                     </span>
                   )}

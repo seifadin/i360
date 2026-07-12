@@ -5,7 +5,7 @@ import {
   ArrowRight, ArrowLeft, RotateCw, Home, Paperclip, Share2,
 } from 'lucide-react'
 import { useAppState } from '@/store/appState'
-import { fetchResources } from '@/api/baserow'
+import { useDataCache } from '@/store/dataCache'
 import { resolveOpenMethod } from '@/hooks/usePlatform'
 
 // TOP BAR (RTL right→left): [HeartPulse] [URL bar] [ListCollapse]
@@ -15,6 +15,7 @@ export default function Browser() {
   const location = useLocation()
   const navigate = useNavigate()
   const { state: appState } = useAppState()
+  const { resource } = useDataCache()
 
   const initialUrl = location.state?.url ?? ''
 
@@ -85,22 +86,14 @@ export default function Browser() {
   }
 
   // Paperclip — open WebAppendix using inWebList/URIschemes logic
-  async function handleWebAppendix() {
+  // (resolveOpenMethod handles the desktop-always-tab case internally)
+  function handleWebAppendix() {
     if (!appState.WebAppendix) return
     const url = appState.WebAppendix
 
-    let openMethod: 'tab' | 'webview' = 'webview'
-    try {
-      const resources = await fetchResources()
-      const resource = resources[0]
-      if (resource) {
-        openMethod = resolveOpenMethod(
-          url,
-          resource.URIschemes ?? '',
-          resource.inWebList ?? ''
-        )
-      }
-    } catch { openMethod = 'webview' }
+    const openMethod: 'tab' | 'webview' = resource
+      ? resolveOpenMethod(url, resource.URIschemes ?? '', resource.inWebList ?? '')
+      : 'webview'
 
     if (openMethod === 'tab') {
       window.open(url, '_blank')
@@ -123,31 +116,29 @@ export default function Browser() {
 
   const canGoBack = CurrentWebViewIndex > 0
   const canGoForward = CurrentWebViewIndex < WebViewPages.length - 1
-  const btn = '#0010CF'
-  const dim = '#CBD5E1'
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-brand-ivory">
 
       {/* TOP BAR */}
-      <div className="flex items-center gap-2 bg-white border-b px-2 py-2">
+      <div className="flex items-center gap-2 bg-brand-ivory border-b px-2 py-2">
         {appState.WebsiteStatus ? (
-          <button onClick={handleWebsiteStatus} style={{ color: btn }} aria-label="حالة الموقع">
+          <button onClick={handleWebsiteStatus} className="text-brand-blue" aria-label="حالة الموقع">
             <HeartPulse size={20} />
           </button>
         ) : (
-          <span style={{ color: dim }}><HeartPulse size={20} /></span>
+          <span className="text-brand-disabled"><HeartPulse size={20} /></span>
         )}
 
         {/* URL bar — LTR for Latin URLs */}
         <div
-          className="flex-1 truncate text-xs bg-gray-100 px-3 py-1"
-          style={{ color: '#666', borderRadius: '9999px', direction: 'ltr', textAlign: 'left' }}
+          dir="ltr"
+          className="flex-1 truncate rounded-full bg-gray-100 px-3 py-1 text-left text-xs text-gray-500"
         >
           {CurrentWebView || 'No URL'}
         </div>
 
-        <button onClick={exitBrowser} style={{ color: btn }} aria-label="الرئيسية">
+        <button onClick={exitBrowser} className="text-brand-blue" aria-label="الرئيسية">
           <ListCollapse size={20} />
         </button>
       </div>
@@ -166,13 +157,12 @@ export default function Browser() {
           {/* Blocked overlay — shown when site refuses iframe */}
           {iframeBlocked && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 gap-3">
-              <p className="text-sm text-right" style={{ color: '#0010CF' }}>
+              <p className="text-sm text-right text-brand-blue">
                 تعذّر عرض الصفحة داخل التطبيق
               </p>
               <button
                 onClick={() => window.open(CurrentWebView, '_blank')}
-                className="px-4 py-2 rounded-full text-sm text-white"
-                style={{ backgroundColor: '#0010CF' }}
+                className="rounded-full bg-brand-blue px-4 py-2 text-sm text-white"
               >
                 فتح في المتصفح
               </button>
@@ -180,33 +170,41 @@ export default function Browser() {
           )}
         </div>
       ) : (
-        <p className="p-4 text-right" style={{ color: '#999' }}>لم يتم تحديد رابط</p>
+        <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
       )}
 
       {/* BOTTOM BAR — visual left→right: [ArrowLeft][ArrowRight][RotateCw][Home][Paperclip][Share2] */}
-      <div className="flex items-center justify-around bg-white border-t px-2 py-2">
-        <button onClick={handleShare} style={{ color: btn }} aria-label="مشاركة">
+      <div className="flex items-center justify-around bg-brand-ivory border-t px-2 py-2">
+        <button onClick={handleShare} className="text-brand-blue" aria-label="مشاركة">
           <Share2 size={20} />
         </button>
         {appState.WebAppendix ? (
-          <button onClick={handleWebAppendix} style={{ color: btn }} aria-label="فتح الملحق">
+          <button onClick={handleWebAppendix} className="text-brand-blue" aria-label="فتح الملحق">
             <Paperclip size={20} />
           </button>
         ) : (
-          <span style={{ color: dim }}><Paperclip size={20} /></span>
+          <span className="text-brand-disabled"><Paperclip size={20} /></span>
         )}
-        <button onClick={goFirst} style={{ color: btn }} aria-label="الصفحة الأولى">
+        <button onClick={goFirst} className="text-brand-blue" aria-label="الصفحة الأولى">
           <Home size={20} />
         </button>
-        <button onClick={refresh} style={{ color: btn }} aria-label="تحديث">
+        <button onClick={refresh} className="text-brand-blue" aria-label="تحديث">
           <RotateCw size={20} />
         </button>
-        <button onClick={goForward} disabled={!canGoForward}
-          style={{ color: canGoForward ? btn : dim }} aria-label="للأمام">
+        <button
+          onClick={goForward}
+          disabled={!canGoForward}
+          className={canGoForward ? 'text-brand-blue' : 'text-brand-disabled'}
+          aria-label="للأمام"
+        >
           <ArrowRight size={20} />
         </button>
-        <button onClick={goBack} disabled={!canGoBack}
-          style={{ color: canGoBack ? btn : dim }} aria-label="رجوع">
+        <button
+          onClick={goBack}
+          disabled={!canGoBack}
+          className={canGoBack ? 'text-brand-blue' : 'text-brand-disabled'}
+          aria-label="رجوع"
+        >
           <ArrowLeft size={20} />
         </button>
       </div>
