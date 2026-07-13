@@ -208,7 +208,7 @@ export default function SearchBar() {
     <div className="flex items-center gap-2 px-3 py-2 bg-brand-ivory border-b border-gray-200">
 
       {/* Search input with SearchIcon (right) + Search-execute icon (left) */}
-      <div className="flex flex-1 items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 gap-2">
+      <div className="flex flex-1 min-w-0 items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 gap-2">
         {/* SearchIcon — live 3-state indicator + one-shot override control.
             PencilSparkles: auto-detect, input doesn't match (resting/default,
             including empty input). Tapping while empty flashes CircleAlert.
@@ -239,11 +239,11 @@ export default function SearchBar() {
           onChange={e => setEntityQueryTerm(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           placeholder="بحث ... أو الآية#.السورة#"
-          className="flex-1 bg-transparent text-right text-sm text-brand-blue outline-none placeholder-gray-400"
+          className="min-w-0 flex-1 bg-transparent text-right text-base text-brand-blue outline-none placeholder-gray-400"
           dir="rtl"
         />
         {/* Search icon inside input on LEFT (last in RTL flex = leftmost) */}
-        <button onClick={handleSubmit} className="text-brand-blue" aria-label="بحث">
+        <button onClick={handleSubmit} className="shrink-0 text-brand-blue" aria-label="بحث">
           <Search size={17} />
         </button>
       </div>

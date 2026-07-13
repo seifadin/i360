@@ -11,15 +11,15 @@ export default function Dialog({ open, title, message, onClose }: DialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
       <div className="w-full max-w-sm rounded-2xl bg-brand-ivory p-5 text-right shadow-xl">
-        <h2 className="mb-2 text-base font-bold text-brand-blue">
+        <h2 className="mb-2 text-lg font-bold text-brand-blue">
           {title}
         </h2>
-        <p className="mb-4 whitespace-pre-line text-sm leading-relaxed text-brand-blue">
+        <p className="mb-4 whitespace-pre-line text-base leading-relaxed text-brand-blue">
           {message}
         </p>
         <button
           onClick={onClose}
-          className="w-full rounded-full bg-brand-blue py-2 text-sm font-semibold text-white"
+          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white"
         >
           موافق
         </button>

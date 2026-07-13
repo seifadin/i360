@@ -76,7 +76,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-brand-ivory">
+    <div className="flex flex-col h-dvh bg-brand-ivory">
 
       {/* App header — logo + title */}
       <div className="flex items-center justify-center gap-2 bg-brand-ivory px-4 py-3 shadow-sm shrink-0">
@@ -85,7 +85,7 @@ export default function Home() {
           alt="i360إ"
           className="h-8 w-8 object-contain"
         />
-        <span className="text-lg font-bold text-brand-blue">
+        <span className="text-xl font-bold text-brand-blue">
           الموسوعة الإسلامية إi360
         </span>
       </div>

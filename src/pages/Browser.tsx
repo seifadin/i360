@@ -118,7 +118,7 @@ export default function Browser() {
   const canGoForward = CurrentWebViewIndex < WebViewPages.length - 1
 
   return (
-    <div className="flex flex-col h-screen bg-brand-ivory">
+    <div className="flex flex-col h-dvh bg-brand-ivory">
 
       {/* TOP BAR */}
       <div className="flex items-center gap-2 bg-brand-ivory border-b px-2 py-2">
@@ -133,7 +133,7 @@ export default function Browser() {
         {/* URL bar — LTR for Latin URLs */}
         <div
           dir="ltr"
-          className="flex-1 truncate rounded-full bg-gray-100 px-3 py-1 text-left text-xs text-gray-500"
+          className="flex-1 truncate rounded-full bg-gray-100 px-3 py-1 text-left text-sm text-gray-500"
         >
           {CurrentWebView || 'No URL'}
         </div>
@@ -157,12 +157,12 @@ export default function Browser() {
           {/* Blocked overlay — shown when site refuses iframe */}
           {iframeBlocked && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 gap-3">
-              <p className="text-sm text-right text-brand-blue">
+              <p className="text-base text-right text-brand-blue">
                 تعذّر عرض الصفحة داخل التطبيق
               </p>
               <button
                 onClick={() => window.open(CurrentWebView, '_blank')}
-                className="rounded-full bg-brand-blue px-4 py-2 text-sm text-white"
+                className="rounded-full bg-brand-blue px-4 py-2 text-base text-white"
               >
                 فتح في المتصفح
               </button>

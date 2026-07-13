@@ -108,7 +108,7 @@ function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
 // now (pure CSS light-blue affordance). The brief green-bold tap-confirmation
 // flash was removed — at 500ms it was negligibly brief to register.
 function minorButtonClass(): string {
-  return 'hover:bg-brand-highlight text-brand-blue'
+  return 'hover:bg-brand-highlight focus:outline-none text-brand-blue'
 }
 
 export default function ScienceGrid() {
@@ -172,7 +172,10 @@ export default function ScienceGrid() {
               setOpenMajorId(openMajorId === group.majorId ? null : group.majorId)
               setOpenIntermediateId(null)
             }}
-            className="flex w-full items-center justify-between px-4 py-1 text-right font-semibold text-brand-blue hover:bg-gray-50"
+            // Padding tightens with depth: major (outermost) gets the most
+            // room, minor (innermost/most numerous) the least — major py-2,
+            // intermediate py-1.5, minor py-1.
+            className="flex w-full items-center justify-between px-4 py-2 text-right text-lg font-bold text-brand-blue hover:bg-brand-highlight focus:outline-none"
           >
             <div className="flex items-center gap-2">
               {openMajorId === group.majorId ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
@@ -186,7 +189,7 @@ export default function ScienceGrid() {
           </button>
 
           {openMajorId === group.majorId && (
-            <div className="divide-y divide-gray-50 bg-gray-50">
+            <div className="divide-y divide-gray-50 bg-brand-ivory">
               {group.intermediates.map(intGroup => (
                 <div key={intGroup.intermediateId}>
                   <button
@@ -195,7 +198,7 @@ export default function ScienceGrid() {
                         openIntermediateId === intGroup.intermediateId ? null : intGroup.intermediateId
                       )
                     }
-                    className="flex w-full items-center justify-between px-8 py-1 text-right text-sm font-medium text-brand-blue hover:bg-gray-100"
+                    className="flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none"
                   >
                     <div className="flex items-center gap-2">
                       {openIntermediateId === intGroup.intermediateId
@@ -217,7 +220,7 @@ export default function ScienceGrid() {
                         <button
                           key={science.ScienceMinorId}
                           onClick={() => handleMinorTap(science)}
-                          className={`flex w-full items-center gap-2 px-12 py-1 text-right text-sm ${minorButtonClass()}`}
+                          className={`flex w-full items-center gap-2 px-12 py-1 text-right text-base ${minorButtonClass()}`}
                         >
                           {science.ScienceMinorIcon && (
                             <span className="text-brand-green">
@@ -236,7 +239,7 @@ export default function ScienceGrid() {
                 <button
                   key={science.ScienceMinorId}
                   onClick={() => handleMinorTap(science)}
-                  className={`flex w-full items-center gap-2 px-8 py-1 text-right text-sm ${minorButtonClass()}`}
+                  className={`flex w-full items-center gap-2 px-8 py-1 text-right text-base ${minorButtonClass()}`}
                 >
                   {science.ScienceMinorIcon && (
                     <span className="text-brand-green">

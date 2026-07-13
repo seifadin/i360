@@ -25,7 +25,7 @@ export default function Toast({ message, show, durationMs, onHide }: ToastProps)
 
   return (
     <div className="pointer-events-none flex justify-center pb-2">
-      <div className="rounded-full border border-gray-200 bg-brand-ivory px-4 py-1 text-xs text-brand-blue shadow-md">
+      <div className="rounded-full border border-gray-200 bg-brand-ivory px-4 py-1 text-sm text-brand-blue shadow-md">
         {message}
       </div>
     </div>

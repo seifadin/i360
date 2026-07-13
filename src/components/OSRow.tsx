@@ -44,7 +44,7 @@ function ToggleItem({
           />
         </button>
       )}
-      <span className="text-xs text-brand-blue">
+      <span className="text-sm text-brand-blue">
         {label}
       </span>
     </div>

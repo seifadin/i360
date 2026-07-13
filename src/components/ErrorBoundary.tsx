@@ -30,15 +30,15 @@ export default class ErrorBoundary extends Component<Props, State> {
           dir="rtl"
           className="flex h-screen flex-col items-center justify-center gap-4 bg-brand-ivory p-6 text-center"
         >
-          <p className="text-lg font-semibold text-brand-blue">
+          <p className="text-xl font-bold text-brand-blue">
             حدث خطأ غير متوقع
           </p>
-          <p className="text-sm text-brand-blue">
+          <p className="text-base text-brand-blue">
             يرجى إعادة تحميل الصفحة
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-full bg-brand-blue px-4 py-2 text-sm text-white"
+            className="rounded-full bg-brand-blue px-4 py-2 text-base text-white"
           >
             إعادة التحميل
           </button>
