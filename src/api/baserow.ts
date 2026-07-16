@@ -37,7 +37,6 @@ export interface Resource {
   id: number
   CustomSearch: string
   Huawei_CustomSearch: string
-  EntitySearch: string
   Translator: string
   BotSearch: string
   Huawei_BotSearch: string
@@ -48,7 +47,6 @@ export interface Resource {
   Version: string
   Revision: string
   inWebList: string
-  WebIcon: string
   URIschemes: string
   i360dbqEOF: number | null
 }

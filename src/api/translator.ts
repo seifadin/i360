@@ -1,4 +1,4 @@
-const TRANSLATOR_URL = import.meta.env.VITE_TRANSLATOR_URL
+const TRANSLATOR_URL_DEFAULT = import.meta.env.VITE_TRANSLATOR_URL
 const TRANSLATOR_KEY = import.meta.env.VITE_TRANSLATOR_KEY
 
 // ─── Arabic detection ─────────────────────────────────────────────────────────
@@ -9,11 +9,19 @@ export function isArabic(text: string): boolean {
 
 // ─── Translator ───────────────────────────────────────────────────────────────
 
-export async function translateToArabic(text: string): Promise<string> {
+// translatorUrl: sourced from i360dbc.Translator (Baserow) — a COMPLETE,
+// ready-to-use URL with its own query params already baked in (e.g.
+// api-version/from/to/profanityAction), used as-is, not appended to.
+// Falls back to VITE_TRANSLATOR_URL (a bare base URL) if the Baserow field
+// is empty or not yet loaded — only the fallback needs params appended.
+// The API key stays a fixed env var regardless — a secret shouldn't live in
+// a shared Baserow table with broader read access.
+export async function translateToArabic(text: string, translatorUrl?: string): Promise<string> {
   if (isArabic(text)) return text
+  const url = translatorUrl || `${TRANSLATOR_URL_DEFAULT}?api-version=3.0&to=ar`
 
   const res = await fetch(
-    `${TRANSLATOR_URL}?api-version=3.0&to=ar`,
+    url,
     {
       method: 'POST',
       headers: {

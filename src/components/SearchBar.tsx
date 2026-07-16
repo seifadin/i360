@@ -161,11 +161,14 @@ export default function SearchBar() {
     if (!opened) flashIconFor('openfailed')
   }
 
-  // fSearchCustom-equivalent — core logic unchanged from Phase 7a.
-  // Choreography: Arabic text → BookSearch while opening, then reverts.
-  // Non-Arabic text → Languages while translating, then BookSearch while
-  // opening, then reverts. CircleX flash only on a genuine open failure;
-  // EntityQueryTermOld reset on failure so the same term can be retried.
+  // fSearchCustom-equivalent. Choreography: Arabic text → BookSearch while
+  // opening, then reverts. Non-Arabic text → Languages while translating,
+  // then BookSearch while opening, then reverts. CircleX flash only on a
+  // genuine open failure; EntityQueryTermOld reset on failure so the same
+  // term can be retried. CustomSearch/Huawei_CustomSearch (search engine cx)
+  // and Translator (translator endpoint URL) are read from cached i360dbc —
+  // wired up this session; both fall back to their VITE_* env var if the
+  // Baserow field is empty/not yet loaded.
   async function handleSearch() {
     if (!EntityQueryTerm.trim()) return
     if (EntityQueryTerm === EntityQueryTermOld) return
@@ -174,13 +177,20 @@ export default function SearchBar() {
     let arabicTerm = EntityQueryTerm
     if (!isArabic(EntityQueryTerm)) {
       setSearchPhase('translating')
-      try { arabicTerm = await translateToArabic(EntityQueryTerm) }
+      try { arabicTerm = await translateToArabic(EntityQueryTerm, resource?.Translator) }
       catch { arabicTerm = EntityQueryTerm }
     }
 
     setSearchPhase('opening')
-    const cx = import.meta.env.VITE_PSE_CX
-    const pseUrl = `https://cse.google.com/cse?cx=${cx}&q=${encodeURIComponent(arabicTerm)}`
+    // Baserow's CustomSearch/Huawei_CustomSearch is a complete search-URL
+    // template ending in Google CSE's fragment convention (#gsc.q=), meant
+    // to have the query appended directly — NOT a bare cx value for a
+    // standard ?q= query string, which is a different (and wrong) URL shape.
+    // The env-var fallback is built in the same template shape from the cx
+    // alone, for consistency with what's actually configured in Baserow.
+    const csTemplate = (useHuawei ? resource?.Huawei_CustomSearch : resource?.CustomSearch)
+      || `https://cse.google.com/cse?cx=${import.meta.env.VITE_PSE_CX}#gsc.tab=0&gsc.sort=&gsc.q=`
+    const pseUrl = `${csTemplate}${encodeURIComponent(arabicTerm)}`
     const opened = openViaWebBrowser(pseUrl)
 
     setSearchPhase(null)

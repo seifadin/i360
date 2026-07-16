@@ -44,6 +44,20 @@ function saveCached<T>(cacheKey: string, data: T[]): void {
 const CACHE_KEY_SCIENCES = 'i360CacheSciences'
 const CACHE_KEY_QURAN = 'i360CacheQuran'
 
+// Consolidates the 3 actually-consumed icon fields (IconName is a 4th field
+// that exists in Baserow but is confirmed unused anywhere in the app) into
+// one set of unique names — no static/hardcoded list, purely derived from
+// whatever Sciences data is actually loaded right now.
+function collectIconNames(sciences: Science[]): Set<string> {
+  const names = new Set<string>()
+  for (const s of sciences) {
+    if (s.ScienceMajorIcon) names.add(s.ScienceMajorIcon)
+    if (s.ScienceIntermediateIcon) names.add(s.ScienceIntermediateIcon)
+    if (s.ScienceMinorIcon) names.add(s.ScienceMinorIcon)
+  }
+  return names
+}
+
 // Resolves Sciences: reuse cache unless Edition changed or no cache exists yet
 async function resolveSciences(editionChanged: boolean): Promise<Science[]> {
   const cached = loadCached<Science>(CACHE_KEY_SCIENCES)
@@ -118,6 +132,9 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         if (cancelled) return
         setSciences(freshSciences)
         setQuran(freshQuran)
+        import('@/lib/iconLoader').then(({ preloadIcons }) =>
+          preloadIcons(collectIconNames(freshSciences))
+        )
       } catch {
         if (!cancelled) setError('تعذّر تحميل البيانات')
       } finally {

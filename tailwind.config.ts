@@ -10,7 +10,7 @@ export default {
       colors: {
         brand: {
           blue: '#0010CF',
-          green: '#1A5C38',
+          green: '#2E8B57',
           ivory: '#FAF7F2',
           highlight: '#EEF2FF',
           disabled: '#CBD5E1',

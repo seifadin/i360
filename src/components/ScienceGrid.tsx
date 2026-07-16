@@ -1,10 +1,11 @@
 import { useMemo, useState, lazy, Suspense, ComponentType } from 'react'
-import { ChevronDown, ChevronLeft } from 'lucide-react'
+import { ChevronDown, ChevronLeft, CircleSlash } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/baserow'
 import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS } from '@/hooks/usePlatform'
+import { loadIcon } from '@/lib/iconLoader'
 
 interface MinorItem { science: Science }
 interface IntermediateGroup {
@@ -72,26 +73,29 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
   }))
 }
 
-// PascalCase (as stored in Baserow, matching lucide-react's named exports) →
-// kebab-case (matching lucide-react's individual icon file names).
-function toKebabCase(name: string): string {
-  return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
-}
-
 // Caches each lazy component so repeated renders of the same icon name don't
 // recreate a new lazy() wrapper (and re-trigger Suspense) every render.
 const iconCache = new Map<string, ComponentType<{ size?: number }>>()
+
+// Visible fallback for a missing/misnamed icon — silently rendering nothing
+// makes a bad icon name indistinguishable from "no icon set," same class of
+// problem as the Keyboard field-mismatch bug (zero visible failure = hard to
+// diagnose). CircleSlash makes a bad name immediately noticeable instead.
+function FallbackIcon({ size }: { size?: number }) {
+  return <CircleSlash size={size} />
+}
 
 function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
   const LazyIcon = useMemo(() => {
     if (!iconCache.has(name)) {
       iconCache.set(
         name,
-        lazy(() =>
-          import(`lucide-react/dist/esm/icons/${toKebabCase(name)}.mjs`)
-            .then(mod => ({ default: mod.default }))
-            .catch(() => ({ default: () => null }))
-        )
+        lazy(() => {
+          const promise = loadIcon(name)
+          return promise
+            ? promise.then(mod => ({ default: mod.default }))
+            : Promise.resolve({ default: FallbackIcon })
+        })
       )
     }
     return iconCache.get(name)!

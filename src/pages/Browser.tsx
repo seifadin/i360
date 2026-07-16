@@ -143,9 +143,11 @@ export default function Browser() {
         </button>
       </div>
 
-      {/* WEBVIEW */}
+      {/* WEBVIEW — pb-16 clears the fixed bottom bar below, same convention
+          as Home.tsx's pb-28 (this page only has one bottom bar, not two
+          stacked ones, so a smaller buffer is enough) */}
       {CurrentWebView ? (
-        <div className="relative flex-1">
+        <div className="relative flex-1 pb-16">
           <iframe
             ref={iframeRef}
             src={CurrentWebView}
@@ -170,11 +172,15 @@ export default function Browser() {
           )}
         </div>
       ) : (
-        <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
+        <p className="p-4 pb-16 text-right text-gray-400">لم يتم تحديد رابط</p>
       )}
 
-      {/* BOTTOM BAR — visual left→right: [ArrowLeft][ArrowRight][RotateCw][Home][Paperclip][Share2] */}
-      <div className="flex items-center justify-around bg-brand-ivory border-t px-2 py-2">
+      {/* BOTTOM BAR — visual left→right: [ArrowLeft][ArrowRight][RotateCw][Home][Paperclip][Share2]
+          position:fixed anchors directly to the viewport, not to document
+          flow — structurally immune to horizontal-scrollbar space
+          reservation (or any other future overflow cause), same fix as
+          Home.tsx's search bar + OSRow cluster. */}
+      <div className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around bg-brand-ivory border-t px-2 py-2">
         <button onClick={handleShare} className="text-brand-blue" aria-label="مشاركة">
           <Share2 size={20} />
         </button>
