@@ -84,16 +84,16 @@ export default function Home() {
           those are removed. DOM order for RTL (first = rightmost):
           FD3F, icon, title, FD3E → visual right-to-left: FD3F icon title FD3E */}
       <div className="flex items-center justify-center gap-2 bg-brand-ivory px-4 py-3 shadow-sm shrink-0">
-        <span className="text-3xl font-bold text-brand-blue" aria-hidden="true">&#xFD3F;</span>
+        <span className="text-2xl font-bold text-brand-blue" aria-hidden="true">&#xFD3F;</span>
         <img
           src="/assets/logo-512.png"
           alt="i360إ"
-          className="h-9 w-9 object-contain"
+          className="h-8 w-8 object-contain"
         />
-        <span className="text-3xl font-bold text-brand-blue">
+        <span className="text-2xl font-bold text-brand-blue">
           الموسوعة الإسلامية إi360
         </span>
-        <span className="text-3xl font-bold text-brand-blue" aria-hidden="true">&#xFD3E;</span>
+        <span className="text-2xl font-bold text-brand-blue" aria-hidden="true">&#xFD3E;</span>
       </div>
 
       <KhatamDivider />
