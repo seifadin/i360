@@ -87,8 +87,13 @@ async function fetchAllPages<T>(url: string): Promise<T[]> {
 // ─── Fetchers ─────────────────────────────────────────────────────────────────
 
 export async function fetchSciences(): Promise<Science[]> {
+  // Sort by ScienceMinorId alone — the table's primary key, confirmed to
+  // already respect ScienceMajorId/ScienceIntermediateId grouping in the
+  // actual data. This also preserves each row's true original position,
+  // which groupSciences() now relies on to interleave intermediate groups
+  // and direct minor items in their real relative order (see ScienceGrid.tsx).
   return fetchAllPages<Science>(
-    `${BASE_URL}${TABLE_SCIENCES}/?user_field_names=true&exclude_fields=BotKB,CustomSearchAIKBlessBotKB`
+    `${BASE_URL}${TABLE_SCIENCES}/?user_field_names=true&exclude_fields=BotKB,CustomSearchAIKBlessBotKB&order_by=ScienceMinorId`
   )
 }
 

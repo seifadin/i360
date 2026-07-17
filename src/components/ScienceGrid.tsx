@@ -8,26 +8,31 @@ import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS }
 import { loadIcon } from '@/lib/iconLoader'
 
 interface MinorItem { science: Science }
-interface IntermediateGroup {
-  intermediateId: number
-  intermediate: string
-  intermediateIcon: string
-  items: MinorItem[]
-}
+type MajorChild =
+  | { kind: 'intermediate'; intermediateId: number; intermediate: string; intermediateIcon: string; items: MinorItem[] }
+  | { kind: 'minor'; science: Science }
 interface MajorGroup {
   majorId: number
   major: string
   majorIcon: string
-  intermediates: IntermediateGroup[]
-  directItems: MinorItem[]
+  children: MajorChild[]
 }
 
+// Builds one ordered `children` list per major, instead of separate
+// "intermediates" and "direct items" arrays — the old two-array approach
+// meant direct items always rendered after every intermediate group,
+// regardless of their true relative position by ScienceMinorId (the
+// table's primary key, which the data's actual insertion order respects).
+// Here, an intermediate group's position is set by its FIRST-encountered
+// item; later items for that same intermediate append to the existing
+// entry rather than creating a new position — this genuinely interleaves
+// intermediate groups and direct items in original minor-ID order.
 function groupSciences(sciences: Science[]): MajorGroup[] {
   const majorMap = new Map<number, {
     major: string
     majorIcon: string
-    intMap: Map<number, { name: string; icon: string; items: MinorItem[] }>
-    directItems: MinorItem[]
+    children: MajorChild[]
+    intPositions: Map<number, Extract<MajorChild, { kind: 'intermediate' }>>
   }>()
 
   for (const s of sciences) {
@@ -39,23 +44,28 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
       majorMap.set(majorKey, {
         major: s.ScienceMajor_Ar,
         majorIcon: s.ScienceMajorIcon ?? '',
-        intMap: new Map(),
-        directItems: [],
+        children: [],
+        intPositions: new Map(),
       })
     }
     const majorEntry = majorMap.get(majorKey)!
     const intId = s.ScienceIntermediateId != null ? Number(s.ScienceIntermediateId) : null
     if (intId) {
-      if (!majorEntry.intMap.has(intId)) {
-        majorEntry.intMap.set(intId, {
-          name: s.ScienceIntermediate_Ar,
-          icon: s.ScienceIntermediateIcon ?? '',
+      let intChild = majorEntry.intPositions.get(intId)
+      if (!intChild) {
+        intChild = {
+          kind: 'intermediate',
+          intermediateId: intId,
+          intermediate: s.ScienceIntermediate_Ar,
+          intermediateIcon: s.ScienceIntermediateIcon ?? '',
           items: [],
-        })
+        }
+        majorEntry.intPositions.set(intId, intChild)
+        majorEntry.children.push(intChild)
       }
-      majorEntry.intMap.get(intId)!.items.push({ science: s })
+      intChild.items.push({ science: s })
     } else {
-      majorEntry.directItems.push({ science: s })
+      majorEntry.children.push({ kind: 'minor', science: s })
     }
   }
 
@@ -63,13 +73,7 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
     majorId,
     major: entry.major,
     majorIcon: entry.majorIcon,
-    intermediates: Array.from(entry.intMap.entries()).map(([intermediateId, { name, icon, items }]) => ({
-      intermediateId,
-      intermediate: name,
-      intermediateIcon: icon,
-      items,
-    })),
-    directItems: entry.directItems,
+    children: entry.children,
   }))
 }
 
@@ -194,33 +198,34 @@ export default function ScienceGrid() {
 
           {openMajorId === group.majorId && (
             <div className="divide-y divide-gray-50 bg-brand-ivory">
-              {group.intermediates.map(intGroup => (
-                <div key={intGroup.intermediateId}>
+              {group.children.map(child =>
+                child.kind === 'intermediate' ? (
+                <div key={`int-${child.intermediateId}`}>
                   <button
                     onClick={() =>
                       setOpenIntermediateId(
-                        openIntermediateId === intGroup.intermediateId ? null : intGroup.intermediateId
+                        openIntermediateId === child.intermediateId ? null : child.intermediateId
                       )
                     }
                     className="flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none"
                   >
                     <div className="flex items-center gap-2">
-                      {openIntermediateId === intGroup.intermediateId
+                      {openIntermediateId === child.intermediateId
                         ? <ChevronDown size={14} />
                         : <ChevronLeft size={14} />
                       }
-                      {intGroup.intermediateIcon && (
+                      {child.intermediateIcon && (
                         <span className="text-brand-green">
-                          <DynamicIcon name={intGroup.intermediateIcon} size={14} />
+                          <DynamicIcon name={child.intermediateIcon} size={14} />
                         </span>
                       )}
-                      <span>{intGroup.intermediate}</span>
+                      <span>{child.intermediate}</span>
                     </div>
                   </button>
 
-                  {openIntermediateId === intGroup.intermediateId && (
+                  {openIntermediateId === child.intermediateId && (
                     <div className="divide-y divide-gray-100 bg-brand-ivory">
-                      {intGroup.items.map(({ science }) => (
+                      {child.items.map(({ science }) => (
                         <button
                           key={science.ScienceMinorId}
                           onClick={() => handleMinorTap(science)}
@@ -237,20 +242,18 @@ export default function ScienceGrid() {
                     </div>
                   )}
                 </div>
-              ))}
-
-              {group.directItems.map(({ science }) => (
+                ) : (
                 <button
-                  key={science.ScienceMinorId}
-                  onClick={() => handleMinorTap(science)}
+                  key={`minor-${child.science.ScienceMinorId}`}
+                  onClick={() => handleMinorTap(child.science)}
                   className={`flex w-full items-center gap-2 px-8 py-1 text-right text-base ${minorButtonClass()}`}
                 >
-                  {science.ScienceMinorIcon && (
+                  {child.science.ScienceMinorIcon && (
                     <span className="text-brand-green">
-                      <DynamicIcon name={science.ScienceMinorIcon} />
+                      <DynamicIcon name={child.science.ScienceMinorIcon} />
                     </span>
                   )}
-                  <span className="flex-1">{science.ScienceMinor_Ar}</span>
+                  <span className="flex-1">{child.science.ScienceMinor_Ar}</span>
                 </button>
               ))}
             </div>
