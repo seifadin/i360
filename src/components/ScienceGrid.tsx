@@ -3,7 +3,7 @@ import { ChevronDown, ChevronLeft, CircleSlash } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
-import { Science } from '@/api/baserow'
+import { Science } from '@/api/dataSource'
 import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
 

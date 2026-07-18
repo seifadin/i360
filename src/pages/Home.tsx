@@ -8,7 +8,7 @@ import SearchBar from '@/components/SearchBar'
 import ScienceGrid from '@/components/ScienceGrid'
 import Toast from '@/components/Toast'
 import Dialog from '@/components/Dialog'
-import KhatamDivider from '@/components/KhatamDivider'
+import OrnamentDivider from '@/components/OrnamentDivider'
 
 // ─── i360Privacy — one-time privacy notice ─────────────────────────────────────
 function checkPrivacyNotice(): boolean {
@@ -96,7 +96,7 @@ export default function Home() {
         <span className="text-2xl font-bold text-brand-blue" aria-hidden="true">&#xFD3E;</span>
       </div>
 
-      <KhatamDivider />
+      <OrnamentDivider />
 
       {/* Science accordion — scrollable. Normal flex flow — search bar +
           OSRow are ordinary siblings below, so this simply ends where they
@@ -119,7 +119,7 @@ export default function Home() {
           — and it cost several rounds of real debugging pain for content
           being hidden underneath it. Reverted in favor of the simpler,
           overlap-proof-by-construction normal flow. */}
-      <KhatamDivider />
+      <OrnamentDivider />
       <div className="shrink-0 border-t border-gray-200 bg-brand-ivory">
         <SearchBar />
       </div>
