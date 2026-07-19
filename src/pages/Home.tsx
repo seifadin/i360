@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { usePlatform } from '@/hooks/usePlatform'
-import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 import OSRow from '@/components/OSRow'
@@ -21,7 +20,6 @@ function checkPrivacyNotice(): boolean {
 
 export default function Home() {
   usePlatform()
-  const { setState } = useAppState()
   const { resource, changeFlags, loading: cacheLoading } = useDataCache()
 
   const [privacyOpen, setPrivacyOpen] = useState(false)
@@ -36,12 +34,10 @@ export default function Home() {
     if (checkPrivacyNotice()) setPrivacyOpen(true)
   }, [])
 
-  // i360dbc resolved by dataCache: sync i360dbqEOF, show Edition/Version/Revision
-  // dialogs per changeFlags (checkChanged already ran once, inside dataCache.tsx)
+  // i360dbc resolved by dataCache: show Edition/Version/Revision dialogs per
+  // changeFlags (checkChanged already ran once, inside dataCache.tsx)
   useEffect(() => {
     if (cacheLoading || !resource) return
-
-    setState({ i360dbqEOF: resource.i360dbqEOF ?? null })
 
     // Serialize dialogs — never show more than one at once.
     // Order: Edition → Version → Revision (broadest scope first, Quran-specific last)
@@ -120,7 +116,7 @@ export default function Home() {
           being hidden underneath it. Reverted in favor of the simpler,
           overlap-proof-by-construction normal flow. */}
       <OrnamentDivider />
-      <div className="shrink-0 border-t border-gray-200 bg-brand-ivory">
+      <div className="shrink-0 bg-brand-ivory">
         <SearchBar />
       </div>
       <OSRow />

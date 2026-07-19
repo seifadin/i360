@@ -5,7 +5,9 @@ import { isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { AndroidIcon, AppleIcon, GoogleIcon, HuaweiIcon } from './BrandIcons'
 import Dialog from './Dialog'
 
-// AppVersion / AppDeveloper — constants, defined once, used app-wide (VersionMenu dialog)
+// AppVersion / AppDeveloper — constants, defined once, used app-wide (VersionMenu dialog).
+// Deliberately hardcoded, NOT sourced from Baserow's Version field — that was tried
+// (housekeeping round) and reverted: the field's format isn't a display-ready string.
 export const AppVersion = 'إصدار 0.13.0 @ 2026/07/01 م - 1448/01/16 هـ'
 export const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 

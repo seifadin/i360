@@ -9,6 +9,7 @@ import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { isArabic, translateToArabic } from '@/api/translator'
 import { isDesktop } from '@/hooks/usePlatform'
+import { tryOpenNewTab } from '@/lib/openTab'
 
 // Icon mapping confirmation:
 // Search   → search icon inside input LEFT side
@@ -80,24 +81,6 @@ export default function SearchBar() {
   const useHuawei = state.isChina || state.useHMS
   const keyboardUrl = (useHuawei ? resource?.Huawei_VirtualKeyboard : resource?.Google_VirtualKeyboard) ?? ''
   const botUrl = (useHuawei ? resource?.Huawei_BotSearch : resource?.BotSearch) ?? ''
-
-  // Opens a new tab and detects a blocked popup properly — some browsers
-  // return a non-null window reference even when blocked, immediately
-  // closing it rather than returning null outright. Checking .closed
-  // catches that case too, not just the null case. A fully-sandboxed
-  // context (e.g. an iframe preview with no allow-popups) can make
-  // window.open throw outright instead — without this try/catch, that
-  // would silently crash the click handler with zero visible feedback,
-  // which matches "not clickable at all" more than a simple blocked popup.
-  function tryOpenNewTab(url: string): boolean {
-    try {
-      const win = window.open(url, '_blank')
-      if (!win) return false
-      return !win.closed
-    } catch {
-      return false
-    }
-  }
 
   // fWebBrowser-equivalent — useWeb-aware WebView/new-tab branching.
   // Desktop always opens a new tab regardless of useWeb — WebView/iframe is

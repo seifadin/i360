@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, JSX } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode, JSX } from 'react'
 import {
   fetchSciences,
   fetchResources,
@@ -148,14 +148,19 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
     }
   }, [])
 
-  function findExegesisUrl(chapter: number, verse: number): string | null {
-    return findExegesisUrlFn(quran, chapter, verse)
-  }
+  const findExegesisUrl = useCallback(
+    (chapter: number, verse: number): string | null =>
+      findExegesisUrlFn(quran, chapter, verse),
+    [quran]
+  )
+
+  const value = useMemo(
+    () => ({ resource, sciences, quran, changeFlags, loading, error, findExegesisUrl }),
+    [resource, sciences, quran, changeFlags, loading, error, findExegesisUrl]
+  )
 
   return (
-    <DataCacheContext.Provider
-      value={{ resource, sciences, quran, changeFlags, loading, error, findExegesisUrl }}
-    >
+    <DataCacheContext.Provider value={value}>
       {children}
     </DataCacheContext.Provider>
   )

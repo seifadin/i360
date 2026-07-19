@@ -7,6 +7,7 @@ import {
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { resolveOpenMethod } from '@/hooks/usePlatform'
+import { tryOpenNewTab } from '@/lib/openTab'
 
 // TOP BAR (RTL right→left): [HeartPulse] [URL bar] [ListCollapse]
 // BOTTOM BAR (RTL right→left): [ArrowRight] [ArrowLeft] [RotateCw] [Home] [Paperclip] [Share2]
@@ -82,7 +83,7 @@ export default function Browser() {
   function handleWebsiteStatus() {
     if (!appState.WebsiteStatus || !CurrentWebView) return
     const domain = CurrentWebView.split('/')[2] ?? ''
-    window.open(`${appState.WebsiteStatus}${domain}`, '_blank')
+    tryOpenNewTab(`${appState.WebsiteStatus}${domain}`)
   }
 
   // Paperclip — open WebAppendix using inWebList/URIschemes logic
@@ -96,7 +97,7 @@ export default function Browser() {
       : 'webview'
 
     if (openMethod === 'tab') {
-      window.open(url, '_blank')
+      tryOpenNewTab(url)
     } else {
       setCurrentWebView(url)
       setWebViewPages(prev => [...prev.slice(0, CurrentWebViewIndex + 1), url])
@@ -143,11 +144,12 @@ export default function Browser() {
         </button>
       </div>
 
-      {/* WEBVIEW — pb-16 clears the fixed bottom bar below, same convention
-          as Home.tsx's pb-28 (this page only has one bottom bar, not two
-          stacked ones, so a smaller buffer is enough) */}
+      {/* WEBVIEW — normal flex flow; the bottom bar below is an ordinary
+          sibling, so this simply ends where it begins. No padding buffer
+          needed (the pb-16 estimate was part of the reverted
+          fixed-positioning approach — see Home.tsx for the full reasoning). */}
       {CurrentWebView ? (
-        <div className="relative flex-1 pb-16">
+        <div className="relative flex-1">
           <iframe
             ref={iframeRef}
             src={CurrentWebView}
@@ -163,7 +165,7 @@ export default function Browser() {
                 تعذّر عرض الصفحة داخل التطبيق
               </p>
               <button
-                onClick={() => window.open(CurrentWebView, '_blank')}
+                onClick={() => tryOpenNewTab(CurrentWebView)}
                 className="rounded-full bg-brand-blue px-4 py-2 text-base text-white"
               >
                 فتح في المتصفح
@@ -172,15 +174,15 @@ export default function Browser() {
           )}
         </div>
       ) : (
-        <p className="p-4 pb-16 text-right text-gray-400">لم يتم تحديد رابط</p>
+        <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
       )}
 
       {/* BOTTOM BAR — visual left→right: [ArrowLeft][ArrowRight][RotateCw][Home][Paperclip][Share2]
-          position:fixed anchors directly to the viewport, not to document
-          flow — structurally immune to horizontal-scrollbar space
-          reservation (or any other future overflow cause), same fix as
-          Home.tsx's search bar + OSRow cluster. */}
-      <div className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around bg-brand-ivory border-t px-2 py-2">
+          Ordinary flex document flow, not fixed — matching Home.tsx's
+          revert of the fixed-positioning approach (this bar previously
+          still carried it after Home reverted, an inconsistency caught in
+          the housekeeping review). */}
+      <div className="shrink-0 flex items-center justify-around bg-brand-ivory border-t px-2 py-2">
         <button onClick={handleShare} className="text-brand-blue" aria-label="مشاركة">
           <Share2 size={20} />
         </button>

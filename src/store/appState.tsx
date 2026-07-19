@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, JSX } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode, JSX } from 'react'
 
 export interface AppState {
   // Platform
@@ -19,8 +19,6 @@ export interface AppState {
   QuranVerse: number | null
   QuranId: string
   ExegesisURL: string | null
-  i360dbqEOF: number | null
-  i360dbqPages: number
 }
 
 export interface AppStateContextType {
@@ -47,18 +45,19 @@ const defaultState: AppState = {
   QuranVerse: null,
   QuranId: '',
   ExegesisURL: null,
-  i360dbqEOF: null,
-  i360dbqPages: 1,
 }
 
 const AppStateContext = createContext<AppStateContextType | null>(null)
 
 export function AppStateProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, setStateRaw] = useState<AppState>(defaultState)
-  const setState = (updates: Partial<AppState>) =>
-    setStateRaw(prev => ({ ...prev, ...updates }))
+  const setState = useCallback(
+    (updates: Partial<AppState>) => setStateRaw(prev => ({ ...prev, ...updates })),
+    []
+  )
+  const value = useMemo(() => ({ state, setState }), [state, setState])
   return (
-    <AppStateContext.Provider value={{ state, setState }}>
+    <AppStateContext.Provider value={value}>
       {children}
     </AppStateContext.Provider>
   )

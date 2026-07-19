@@ -6,6 +6,7 @@ import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
 import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
+import { tryOpenNewTab } from '@/lib/openTab'
 
 interface MinorItem { science: Science }
 type MajorChild =
@@ -159,10 +160,10 @@ export default function ScienceGrid() {
           : 'webview'
 
     if (openMethod === 'tab') {
-      window.open(url, '_blank')
+      tryOpenNewTab(url)
       // WebAppendix is a companion to the Web resource specifically — it
       // doesn't make sense alongside an app-store link (native !useWeb mode).
-      if (state.useWeb && science.WebAppendix) window.open(science.WebAppendix, '_blank')
+      if (state.useWeb && science.WebAppendix) tryOpenNewTab(science.WebAppendix)
     } else {
       navigate('/browser', { state: { url } })
     }
