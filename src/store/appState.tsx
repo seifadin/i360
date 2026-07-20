@@ -3,22 +3,14 @@ import { createContext, useContext, useState, useCallback, useMemo, ReactNode, J
 export interface AppState {
   // Platform
   useWeb: boolean
-  isMobile: boolean
   isChina: boolean
   useHMS: boolean
   isGMSorApple: boolean
-  useHMSdefault: boolean
 
   // Content
   ScienceMinorId: number
   WebsiteStatus: string | null
   WebAppendix: string | null
-
-  // Quran
-  QuranChapter: number | null
-  QuranVerse: number | null
-  QuranId: string
-  ExegesisURL: string | null
 }
 
 export interface AppStateContextType {
@@ -29,22 +21,14 @@ export interface AppStateContextType {
 const defaultState: AppState = {
   // Platform — useWeb defaults TRUE on all OS (manual toggle via OS_WebToggle, Sprint 6b)
   useWeb: true,
-  isMobile: true,
   isChina: false,
   useHMS: false,
   isGMSorApple: false,
-  useHMSdefault: false,
 
   // Content
   ScienceMinorId: 0,
   WebsiteStatus: null,
   WebAppendix: null,
-
-  // Quran
-  QuranChapter: null,
-  QuranVerse: null,
-  QuranId: '',
-  ExegesisURL: null,
 }
 
 const AppStateContext = createContext<AppStateContextType | null>(null)

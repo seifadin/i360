@@ -37,21 +37,31 @@ export function computeIsGMSorApple(useWeb: boolean, isChina: boolean, useHMS: b
   return ((os === 'android' && !(isChina || useHMS)) || os === 'ios') && !useWeb
 }
 
+// Whether Huawei-specific resources (BotSearch, VirtualKeyboard, CustomSearch)
+// should be used instead of their Google/default counterparts. Gated on
+// !useWeb because MobileServicesToggle — the only thing that sets useHMS —
+// is itself only visible when useWeb is off; without this gate, a stale
+// useHMS from an earlier native-mode session kept silently applying after
+// switching back to web. Extracted here (matching computeIsGMSorApple's
+// pattern) after this exact logic was found duplicated independently in
+// ScienceGrid.tsx and SearchBar.tsx, with only one of the two copies
+// actually including this gate.
+export function computeUseHuawei(useWeb: boolean, isChina: boolean, useHMS: boolean): boolean {
+  return !useWeb && (isChina || useHMS)
+}
+
 export function usePlatform() {
   const { state, setState } = useAppState()
 
   // OS/HMS/China detection — computed once on mount, doesn't depend on useWeb
   useEffect(() => {
-    const os = detectOS()
-    const isMobile = os !== 'web'
     const ua = navigator.userAgent
     const useHMS = /huawei|hmscore|harmony/i.test(ua)
     const isChina = /china/i.test(navigator.language) ||
       Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Shanghai') ||
       Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Urumqi')
-    const useHMSdefault = useHMS
 
-    setState({ isMobile, isChina, useHMS, useHMSdefault })
+    setState({ isChina, useHMS })
   }, [])
 
   // isGMSorApple depends on useWeb (a manual toggle that can change after

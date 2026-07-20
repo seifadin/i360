@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
-import { resolveOpenMethod, isDesktop, computeIsGMSorApple, resolveEffectiveOS } from '@/hooks/usePlatform'
+import { resolveOpenMethod, computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
 import { tryOpenNewTab } from '@/lib/openTab'
 
@@ -133,7 +133,7 @@ export default function ScienceGrid() {
     if (computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS)) {
       return resolveEffectiveOS(state.useWeb) === 'ios' ? science.AppleAppStore ?? '' : science.GooglePlayStore ?? ''
     }
-    if (!state.useWeb && (state.isChina || state.useHMS)) {
+    if (computeUseHuawei(state.useWeb, state.isChina, state.useHMS)) {
       return science.HuaweiAppGallery ?? ''
     }
     return science.Web ?? ''
@@ -149,15 +149,15 @@ export default function ScienceGrid() {
       WebsiteStatus: globalResource?.WebsiteStatus ?? null,
     })
 
-    // Desktop and native app-store mode (!useWeb) always open a new tab —
-    // app-store links can't meaningfully render inside the WebView iframe.
-    // Only mobile + useWeb consults inWebList/URIschemes via resolveOpenMethod.
+    // Native app-store mode (!useWeb) always opens a new tab — app-store
+    // links can't meaningfully render inside the WebView iframe. The
+    // desktop case is handled inside resolveOpenMethod itself (its first
+    // check), so it isn't repeated here — only useWeb mode consults
+    // inWebList/URIschemes.
     const openMethod: 'tab' | 'webview' =
-      isDesktop() || !state.useWeb
+      !state.useWeb
         ? 'tab'
-        : globalResource
-          ? resolveOpenMethod(url, globalResource.URIschemes, globalResource.inWebList)
-          : 'webview'
+        : resolveOpenMethod(url, globalResource?.URIschemes ?? '', globalResource?.inWebList ?? '')
 
     if (openMethod === 'tab') {
       tryOpenNewTab(url)

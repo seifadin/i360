@@ -8,7 +8,7 @@ import {
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { isArabic, translateToArabic } from '@/api/translator'
-import { isDesktop } from '@/hooks/usePlatform'
+import { isDesktop, computeUseHuawei } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 
 // Icon mapping confirmation:
@@ -78,17 +78,32 @@ export default function SearchBar() {
   const [keyboardFailed, triggerKeyboardFailed] = useBriefFlash()
 
   // Keyboard + Bot URLs — derived from the cached i360dbc record (no fetch here)
-  const useHuawei = state.isChina || state.useHMS
+  const useHuawei = computeUseHuawei(state.useWeb, state.isChina, state.useHMS)
   const keyboardUrl = (useHuawei ? resource?.Huawei_VirtualKeyboard : resource?.Google_VirtualKeyboard) ?? ''
   const botUrl = (useHuawei ? resource?.Huawei_BotSearch : resource?.BotSearch) ?? ''
 
   // fWebBrowser-equivalent — useWeb-aware WebView/new-tab branching.
-  // Desktop always opens a new tab regardless of useWeb — WebView/iframe is
-  // mobile-only, matching the same short-circuit already used in ScienceGrid.tsx.
   // Returns whether the open succeeded (WebView navigation always does;
   // window.open returns null — or an immediately-closed window — if blocked).
-  function openViaWebBrowser(url: string): boolean {
-    if (state.useWeb && !isDesktop()) {
+  //
+  // context='default' (Search results, Exegesis pages): desktop always opens
+  // a new tab regardless of useWeb — bypasses X-Frame-Options embedding
+  // failures entirely, since these point at arbitrary external sites that
+  // may refuse to be iframed at all.
+  //
+  // context='bot': routing is based on useWeb alone, ignoring isDesktop() —
+  // identical behavior on any browser, mobile or desktop. Safe to skip the
+  // X-Frame-Options safeguard here specifically because Botpress's webchat
+  // URL is purpose-built for iframe embedding, not arbitrary content. Also
+  // the natural place to eventually branch into a real native WebView
+  // component once Capacitor exists (Phase 12, not yet built) — !useWeb
+  // would be that branch point.
+  function openViaWebBrowser(url: string, context: 'default' | 'bot' = 'default'): boolean {
+    const useWebViewRoute = context === 'bot'
+      ? state.useWeb
+      : state.useWeb && !isDesktop()
+
+    if (useWebViewRoute) {
       setState({ WebAppendix: null, ScienceMinorId: 0 })
       navigate('/browser', { state: { url } })
       return true
@@ -115,8 +130,6 @@ export default function SearchBar() {
 
   // fExegesis-equivalent — chapter.verse dot format, chapter=split[0], verse=split[1]
   function handleExegesisSubmit(value: string) {
-    setState({ QuranId: value })
-
     const [chapterStr, verseStr] = value.split('.')
     const chapter = Number(chapterStr)
     const verse = Number(verseStr)
@@ -126,14 +139,11 @@ export default function SearchBar() {
       return
     }
 
-    setState({ QuranChapter: chapter, QuranVerse: verse })
-
     // Dot-to-colon normalization — kept for possible future use (e.g. matching
     // tanzil.net's Chapter:Verse convention): `${chapter}:${verse}`.
     // Not currently consumed by anything, so not computed here to avoid dead code.
 
     const url = findExegesisUrl(chapter, verse)
-    setState({ ExegesisURL: url })
 
     if (!url) {
       flashIconFor('notfound')
@@ -185,7 +195,7 @@ export default function SearchBar() {
 
   function handleBot() {
     if (!botUrl) return
-    const opened = openViaWebBrowser(botUrl)
+    const opened = openViaWebBrowser(botUrl, 'bot')
     if (!opened) triggerBotFailed()
   }
 

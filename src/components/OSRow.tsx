@@ -24,14 +24,12 @@ function ToggleItem({
   icon,
   ariaLabel,
   onToggle,
-  labelOnly = false,
   tooltipAlign = 'center',
 }: {
   active: boolean
   icon: React.ReactNode
   ariaLabel: string
   onToggle: () => void
-  labelOnly?: boolean
   tooltipAlign?: 'center' | 'left'
 }) {
   // Mobile has no real :hover — tapping already toggles the switch, so the
@@ -48,20 +46,18 @@ function ToggleItem({
   // Toggle switch (rightmost within this item) + icon to its left
   return (
     <div className="flex items-center gap-1.5">
-      {!labelOnly && (
-        <button
-          onClick={handleToggle}
-          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-            active ? 'bg-brand-green' : 'bg-brand-disabled'
-          }`}
-          aria-pressed={active}
-        >
-          <span
-            className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
-            style={{ [active ? 'left' : 'right']: '2px' } as CSSProperties}
-          />
-        </button>
-      )}
+      <button
+        onClick={handleToggle}
+        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+          active ? 'bg-brand-green' : 'bg-brand-disabled'
+        }`}
+        aria-pressed={active}
+      >
+        <span
+          className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
+          style={{ [active ? 'left' : 'right']: '2px' } as CSSProperties}
+        />
+      </button>
       {/* Icon + tooltip: aria-label covers screen readers; the floating note
           shows on hover (desktop pointer) OR briefly after a tap (mobile,
           via showTooltip). Positioned above the icon since OSRow sits at the
