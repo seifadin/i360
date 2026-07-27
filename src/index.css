@@ -3,12 +3,22 @@
 @tailwind utilities;
 
 @layer base {
-  html,
-  body,
   * {
     font-family: 'Amiri', serif;
-    color: #0010CF;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* color deliberately NOT on the universal * selector — that was setting
+     color directly on every element, including <svg>/<path> tags. A direct
+     rule on an element always beats an inherited value from a parent,
+     regardless of specificity — so no icon could ever inherit a different
+     color from its parent button (e.g. text-brand-disabled), since the
+     universal rule already claimed the icon's own color directly. Scoping
+     this to html/body lets it flow down through genuine inheritance instead,
+     correctly yielding to a closer ancestor's more specific class. */
+  html,
+  body {
+    color: #0010CF;
   }
 
   :root {

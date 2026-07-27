@@ -9,7 +9,6 @@ export interface AppState {
 
   // Content
   ScienceMinorId: number
-  WebsiteStatus: string | null
   WebAppendix: string | null
 }
 
@@ -27,7 +26,6 @@ const defaultState: AppState = {
 
   // Content
   ScienceMinorId: 0,
-  WebsiteStatus: null,
   WebAppendix: null,
 }
 

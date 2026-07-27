@@ -146,7 +146,6 @@ export default function ScienceGrid() {
     setState({
       ScienceMinorId: science.ScienceMinorId,
       WebAppendix: science.WebAppendix ?? null,
-      WebsiteStatus: globalResource?.WebsiteStatus ?? null,
     })
 
     // Native app-store mode (!useWeb) always opens a new tab — app-store
