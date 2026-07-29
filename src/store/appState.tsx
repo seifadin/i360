@@ -5,10 +5,8 @@ export interface AppState {
   useWeb: boolean
   isChina: boolean
   useHMS: boolean
-  isGMSorApple: boolean
 
   // Content
-  ScienceMinorId: number
   WebAppendix: string | null
 }
 
@@ -22,10 +20,8 @@ const defaultState: AppState = {
   useWeb: true,
   isChina: false,
   useHMS: false,
-  isGMSorApple: false,
 
   // Content
-  ScienceMinorId: 0,
   WebAppendix: null,
 }
 

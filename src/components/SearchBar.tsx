@@ -104,7 +104,7 @@ export default function SearchBar() {
       : state.useWeb && !isDesktop()
 
     if (useWebViewRoute) {
-      setState({ WebAppendix: null, ScienceMinorId: 0 })
+      setState({ WebAppendix: null })
       navigate('/browser', { state: { url } })
       return true
     } else {

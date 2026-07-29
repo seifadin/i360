@@ -143,10 +143,7 @@ export default function ScienceGrid() {
     const url = resolveUrl(science)
     if (!url) return
 
-    setState({
-      ScienceMinorId: science.ScienceMinorId,
-      WebAppendix: science.WebAppendix ?? null,
-    })
+    setState({ WebAppendix: science.WebAppendix ?? null })
 
     // Native app-store mode (!useWeb) always opens a new tab — app-store
     // links can't meaningfully render inside the WebView iframe. The

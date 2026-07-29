@@ -28,10 +28,10 @@ export function resolveEffectiveOS(useWeb: boolean): OSType {
 }
 
 // Plain, synchronous — no React state involved, so callers always get a
-// fresh answer with zero lag. The stored appState.isGMSorApple (set via the
-// effect below) can trail one render behind useWeb changing; any
-// business-critical decision (e.g. resolveUrl) should call this directly
-// instead of reading the stored value.
+// fresh answer with zero lag. There is no stored appState equivalent —
+// that copy (and the effect that wrote it) was removed as dead state in an
+// earlier round, since it could trail one render behind useWeb changing and
+// nothing safely depended on it. This function is the only source now.
 export function computeIsGMSorApple(useWeb: boolean, isChina: boolean, useHMS: boolean): boolean {
   const os = resolveEffectiveOS(useWeb)
   return ((os === 'android' && !(isChina || useHMS)) || os === 'ios') && !useWeb
@@ -51,7 +51,7 @@ export function computeUseHuawei(useWeb: boolean, isChina: boolean, useHMS: bool
 }
 
 export function usePlatform() {
-  const { state, setState } = useAppState()
+  const { setState } = useAppState()
 
   // OS/HMS/China detection — computed once on mount, doesn't depend on useWeb
   useEffect(() => {
@@ -63,15 +63,6 @@ export function usePlatform() {
 
     setState({ isChina, useHMS })
   }, [])
-
-  // isGMSorApple depends on useWeb (a manual toggle that can change after
-  // mount) plus isChina/useHMS — recompute whenever any of them change,
-  // rather than freezing at whatever useWeb was on first render.
-  // NOTE: this stored value can still lag one render behind — see
-  // computeIsGMSorApple() above for the race-free alternative.
-  useEffect(() => {
-    setState({ isGMSorApple: computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS) })
-  }, [state.useWeb, state.isChina, state.useHMS])
 }
 
 // ─── URL resolution ───────────────────────────────────────────────────────────
