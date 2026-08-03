@@ -9,6 +9,7 @@ node_modules/
 .env.*.local
 *.jks
 *.keystore
+keystore.properties
 *.log
 npm-debug.log*
 Thumbs.db
