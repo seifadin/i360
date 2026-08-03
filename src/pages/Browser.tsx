@@ -4,6 +4,8 @@ import {
   ListCollapse, HeartPulse,
   ArrowRight, ArrowLeft, RotateCw, Home, Paperclip, Share2,
 } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { Share } from '@capacitor/share'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { resolveOpenMethod } from '@/hooks/usePlatform'
@@ -58,23 +60,61 @@ export default function Browser() {
   }
 
   const [iframeBlocked, setIframeBlocked] = useState(false)
+  const blockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Known browser/WebView error-page title fragments — English and Arabic,
+  // since this app's real audience is Arabic-primary and the browser's own
+  // error page renders in whatever language the device is set to, not
+  // necessarily English. Deliberately lowercase/simple substring matches,
+  // not an exhaustive list — this is one signal among two, not the only one.
+  const ERROR_TITLE_PATTERNS = [
+    'not available', "can't be reached", 'access denied', 'attention required',
+    'blocked', 'error',
+    'تعذر', 'تعذّر', 'غير متاح', 'رفض الوصول',
+  ]
 
   useEffect(() => {
     setIframeBlocked(false)
+    if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+    // Timeout fallback — catches anything the text-based checks below miss
+    // (e.g. an error page whose title doesn't match any known pattern).
+    // Language-independent, unlike the title check, so it's the more
+    // robust signal for this app's multi-lingual audience; the two
+    // checks fail differently, so combining them covers more real cases
+    // than either alone.
+    blockTimeoutRef.current = setTimeout(() => setIframeBlocked(true), 8000)
+    return () => {
+      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+    }
   }, [CurrentWebView])
 
   function handleIframeLoad() {
     try {
       const doc = iframeRef.current?.contentDocument
-      if (doc !== null && (!doc?.title && !doc?.body?.childNodes.length)) {
+      if (doc === null) return // cross-origin success — can't inspect, assume fine
+
+      const title = (doc?.title ?? '').toLowerCase()
+      const isEmpty = !doc?.title && !doc?.body?.childNodes.length
+      const matchesErrorPattern = ERROR_TITLE_PATTERNS.some(p => title.includes(p))
+
+      if (isEmpty || matchesErrorPattern) {
+        if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
         setIframeBlocked(true)
+      } else if (blockTimeoutRef.current) {
+        // Genuine content loaded — cancel the timeout so a slow-but-working
+        // page isn't falsely flagged once it finally finishes.
+        clearTimeout(blockTimeoutRef.current)
       }
     } catch {
-      setIframeBlocked(false)
+      // Threw = genuinely cross-origin content we can't inspect, which only
+      // happens for a real, different-origin page — a positive sign the
+      // load actually succeeded, not a failure.
+      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
     }
   }
 
   function handleIframeError() {
+    if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
     setIframeBlocked(true)
   }
 
@@ -107,6 +147,17 @@ export default function Browser() {
 
   async function handleShare() {
     if (!CurrentWebView) return
+
+    // Android's WebView never implements navigator.share (confirmed: not even
+    // Level 1) — Capacitor's own Share plugin talks to the native share sheet
+    // directly instead, working correctly on both Android and iOS. The web/PWA
+    // path below is untouched — navigator.share works fine in a real browser.
+    if (Capacitor.isNativePlatform()) {
+      try { await Share.share({ url: CurrentWebView, title: document.title }) }
+      catch { /* cancelled */ }
+      return
+    }
+
     if (navigator.share) {
       try { await navigator.share({ url: CurrentWebView, title: document.title }) }
       catch { /* cancelled */ }
