@@ -61,6 +61,7 @@ export default function Browser() {
 
   const [iframeBlocked, setIframeBlocked] = useState(false)
   const blockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Known browser/WebView error-page title fragments — English and Arabic,
   // since this app's real audience is Arabic-primary and the browser's own
@@ -76,41 +77,73 @@ export default function Browser() {
   useEffect(() => {
     setIframeBlocked(false)
     if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
     // Timeout fallback — catches anything the text-based checks below miss
     // (e.g. an error page whose title doesn't match any known pattern).
     // Language-independent, unlike the title check, so it's the more
     // robust signal for this app's multi-lingual audience; the two
     // checks fail differently, so combining them covers more real cases
     // than either alone.
-    blockTimeoutRef.current = setTimeout(() => setIframeBlocked(true), 8000)
+    blockTimeoutRef.current = setTimeout(() => setIframeBlocked(true), 4000)
     return () => {
       if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
     }
   }, [CurrentWebView])
 
-  function handleIframeLoad() {
+  function checkIframeTitle(): 'blocked' | 'ok' | 'inconclusive' {
     try {
       const doc = iframeRef.current?.contentDocument
-      if (doc === null) return // cross-origin success — can't inspect, assume fine
+      if (doc === null) return 'inconclusive' // hasn't settled yet
 
       const title = (doc?.title ?? '').toLowerCase()
       const isEmpty = !doc?.title && !doc?.body?.childNodes.length
       const matchesErrorPattern = ERROR_TITLE_PATTERNS.some(p => title.includes(p))
 
-      if (isEmpty || matchesErrorPattern) {
-        if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-        setIframeBlocked(true)
-      } else if (blockTimeoutRef.current) {
-        // Genuine content loaded — cancel the timeout so a slow-but-working
-        // page isn't falsely flagged once it finally finishes.
-        clearTimeout(blockTimeoutRef.current)
-      }
+      // A matched error pattern is a strong, unambiguous signal — trust it
+      // immediately. An empty title/body is genuinely ambiguous on its own
+      // (could be a real error page that hasn't finished, or just a normal
+      // page still loading) — treat as inconclusive and let polling wait
+      // for it to settle, rather than jumping to a premature verdict.
+      if (matchesErrorPattern) return 'blocked'
+      if (isEmpty) return 'inconclusive'
+      return 'ok'
     } catch {
       // Threw = genuinely cross-origin content we can't inspect, which only
       // happens for a real, different-origin page — a positive sign the
       // load actually succeeded, not a failure.
-      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+      return 'ok'
     }
+  }
+
+  function handleIframeLoad() {
+    const result = checkIframeTitle()
+    if (result === 'blocked') {
+      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+      setIframeBlocked(true)
+      return
+    }
+    if (result === 'ok') {
+      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+      return
+    }
+    // 'inconclusive' — a single fixed-delay re-check proved unreliable (the
+    // error page's title can take longer than expected to populate, and by
+    // how much isn't consistent). Poll repeatedly instead of guessing one
+    // delay, stopping as soon as a definitive result appears. The existing
+    // 4s timeout above remains the final ceiling if polling never resolves.
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+    pollIntervalRef.current = setInterval(() => {
+      const polled = checkIframeTitle()
+      if (polled === 'inconclusive') return // keep polling
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+      if (polled === 'blocked') {
+        if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
+        setIframeBlocked(true)
+      } else if (blockTimeoutRef.current) {
+        clearTimeout(blockTimeoutRef.current)
+      }
+    }, 200)
   }
 
   function handleIframeError() {
