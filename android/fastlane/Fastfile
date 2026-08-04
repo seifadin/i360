@@ -1,0 +1,10 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build a signed release AAB, ready to upload manually to Google Play / AppGallery Connect"
+  lane :build_release do
+    gradle(
+      task: "bundleRelease"
+    )
+  end
+end
