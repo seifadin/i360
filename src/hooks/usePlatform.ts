@@ -70,16 +70,28 @@ export function usePlatform() {
 // URIschemes → comma-separated schemes that force browser tab
 // Default    → WebView
 
+// Extracts the domain from a URL — shared by matchesWebList below and
+// Browser.tsx's handleWebsiteStatus, which previously each hand-wrote the
+// same one-line extraction independently.
+export function getDomain(url: string): string {
+  return url.split('/')[2]?.trim() ?? ''
+}
+
+// Checks a URL against inWebList/URIschemes only — no desktop handling, so
+// callers with their own desktop policy (e.g. SearchBar's Bot context, which
+// deliberately ignores isDesktop()) can still consult the same underlying
+// data as resolveOpenMethod, without inheriting its desktop-always-tab rule.
+export function matchesWebList(webUrl: string, uriSchemes: string, inWebList: string): boolean {
+  const scheme = webUrl.split(':')[0]?.trim() ?? ''
+  const domain = getDomain(webUrl)
+  return !!(uriSchemes?.includes(scheme) || inWebList?.includes(domain))
+}
+
 export function resolveOpenMethod(
   webUrl: string,
   uriSchemes: string,
   inWebList: string
 ): 'tab' | 'webview' {
   if (isDesktop()) return 'tab'
-
-  const scheme = webUrl.split(':')[0]?.trim() ?? ''
-  const domain = webUrl.split('/')[2]?.trim() ?? ''
-
-  if (uriSchemes?.includes(scheme) || inWebList?.includes(domain)) return 'tab'
-  return 'webview'
+  return matchesWebList(webUrl, uriSchemes, inWebList) ? 'tab' : 'webview'
 }

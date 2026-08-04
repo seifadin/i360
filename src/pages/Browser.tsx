@@ -8,7 +8,7 @@ import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
-import { resolveOpenMethod } from '@/hooks/usePlatform'
+import { resolveOpenMethod, getDomain } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 
 // TOP BAR (RTL right→left): [HeartPulse] [URL bar] [ListCollapse]
@@ -59,104 +59,11 @@ export default function Browser() {
     setCurrentWebView(WebViewPages[0])
   }
 
-  const [iframeBlocked, setIframeBlocked] = useState(false)
-  const blockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  // Known browser/WebView error-page title fragments — English and Arabic,
-  // since this app's real audience is Arabic-primary and the browser's own
-  // error page renders in whatever language the device is set to, not
-  // necessarily English. Deliberately lowercase/simple substring matches,
-  // not an exhaustive list — this is one signal among two, not the only one.
-  const ERROR_TITLE_PATTERNS = [
-    'not available', "can't be reached", 'access denied', 'attention required',
-    'blocked', 'error',
-    'تعذر', 'تعذّر', 'غير متاح', 'رفض الوصول',
-  ]
-
-  useEffect(() => {
-    setIframeBlocked(false)
-    if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
-    // Timeout fallback — catches anything the text-based checks below miss
-    // (e.g. an error page whose title doesn't match any known pattern).
-    // Language-independent, unlike the title check, so it's the more
-    // robust signal for this app's multi-lingual audience; the two
-    // checks fail differently, so combining them covers more real cases
-    // than either alone.
-    blockTimeoutRef.current = setTimeout(() => setIframeBlocked(true), 4000)
-    return () => {
-      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
-    }
-  }, [CurrentWebView])
-
-  function checkIframeTitle(): 'blocked' | 'ok' | 'inconclusive' {
-    try {
-      const doc = iframeRef.current?.contentDocument
-      if (doc === null) return 'inconclusive' // hasn't settled yet
-
-      const title = (doc?.title ?? '').toLowerCase()
-      const isEmpty = !doc?.title && !doc?.body?.childNodes.length
-      const matchesErrorPattern = ERROR_TITLE_PATTERNS.some(p => title.includes(p))
-
-      // A matched error pattern is a strong, unambiguous signal — trust it
-      // immediately. An empty title/body is genuinely ambiguous on its own
-      // (could be a real error page that hasn't finished, or just a normal
-      // page still loading) — treat as inconclusive and let polling wait
-      // for it to settle, rather than jumping to a premature verdict.
-      if (matchesErrorPattern) return 'blocked'
-      if (isEmpty) return 'inconclusive'
-      return 'ok'
-    } catch {
-      // Threw = genuinely cross-origin content we can't inspect, which only
-      // happens for a real, different-origin page — a positive sign the
-      // load actually succeeded, not a failure.
-      return 'ok'
-    }
-  }
-
-  function handleIframeLoad() {
-    const result = checkIframeTitle()
-    if (result === 'blocked') {
-      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-      setIframeBlocked(true)
-      return
-    }
-    if (result === 'ok') {
-      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-      return
-    }
-    // 'inconclusive' — a single fixed-delay re-check proved unreliable (the
-    // error page's title can take longer than expected to populate, and by
-    // how much isn't consistent). Poll repeatedly instead of guessing one
-    // delay, stopping as soon as a definitive result appears. The existing
-    // 4s timeout above remains the final ceiling if polling never resolves.
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
-    pollIntervalRef.current = setInterval(() => {
-      const polled = checkIframeTitle()
-      if (polled === 'inconclusive') return // keep polling
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
-      if (polled === 'blocked') {
-        if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-        setIframeBlocked(true)
-      } else if (blockTimeoutRef.current) {
-        clearTimeout(blockTimeoutRef.current)
-      }
-    }, 200)
-  }
-
-  function handleIframeError() {
-    if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current)
-    setIframeBlocked(true)
-  }
-
   function exitBrowser() { navigate('/') }
 
   function handleWebsiteStatus() {
     if (!resource?.WebsiteStatus || !CurrentWebView) return
-    const domain = CurrentWebView.split('/')[2] ?? ''
-    tryOpenNewTab(`${resource.WebsiteStatus}${domain}`)
+    tryOpenNewTab(`${resource.WebsiteStatus}${getDomain(CurrentWebView)}`)
   }
 
   // Paperclip — open WebAppendix using inWebList/URIschemes logic
@@ -231,32 +138,24 @@ export default function Browser() {
       {/* WEBVIEW — normal flex flow; the bottom bar below is an ordinary
           sibling, so this simply ends where it begins. No padding buffer
           needed (the pb-16 estimate was part of the reverted
-          fixed-positioning approach — see Home.tsx for the full reasoning). */}
+          fixed-positioning approach — see Home.tsx for the full reasoning).
+          No custom blocked-page detection — tried extensively (title/text
+          pattern matching, polling, visibility timeouts) and found
+          fundamentally unreliable inside this specific Android WebView
+          (misfired broadly, even on genuinely working pages). Reverted:
+          a site that refuses to be framed shows the browser's own raw
+          error page, same as before this was ever attempted. The intended
+          real fix is upstream — vet problem domains manually and add them
+          to inWebList/URIschemes so they open in a tab instead of an
+          iframe in the first place, rather than trying to detect failure
+          after the fact from inside the page. */}
       {CurrentWebView ? (
-        <div className="relative flex-1">
-          <iframe
-            ref={iframeRef}
-            src={CurrentWebView}
-            className="w-full h-full border-none"
-            title="المتصفح"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-          />
-          {/* Blocked overlay — shown when site refuses iframe */}
-          {iframeBlocked && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 gap-3">
-              <p className="text-base text-right text-brand-blue">
-                تعذّر عرض الصفحة داخل التطبيق
-              </p>
-              <button
-                onClick={() => tryOpenNewTab(CurrentWebView)}
-                className="rounded-full bg-brand-blue px-4 py-2 text-base text-white"
-              >
-                فتح في المتصفح
-              </button>
-            </div>
-          )}
-        </div>
+        <iframe
+          ref={iframeRef}
+          src={CurrentWebView}
+          className="w-full h-full border-none flex-1"
+          title="المتصفح"
+        />
       ) : (
         <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
       )}

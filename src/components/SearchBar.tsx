@@ -8,7 +8,7 @@ import {
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { isArabic, translateToArabic } from '@/api/translator'
-import { isDesktop, computeUseHuawei } from '@/hooks/usePlatform'
+import { computeUseHuawei, resolveOpenMethod, matchesWebList } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 
 // Icon mapping confirmation:
@@ -89,19 +89,26 @@ export default function SearchBar() {
   // context='default' (Search results, Exegesis pages): desktop always opens
   // a new tab regardless of useWeb — bypasses X-Frame-Options embedding
   // failures entirely, since these point at arbitrary external sites that
-  // may refuse to be iframed at all.
+  // may refuse to be iframed at all. Now also consults inWebList/URIschemes
+  // via resolveOpenMethod (the same function ScienceGrid.tsx uses) — a site
+  // known to refuse framing can be added there to force a tab instead of
+  // relying on in-page detection, which was tried and found unreliable
+  // inside this app's WebView (see Browser.tsx).
   //
   // context='bot': routing is based on useWeb alone, ignoring isDesktop() —
   // identical behavior on any browser, mobile or desktop. Safe to skip the
   // X-Frame-Options safeguard here specifically because Botpress's webchat
-  // URL is purpose-built for iframe embedding, not arbitrary content. Also
-  // the natural place to eventually branch into a real native WebView
-  // component once Capacitor exists (Phase 12, not yet built) — !useWeb
-  // would be that branch point.
+  // URL is purpose-built for iframe embedding, not arbitrary content. Still
+  // consults inWebList/URIschemes via matchesWebList (not resolveOpenMethod,
+  // which would also pull in the desktop check bot deliberately skips) in
+  // case a bot URL ever needs to be force-opened in a tab too.
   function openViaWebBrowser(url: string, context: 'default' | 'bot' = 'default'): boolean {
+    const uriSchemes = resource?.URIschemes ?? ''
+    const inWebList = resource?.inWebList ?? ''
+
     const useWebViewRoute = context === 'bot'
-      ? state.useWeb
-      : state.useWeb && !isDesktop()
+      ? state.useWeb && !matchesWebList(url, uriSchemes, inWebList)
+      : state.useWeb && resolveOpenMethod(url, uriSchemes, inWebList) === 'webview'
 
     if (useWebViewRoute) {
       setState({ WebAppendix: null })
