@@ -5,7 +5,6 @@ import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 import OSRow from '@/components/OSRow'
 import SearchBar from '@/components/SearchBar'
 import ScienceGrid from '@/components/ScienceGrid'
-import Toast from '@/components/Toast'
 import Dialog from '@/components/Dialog'
 import OrnamentDivider from '@/components/OrnamentDivider'
 
@@ -101,12 +100,6 @@ export default function Home() {
       <div className="flex-1 overflow-y-auto">
         <ScienceGrid />
       </div>
-
-      {/* Loading toast — visible exactly as long as data cache is fetching */}
-      <Toast
-        message="تحميل البيانات"
-        show={cacheLoading}
-      />
 
       {/* Search bar + OSRow — ordinary flex document flow, not fixed. The
           original OS_WebToggle tooltip-overflow bug is already fixed at

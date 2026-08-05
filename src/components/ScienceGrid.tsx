@@ -1,5 +1,5 @@
 import { useMemo, useState, lazy, Suspense, ComponentType } from 'react'
-import { ChevronDown, ChevronLeft, CircleSlash } from 'lucide-react'
+import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
@@ -165,8 +165,17 @@ export default function ScienceGrid() {
     }
   }
 
-  if (loading) return <p className="p-4 text-right text-gray-500">جارٍ التحميل...</p>
-  if (error) return <p className="p-4 text-right text-red-500">{error}</p>
+  if (loading) return (
+    <div className="flex items-center justify-center gap-2 p-4 text-base text-gray-500">
+      <LoaderCircle size={20} className="animate-spin" />
+      <span>جارٍ التحميل...</span>
+    </div>
+  )
+  if (error) return (
+    <div className="flex items-center justify-center p-4 text-base text-red-500">
+      <span>{error}</span>
+    </div>
+  )
 
   return (
     <div className="divide-y divide-gray-100">
