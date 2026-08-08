@@ -4,6 +4,23 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// Single source of truth for the user-facing version: package.json's
+// "version" field. versionCode is separate — computed as yyyyDDDHH
+// (4-digit year + 3-digit ordinal day-of-year + 2-digit hour, 9 digits
+// total). A 9-digit number's absolute maximum (999999999) is inherently
+// below Google Play's 2,100,000,000 ceiling regardless of the actual
+// date/time, so this never needs revisiting as the calendar advances —
+// unlike a full yyyyMMddHH scheme, which would eventually exceed the
+// ceiling around year 2100. Hour-level granularity avoids collisions
+// between same-day rebuilds, a real, demonstrated pattern in this
+// project's own workflow.
+def packageJson = new groovy.json.JsonSlurper().parseText(file('../../package.json').text)
+def appVersionName = packageJson.version
+def now = new Date()
+def appVersionCode = Integer.parseInt(
+    new java.text.SimpleDateFormat("yyyyDDDHH").format(now)
+)
+
 apply plugin: 'com.android.application'
 
 android {
@@ -13,8 +30,8 @@ android {
         applicationId "com.appgyver.i360"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

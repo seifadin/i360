@@ -7,4 +7,30 @@ platform :android do
       task: "bundleRelease"
     )
   end
+
+  desc "Build and submit to Google Play production"
+  lane :deploy_google do
+    gradle(
+      task: "bundleRelease"
+    )
+    supply(
+      track: "production",
+      aab: "./app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_apk: true
+    )
+  end
+
+  desc "Build and submit to Huawei AppGallery"
+  lane :deploy_huawei do
+    gradle(
+      task: "bundleRelease"
+    )
+    huawei_appgallery_connect(
+      client_id: ENV["HUAWEI_CLIENT_ID"],
+      client_secret: ENV["HUAWEI_CLIENT_SECRET"],
+      app_id: ENV["HUAWEI_APP_ID"],
+      apk_path: "./app/build/outputs/bundle/release/app-release.aab",
+      is_aab: true
+    )
+  end
 end
