@@ -12,6 +12,15 @@
 #   public *;
 #}
 
+# Capacitor's own officially-recommended rule (capacitorjs.com/docs/android/troubleshooting) —
+# prevents R8 from stripping/renaming plugin classes in a way that breaks
+# the bridge's reflection-based calls (@capacitor/share, @capacitor/splash-screen).
+-keep public class * extends com.getcapacitor.Plugin
+
+# Moves all obfuscated classes into a single package, saving DEX space by
+# removing redundant package name strings (12g).
+-repackageclasses
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable

@@ -5,7 +5,11 @@ if (keystorePropertiesFile.exists()) {
 }
 
 // Single source of truth for the user-facing version: package.json's
-// "version" field. versionCode is separate — computed as yyyyDDDHH
+// "version" field. Extracted via a simple regex rather than a JSON parser —
+// groovy.json.JsonSlurper reproducibly fails to resolve in this specific
+// Codespace environment (confirmed across a fresh reload, not a one-off),
+// and a full parser is unnecessary overhead for pulling one predictable
+// string field anyway. versionCode is separate — computed as yyyyDDDHH
 // (4-digit year + 3-digit ordinal day-of-year + 2-digit hour, 9 digits
 // total). A 9-digit number's absolute maximum (999999999) is inherently
 // below Google Play's 2,100,000,000 ceiling regardless of the actual
@@ -14,8 +18,9 @@ if (keystorePropertiesFile.exists()) {
 // ceiling around year 2100. Hour-level granularity avoids collisions
 // between same-day rebuilds, a real, demonstrated pattern in this
 // project's own workflow.
-def packageJson = new groovy.json.JsonSlurper().parseText(file('../../package.json').text)
-def appVersionName = packageJson.version
+def packageJsonText = file('../../package.json').text
+def versionMatcher = (packageJsonText =~ /"version"\s*:\s*"([^"]+)"/)
+def appVersionName = versionMatcher[0][1]
 def now = new Date()
 def appVersionCode = Integer.parseInt(
     new java.text.SimpleDateFormat("yyyyDDDHH").format(now)
@@ -54,8 +59,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
