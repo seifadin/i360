@@ -23,6 +23,22 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Build a signed release AAB, ready to upload manually to Google Play / AppGallery Connect
 
+### android deploy_google
+
+```sh
+[bundle exec] fastlane android deploy_google
+```
+
+Build and submit to Google Play production
+
+### android deploy_huawei
+
+```sh
+[bundle exec] fastlane android deploy_huawei
+```
+
+Build and submit to Huawei AppGallery
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

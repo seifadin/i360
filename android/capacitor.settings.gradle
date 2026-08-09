@@ -7,3 +7,6 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capacitor/splash-screen/android')
+
+include ':otakit-capacitor-updater'
+project(':otakit-capacitor-updater').projectDir = new File('../node_modules/@otakit/capacitor-updater/android')

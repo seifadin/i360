@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { usePlatform } from '@/hooks/usePlatform'
 import { useDataCache } from '@/store/dataCache'
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 import OSRow from '@/components/OSRow'
@@ -18,7 +17,6 @@ function checkPrivacyNotice(): boolean {
 }
 
 export default function Home() {
-  usePlatform()
   const { resource, changeFlags, loading: cacheLoading } = useDataCache()
 
   const [privacyOpen, setPrivacyOpen] = useState(false)

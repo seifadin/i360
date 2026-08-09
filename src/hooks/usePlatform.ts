@@ -53,7 +53,12 @@ export function computeUseHuawei(useWeb: boolean, isChina: boolean, useHMS: bool
 export function usePlatform() {
   const { setState } = useAppState()
 
-  // OS/HMS/China detection — computed once on mount, doesn't depend on useWeb
+  // OS/HMS/China detection — computed once on mount, doesn't depend on
+  // useWeb. Must be called from a component that survives in-app
+  // navigation (App.tsx, not a route-level page like Home.tsx) — calling
+  // it from a page component means React Router unmounting/remounting
+  // that page re-runs this and silently overwrites any manual
+  // MobileServicesToggle override, defeating the simulator's purpose.
   useEffect(() => {
     const ua = navigator.userAgent
     const useHMS = /huawei|hmscore|harmony/i.test(ua)

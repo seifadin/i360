@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  ListCollapse, HeartPulse,
+  ListCollapse, HeartPulse, LoaderCircle,
   ArrowRight, ArrowLeft, RotateCw, Home, Paperclip, Share2,
 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
@@ -26,6 +26,32 @@ export default function Browser() {
   const [WebViewPages, setWebViewPages] = useState<string[]>(initialUrl ? [initialUrl] : [])
   const [CurrentWebViewIndex, setCurrentWebViewIndex] = useState<number>(0)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Loading spinner — deliberately simple, just tracks whether onLoad has
+  // fired for the current navigation. Not trying to judge page content or
+  // detect blocking (that approach was tried extensively and abandoned —
+  // see the note by the iframe below); onLoad itself firing is a reliable,
+  // standard browser event, unlike inspecting what loaded. A generous
+  // safety-net timeout hides it regardless, so a genuinely hung load never
+  // spins forever.
+  const [iframeLoading, setIframeLoading] = useState(!!initialUrl)
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    setIframeLoading(!!CurrentWebView)
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
+    if (CurrentWebView) {
+      loadTimeoutRef.current = setTimeout(() => setIframeLoading(false), 15000)
+    }
+    return () => {
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
+    }
+  }, [CurrentWebView])
+
+  function handleIframeLoad() {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
+    setIframeLoading(false)
+  }
 
   useEffect(() => {
     if (initialUrl) {
@@ -150,12 +176,20 @@ export default function Browser() {
           iframe in the first place, rather than trying to detect failure
           after the fact from inside the page. */}
       {CurrentWebView ? (
-        <iframe
-          ref={iframeRef}
-          src={CurrentWebView}
-          className="w-full h-full border-none flex-1"
-          title="المتصفح"
-        />
+        <div className="relative flex-1">
+          <iframe
+            ref={iframeRef}
+            src={CurrentWebView}
+            className="w-full h-full border-none"
+            title="المتصفح"
+            onLoad={handleIframeLoad}
+          />
+          {iframeLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-ivory">
+              <LoaderCircle size={32} className="animate-spin text-brand-blue" />
+            </div>
+          )}
+        </div>
       ) : (
         <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
       )}

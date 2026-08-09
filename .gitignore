@@ -10,6 +10,8 @@ node_modules/
 *.jks
 *.keystore
 keystore.properties
+android/fastlane/.env
+android/fastlane/google-play-key.json
 *.log
 npm-debug.log*
 Thumbs.db
