@@ -62,7 +62,12 @@ if [ "$IS_NATIVE" = false ]; then
   echo "✓ OTA update pushed."
 else
   echo "→ Native change detected."
-  read -p "  Submit to stores (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r
+  # Read from /dev/tty explicitly, not stdin — git hooks receive ref info
+  # via stdin (already consumed by the while-read loop above), so a plain
+  # `read` here would hit EOF immediately and fail under set -e, silently
+  # blocking the push. This was a real bug caught in actual use, not
+  # something the earlier file-detection tests could have revealed.
+  read -p "  Submit to stores (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "→ Submitting to both stores..."
