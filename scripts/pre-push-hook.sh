@@ -53,6 +53,16 @@ if [ "$IS_NATIVE" = false ]; then
   echo "→ Web-only change detected — pushing OTA update..."
   npm run build
 
+  # otakit is a standalone CLI, not part of Vite's build - it has no
+  # awareness of .env at all unless we explicitly load it. Vite itself
+  # reads .env internally during npm run build above, but that's a
+  # separate mechanism that doesn't export anything to the shell.
+  if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+  fi
+
   if ! command -v otakit &> /dev/null; then
     echo "  (otakit CLI not found, installing...)"
     npm install -g @otakit/cli
