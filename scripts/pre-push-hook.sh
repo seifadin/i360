@@ -56,7 +56,7 @@ echo
 echo "→ Branch: $BRANCH"
 echo "→ Checking what changed in this push..."
 
-NATIVE_PATTERN='^(android/|ios/|capacitor\.config\.ts|package\.json|package-lock\.json|fastlane/)'
+NATIVE_PATTERN='^(android/|ios/|capacitor\.config\.ts|package\.json|package-lock\.json)'
 IS_NATIVE=false
 if echo "$CHANGED_FILES" | grep -qE "$NATIVE_PATTERN"; then
   IS_NATIVE=true
@@ -141,12 +141,15 @@ if [ "$IS_NATIVE" = false ]; then
   fi
 else
   echo "→ Native change detected."
+  echo "  iOS: build & submit manually from the Mac VM — this Codespace"
+  echo "  (Linux) can never run Xcode/xcodebuild, so iOS is never part of"
+  echo "  this automated flow, regardless of what changed."
   # Read from /dev/tty explicitly, not stdin — git hooks receive ref info
   # via stdin (already consumed by the while-read loop above), so a plain
   # `read` here would hit EOF immediately and fail under set -e, silently
   # blocking the push. This was a real bug caught in actual use, not
   # something the earlier file-detection tests could have revealed.
-  read -p "  Submit to stores (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
+  read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "→ Submitting to both stores..."
