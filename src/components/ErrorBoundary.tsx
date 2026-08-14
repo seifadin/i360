@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <div
           dir="rtl"
-          className="flex h-screen flex-col items-center justify-center gap-4 bg-brand-ivory p-6 text-center"
+          className="flex h-dvh flex-col items-center justify-center gap-4 bg-brand-ivory p-6 text-center"
         >
           <p className="text-xl font-bold text-brand-blue">
             حدث خطأ غير متوقع
