@@ -15,3 +15,8 @@ android/fastlane/google-play-key.json
 *.log
 npm-debug.log*
 Thumbs.db
+
+# iOS (Xcode)
+ios/**/xcuserdata/
+ios/**/*.xcuserstate
+ios/**/.DS_Store
