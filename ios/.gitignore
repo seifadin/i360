@@ -11,3 +11,9 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# Fastlane build artifacts
+
+# Bundler-installed gems (reproducible via Gemfile.lock + .bundle/config)
+vendor/
+report.xml
