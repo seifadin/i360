@@ -24,5 +24,13 @@ platform :ios do
     upload_to_testflight(
       skip_waiting_for_build_processing: true
     )
+
+    # Release the current bundle to OtaKit, tagged with whatever
+    # runtimeVersion capacitor.config.ts currently holds — otakit's own
+    # CLI inherits it automatically from config, no manual value needed.
+    # Defensive `unset OTA_CHANNEL` first: a real release must always
+    # target the production (base) channel, never a leftover local-test
+    # value from an earlier `OTA_CHANNEL=development` build session.
+    sh("unset OTA_CHANNEL && otakit upload --release")
   end
 end

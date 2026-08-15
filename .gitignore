@@ -20,3 +20,4 @@ Thumbs.db
 ios/**/xcuserdata/
 ios/**/*.xcuserstate
 ios/**/.DS_Store
+*.tsbuildinfo

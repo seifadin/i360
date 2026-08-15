@@ -155,9 +155,16 @@ else
     echo "→ Submitting to both stores..."
     (cd android && fastlane deploy_google && fastlane deploy_huawei)
     echo "✓ Submitted to Google Play and Huawei AppGallery."
+    echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
+    # Defensive: OTA_CHANNEL may be left set from an earlier local test
+    # session — unset it here so this real release always targets the
+    # production (base) channel, never a leftover development one.
+    (unset OTA_CHANNEL && otakit upload --release)
+    echo "✓ OtaKit release published, tagged with the current runtimeVersion."
   else
     echo "  Skipped. Run manually when ready:"
     echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
+    echo "    unset OTA_CHANNEL && otakit upload --release"
   fi
 fi
 
