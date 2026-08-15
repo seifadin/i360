@@ -28,9 +28,30 @@ platform :ios do
     # Release the current bundle to OtaKit, tagged with whatever
     # runtimeVersion capacitor.config.ts currently holds — otakit's own
     # CLI inherits it automatically from config, no manual value needed.
-    # Defensive `unset OTA_CHANNEL` first: a real release must always
-    # target the production (base) channel, never a leftover local-test
-    # value from an earlier `OTA_CHANNEL=development` build session.
-    sh("unset OTA_CHANNEL && otakit upload --release")
+    # cd ../.. first — Fastlane sh() runs from ios/fastlane/, but otakit
+    # needs the repo root (where dist/, package.json, capacitor.config.ts
+    # actually live) — confirmed via a real "Bundle directory does not
+    # exist: .../ios/dist" failure when this wasn't accounted for.
+    #
+    # Same resilience reasoning as the Android pre-push-hook.sh: the
+    # TestFlight upload just above is the critical action and already
+    # succeeded — a transient OtaKit failure here must not make Fastlane
+    # report the whole lane as failed. Retry once, then fall back to a
+    # clear manual-retry instruction rather than raising.
+    begin
+      sh("cd ../.. && unset OTA_CHANNEL && otakit upload --release")
+      UI.success("OtaKit release published, tagged with the current runtimeVersion.")
+    rescue => e
+      UI.message("OtaKit release failed, retrying once... (#{e.message})")
+      sleep(3)
+      begin
+        sh("cd ../.. && unset OTA_CHANNEL && otakit upload --release")
+        UI.success("OtaKit release published, tagged with the current runtimeVersion.")
+      rescue => e2
+        UI.important("OtaKit release failed after retry — TestFlight upload still succeeded above.")
+        UI.important("Retry manually when ready: unset OTA_CHANNEL && otakit upload --release")
+        UI.important("(#{e2.message})")
+      end
+    end
   end
 end

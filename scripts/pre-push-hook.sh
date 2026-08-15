@@ -155,12 +155,32 @@ else
     echo "→ Submitting to both stores..."
     (cd android && fastlane deploy_google && fastlane deploy_huawei)
     echo "✓ Submitted to Google Play and Huawei AppGallery."
+
     echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
-    # Defensive: OTA_CHANNEL may be left set from an earlier local test
-    # session — unset it here so this real release always targets the
-    # production (base) channel, never a leftover development one.
+    # Same resilience pattern as the web-only OTA call above, and for the
+    # same reason: the store submission just above is the critical action
+    # and already succeeded — a transient OtaKit failure here must not
+    # abort the push via set -e and leave things looking broken when the
+    # actual release already went out. Retry once, then fall back to a
+    # clear manual-retry instruction rather than blocking anything.
+    set +e
     (unset OTA_CHANNEL && otakit upload --release)
-    echo "✓ OtaKit release published, tagged with the current runtimeVersion."
+    OTA_RELEASE_STATUS=$?
+    if [ $OTA_RELEASE_STATUS -ne 0 ]; then
+      echo "  (release failed, retrying once...)"
+      sleep 3
+      (unset OTA_CHANNEL && otakit upload --release)
+      OTA_RELEASE_STATUS=$?
+    fi
+    set -e
+
+    if [ $OTA_RELEASE_STATUS -eq 0 ]; then
+      echo "✓ OtaKit release published, tagged with the current runtimeVersion."
+    else
+      echo "⚠ OtaKit release failed after retry — store submission still"
+      echo "  succeeded above. Retry manually when ready:"
+      echo "    unset OTA_CHANNEL && otakit upload --release"
+    fi
   else
     echo "  Skipped. Run manually when ready:"
     echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
