@@ -77,3 +77,4 @@ const config: CapacitorConfig = {
 };
 
 export default config;
+// test: verify automatic push skips OtaKit release
