@@ -89,6 +89,7 @@ export interface DataCacheContextType {
   changeFlags: ChangeFlags
   loading: boolean
   error: string | null
+  isRetrying: boolean
   findExegesisUrl: (chapter: number, verse: number) => string | null
 }
 
@@ -105,11 +106,38 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isRetrying, setIsRetrying] = useState(false)
 
   useEffect(() => {
     let cancelled = false
+    let retryTimer: ReturnType<typeof setInterval> | null = null
+    let isFetching = false
+    let hasAttempted = false
 
+    // Real production bug (2026-08-16/17): a single transient network
+    // failure — from any source, not specifically OtaKit — permanently
+    // broke data loading for the rest of the app session, since this
+    // effect only ran once per mount and a mere close/reopen on Android
+    // is usually just a resume of the same still-running process, not a
+    // fresh mount. fetchWithRetry (dataSource.ts) already retries/times
+    // out at the network layer; this adds session-level retry on top —
+    // if that still fails, keep retrying automatically every 10s until it
+    // succeeds, with zero need to close/reopen the app at all. The
+    // isFetching guard (not the interval length) is what actually
+    // prevents overlap with a still-running attempt — so this interval
+    // is free to be short for faster recovery, not held long defensively.
     async function init() {
+      if (isFetching) return
+      isFetching = true
+      // isRetrying distinguishes the very first attempt (hasAttempted
+      // still false at this point) from every subsequent automatic retry
+      // — lets the UI show a distinct "retrying..." message instead of
+      // silently reusing the first-load spinner text.
+      setIsRetrying(hasAttempted)
+      hasAttempted = true
+      setError(null)
+      setLoading(true)
+
       try {
         // i360dbc — always fetched fresh (small, cheap), drives all change checks
         const resources = await fetchResources()
@@ -135,9 +163,23 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         import('@/lib/iconLoader').then(({ preloadIcons }) =>
           preloadIcons(collectIconNames(freshSciences))
         )
+
+        // Success — clear any retry cycle that was running
+        if (retryTimer) {
+          clearInterval(retryTimer)
+          retryTimer = null
+        }
       } catch {
-        if (!cancelled) setError('تعذّر تحميل البيانات')
+        if (!cancelled) {
+          setError('تعذّر تحميل البيانات')
+          if (!retryTimer) {
+            retryTimer = setInterval(() => {
+              if (!cancelled) init()
+            }, 10000)
+          }
+        }
       } finally {
+        isFetching = false
         if (!cancelled) setLoading(false)
       }
     }
@@ -145,6 +187,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
     init()
     return () => {
       cancelled = true
+      if (retryTimer) clearInterval(retryTimer)
     }
   }, [])
 
@@ -155,8 +198,8 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
   )
 
   const value = useMemo(
-    () => ({ resource, sciences, quran, changeFlags, loading, error, findExegesisUrl }),
-    [resource, sciences, quran, changeFlags, loading, error, findExegesisUrl]
+    () => ({ resource, sciences, quran, changeFlags, loading, error, isRetrying, findExegesisUrl }),
+    [resource, sciences, quran, changeFlags, loading, error, isRetrying, findExegesisUrl]
   )
 
   return (

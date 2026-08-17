@@ -68,14 +68,59 @@ interface BaserowResponse<T> {
 
 // ─── Pagination helper ────────────────────────────────────────────────────────
 
+// Real root cause of a production bug (2026-08-16/17): a single transient
+// network failure — from ANY source, not just OtaKit's own launch/resume
+// checks competing at startup — permanently broke data loading for the rest
+// of that app session, since a plain fetch() has no timeout and no retry,
+// and dataCache.tsx's init() only ever runs once per mount. Disabling
+// OtaKit's runtimePolicy only removed one contributor to that race, which is
+// why the bug still recurred, just less often ("took several tries"), not
+// zero. The actual fix belongs here, not in more OtaKit policy tweaking —
+// resilience to any transient failure, regardless of its source.
+const FETCH_TIMEOUT_MS = 10000
+const MAX_RETRIES = 2 // 1 initial attempt + 2 retries = 3 total tries
+const RETRY_BACKOFF_MS = [1000, 2000]
+
+async function fetchWithRetry(url: string): Promise<Response> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_BACKOFF_MS[attempt - 1]))
+    }
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
+    try {
+      const res = await fetch(url, { headers, signal: controller.signal })
+      clearTimeout(timeoutId)
+      if (!res.ok) throw new Error(`Baserow fetch failed: ${res.status}`)
+      return res
+    } catch (err) {
+      clearTimeout(timeoutId)
+      lastError = err
+      // loop continues to the next attempt, unless this was the last one
+    }
+  }
+
+  // All retries within this app session exhausted — genuinely propagates
+  // up to dataCache.tsx's catch, setting the visible error. No persistent/
+  // module-level retry counter exists anywhere here by design: closing and
+  // reopening the app is a fresh mount, calling this function fresh, with
+  // its own full, brand-new set of retries — the "last resort" behavior
+  // falls out naturally from not tracking any state across calls, no
+  // special-case code needed for it.
+  throw lastError
+}
+
 async function fetchAllPages<T>(url: string): Promise<T[]> {
   const all: T[] = []
   let nextUrl: string | null = url
 
   while (nextUrl) {
     const safeUrl = nextUrl.replace(/^http:\/\//, 'https://')
-    const res = await fetch(safeUrl, { headers })
-    if (!res.ok) throw new Error(`Baserow fetch failed: ${res.status}`)
+    const res = await fetchWithRetry(safeUrl)
     const data: BaserowResponse<T> = await res.json()
     all.push(...data.results)
     nextUrl = data.next

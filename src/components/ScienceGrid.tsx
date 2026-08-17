@@ -122,7 +122,7 @@ function minorButtonClass(): string {
 
 export default function ScienceGrid() {
   const { state, setState } = useAppState()
-  const { sciences, resource: globalResource, loading, error } = useDataCache()
+  const { sciences, resource: globalResource, loading, error, isRetrying } = useDataCache()
   const navigate = useNavigate()
   const [openMajorId, setOpenMajorId] = useState<number | null>(null)
   const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
@@ -168,7 +168,7 @@ export default function ScienceGrid() {
   if (loading) return (
     <div className="flex items-center justify-center gap-2 p-4 text-base text-gray-500">
       <LoaderCircle size={20} className="animate-spin" />
-      <span>جارٍ التحميل...</span>
+      <span>{isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...'}</span>
     </div>
   )
   if (error) return (
