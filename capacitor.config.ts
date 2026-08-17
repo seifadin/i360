@@ -71,7 +71,29 @@ const config: CapacitorConfig = {
       appReadyTimeout: 10000,
       launchPolicy: 'apply-staged',
       resumePolicy: 'shadow',
-      runtimePolicy: 'immediate',
+      // Locked: runtimePolicy = 'off', not the plugin's own documented
+      // default ('immediate'). Real, confirmed bug: a sideloaded Android
+      // build showed "تعذّر تحميل البيانات" (can't load data) shortly after
+      // a successful initial data load — on code identical to the working
+      // PWA, ruling out the app's own fetch logic. Isolated via clean,
+      // single-variable tests, not guessed: (1) fully removing the OtaKit
+      // block fixed it — confirmed OtaKit's automatic behavior as the
+      // cause; (2) restoring launchPolicy/resumePolicy to their normal
+      // values and setting only runtimePolicy: 'off' also fixed it —
+      // isolates the cause specifically to the 'runtime' lifecycle event
+      // (OtaKit's own docs: "Cold start where the current runtimeVersion
+      // lane has not been resolved yet" — i.e. a fresh install or a new
+      // native release), not launch or resume, both left untouched at
+      // their working values above.
+      // Real, accepted trade-off: a genuinely fresh install (or first
+      // launch after a new native runtimeVersion release) no longer
+      // "catches up immediately." It still receives the update — staged
+      // by resumePolicy 'shadow' on first background resume, then applied
+      // by launchPolicy 'apply-staged' on the next cold launch — just one
+      // cycle later than OtaKit's own default behavior. Reported upstream
+      // to OtaKit (github.com/OtaKit/otakit/issues) — see
+      // i360-instructions.md §14 for the full investigation.
+      runtimePolicy: 'off',
     },
   },
 };
