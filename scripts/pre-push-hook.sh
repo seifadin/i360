@@ -155,14 +155,28 @@ else
     echo "→ Submitting to both stores..."
     (cd android && fastlane deploy_google && fastlane deploy_huawei)
     echo "✓ Submitted to Google Play and Huawei AppGallery."
+  else
+    echo "  Skipped. Run manually when ready:"
+    echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
+  fi
 
+  # Deliberately a SEPARATE question from store submission above, not
+  # nested inside it — a real bug caught in actual use: OTA release was
+  # originally coupled to the store-submission "y", so declining that
+  # prompt (for any reason — maybe this push has nothing store-relevant
+  # in it) silently skipped shipping the JS/web update too, even though
+  # OTA exists specifically to reach users WITHOUT needing store review
+  # at all. The two are conceptually unrelated risk decisions and must
+  # stay independently answerable.
+  read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
     # Same resilience pattern as the web-only OTA call above, and for the
-    # same reason: the store submission just above is the critical action
-    # and already succeeded — a transient OtaKit failure here must not
-    # abort the push via set -e and leave things looking broken when the
-    # actual release already went out. Retry once, then fall back to a
-    # clear manual-retry instruction rather than blocking anything.
+    # same reason: a transient OtaKit failure here must not abort the
+    # push via set -e and leave things looking broken. Retry once, then
+    # fall back to a clear manual-retry instruction rather than blocking
+    # anything.
     set +e
     (unset OTA_CHANNEL && otakit upload --release)
     OTA_RELEASE_STATUS=$?
@@ -177,13 +191,11 @@ else
     if [ $OTA_RELEASE_STATUS -eq 0 ]; then
       echo "✓ OtaKit release published, tagged with the current runtimeVersion."
     else
-      echo "⚠ OtaKit release failed after retry — store submission still"
-      echo "  succeeded above. Retry manually when ready:"
+      echo "⚠ OtaKit release failed after retry. Retry manually when ready:"
       echo "    unset OTA_CHANNEL && otakit upload --release"
     fi
   else
     echo "  Skipped. Run manually when ready:"
-    echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
     echo "    unset OTA_CHANNEL && otakit upload --release"
   fi
 fi
