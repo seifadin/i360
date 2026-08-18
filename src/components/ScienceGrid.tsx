@@ -120,6 +120,38 @@ function minorButtonClass(): string {
   return 'hover:bg-brand-highlight focus:outline-none text-brand-blue'
 }
 
+// Extracted after the intermediate-nested minor button and the direct
+// minor button (rendered when a science has no intermediate parent) were
+// found to be identical except for indent depth (px-12 vs px-8). Defined
+// at module scope, not nested inside ScienceGrid, with onTap passed as a
+// prop rather than closed over — a component defined inside another
+// component's render body gets a fresh function identity every render,
+// which React treats as a brand-new component type and remounts instead
+// of reconciling.
+function MinorButton({
+  science,
+  indent,
+  onTap,
+}: {
+  science: Science
+  indent: 'nested' | 'direct'
+  onTap: (science: Science) => void
+}) {
+  return (
+    <button
+      onClick={() => onTap(science)}
+      className={`flex w-full items-center gap-2 ${indent === 'nested' ? 'px-12' : 'px-8'} py-1 text-right text-base ${minorButtonClass()}`}
+    >
+      {science.ScienceMinorIcon && (
+        <span className="text-brand-green">
+          <DynamicIcon name={science.ScienceMinorIcon} />
+        </span>
+      )}
+      <span className="flex-1">{science.ScienceMinor_Ar}</span>
+    </button>
+  )
+}
+
 export default function ScienceGrid() {
   const { state, setState } = useAppState()
   const { sciences, resource: globalResource, loading, error, isRetrying } = useDataCache()
@@ -206,62 +238,51 @@ export default function ScienceGrid() {
             <div className="divide-y divide-gray-50 bg-brand-ivory">
               {group.children.map(child =>
                 child.kind === 'intermediate' ? (
-                <div key={`int-${child.intermediateId}`}>
-                  <button
-                    onClick={() =>
-                      setOpenIntermediateId(
-                        openIntermediateId === child.intermediateId ? null : child.intermediateId
-                      )
-                    }
-                    className="flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none"
-                  >
-                    <div className="flex items-center gap-2">
-                      {openIntermediateId === child.intermediateId
-                        ? <ChevronDown size={14} />
-                        : <ChevronLeft size={14} />
+                  <div key={`int-${child.intermediateId}`}>
+                    <button
+                      onClick={() =>
+                        setOpenIntermediateId(
+                          openIntermediateId === child.intermediateId ? null : child.intermediateId
+                        )
                       }
-                      {child.intermediateIcon && (
-                        <span className="text-brand-green">
-                          <DynamicIcon name={child.intermediateIcon} size={14} />
-                        </span>
-                      )}
-                      <span>{child.intermediate}</span>
-                    </div>
-                  </button>
+                      className="flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none"
+                    >
+                      <div className="flex items-center gap-2">
+                        {openIntermediateId === child.intermediateId
+                          ? <ChevronDown size={14} />
+                          : <ChevronLeft size={14} />
+                        }
+                        {child.intermediateIcon && (
+                          <span className="text-brand-green">
+                            <DynamicIcon name={child.intermediateIcon} size={14} />
+                          </span>
+                        )}
+                        <span>{child.intermediate}</span>
+                      </div>
+                    </button>
 
-                  {openIntermediateId === child.intermediateId && (
-                    <div className="divide-y divide-gray-100 bg-brand-ivory">
-                      {child.items.map(({ science }) => (
-                        <button
-                          key={science.ScienceMinorId}
-                          onClick={() => handleMinorTap(science)}
-                          className={`flex w-full items-center gap-2 px-12 py-1 text-right text-base ${minorButtonClass()}`}
-                        >
-                          {science.ScienceMinorIcon && (
-                            <span className="text-brand-green">
-                              <DynamicIcon name={science.ScienceMinorIcon} />
-                            </span>
-                          )}
-                          <span className="flex-1">{science.ScienceMinor_Ar}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                    {openIntermediateId === child.intermediateId && (
+                      <div className="divide-y divide-gray-100 bg-brand-ivory">
+                        {child.items.map(({ science }) => (
+                          <MinorButton
+                            key={science.ScienceMinorId}
+                            science={science}
+                            indent="nested"
+                            onTap={handleMinorTap}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                <button
-                  key={`minor-${child.science.ScienceMinorId}`}
-                  onClick={() => handleMinorTap(child.science)}
-                  className={`flex w-full items-center gap-2 px-8 py-1 text-right text-base ${minorButtonClass()}`}
-                >
-                  {child.science.ScienceMinorIcon && (
-                    <span className="text-brand-green">
-                      <DynamicIcon name={child.science.ScienceMinorIcon} />
-                    </span>
-                  )}
-                  <span className="flex-1">{child.science.ScienceMinor_Ar}</span>
-                </button>
-              ))}
+                  <MinorButton
+                    key={`minor-${child.science.ScienceMinorId}`}
+                    science={child.science}
+                    indent="direct"
+                    onTap={handleMinorTap}
+                  />
+                )
+              )}
             </div>
           )}
         </div>

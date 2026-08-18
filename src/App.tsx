@@ -50,11 +50,14 @@ function AppShell() {
   const { resource, changeFlags, loading: cacheLoading } = useDataCache()
 
   const [privacyOpen, setPrivacyOpen] = useState(false)
-  const [editionOpen, setEditionOpen] = useState(false)
-  const [versionOpen, setVersionOpen] = useState(false)
-  const [revisionOpen, setRevisionOpen] = useState(false)
-  const [versionPending, setVersionPending] = useState(false)
-  const [revisionPending, setRevisionPending] = useState(false)
+
+  // Queue-based, replacing 5 separate state variables (editionOpen/
+  // versionOpen/revisionOpen/versionPending/revisionPending) and 2
+  // near-duplicate close handlers that manually chained which dialog
+  // shows next. A future 4th dialog type now just needs pushing one more
+  // object here — no chain logic to remember to update in multiple places.
+  interface QueuedDialog { title: string; message: string }
+  const [dialogQueue, setDialogQueue] = useState<QueuedDialog[]>([])
 
   // Mount: privacy notice (one-time). Moved here from Home.tsx, same
   // reasoning as usePlatform() above — checkPrivacyNotice()'s own
@@ -79,37 +82,22 @@ function AppShell() {
   useEffect(() => {
     if (cacheLoading || !resource) return
 
-    // Serialize dialogs — never show more than one at once.
     // Order: Edition → Version → Revision (broadest scope first, Quran-specific last)
+    const queue: QueuedDialog[] = []
     if (changeFlags.editionChanged) {
-      setEditionOpen(true)
-      if (changeFlags.versionChanged) setVersionPending(true)
-      else if (changeFlags.revisionChanged) setRevisionPending(true)
-    } else if (changeFlags.versionChanged) {
-      setVersionOpen(true)
-      if (changeFlags.revisionChanged) setRevisionPending(true)
-    } else if (changeFlags.revisionChanged) {
-      setRevisionOpen(true)
+      queue.push({ title: 'طبعة جديدة', message: 'تمت إضافة / تعديل محتوى مُحدَّث لإثراء تجربتك' })
     }
+    if (changeFlags.versionChanged) {
+      queue.push({ title: 'إصدار جديد', message: 'تم إطلاق إصدار مُحدَّث لإثراء تجربتك' })
+    }
+    if (changeFlags.revisionChanged) {
+      queue.push({ title: 'مراجعة جديدة', message: 'تم إضافة / تعديل فهرسة تفسير مُحدَّث لإثراء تجربتك' })
+    }
+    setDialogQueue(queue)
   }, [cacheLoading, resource, changeFlags])
 
-  function handleEditionClose() {
-    setEditionOpen(false)
-    if (versionPending) {
-      setVersionPending(false)
-      setVersionOpen(true)
-    } else if (revisionPending) {
-      setRevisionPending(false)
-      setRevisionOpen(true)
-    }
-  }
-
-  function handleVersionClose() {
-    setVersionOpen(false)
-    if (revisionPending) {
-      setRevisionPending(false)
-      setRevisionOpen(true)
-    }
+  function handleDialogClose() {
+    setDialogQueue(prev => prev.slice(1))
   }
 
   return (
@@ -129,28 +117,12 @@ function AppShell() {
         onClose={() => setPrivacyOpen(false)}
       />
 
-      {/* Edition changed notice */}
+      {/* Edition/Version/Revision — one at a time, queue-driven (see above) */}
       <Dialog
-        open={editionOpen}
-        title="طبعة جديدة"
-        message="تمت إضافة / تعديل محتوى مُحدَّث لإثراء تجربتك"
-        onClose={handleEditionClose}
-      />
-
-      {/* Version changed notice */}
-      <Dialog
-        open={versionOpen}
-        title="إصدار جديد"
-        message="تم إطلاق إصدار مُحدَّث لإثراء تجربتك"
-        onClose={handleVersionClose}
-      />
-
-      {/* Revision changed notice — i360dbq exegesis index */}
-      <Dialog
-        open={revisionOpen}
-        title="مراجعة جديدة"
-        message="تم إضافة / تعديل فهرسة تفسير مُحدَّث لإثراء تجربتك"
-        onClose={() => setRevisionOpen(false)}
+        open={dialogQueue.length > 0}
+        title={dialogQueue[0]?.title ?? ''}
+        message={dialogQueue[0]?.message ?? ''}
+        onClose={handleDialogClose}
       />
     </>
   )

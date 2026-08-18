@@ -58,21 +58,20 @@ function collectIconNames(sciences: Science[]): Set<string> {
   return names
 }
 
-// Resolves Sciences: reuse cache unless Edition changed or no cache exists yet
-async function resolveSciences(editionChanged: boolean): Promise<Science[]> {
-  const cached = loadCached<Science>(CACHE_KEY_SCIENCES)
-  if (!editionChanged && cached) return cached
-  const fresh = await fetchSciences()
-  saveCached(CACHE_KEY_SCIENCES, fresh)
-  return fresh
-}
-
-// Resolves Quran: reuse cache unless Revision changed or no cache exists yet
-async function resolveQuran(revisionChanged: boolean): Promise<QuranEntry[]> {
-  const cached = loadCached<QuranEntry>(CACHE_KEY_QURAN)
-  if (!revisionChanged && cached) return cached
-  const fresh = await fetchQuran()
-  saveCached(CACHE_KEY_QURAN, fresh)
+// Generic cache-or-fetch resolver — extracted after resolveSciences/
+// resolveQuran (below) were found to be identical except for their
+// type/cache-key/fetcher. Reuse the cache unless `changed` is true or no
+// cache exists yet; either way, whatever's returned becomes the new
+// cache baseline.
+async function resolveCached<T>(
+  cacheKey: string,
+  changed: boolean,
+  fetcher: () => Promise<T[]>
+): Promise<T[]> {
+  const cached = loadCached<T>(cacheKey)
+  if (!changed && cached) return cached
+  const fresh = await fetcher()
+  saveCached(cacheKey, fresh)
   return fresh
 }
 
@@ -154,8 +153,8 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
 
         // Sciences + Quran resolved concurrently — each independently cached-or-fetched
         const [freshSciences, freshQuran] = await Promise.all([
-          resolveSciences(editionChanged),
-          resolveQuran(revisionChanged),
+          resolveCached(CACHE_KEY_SCIENCES, editionChanged, fetchSciences),
+          resolveCached(CACHE_KEY_QURAN, revisionChanged, fetchQuran),
         ])
         if (cancelled) return
         setSciences(freshSciences)
