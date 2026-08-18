@@ -46,24 +46,10 @@ npm install -g @otakit/cli
 # real run carefully before trusting this assumption long-term.
 cd ../../..
 
-# Retry-once resilience, same pattern as pre-push-hook.sh and the iOS
-# Fastfile — a transient OtaKit failure here must not be treated as if
-# the whole build failed, since the actual archive already succeeded.
-set +e
-unset OTA_CHANNEL
-otakit upload --release
-OTA_RELEASE_STATUS=$?
-if [ $OTA_RELEASE_STATUS -ne 0 ]; then
-  echo "OtaKit release failed, retrying once..."
-  sleep 3
-  otakit upload --release
-  OTA_RELEASE_STATUS=$?
-fi
-set -e
-
-if [ $OTA_RELEASE_STATUS -eq 0 ]; then
-  echo "OtaKit release published successfully."
-else
-  echo "OtaKit release failed after retry. Manual retry needed:"
-  echo "  unset OTA_CHANNEL && otakit upload --release"
-fi
+# Shared release-with-retry script (scripts/release-to-otakit.sh, see its
+# own header comment) — extracted 2026-08-17 after the exact same retry
+# logic was duplicated here, in pre-push-hook.sh, and in the iOS Fastfile.
+# No set -e active in this script, so a non-zero exit here doesn't need
+# special handling to avoid aborting anything — but || true keeps it
+# explicit/robust regardless of whether that assumption ever changes.
+bash scripts/release-to-otakit.sh || true

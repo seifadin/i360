@@ -25,33 +25,23 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
 
-    # Release the current bundle to OtaKit, tagged with whatever
-    # runtimeVersion capacitor.config.ts currently holds — otakit's own
-    # CLI inherits it automatically from config, no manual value needed.
-    # cd ../.. first — Fastlane sh() runs from ios/fastlane/, but otakit
-    # needs the repo root (where dist/, package.json, capacitor.config.ts
-    # actually live) — confirmed via a real "Bundle directory does not
-    # exist: .../ios/dist" failure when this wasn't accounted for.
+    # Shared release-with-retry script (scripts/release-to-otakit.sh, see
+    # its own header comment) — extracted 2026-08-17 after the exact same
+    # retry logic was duplicated here, in pre-push-hook.sh, and in
+    # ci_post_xcodebuild.sh. cd ../.. first — Fastlane runs from
+    # ios/fastlane/, but otakit needs the repo root (where dist/,
+    # package.json, capacitor.config.ts actually live) — confirmed via a
+    # real "Bundle directory does not exist: .../ios/dist" failure when
+    # this wasn't accounted for.
     #
-    # Same resilience reasoning as the Android pre-push-hook.sh: the
-    # TestFlight upload just above is the critical action and already
-    # succeeded — a transient OtaKit failure here must not make Fastlane
-    # report the whole lane as failed. Retry once, then fall back to a
-    # clear manual-retry instruction rather than raising.
-    begin
-      sh("cd ../.. && unset OTA_CHANNEL && otakit upload --release")
-      UI.success("OtaKit release published, tagged with the current runtimeVersion.")
-    rescue => e
-      UI.message("OtaKit release failed, retrying once... (#{e.message})")
-      sleep(3)
-      begin
-        sh("cd ../.. && unset OTA_CHANNEL && otakit upload --release")
-        UI.success("OtaKit release published, tagged with the current runtimeVersion.")
-      rescue => e2
-        UI.important("OtaKit release failed after retry — TestFlight upload still succeeded above.")
-        UI.important("Retry manually when ready: unset OTA_CHANNEL && otakit upload --release")
-        UI.important("(#{e2.message})")
-      end
+    # Ruby's system() here, not Fastlane's sh() — system() returns
+    # true/false rather than raising, and the shared script already
+    # retries once internally, so wrapping it in Fastlane's own
+    # begin/rescue retry (like this lane used to) would risk up to 4
+    # total attempts instead of the intended 2 if it kept failing.
+    success = system("cd ../.. && bash scripts/release-to-otakit.sh")
+    unless success
+      UI.important("OtaKit release failed after retry — TestFlight upload still succeeded above.")
     end
   end
 end

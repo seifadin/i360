@@ -88,45 +88,36 @@ if [ "$BRANCH" != "vite" ] && [ "$BRANCH" != "main" ]; then
   exit 0
 fi
 
+# otakit is a standalone CLI, not part of Vite's build — it has no
+# awareness of .env at all unless we explicitly load it. Vite itself
+# reads .env internally during npm run build above, but that's a
+# separate mechanism that doesn't export anything to the shell. Runs
+# once here, before either branch below, since both may call otakit —
+# a real bug caught while extracting scripts/release-to-otakit.sh: this
+# used to live only inside the web-only branch, so the native branch's
+# OTA release call had no OTAKIT_TOKEN available at all unless the
+# calling shell happened to already have it from something else.
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+fi
+if ! command -v otakit &> /dev/null; then
+  echo "  (otakit CLI not found, installing...)"
+  npm install -g @otakit/cli
+fi
+
 if [ "$IS_NATIVE" = false ]; then
   echo "→ Web-only change detected — pushing OTA update..."
 
-  # otakit is a standalone CLI, not part of Vite's build - it has no
-  # awareness of .env at all unless we explicitly load it. Vite itself
-  # reads .env internally during npm run build above, but that's a
-  # separate mechanism that doesn't export anything to the shell.
-  if [ -f .env ]; then
-    set -a
-    source .env
-    set +a
-  fi
-
-  if ! command -v otakit &> /dev/null; then
-    echo "  (otakit CLI not found, installing...)"
-    npm install -g @otakit/cli
-  fi
-
-  # Don't let a failed upload kill the script under set -e - that would
-  # block the push entirely, contradicting this script's own "never
-  # blocks the push" promise. Try once, retry once for a transient
-  # blip, then fall back to offering store submission instead - the
-  # same prompt native changes get - since a persistently-failing OTA
-  # server means mobile users need another way to receive this update.
-  set +e
-  otakit upload --release
-  UPLOAD_STATUS=$?
-  if [ $UPLOAD_STATUS -ne 0 ]; then
-    echo "  (upload failed, retrying once...)"
-    sleep 3
-    otakit upload --release
-    UPLOAD_STATUS=$?
-  fi
-  set -e
-
-  if [ $UPLOAD_STATUS -eq 0 ]; then
-    echo "✓ OTA update pushed."
-  else
-    echo "⚠ OTA upload failed after retry — OtaKit's server may be down."
+  # scripts/release-to-otakit.sh's own non-zero exit (genuine failure
+  # after its internal retry) must not kill this script under set -e —
+  # this specific call site has its own further fallback (offering store
+  # submission) that no other caller of the shared script needs, since
+  # here nothing has explicitly confirmed a manual release is even
+  # wanted; a persistently-failing OTA server means mobile users need
+  # another way to receive this update at all.
+  if ! bash scripts/release-to-otakit.sh; then
     read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -136,7 +127,6 @@ if [ "$IS_NATIVE" = false ]; then
     else
       echo "  Skipped. This push will proceed, but mobile users won't"
       echo "  receive this update until OTA or a store submission succeeds."
-      echo "  Retry manually when ready: otakit upload --release"
     fi
   fi
 else
@@ -172,28 +162,10 @@ else
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
-    # Same resilience pattern as the web-only OTA call above, and for the
-    # same reason: a transient OtaKit failure here must not abort the
-    # push via set -e and leave things looking broken. Retry once, then
-    # fall back to a clear manual-retry instruction rather than blocking
-    # anything.
-    set +e
-    (unset OTA_CHANNEL && otakit upload --release)
-    OTA_RELEASE_STATUS=$?
-    if [ $OTA_RELEASE_STATUS -ne 0 ]; then
-      echo "  (release failed, retrying once...)"
-      sleep 3
-      (unset OTA_CHANNEL && otakit upload --release)
-      OTA_RELEASE_STATUS=$?
-    fi
-    set -e
-
-    if [ $OTA_RELEASE_STATUS -eq 0 ]; then
-      echo "✓ OtaKit release published, tagged with the current runtimeVersion."
-    else
-      echo "⚠ OtaKit release failed after retry. Retry manually when ready:"
-      echo "    unset OTA_CHANNEL && otakit upload --release"
-    fi
+    # This script has set -e active — the shared script's own non-zero
+    # exit (on genuine failure after its internal retry) must not be
+    # allowed to abort the whole push. || true absorbs that here.
+    bash scripts/release-to-otakit.sh || true
   else
     echo "  Skipped. Run manually when ready:"
     echo "    unset OTA_CHANNEL && otakit upload --release"
