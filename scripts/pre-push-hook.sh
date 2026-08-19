@@ -56,6 +56,55 @@ echo
 echo "→ Branch: $BRANCH"
 echo "→ Checking what changed in this push..."
 
+# ci_scripts must stay executable in git (§15's silent 100755→100644
+# incident — Xcode Cloud's zsh fallback survived it once, but that's a
+# documented leniency, not a contract). Self-announcing + self-repairing
+# at the moment it matters, matching submit_to_stores()'s
+# verify-don't-trust pattern. Note: the fix lands in the INDEX — the push
+# currently in flight still carries the old mode; commit and include it
+# in a follow-up push.
+if git ls-files -s ios/App/ci_scripts/*.sh | grep -q '^100644'; then
+  echo "⚠ ci_scripts lost exec bit — restoring in the index now:"
+  git update-index --chmod=+x ios/App/ci_scripts/*.sh
+  git ls-files -s ios/App/ci_scripts/
+  echo "  Commit this mode change and include it in a follow-up push."
+fi
+
+# Shared by both store-submission call sites below (the native-change
+# branch and the web-only branch's OTA-failure fallback) — extracted per
+# §12 rule 12 rather than duplicating the sync+guard+submit sequence.
+#
+# Why the sync: deploy_google/deploy_huawei package whatever the LAST
+# manual `cap sync` left in android/'s assets — which may be a stale
+# dist/, or worse, a local test sync that baked "channel": "development"
+# into the compiled capacitor.config.json. That's §12.16c's exact
+# failure class (a real release landing on the dev channel), re-entering
+# via stale sync artifacts instead of a lingering `export`. `env -u`
+# guarantees OTA_CHANNEL can't leak in from the calling shell no matter
+# what it has exported. dist/ is guaranteed fresh here — the shared
+# `npm run build` above already ran (this function is only reachable on
+# vite/main, the same branches that build).
+#
+# Why the grep guard anyway: verify, don't trust the command alone —
+# the same principle as §12.16c's post-sync `cat | grep` check, just
+# automated at the moment it matters most. Tripping it aborts the
+# submission (and, under set -e, the push — consistent with how a
+# fastlane failure here has always behaved), since a channel key
+# appearing despite env -u means something is genuinely wrong.
+submit_to_stores() {
+  echo "→ Syncing native assets (guaranteed-clean OTA channel)..."
+  env -u OTA_CHANNEL npx cap sync android
+  if grep -q '"channel"' android/app/src/main/assets/capacitor.config.json; then
+    echo "✗ ABORT: compiled capacitor.config.json contains a channel key —"
+    echo "  this submission would ship targeting a non-production OTA"
+    echo "  channel. Investigate before submitting (see §12.16c)."
+    return 1
+  fi
+  echo "→ Submitting to both stores..."
+  (cd android && fastlane deploy_google && fastlane deploy_huawei)
+  echo "✓ Submitted to Google Play and Huawei AppGallery."
+}
+
 NATIVE_PATTERN='^(android/|ios/|capacitor\.config\.ts|package\.json|package-lock\.json)'
 IS_NATIVE=false
 if echo "$CHANGED_FILES" | grep -qE "$NATIVE_PATTERN"; then
@@ -121,9 +170,7 @@ if [ "$IS_NATIVE" = false ]; then
     read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      echo "→ Submitting to both stores..."
-      (cd android && fastlane deploy_google && fastlane deploy_huawei)
-      echo "✓ Submitted to Google Play and Huawei AppGallery."
+      submit_to_stores
     else
       echo "  Skipped. This push will proceed, but mobile users won't"
       echo "  receive this update until OTA or a store submission succeeds."
@@ -142,11 +189,11 @@ else
   read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "→ Submitting to both stores..."
-    (cd android && fastlane deploy_google && fastlane deploy_huawei)
-    echo "✓ Submitted to Google Play and Huawei AppGallery."
+    submit_to_stores
   else
-    echo "  Skipped. Run manually when ready:"
+    echo "  Skipped. Run manually when ready (build + clean sync first —"
+    echo "  see submit_to_stores above for why the sync matters):"
+    echo "    npm run build && env -u OTA_CHANNEL npx cap sync android"
     echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
   fi
 

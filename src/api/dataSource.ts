@@ -48,7 +48,11 @@ export interface Resource {
   Revision: string
   inWebList: string
   URIschemes: string
-  i360dbqEOF: number | null
+  // i360dbqEOF exists in the Baserow table but is deliberately NOT typed
+  // here — its app-state consumer was removed as written-but-never-read
+  // long ago (§5), and an interface field with zero readers only implies
+  // a dependency that doesn't exist. The column itself stays in Baserow
+  // untouched (same live-fetch backward-compat reasoning as IconName).
 }
 
 export interface QuranEntry {

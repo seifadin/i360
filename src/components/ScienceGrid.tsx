@@ -113,13 +113,6 @@ function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
   )
 }
 
-// Shared className for minor-science buttons — hover is the only feedback
-// now (pure CSS light-blue affordance). The brief green-bold tap-confirmation
-// flash was removed — at 500ms it was negligibly brief to register.
-function minorButtonClass(): string {
-  return 'hover:bg-brand-highlight focus:outline-none text-brand-blue'
-}
-
 // Extracted after the intermediate-nested minor button and the direct
 // minor button (rendered when a science has no intermediate parent) were
 // found to be identical except for indent depth (px-12 vs px-8). Defined
@@ -137,10 +130,16 @@ function MinorButton({
   indent: 'nested' | 'direct'
   onTap: (science: Science) => void
 }) {
+  // Hover is the only tap feedback (pure CSS light-blue affordance) — the
+  // brief green-bold tap-confirmation flash was removed; at 500ms it was
+  // negligibly brief to register. The class string lives inline here since
+  // this is its only consumer (the former minorButtonClass() helper was a
+  // zero-arg function returning a constant, left with one caller after the
+  // MinorButton extraction).
   return (
     <button
       onClick={() => onTap(science)}
-      className={`flex w-full items-center gap-2 ${indent === 'nested' ? 'px-12' : 'px-8'} py-1 text-right text-base ${minorButtonClass()}`}
+      className={`flex w-full items-center gap-2 ${indent === 'nested' ? 'px-12' : 'px-8'} py-1 text-right text-base hover:bg-brand-highlight focus:outline-none text-brand-blue`}
     >
       {science.ScienceMinorIcon && (
         <span className="text-brand-green">
@@ -162,8 +161,8 @@ export default function ScienceGrid() {
   const groups = useMemo(() => groupSciences(sciences), [sciences])
 
   function resolveUrl(science: Science): string {
-    if (computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS)) {
-      return resolveEffectiveOS(state.useWeb) === 'ios' ? science.AppleAppStore ?? '' : science.GooglePlayStore ?? ''
+    if (computeIsGMSorApple(state.useWeb, state.isChina, state.useHMS, state.simIOS)) {
+      return resolveEffectiveOS(state.useWeb, state.simIOS) === 'ios' ? science.AppleAppStore ?? '' : science.GooglePlayStore ?? ''
     }
     if (computeUseHuawei(state.useWeb, state.isChina, state.useHMS)) {
       return science.HuaweiAppGallery ?? ''

@@ -132,7 +132,7 @@ function App() {
   return (
     <AppStateProvider>
       <DataCacheProvider>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <BrowserRouter>
           <AppShell />
         </BrowserRouter>
       </DataCacheProvider>

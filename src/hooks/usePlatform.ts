@@ -16,14 +16,14 @@ export function isDesktop(): boolean {
 
 // On a genuine desktop browser there's no real "native app" identity to
 // resolve to — but toggling useWeb off is meant to let a desktop developer
-// preview mobile store-link behavior via MobileServicesToggle (Google/
-// Huawei). This treats that case as a simulated Android context so
-// resolveUrl actually resolves to a real store link, not a Web fallback.
+// preview mobile store-link behavior via the OSRow simulator cycle
+// (Google → Huawei → Apple). simIOS picks which OS is being simulated:
+// false → 'android' (Google/Huawei links), true → 'ios' (Apple links).
 // Real mobile devices are never affected — this only kicks in when the
-// genuine OS is 'web' and useWeb is off.
-export function resolveEffectiveOS(useWeb: boolean): OSType {
+// genuine OS is 'web' and useWeb is off; simIOS is otherwise inert.
+export function resolveEffectiveOS(useWeb: boolean, simIOS: boolean): OSType {
   const os = detectOS()
-  if (os === 'web' && !useWeb) return 'android'
+  if (os === 'web' && !useWeb) return simIOS ? 'ios' : 'android'
   return os
 }
 
@@ -32,8 +32,8 @@ export function resolveEffectiveOS(useWeb: boolean): OSType {
 // that copy (and the effect that wrote it) was removed as dead state in an
 // earlier round, since it could trail one render behind useWeb changing and
 // nothing safely depended on it. This function is the only source now.
-export function computeIsGMSorApple(useWeb: boolean, isChina: boolean, useHMS: boolean): boolean {
-  const os = resolveEffectiveOS(useWeb)
+export function computeIsGMSorApple(useWeb: boolean, isChina: boolean, useHMS: boolean, simIOS: boolean): boolean {
+  const os = resolveEffectiveOS(useWeb, simIOS)
   return ((os === 'android' && !(isChina || useHMS)) || os === 'ios') && !useWeb
 }
 

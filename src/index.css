@@ -21,10 +21,8 @@
     color: #0010CF;
   }
 
-  :root {
-    --color-blue: #0010CF;
-    --color-green: #2E8B57;
-    --color-highlight: #EEF2FF;
-    --color-disabled: #CBD5E1;
-  }
+  /* No :root --color-* variables here — a set once existed but was
+     consumed by nothing (tailwind.config.ts's brand tokens are the single
+     source of truth for colors, per the locked §8 convention); removed as
+     a second, dead declaration of the same decision (§12 rule 12). */
 }

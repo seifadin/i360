@@ -37,11 +37,23 @@ export default function Browser() {
   const [iframeLoading, setIframeLoading] = useState(!!initialUrl)
   const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    setIframeLoading(!!CurrentWebView)
+  // Shared by the CurrentWebView effect below AND refresh() — refresh
+  // reassigns the same src string, which doesn't change CurrentWebView,
+  // so the effect alone would never re-show the spinner on a refresh (a
+  // real inconsistency caught in the 2026-08-19 review: every other
+  // navigation showed the spinner, refresh silently didn't).
+  function beginIframeLoad() {
+    setIframeLoading(true)
     if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
+    loadTimeoutRef.current = setTimeout(() => setIframeLoading(false), 15000)
+  }
+
+  useEffect(() => {
     if (CurrentWebView) {
-      loadTimeoutRef.current = setTimeout(() => setIframeLoading(false), 15000)
+      beginIframeLoad()
+    } else {
+      setIframeLoading(false)
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
     }
     return () => {
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current)
@@ -76,7 +88,9 @@ export default function Browser() {
   }
 
   function refresh() {
-    if (iframeRef.current) iframeRef.current.src = CurrentWebView
+    if (!iframeRef.current) return
+    beginIframeLoad()
+    iframeRef.current.src = CurrentWebView
   }
 
   function goFirst() {

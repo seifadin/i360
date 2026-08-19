@@ -5,6 +5,15 @@ export interface AppState {
   useWeb: boolean
   isChina: boolean
   useHMS: boolean
+  // Desktop-simulator target only: simulate iOS (Apple links) instead of
+  // Android. 5th app variable, added 2026-08-19 for the three-way
+  // Google→Huawei→Apple cycle — genuinely read (resolveEffectiveOS,
+  // computeIsGMSorApple) and written (OSRow's cycle control), unlike the
+  // 11 removed as write-only in earlier rounds. Only ever consulted when
+  // detectOS()==='web' && !useWeb, so it's inert on real devices and in
+  // web mode by construction — no stale-flag leak possible (the class of
+  // bug computeUseHuawei's !useWeb gate exists for).
+  simIOS: boolean
 
   // Content
   WebAppendix: string | null
@@ -20,6 +29,7 @@ const defaultState: AppState = {
   useWeb: true,
   isChina: false,
   useHMS: false,
+  simIOS: false, // simulator starts on Android (Google) — today's exact behavior
 
   // Content
   WebAppendix: null,

@@ -159,9 +159,14 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         if (cancelled) return
         setSciences(freshSciences)
         setQuran(freshQuran)
-        import('@/lib/iconLoader').then(({ preloadIcons }) =>
-          preloadIcons(collectIconNames(freshSciences))
-        )
+        import('@/lib/iconLoader')
+          .then(({ preloadIcons }) => preloadIcons(collectIconNames(freshSciences)))
+          // Best-effort, matching preloadIcons' own internal stance — if
+          // this chunk fetch itself fails (e.g. network drops right after
+          // data resolved from localStorage cache), DynamicIcon's per-icon
+          // fallback still handles rendering; an unhandled rejection here
+          // would only add console noise, never a functional difference.
+          .catch(() => {})
 
         // Success — clear any retry cycle that was running
         if (retryTimer) {

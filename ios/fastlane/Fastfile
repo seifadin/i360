@@ -20,6 +20,24 @@ platform :ios do
 
   desc "Build and upload to TestFlight"
   lane :deploy_apple do
+    # Channel guard — §12.16c's failure class from the stale-sync
+    # direction: build_release archives whatever the LAST `cap sync ios`
+    # left in App/App/, which may still carry "channel": "development"
+    # from a local test build. Guarded here in deploy_apple only, NOT in
+    # build_release — test builds run build_release with the development
+    # channel deliberately, and must keep doing so. Fastlane's CWD is
+    # ios/fastlane/ (same reasoning as the cd ../.. below), hence ../.
+    # Xcode Cloud never needs this — ci_post_clone.sh runs a fresh
+    # env-clean sync every build by construction.
+    if File.read("../App/App/capacitor.config.json").include?('"channel"')
+      UI.user_error!(
+        "Compiled capacitor.config.json contains a channel key — the last " \
+        "cap sync targeted a non-production OTA channel. Re-run from the " \
+        "repo root: npm run build && env -u OTA_CHANNEL npx cap sync ios, " \
+        "then retry deploy_apple."
+      )
+    end
+
     build_release
     upload_to_testflight(
       skip_waiting_for_build_processing: true

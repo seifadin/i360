@@ -47,23 +47,20 @@ const config: CapacitorConfig = {
     // Baseline set 2026-08-15 (yyyy.MM, matching OtaKit's own docs
     // example format), reflecting current native shell state — no
     // runtime-affecting change since this baseline.
-    // ⚠️ REQUIRED FOLLOW-UP, not yet done: this value only takes effect in
-    // native builds compiled with it — existing real installs are
-    // completely unaffected until they update to a future native release
-    // that includes this config. But whenever that next native release
-    // actually ships (Google Play/Huawei/App Store), the current bundle
-    // MUST be re-released to the base channel under this same
-    // runtimeVersion tag in the same window — otherwise devices upgrading
-    // to the new native shell request a lane nothing has been published
-    // to, and silently stop receiving OTA updates entirely. See
-    // i360-instructions.md §14/§15 for the full reasoning.
+    // Lane-continuity requirement — SATISFIED and automated: a baseline
+    // release tagged 2026.08 was published to the base channel on
+    // 2026-08-15 (the "something must exist on the new lane" requirement
+    // before any native build ships with this value), and every genuine
+    // store submission now auto-runs scripts/release-to-otakit.sh
+    // (pre-push-hook.sh's Android/Huawei path, deploy_apple's iOS path,
+    // and Xcode Cloud's manual-gated ci_post_xcodebuild.sh), so any
+    // future runtimeVersion bump only needs the bump itself — the
+    // release-on-submission automation keeps the new lane populated with
+    // no separate step to remember. See i360-instructions.md §14/§15.
     //
-    // Local test builds naturally benefit from this too, as a side
-    // effect: a fresh local build with this runtimeVersion, on the real
-    // base channel, finds no matching-runtime release (none of the 5
-    // existing bundles are runtime-tagged) — but OTA_CHANNEL=development
-    // remains the deliberate, explicit isolation mechanism; don't rely on
-    // this side effect alone.
+    // OTA_CHANNEL=development remains the deliberate, explicit isolation
+    // mechanism for local test builds — don't rely on runtimeVersion
+    // lane separation alone for that.
     OtaKit: {
       appId: '423c89c7-e4c3-40e9-891a-e9f6bfe27386',
       ...(process.env.OTA_CHANNEL ? { channel: process.env.OTA_CHANNEL } : {}),

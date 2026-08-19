@@ -170,15 +170,20 @@ export default function SearchBar() {
   // wired up this session; both fall back to their VITE_* env var if the
   // Baserow field is empty/not yet loaded.
   async function handleSearch() {
-    if (!EntityQueryTerm.trim()) return
-    if (EntityQueryTerm === EntityQueryTermOld) return
-    setEntityQueryTermOld(EntityQueryTerm)
+    // Consistently the trimmed value throughout — handleSubmit already
+    // validated `trimmed`, so guarding/deduping/translating on the raw
+    // untrimmed state here meant "قرآن " and "قرآن" counted as different
+    // for the dedupe and shipped stray encoded whitespace into the search
+    // URL (caught in the 2026-08-19 review; harmless but inconsistent).
+    if (!trimmed) return
+    if (trimmed === EntityQueryTermOld) return
+    setEntityQueryTermOld(trimmed)
 
-    let arabicTerm = EntityQueryTerm
-    if (!isArabic(EntityQueryTerm)) {
+    let arabicTerm = trimmed
+    if (!isArabic(trimmed)) {
       setSearchPhase('translating')
-      try { arabicTerm = await translateToArabic(EntityQueryTerm, resource?.Translator) }
-      catch { arabicTerm = EntityQueryTerm }
+      try { arabicTerm = await translateToArabic(trimmed, resource?.Translator) }
+      catch { arabicTerm = trimmed }
     }
 
     setSearchPhase('opening')
