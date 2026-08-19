@@ -46,7 +46,17 @@ BRANCH="${LOCAL_REF#refs/heads/}"
 # New branch / first push — remote_sha is all zeros, nothing to diff
 # against. Treat as "changed everything" to be safe (routes to native
 # path, which just prompts rather than silently doing anything).
-if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]]; then
+#
+# Also treat an UNKNOWN (non-zero) remote SHA the same way — a real
+# failure hit in practice (2026-08-19): `git diff` against a SHA this
+# clone can't resolve aborts with "fatal: bad object <sha>", which under
+# `set -e` killed the push outright before any of the hook's own logic
+# ran. Root cause wasn't pinned down with certainty — regardless, a hook
+# that can hard-fail on a git-internal object-lookup hiccup is too
+# fragile; falling back to "changed everything" costs nothing (native
+# path just prompts) and can never block a push that would otherwise
+# succeed.
+if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$REMOTE_SHA^{commit}" 2>/dev/null; then
   CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
 else
   CHANGED_FILES=$(git diff --name-only "$REMOTE_SHA" "$LOCAL_SHA")
@@ -63,7 +73,7 @@ echo "→ Checking what changed in this push..."
 # verify-don't-trust pattern. Note: the fix lands in the INDEX — the push
 # currently in flight still carries the old mode; commit and include it
 # in a follow-up push.
-if git ls-files -s ios/App/ci_scripts/*.sh | grep -q '^100644'; then
+if git ls-files -s ios/App/ci_scripts/ | grep -q '^100644'; then
   echo "⚠ ci_scripts lost exec bit — restoring in the index now:"
   git update-index --chmod=+x ios/App/ci_scripts/*.sh
   git ls-files -s ios/App/ci_scripts/
@@ -109,6 +119,28 @@ NATIVE_PATTERN='^(android/|ios/|capacitor\.config\.ts|package\.json|package-lock
 IS_NATIVE=false
 if echo "$CHANGED_FILES" | grep -qE "$NATIVE_PATTERN"; then
   IS_NATIVE=true
+fi
+
+# Does this push change anything that could actually affect the BUILT
+# WEB BUNDLE (dist/)? Real gap caught in practice (2026-08-19): the
+# web-only branch below auto-releases to OtaKit unconditionally — so a
+# pure scripts/ or docs change (this hook file itself, a moment ago)
+# still published a new, distinct OTA release even though dist/ would be
+# byte-identical to the previous one. Harmless (OtaKit just republishes
+# the same content under a new timestamp-derived tag) but pure noise —
+# a fresh Downloaded/Applied event on the dashboard for zero real change.
+# Deliberately narrow/inclusive, not exhaustive: only files verified to
+# actually feed `npm run build`'s output. package.json/capacitor.config.ts
+# are already handled by NATIVE_PATTERN above (native path has its own,
+# separately-answered OTA prompt) so they're intentionally absent here —
+# this pattern only needs to cover the web-only branch's true positives.
+# tsconfig*.json deliberately excluded: `tsc -b` is noEmit, type-checking
+# only — a config-only change there can block or pass the build but
+# never changes dist/'s actual contents.
+OTA_RELEVANT_PATTERN='^(src/|public/|index\.html|vite\.config\.ts|tailwind\.config\.ts|postcss\.config\.js)'
+OTA_RELEVANT=false
+if echo "$CHANGED_FILES" | grep -qE "$OTA_RELEVANT_PATTERN"; then
+  OTA_RELEVANT=true
 fi
 
 # Build once, shared by Firebase deploy below and OTA further down —
@@ -157,23 +189,32 @@ if ! command -v otakit &> /dev/null; then
 fi
 
 if [ "$IS_NATIVE" = false ]; then
-  echo "→ Web-only change detected — pushing OTA update..."
+  if [ "$OTA_RELEVANT" = false ]; then
+    # Nothing in this push could change dist/'s actual contents (see
+    # OTA_RELEVANT_PATTERN above) — deliberately distinct from "tried and
+    # failed" below: this is "nothing to ship," so no store-submission
+    # fallback offer here, that fallback exists for a genuine failed
+    # release, not a skipped one.
+    echo "→ No web-bundle-relevant files changed — skipping OTA release."
+  else
+    echo "→ Web-only change detected — pushing OTA update..."
 
-  # scripts/release-to-otakit.sh's own non-zero exit (genuine failure
-  # after its internal retry) must not kill this script under set -e —
-  # this specific call site has its own further fallback (offering store
-  # submission) that no other caller of the shared script needs, since
-  # here nothing has explicitly confirmed a manual release is even
-  # wanted; a persistently-failing OTA server means mobile users need
-  # another way to receive this update at all.
-  if ! bash scripts/release-to-otakit.sh; then
-    read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      submit_to_stores
-    else
-      echo "  Skipped. This push will proceed, but mobile users won't"
-      echo "  receive this update until OTA or a store submission succeeds."
+    # scripts/release-to-otakit.sh's own non-zero exit (genuine failure
+    # after its internal retry) must not kill this script under set -e —
+    # this specific call site has its own further fallback (offering store
+    # submission) that no other caller of the shared script needs, since
+    # here nothing has explicitly confirmed a manual release is even
+    # wanted; a persistently-failing OTA server means mobile users need
+    # another way to receive this update at all.
+    if ! bash scripts/release-to-otakit.sh; then
+      read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
+      echo
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        submit_to_stores
+      else
+        echo "  Skipped. This push will proceed, but mobile users won't"
+        echo "  receive this update until OTA or a store submission succeeds."
+      fi
     fi
   fi
 else
