@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/assets/logo-512.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- viewport-fit=cover + env(safe-area-inset-*) in src/pages/Home.tsx —
+         needed specifically because Capacitor's native iOS WKWebView
+         renders edge-to-edge (under the status bar/notch) regardless of
+         this tag, unlike a plain Safari tab or an installed "Add to Home
+         Screen" PWA, both of which already reserve that space on their
+         own by default. Confirmed via real iPhone testing 2026-08-19:
+         overlap only in the native app, not Safari or standalone PWA —
+         this fix adds the missing padding without affecting the two
+         contexts that were already correct. -->
     <title>i360إ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -5,7 +5,17 @@ import OrnamentDivider from '@/components/OrnamentDivider'
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-dvh bg-brand-ivory">
+    <div className="flex flex-col h-dvh bg-brand-ivory pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      {/* Safe-area padding here, not on the header/OSRow individually —
+          one place, applies uniformly top+bottom, and box-sizing:
+          border-box (Tailwind preflight) means it's absorbed within
+          h-dvh rather than pushing the layout taller than the viewport.
+          bg-brand-ivory already on this element, so the inset itself
+          reads as ivory, not a stray black/white bar. Real bug, real
+          iPhone: native app rendered edge-to-edge under the status bar
+          (Capacitor's native default); Safari tab and installed PWA were
+          both already correct without this, since they reserve that
+          space on their own — see index.html's viewport comment. */}
 
       {/* App header — framed by classical ornate Arabic parentheses
           (U+FD3F / U+FD3E), not the earlier hand-drawn star flanking —

@@ -150,7 +150,11 @@ export default function Browser() {
   const canGoForward = CurrentWebViewIndex < WebViewPages.length - 1
 
   return (
-    <div className="flex flex-col h-dvh bg-brand-ivory">
+    <div className="flex flex-col h-dvh bg-brand-ivory pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      {/* Same fix as Home.tsx, same reason — this route has its own
+          separate h-dvh wrapper (not shared layout), so it needed its
+          own copy of this padding; missed in the first pass, caught on
+          review since the same unguarded pattern existed here too. */}
 
       {/* TOP BAR */}
       <div className="flex items-center gap-2 bg-brand-ivory border-b px-2 py-2">
