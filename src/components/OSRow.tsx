@@ -11,8 +11,13 @@ import Dialog from './Dialog'
 // Kept short and clearly placeholder-looking ("إصدار -") rather than a fake
 // full version string, so a cold-start-before-data-loads moment doesn't
 // look like a real, specific version number.
-export const AppVersionFallback = 'إصدار -'
-export const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
+// Not exported (2026-08-25 review) — both were exported but never actually
+// imported anywhere else in src/; the export implied a dependency that
+// doesn't exist. Genuinely file-local, kept as named constants rather than
+// inlined for the same self-documenting reason they were named in the
+// first place.
+const AppVersionFallback = 'إصدار -'
+const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 
 // Layout order confirmed: OS_WebToggle (leftmost) → MobileServicesToggle → VersionMenu (rightmost)
 // RTL rule used throughout this project: first item in HTML = rightmost visually,
@@ -94,21 +99,31 @@ function ToggleItem({
           style={knobStyle}
         />
       </button>
-      {/* Icon + tooltip: aria-label covers screen readers; the floating note
-          shows on hover (desktop pointer) OR briefly after a tap (mobile,
-          via showTooltip). Positioned above the icon since OSRow sits at the
-          bottom of the screen — a tooltip below would risk running off-screen.
-          tooltipAlign='left' anchors the tooltip's left edge to the icon
-          (extending rightward, inward from the screen edge) instead of the
-          default symmetric centering — needed for OS_WebToggle specifically,
-          the bar's leftmost item, where a centered tooltip's left half could
-          extend past the physical viewport edge and trigger horizontal
-          scroll (real bug found on a real desktop browser). */}
+      {/* Icon + tooltip: the floating note shows on hover (desktop pointer)
+          OR briefly after a tap (mobile, via showTooltip). Positioned above
+          the icon since OSRow sits at the bottom of the screen — a tooltip
+          below would risk running off-screen. tooltipAlign='left' anchors
+          the tooltip's left edge to the icon (extending rightward, inward
+          from the screen edge) instead of the default symmetric centering —
+          needed for OS_WebToggle specifically, the bar's leftmost item,
+          where a centered tooltip's left half could extend past the
+          physical viewport edge and trigger horizontal scroll (real bug
+          found on a real desktop browser).
+          Both spans below are aria-hidden now that the switch button itself
+          carries the accessible name (aria-label above) — avoids a screen
+          reader hearing the same label announced two or three times in a
+          row. The tooltip specifically: opacity:0 (unlike display:none)
+          does NOT remove an element from the accessibility tree, so its
+          text was being exposed to screen readers regardless of visibility
+          — a second redundant-text source found on closer review, on top
+          of the icon span. Both are inherently sighted-user-only
+          interaction patterns (something that appears near where you just
+          looked or tapped) with zero benefit to a screen reader either way. */}
       <span className="group relative flex items-center">
-        <span className="text-brand-blue" role="img" aria-label={ariaLabel}>
+        <span className="text-brand-blue" aria-hidden="true">
           {icon}
         </span>
-        <span className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded border border-gray-200 bg-brand-ivory px-2 py-1 text-base text-brand-blue shadow-md transition-opacity group-hover:opacity-100 ${
+        <span aria-hidden="true" className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded border border-gray-200 bg-brand-ivory px-2 py-1 text-base text-brand-blue shadow-md transition-opacity group-hover:opacity-100 ${
           tooltipAlign === 'left' ? 'left-0' : 'left-1/2 -translate-x-1/2'
         } ${
           showTooltip ? 'opacity-100' : 'opacity-0'

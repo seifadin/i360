@@ -219,8 +219,54 @@ export default function SearchBar() {
     if (!tryOpenNewTab(keyboardUrl)) triggerKeyboardFailed()
   }
 
+  // Dynamic accessible name for the search-options button — mirrors the
+  // exact same conditional chain used below to pick which icon renders, so
+  // a screen reader user gets the same information a sighted user reads
+  // from the icon changing (previously a static "خيارات البحث" regardless
+  // of state — a real gap manual review caught, on top of the Lighthouse-
+  // driven fixes, since Lighthouse's automated a11y check only catches a
+  // subset of real issues by its own admission).
+  // Shared by both computed values below — the flash/searchPhase portion
+  // is identical logic for both (same state, same messages), so it's
+  // computed once here rather than duplicated in two separate ternary
+  // chains. null (not '') when nothing transient applies, so each
+  // consumer's own ?? fallback reads clearly as "nothing transient, fall
+  // through to my own non-transient default."
+  const transientStatus: string | null =
+    flash === 'invalid' ? 'إدخال غير صالح' :
+    flash === 'notfound' ? 'لم يتم العثور على تفسير لهذه الآية' :
+    flash === 'openfailed' ? 'تعذر فتح الرابط' :
+    searchPhase === 'translating' ? 'جارٍ الترجمة' :
+    searchPhase === 'opening' ? 'جارٍ فتح النتائج' :
+    null
+
+  const searchIconLabel = transientStatus ?? (
+    overrideArmed ? 'وضع البحث المباشر مفعّل، اضغط للإلغاء' :
+    isExegesisMatch ? 'تم اكتشاف رقم آية، اضغط للبحث العادي بدلاً من ذلك' :
+    'خيارات البحث'
+  )
+
+  // Separate from the button label above: covers only the genuinely
+  // transient/ephemeral events (500ms flashes, in-flight phases, plus
+  // Bot/Keyboard's own failures) that need proactive announcement
+  // regardless of what currently has focus — e.g. an "invalid input"
+  // flash appears on THIS icon after tapping Submit, a different button,
+  // so nothing here would otherwise reach a screen reader unless it's
+  // wrapped in a live region. Empty string when nothing transient is
+  // happening, so the live region stays silent by default.
+  const liveMessage = transientStatus ?? (
+    botFailed ? 'تعذر فتح المساعد الذكي' :
+    keyboardFailed ? 'تعذر فتح لوحة المفاتيح' :
+    ''
+  )
+
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-brand-ivory border-b border-gray-200">
+      {/* Visually hidden, announces the transient states above regardless
+          of which element currently has focus. role="status" + explicit
+          aria-live="polite" together for the broadest, most reliable
+          screen-reader support. */}
+      <span className="sr-only" role="status" aria-live="polite">{liveMessage}</span>
 
       {/* Search input with SearchIcon (right) + Search-execute icon (left) */}
       <div className="flex flex-1 min-w-0 items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 gap-2">
@@ -234,7 +280,7 @@ export default function SearchBar() {
         <button
           onClick={handleSearchIconTap}
           className="shrink-0 text-brand-blue"
-          aria-label="خيارات البحث"
+          aria-label={searchIconLabel}
         >
           {flash === 'invalid' && <CircleAlert size={17} />}
           {flash === 'notfound' && (
@@ -257,6 +303,12 @@ export default function SearchBar() {
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           placeholder="بحث ... أو الآية#.السورة#"
           aria-label="بحث"
+          // Standard form pattern found on closer review, alongside the
+          // three findings above: many screen readers announce "invalid
+          // entry" automatically when a focused field has aria-invalid
+          // true. Only ever true for the same brief 500ms window the
+          // invalid-input flash shows, then clears itself with it.
+          aria-invalid={flash === 'invalid'}
           className="min-w-0 flex-1 bg-transparent text-right text-base text-brand-blue outline-none placeholder-gray-400"
           dir="rtl"
         />
