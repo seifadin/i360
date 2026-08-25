@@ -40,9 +40,9 @@ export default function Home() {
           OSRow are ordinary siblings below, so this simply ends where they
           begin. No measured/guessed padding needed, unlike the reverted
           fixed-positioning attempt. */}
-      <div className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
         <ScienceGrid />
-      </div>
+      </main>
 
       {/* Search bar + OSRow — ordinary flex document flow, not fixed. The
           original OS_WebToggle tooltip-overflow bug is already fixed at

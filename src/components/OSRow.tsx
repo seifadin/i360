@@ -80,6 +80,14 @@ function ToggleItem({
           triPosition !== undefined || active ? 'bg-brand-green' : 'bg-brand-disabled'
         }`}
         aria-pressed={triPosition === undefined ? active : undefined}
+        // Real Lighthouse finding (2026-08-25): this button had no
+        // accessible name at all — no visible text, and the label lives
+        // on the separate sibling icon below, not referenced by this
+        // element. A screen reader announced only "button, pressed" with
+        // no indication of what it toggles. Reusing the same ariaLabel
+        // already passed in for the icon closes this correctly, since
+        // it's already the accurate, current-state-aware label.
+        aria-label={ariaLabel}
       >
         <span
           className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"

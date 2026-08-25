@@ -1,0 +1,15 @@
+# i360إ (الموسوعة الإسلامية)
+
+> An Arabic-only Islamic knowledge discovery app that organizes Islamic resources — apps, websites, and books — by discipline into a single searchable interface.
+
+i360إ aggregates content from a curated resource database, web search, and the Internet Archive, and presents it through a right-to-left Arabic interface. It is available as a web app (Progressive Web App) and as native apps for Android, iOS, and Huawei AppGallery.
+
+## Access
+
+- [Web app](https://i360-e.web.app/): usable directly in any browser, installable to a device home screen
+- [Google Play](https://play.google.com/store/apps/details?id=com.appgyver.i360): Android app
+- [Apple App Store](https://apps.apple.com/app/id1632337666): iOS app
+
+## Content areas
+
+The app organizes resources across Islamic science disciplines including the Qur'an and its exegesis (Tafsir), Hadith, Aqeedah (creed), Fiqh (jurisprudence), Tazkiyah (spiritual purification), Fatawa (religious rulings), acts of worship, and language and culture resources, alongside tools such as a virtual Arabic keyboard and Qur'an chapter/verse search.

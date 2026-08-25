@@ -193,24 +193,26 @@ export default function Browser() {
           to inWebList/URIschemes so they open in a tab instead of an
           iframe in the first place, rather than trying to detect failure
           after the fact from inside the page. */}
-      {CurrentWebView ? (
-        <div className="relative flex-1">
-          <iframe
-            ref={iframeRef}
-            src={CurrentWebView}
-            className="w-full h-full border-none"
-            title="المتصفح"
-            onLoad={handleIframeLoad}
-          />
-          {iframeLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-brand-ivory">
-              <LoaderCircle size={32} className="animate-spin text-brand-blue" />
-            </div>
-          )}
-        </div>
-      ) : (
-        <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
-      )}
+      <main className="flex flex-1 flex-col">
+        {CurrentWebView ? (
+          <div className="relative flex-1">
+            <iframe
+              ref={iframeRef}
+              src={CurrentWebView}
+              className="w-full h-full border-none"
+              title="المتصفح"
+              onLoad={handleIframeLoad}
+            />
+            {iframeLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-brand-ivory">
+                <LoaderCircle size={32} className="animate-spin text-brand-blue" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="p-4 text-right text-gray-400">لم يتم تحديد رابط</p>
+        )}
+      </main>
 
       {/* BOTTOM BAR — visual left→right: [ArrowLeft][ArrowRight][RotateCw][Home][Paperclip][Share2]
           Ordinary flex document flow, not fixed — matching Home.tsx's

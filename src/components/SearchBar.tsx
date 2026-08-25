@@ -250,10 +250,13 @@ export default function SearchBar() {
 
         <input
           type="text"
+          id="i360-search"
+          name="search"
           value={EntityQueryTerm}
           onChange={e => setEntityQueryTerm(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           placeholder="بحث ... أو الآية#.السورة#"
+          aria-label="بحث"
           className="min-w-0 flex-1 bg-transparent text-right text-base text-brand-blue outline-none placeholder-gray-400"
           dir="rtl"
         />

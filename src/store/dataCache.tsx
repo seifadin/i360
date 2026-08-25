@@ -41,21 +41,61 @@ function saveCached<T>(cacheKey: string, data: T[]): void {
   }
 }
 
-const CACHE_KEY_SCIENCES = 'i360CacheSciences'
+export const CACHE_KEY_SCIENCES = 'i360CacheSciences'
 const CACHE_KEY_QURAN = 'i360CacheQuran'
+
+// Redundant, tiny persisted copy of the feedback mailto: link — separate
+// from the full Sciences cache above. ErrorBoundary sits ABOVE
+// DataCacheProvider in the tree (main.tsx wraps <App/>, not the reverse),
+// so it can't use useDataCache() and reads localStorage directly instead;
+// this key exists so that read doesn't depend on the FULL Sciences cache
+// having survived intact, and so a crash-time lookup succeeds even if the
+// CURRENT session's own Sciences fetch hasn't completed yet, as long as
+// ANY previous session ever wrote it. Sourced from i360dbs (not i360dbc,
+// which is fetched fresh every launch with zero localStorage persistence
+// at all — confirmed via grep, no CACHE_KEY_RESOURCE exists — making it
+// strictly worse for this purpose, not just the same edge case moved
+// earlier). Written opportunistically on every successful Sciences load,
+// not only during a crash.
+export const FEEDBACK_MAILTO_KEY = 'i360FeedbackMailto'
+
+function cacheFeedbackMailto(sciences: Science[]): void {
+  const feedbackRow = sciences.find(s => s.ScienceMinor_En === 'Feedback')
+  if (feedbackRow?.Web?.toLowerCase().startsWith('mailto:')) {
+    setStoredItem(FEEDBACK_MAILTO_KEY, feedbackRow.Web)
+  }
+  // Deliberately no else/removal branch: if the Feedback row is temporarily
+  // absent from a given fetch (a transient Baserow hiccup, a momentary
+  // filter mismatch), keep whatever was last successfully cached rather
+  // than wiping it — this redundant copy exists specifically to survive
+  // exactly this kind of transient gap.
+}
 
 // Consolidates the 3 actually-consumed icon fields (IconName is a 4th field
 // that exists in Baserow but is confirmed unused anywhere in the app) into
 // one set of unique names — no static/hardcoded list, purely derived from
 // whatever Sciences data is actually loaded right now.
-function collectIconNames(sciences: Science[]): Set<string> {
-  const names = new Set<string>()
+type IconTier = 'major' | 'intermediate' | 'minor'
+
+// Single pass over sciences, building all three tiers' unique-icon sets
+// together — one loop, not three (2026-08-25 review). Each tier's Set
+// dedupes on its own by construction; a tier legitimately reusing the same
+// icon across many rows (e.g. 13 Major rows sharing 3 distinct icons)
+// collapses to exactly that count automatically, no separate dedup step
+// needed. Tiers stay separate (not one flat union) so callers can preload
+// by priority — see the staged Major/Intermediate/Minor calls below.
+function collectIconNamesByTier(sciences: Science[]): Map<IconTier, Set<string>> {
+  const tiers = new Map<IconTier, Set<string>>([
+    ['major', new Set<string>()],
+    ['intermediate', new Set<string>()],
+    ['minor', new Set<string>()],
+  ])
   for (const s of sciences) {
-    if (s.ScienceMajorIcon) names.add(s.ScienceMajorIcon)
-    if (s.ScienceIntermediateIcon) names.add(s.ScienceIntermediateIcon)
-    if (s.ScienceMinorIcon) names.add(s.ScienceMinorIcon)
+    if (s.ScienceMajorIcon) tiers.get('major')!.add(s.ScienceMajorIcon)
+    if (s.ScienceIntermediateIcon) tiers.get('intermediate')!.add(s.ScienceIntermediateIcon)
+    if (s.ScienceMinorIcon) tiers.get('minor')!.add(s.ScienceMinorIcon)
   }
-  return names
+  return tiers
 }
 
 // Generic cache-or-fetch resolver — extracted after resolveSciences/
@@ -159,8 +199,41 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         if (cancelled) return
         setSciences(freshSciences)
         setQuran(freshQuran)
-        import('@/lib/iconLoader')
-          .then(({ preloadIcons }) => preloadIcons(collectIconNames(freshSciences)))
+        cacheFeedbackMailto(freshSciences)
+
+        // Staged icon preloading, by tier priority — real fix for a real,
+        // measured problem (2026-08-25): the previous one-shot preload of
+        // every icon (Major+Intermediate+Minor together) fired ~50 dynamic
+        // imports immediately on page load, and their staggered module
+        // evaluation as each one resolved was traced (via Lighthouse
+        // long-tasks + console.time profiling) to ~1-1.8s of scattered
+        // main-thread blocking during the most critical load window — even
+        // though only Major-tier icons are actually visible before any
+        // category is expanded (ScienceGrid.tsx's openMajorId/
+        // openIntermediateId gates mean Intermediate/Minor rows aren't
+        // rendered at all until tapped open).
+        //
+        // Staged, not lazy-per-tap: Major loads immediately (small,
+        // genuinely needed now); Intermediate and Minor are deferred to
+        // idle time, in that order, rather than dropped entirely — a fully
+        // lazy per-tap approach would reintroduce a real, previously-fixed
+        // bug (2026-08-12: a burst of fresh per-icon requests firing
+        // simultaneously the moment a category was tapped, causing a
+        // perceptible pause). This keeps that fix's benefit (icons already
+        // warm by the time a user taps) while removing Intermediate/Minor
+        // from the initial page-load critical path.
+        import('@/lib/iconLoader').then(({ preloadIcons, scheduleIdle }) => {
+          const tiers = collectIconNamesByTier(freshSciences)
+
+          preloadIcons(tiers.get('major')!)
+
+          scheduleIdle(() => {
+            preloadIcons(tiers.get('intermediate')!)
+            scheduleIdle(() => {
+              preloadIcons(tiers.get('minor')!)
+            })
+          })
+        })
           // Best-effort, matching preloadIcons' own internal stance — if
           // this chunk fetch itself fails (e.g. network drops right after
           // data resolved from localStorage cache), DynamicIcon's per-icon

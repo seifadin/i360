@@ -36,3 +36,19 @@ export function preloadIcons(names: Iterable<string>) {
     loadIcon(name)?.catch(() => {}) // best-effort — DynamicIcon's own fallback handles real failures
   }
 }
+
+// requestIdleCallback has never shipped in Safari/WebKit — meaning
+// Capacitor's iOS app, which renders through WKWebView, would silently
+// never defer anything scheduled this way without a fallback (the same
+// "don't assume a standard API behaves the same in this app's WebView"
+// caution as §12.16's existing bug class, just for WebKit specifically
+// rather than Android's WebView). 200ms is a reasonable "the browser has
+// likely settled by now" guess where requestIdleCallback isn't available,
+// not a precise substitute for it.
+export function scheduleIdle(callback: () => void): void {
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(callback)
+  } else {
+    setTimeout(callback, 200)
+  }
+}
