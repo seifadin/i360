@@ -21,10 +21,13 @@
 # removing redundant package name strings (12g).
 -repackageclasses
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keeps line-number info in obfuscated stack traces for native-level crashes
+# — otherwise a real Android crash shows no usable location at all. Paired
+# deliberately with -renamesourcefileattribute below: alone, this would also
+# expose real file names (MainActivity.java etc.) in a crash log or decompile;
+# together, real names stay hidden while line numbers survive. Low benefit in
+# practice (this app's native layer is thin — most logic is JS, already
+# covered by ErrorBoundary's own crash-report path), added anyway since the
+# combined pair has no real downside once decided on (2026-08-25).
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
