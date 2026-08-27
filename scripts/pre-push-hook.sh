@@ -246,17 +246,28 @@ else
   # OTA exists specifically to reach users WITHOUT needing store review
   # at all. The two are conceptually unrelated risk decisions and must
   # stay independently answerable.
-  read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
-    # This script has set -e active — the shared script's own non-zero
-    # exit (on genuine failure after its internal retry) must not be
-    # allowed to abort the whole push. || true absorbs that here.
-    bash scripts/release-to-otakit.sh || true
+  #
+  # Gated behind OTA_RELEVANT (same check the web-only branch already
+  # applies above) — a real gap caught in practice (2026-08-27): a
+  # native-only change (e.g. proguard-rules.pro alone) was still asking
+  # this unconditionally. Answering yes republished dist/ byte-identical
+  # to what was already live, under a new timestamp tag — harmless, but
+  # a confusing no-op release with nothing to actually ship.
+  if [ "$OTA_RELEVANT" = false ]; then
+    echo "→ No web-bundle-relevant files changed — skipping OTA release."
   else
-    echo "  Skipped. Run manually when ready:"
-    echo "    unset OTA_CHANNEL && otakit upload --release"
+    read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
+      # This script has set -e active — the shared script's own non-zero
+      # exit (on genuine failure after its internal retry) must not be
+      # allowed to abort the whole push. || true absorbs that here.
+      bash scripts/release-to-otakit.sh || true
+    else
+      echo "  Skipped. Run manually when ready:"
+      echo "    unset OTA_CHANNEL && otakit upload --release"
+    fi
   fi
 fi
 
