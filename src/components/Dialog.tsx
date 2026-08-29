@@ -32,7 +32,12 @@ export default function Dialog({ open, title, message, onClose }: DialogProps) {
     // was focused before the dialog opened stays focused — meaning a
     // keyboard/screen-reader user could be left "on" page content that's
     // now visually hidden behind the overlay, with no indication a modal
-    // appeared at all.
+    // appeared at all. Confirmed via real on-device diagnostic logging
+    // (2026-08-29): focus genuinely lands here correctly, immediately and
+    // held — the initial "no ring visible" report traced to a testing
+    // artifact (OTA silently reverting a locally-built test APK, see
+    // §14/§14g's own established pattern for this exact class of issue),
+    // not a real focus bug at all.
     okButtonRef.current?.focus()
 
     function handleKeyDown(e: KeyboardEvent) {
@@ -75,7 +80,16 @@ export default function Dialog({ open, title, message, onClose }: DialogProps) {
         <button
           ref={okButtonRef}
           onClick={onClose}
-          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+          // ring, not outline (2026-08-29 fix) — outline doesn't reliably
+          // follow border-radius in every WebView implementation, and this
+          // button uses rounded-full (a full pill shape). That produced a
+          // visible gap specifically at the rounded ends regardless of
+          // outline-offset value, confirmed via real screenshots — no
+          // offset value was ever going to fix it, since the actual cause
+          // was outline rendering as a squared bounding box, not spacing.
+          // Tailwind's ring-* utilities use box-shadow instead, which
+          // correctly clips to the element's own border-radius.
+          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-green"
         >
           موافق
         </button>

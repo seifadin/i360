@@ -1,4 +1,4 @@
-import { useEffect, useState, CSSProperties } from 'react'
+import { useCallback, useEffect, useState, CSSProperties } from 'react'
 import { EllipsisVertical, Globe } from 'lucide-react'
 import { OtaKit } from '@otakit/capacitor-updater'
 import { useAppState } from '@/store/appState'
@@ -141,6 +141,18 @@ export default function OSRow() {
   const { resource } = useDataCache()
   const [versionOpen, setVersionOpen] = useState(false)
 
+  // useCallback (2026-08-29) — same real issue already fixed on the other
+  // two dialogs (App.tsx), missed on this one at the time: a fresh inline
+  // function every render meant Dialog.tsx's own focus/keydown effect
+  // (dependent on onClose) tore down and rebuilt on every unrelated
+  // OSRow re-render while this dialog was open - notably including the
+  // async OtaKit.getState() resolving right around when the dialog opens.
+  // setVersionOpen is React-guaranteed stable, so an empty dependency
+  // array is correct.
+  const handleVersionClose = useCallback(() => {
+    setVersionOpen(false)
+  }, [])
+
   // OTA bundle identifier (2026-08-29) — shown as a permanent, smaller
   // third line in the version dialog below, distinct from the Baserow
   // Version above it: that reflects content, this reflects which OTA
@@ -276,7 +288,7 @@ export default function OSRow() {
             )}
           </>
         }
-        onClose={() => setVersionOpen(false)}
+        onClose={handleVersionClose}
       />
     </div>
   )
