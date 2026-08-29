@@ -1,5 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// Xcode Cloud Distribution Preparation experiment, test 1 of 3 (2026-08-29):
+// this push is deliberate, no functional change — confirms whether the
+// current "App Store Connect" setting on "iOS Validate" produces a fresh
+// 90062/90186 failure on a genuinely new build, not a delayed-queue echo
+// of an older, already-fixed state. See i360-instructions.md §15.
+
+
 const config: CapacitorConfig = {
   appId: 'com.appgyver.i360',
   appName: 'i360إ',
