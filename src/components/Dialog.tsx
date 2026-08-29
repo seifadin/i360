@@ -75,7 +75,7 @@ export default function Dialog({ open, title, message, onClose }: DialogProps) {
         <button
           ref={okButtonRef}
           onClick={onClose}
-          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white"
+          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
         >
           موافق
         </button>
