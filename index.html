@@ -29,8 +29,26 @@
          CHANGELOG.md. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- display=block, not swap (2026-08-28) — a real, recurring bug, not
+         hypothetical: the privacy dialog (first thing shown on a fresh
+         install) visibly reflowed mid-view as Amiri swapped in over the
+         fallback font, confirmed by real screenshots showing different
+         line-wrap counts and even differently-mirrored parentheses
+         between two shots seconds apart. swap paints immediately in the
+         fallback, then swaps once Amiri arrives — exactly the visible
+         transition causing this. Two JS-based attempts to detect and wait
+         for readiness (document.fonts.ready, then explicit
+         document.fonts.load() calls) both failed on real device testing —
+         real, reproducible failures, not just theoretical concern. block
+         moves this to the browser's own rendering pipeline instead: holds
+         text invisible until Amiri is ready (or a short ~3s timeout,
+         browser-dependent), rather than painting a fallback first. Only
+         meaningfully costs anything on a genuinely first-ever launch with
+         nothing cached — exactly the one moment this dialog appears
+         anyway; every subsequent app open has the font already cached,
+         so the practical downside mostly disappears where it matters. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=block"
       rel="stylesheet"
     />
   </head>

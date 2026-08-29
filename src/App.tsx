@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { OtaKit } from '@otakit/capacitor-updater'
 import { AppStateProvider } from '@/store/appState'
@@ -11,12 +11,22 @@ const Home = lazy(() => import('@/pages/Home'))
 const Browser = lazy(() => import('@/pages/Browser'))
 
 // ─── i360Privacy — one-time privacy notice ─────────────────────────────────────
+// Shared, not a local const inside the function — read from two places (the
+// check, and the write-on-dismiss handler below), avoiding a duplicated
+// literal that could drift out of sync.
+const PRIVACY_NOTICE_KEY = 'i360Privacy'
+
+// Read-only (2026-08-28 fix) — previously wrote the key the instant this
+// check ran, before the dialog had even rendered, let alone before a user
+// could have dismissed it. Root cause of a real, confirmed bug: an
+// invisible, discarded first render pass (plausibly triggered by OtaKit
+// applying a pending update mid-launch) could reach this check, silently
+// mark the notice "seen," and get replaced before ever reaching the screen
+// — permanently consuming the one-time notice for a user who never actually
+// saw or dismissed it. The write now only happens in the dialog's own
+// onClose below, gated behind a real tap.
 function checkPrivacyNotice(): boolean {
-  const key = 'i360Privacy'
-  const stored = getStoredItem(key)
-  if (stored !== null) return false // already shown before — exit, no dialog
-  setStoredItem(key, '1')
-  return true // first time — show dialog
+  return getStoredItem(PRIVACY_NOTICE_KEY) === null
 }
 
 // Renamed from AppRoutes — routing is now only one of several "runs once
@@ -59,13 +69,44 @@ function AppShell() {
   interface QueuedDialog { title: string; message: string }
   const [dialogQueue, setDialogQueue] = useState<QueuedDialog[]>([])
 
-  // Mount: privacy notice (one-time). Moved here from Home.tsx, same
-  // reasoning as usePlatform() above — checkPrivacyNotice()'s own
-  // localStorage guard already made a Home.tsx remount harmless, but
-  // living here means the check itself only ever runs once, consistent
-  // with every other "once per app session" concern in this component.
+  // Mount: privacy notice (one-time). checkPrivacyNotice() itself is
+  // read-only (see its own comment) and computed exactly once via
+  // useState's lazy initializer — safe to call here with no side effects.
+  const [needsPrivacyNotice] = useState(() => checkPrivacyNotice())
+
+  // Fix (2026-08-28): the dialog used to show immediately on mount,
+  // regardless of anything else — the single fastest thing to render
+  // anywhere in the app, faster even than Home's own static title (which
+  // waits on Home's lazy chunk to load). That made it the one piece of UI
+  // exposed to a real font-swap layout bug (Amiri loading async over a
+  // fallback, confirmed via real screenshots showing different line-wrap
+  // counts and mirrored punctuation between shots seconds apart) and,
+  // separately, to font-display:block's own "blank text in an already-
+  // visible container" behavior once that was tried as a fix. Two direct
+  // JS attempts to detect font-readiness (document.fonts.ready, then
+  // explicit document.fonts.load() calls) both failed real on-device
+  // testing. Real fix: gate the dialog's visibility behind the same
+  // already-proven cacheLoading signal the Edition/Version/Revision
+  // dialogs use below, instead of a third novel font-detection attempt —
+  // real data-fetch time is comfortably longer than the font's own fetch
+  // in practice, so Amiri has virtually always settled by the time this
+  // fires. font-display:block (index.html) stays as a safety net for the
+  // rare case data genuinely loads faster than the font.
   useEffect(() => {
-    if (checkPrivacyNotice()) setPrivacyOpen(true)
+    if (cacheLoading) return
+    if (needsPrivacyNotice) setPrivacyOpen(true)
+  }, [cacheLoading, needsPrivacyNotice])
+
+  // useCallback here and on handleDialogClose below (2026-08-28) — a
+  // fresh inline function on every render meant Dialog.tsx's own focus/
+  // keydown effect (dependent on onClose) tore down and re-ran on every
+  // unrelated AppShell re-render while a dialog was open, not just when
+  // it actually opened or closed. setStoredItem is a plain imported
+  // function (stable) and setPrivacyOpen is React-guaranteed stable, so
+  // an empty dependency array is correct.
+  const handlePrivacyClose = useCallback(() => {
+    setStoredItem(PRIVACY_NOTICE_KEY, '1') // real fix — write moved here, see checkPrivacyNotice()'s own comment
+    setPrivacyOpen(false)
   }, [])
 
   // i360dbc resolved by dataCache: show Edition/Version/Revision dialogs
@@ -96,9 +137,9 @@ function AppShell() {
     setDialogQueue(queue)
   }, [cacheLoading, resource, changeFlags])
 
-  function handleDialogClose() {
+  const handleDialogClose = useCallback(() => {
     setDialogQueue(prev => prev.slice(1))
-  }
+  }, [])
 
   return (
     <>
@@ -114,7 +155,7 @@ function AppShell() {
         open={privacyOpen}
         title="سلامة البيانات"
         message="لا يتم جمع البيانات (غير الوظيفية) أو مشاركتها. سياسة الخصوصية: https://tinyurl.com/i360Privacy"
-        onClose={() => setPrivacyOpen(false)}
+        onClose={handlePrivacyClose}
       />
 
       {/* Edition/Version/Revision — one at a time, queue-driven (see above) */}
