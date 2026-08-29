@@ -1,9 +1,14 @@
-import { useEffect, useId, useRef } from 'react'
+import { ReactNode, useEffect, useId, useRef } from 'react'
 
 interface DialogProps {
   open: boolean
   title: string
-  message: string
+  // ReactNode, not just string (2026-08-29) — needed so OSRow's version
+  // dialog can render its OTA-build line in a different, smaller text
+  // size than the rest of the message. Fully backward-compatible: a plain
+  // string is itself a valid ReactNode, so the privacy/Edition dialogs'
+  // existing string messages need no changes at all.
+  message: ReactNode
   onClose: () => void
 }
 

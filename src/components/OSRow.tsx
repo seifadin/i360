@@ -1,5 +1,6 @@
-import { useState, CSSProperties } from 'react'
+import { useEffect, useState, CSSProperties } from 'react'
 import { EllipsisVertical, Globe } from 'lucide-react'
+import { OtaKit } from '@otakit/capacitor-updater'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { detectOS, isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
@@ -140,6 +141,27 @@ export default function OSRow() {
   const { resource } = useDataCache()
   const [versionOpen, setVersionOpen] = useState(false)
 
+  // OTA bundle identifier (2026-08-29) — shown as a permanent, smaller
+  // third line in the version dialog below, distinct from the Baserow
+  // Version above it: that reflects content, this reflects which OTA
+  // bundle is actually running (useful precisely because they can differ
+  // — the original motivation was a real bug where confirming "is the fix
+  // actually live" needed a full clear-data-and-repro cycle each time).
+  // Fetched once here, not lazily on dialog open — getState() reads
+  // already-known local plugin state, no network call, so it's cheap
+  // enough to have ready before the user ever taps to open the dialog.
+  // Shown verbatim, not reformatted — OtaKit's own CLI calls this an
+  // "auto-generated version," meaning the exact otk.<hash>.<timestamp>
+  // shape is a default, not a permanently guaranteed format; displaying
+  // whatever it reports avoids any risk of parsing logic breaking later
+  // if that shape ever changes. Implemented on the web fallback too
+  // (confirmed in OtaKitWeb), so this is safe to call regardless of
+  // platform — resolves to a sensible built-in default there.
+  const [otaVersion, setOtaVersion] = useState<string | null>(null)
+  useEffect(() => {
+    OtaKit.getState().then(s => setOtaVersion(s.current.version)).catch(() => {})
+  }, [])
+
   const appVersion = resource?.Version || AppVersionFallback
 
   // Effective OS drives the leftmost icon. Real android/ios devices:
@@ -237,7 +259,23 @@ export default function OSRow() {
       <Dialog
         open={versionOpen}
         title="معلومات التطبيق"
-        message={`${appVersion}\n${AppDeveloper}`}
+        message={
+          <>
+            {appVersion}
+            {'\n'}
+            {AppDeveloper}
+            {otaVersion && (
+              <>
+                {'\n'}
+                {/* dir="ltr" — this is a technical, Latin-script string
+                    (version, hash, timestamp) embedded in an RTL dialog;
+                    explicit direction avoids relying on the bidi
+                    algorithm's own default handling for mixed content. */}
+                <span dir="ltr" className="text-xs">({otaVersion})</span>
+              </>
+            )}
+          </>
+        }
         onClose={() => setVersionOpen(false)}
       />
     </div>
