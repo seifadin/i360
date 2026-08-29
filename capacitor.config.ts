@@ -1,16 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// Xcode Cloud Distribution Preparation experiment, test 3 of 3 (2026-08-29):
-// this push is deliberate, no functional change. Test 1 (App Store
-// Connect, control) failed with 90062/90186, as expected. Test 2
-// (TestFlight Internal Testing Only) also failed — unexpected, given
-// Apple's own WWDC guidance suggests this track should tolerate multiple
-// builds at the same marketing version; exact error TBD. This run tests
-// "None" — confirms no distributable artifact is prepared at all, the
-// one setting expected to be unconditionally safe regardless of version
-// state. See i360-instructions.md §15.
-
-
 const config: CapacitorConfig = {
   appId: 'com.appgyver.i360',
   appName: 'i360إ',
