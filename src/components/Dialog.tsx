@@ -33,11 +33,12 @@ export default function Dialog({ open, title, message, onClose }: DialogProps) {
     // keyboard/screen-reader user could be left "on" page content that's
     // now visually hidden behind the overlay, with no indication a modal
     // appeared at all. Confirmed via real on-device diagnostic logging
-    // (2026-08-29): focus genuinely lands here correctly, immediately and
-    // held — the initial "no ring visible" report traced to a testing
-    // artifact (OTA silently reverting a locally-built test APK, see
-    // §14/§14g's own established pattern for this exact class of issue),
-    // not a real focus bug at all.
+    // (2026-08-29) that focus-SETTING itself was never actually broken —
+    // it landed here correctly, immediately, on every dialog throughout.
+    // That's a narrower claim than "the ring-visibility saga was nothing
+    // real": a genuine, separate CSS bug (outline not following
+    // border-radius) also existed and needed its own real fix — see the
+    // button's own className comment below for that half of the story.
     okButtonRef.current?.focus()
 
     function handleKeyDown(e: KeyboardEvent) {

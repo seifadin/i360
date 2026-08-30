@@ -141,14 +141,21 @@ export default function OSRow() {
   const { resource } = useDataCache()
   const [versionOpen, setVersionOpen] = useState(false)
 
-  // useCallback (2026-08-29) — same real issue already fixed on the other
-  // two dialogs (App.tsx), missed on this one at the time: a fresh inline
-  // function every render meant Dialog.tsx's own focus/keydown effect
-  // (dependent on onClose) tore down and rebuilt on every unrelated
-  // OSRow re-render while this dialog was open - notably including the
-  // async OtaKit.getState() resolving right around when the dialog opens.
-  // setVersionOpen is React-guaranteed stable, so an empty dependency
-  // array is correct.
+  // useCallback (2026-08-29) — same real pattern already fixed on the
+  // other two dialogs (App.tsx): a fresh inline function every render
+  // means Dialog.tsx's own focus/keydown effect (dependent on onClose)
+  // tears down and rebuilds on every unrelated OSRow re-render while
+  // this dialog is open. Applied here on the reasonable suspicion it was
+  // contributing to a real, separately-investigated ring-visibility bug
+  // — but a later on-device diagnostic directly confirmed focus was
+  // never actually broken by this, even before this fix existed; the
+  // real causes turned out to be a testing artifact (missing
+  // OTA_CHANNEL=development) and a genuine CSS bug (outline not
+  // following border-radius), both unrelated to this. Kept anyway: still
+  // real, wasteful effect churn worth avoiding on its own merits, same
+  // as the other two dialogs — just not the fix that solved what this
+  // was investigating. setVersionOpen is React-guaranteed stable, so an
+  // empty dependency array is correct.
   const handleVersionClose = useCallback(() => {
     setVersionOpen(false)
   }, [])
