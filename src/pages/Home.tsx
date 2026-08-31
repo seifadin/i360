@@ -18,6 +18,9 @@ const HEADER_STEPS = [
   { text: 'text-2xl', icon: 'h-8 w-8', px: 24 }, // original fixed size — explicitly agreed not to exceed this even on very wide screens
   { text: 'text-xl', icon: 'h-7 w-7', px: 20 },
   { text: 'text-lg', icon: 'h-6 w-6', px: 18 },
+  { text: 'text-base', icon: 'h-5 w-5', px: 16 },
+  { text: 'text-sm', icon: 'h-4 w-4', px: 14 },
+  { text: 'text-xs', icon: 'h-3.5 w-3.5', px: 12 }, // true floor of Tailwind's standard scale (2026-08-31) — stopping at text-sm was itself an unjustified arbitrary limit, the same class of mistake this whole investigation exists to remove
 ] as const
 
 // Container's own horizontal padding (px-4 = 16px × 2 sides) — subtracted
@@ -146,6 +149,17 @@ export default function Home() {
           {HEADER_TITLE}
         </span>
         <span className={`${headerStep.text} font-bold text-brand-blue`} aria-hidden="true">&#xFD3E;</span>
+      </div>
+
+      {/* TEMPORARY DIAGNOSTIC (2026-08-31, round 2) — remove once
+          confirmed on the specific narrower device that wrapped even
+          after the measurement-based fix. Table extended to text-sm/14px
+          as the likely cause, but confirming with real numbers rather
+          than assuming the extension alone is sufficient. */}
+      <div className="text-center text-xs text-gray-400" dir="ltr">
+        {measureRef.current
+          ? `natural=${measureRef.current.scrollWidth} available=${currentPortraitWidth() - HEADER_CONTAINER_PADDING_PX} → ${headerStep.text}`
+          : ''}
       </div>
 
       <OrnamentDivider />
