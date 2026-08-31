@@ -148,14 +148,6 @@ export default function Home() {
         <span className={`${headerStep.text} font-bold text-brand-blue`} aria-hidden="true">&#xFD3E;</span>
       </div>
 
-      {/* TEMPORARY DIAGNOSTIC (2026-08-31) — remove once confirmed working
-          on real hardware. Shows the real, measured values directly. */}
-      <div className="text-center text-xs text-gray-400" dir="ltr">
-        {measureRef.current
-          ? `natural=${measureRef.current.scrollWidth} available=${currentPortraitWidth() - HEADER_CONTAINER_PADDING_PX} → ${headerStep.text}`
-          : ''}
-      </div>
-
       <OrnamentDivider />
 
       {/* Science accordion — scrollable. Normal flex flow — search bar +
