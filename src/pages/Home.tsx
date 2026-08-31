@@ -164,16 +164,6 @@ export default function Home() {
         <span className={`${headerStep.text} font-bold text-brand-blue`} aria-hidden="true">&#xFD3E;</span>
       </div>
 
-      {/* TEMPORARY DIAGNOSTIC (2026-08-31, round 3) — remove once
-          confirmed the safety margin + real-img measurer fix resolves the
-          zero-margin tie (natural=328 available=328) seen on the test
-          device. */}
-      <div className="text-center text-xs text-gray-400" dir="ltr">
-        {measureRef.current
-          ? `natural=${measureRef.current.scrollWidth} available=${currentPortraitWidth() - HEADER_CONTAINER_PADDING_PX} → ${headerStep.text}`
-          : ''}
-      </div>
-
       <OrnamentDivider />
 
       {/* Science accordion — scrollable. Normal flex flow — search bar +
