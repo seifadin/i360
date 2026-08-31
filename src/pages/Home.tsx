@@ -20,15 +20,29 @@ export default function Home() {
       {/* App header — framed by classical ornate Arabic parentheses
           (U+FD3F / U+FD3E), not the earlier hand-drawn star flanking —
           those are removed. DOM order for RTL (first = rightmost):
-          FD3F, icon, title, FD3E → visual right-to-left: FD3F icon title FD3E */}
+          FD3F, icon, title, FD3E → visual right-to-left: FD3F icon title FD3E
+
+          Fluid sizing via clamp() (2026-08-31), not fixed text-2xl/h-8 —
+          real bug, confirmed via a photo from an actual narrower device:
+          the fixed size wrapped to two lines, looking cramped/unpolished.
+          clamp(MIN, Nvw, MAX) scales continuously with viewport width
+          between the two bounds, unlike Tailwind's sm:/md: breakpoints
+          which jump discretely — no single width where it visibly
+          "snaps." MAX on both matches the original fixed size exactly
+          (already visually approved across tonight's testing), so wide
+          screens are byte-for-byte unchanged; only narrow screens now
+          shrink gracefully instead of wrapping. Icon's clamp range keeps
+          the same ~1.33x ratio to the text it had at h-8 (32px) vs
+          text-2xl (24px), so the two stay visually proportional at every
+          width, not just at the old fixed size. */}
       <div className="flex items-center justify-center gap-2 bg-brand-ivory px-4 py-3 shadow-sm shrink-0">
-        <span className="text-2xl font-bold text-brand-blue" aria-hidden="true">&#xFD3F;</span>
+        <span className="text-[clamp(1.125rem,5vw,1.5rem)] font-bold text-brand-blue" aria-hidden="true">&#xFD3F;</span>
         <img
           src="/assets/logo-512.png"
           alt="i360إ"
-          className="h-8 w-8 object-contain"
+          className="h-[clamp(1.5rem,6.5vw,2rem)] w-[clamp(1.5rem,6.5vw,2rem)] object-contain shrink-0"
         />
-        <span className="text-2xl font-bold text-brand-blue">
+        <span className="text-[clamp(1.125rem,5vw,1.5rem)] font-bold text-brand-blue">
           الموسوعة الإسلامية إi360
         </span>
         <span className="text-2xl font-bold text-brand-blue" aria-hidden="true">&#xFD3E;</span>
