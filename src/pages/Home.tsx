@@ -30,6 +30,17 @@ const HEADER_CONTAINER_PADDING_PX = 32
 
 const HEADER_TITLE = 'الموسوعة الإسلامية إi360'
 
+// Tolerance for sub-pixel rounding and any tiny discrepancy between the
+// hidden measurer and the real visible header — not a device-width guess,
+// a measurement-imprecision buffer. Real, confirmed need (2026-08-31): a
+// real device measured natural=328 available=328, a dead-even tie —
+// exactly the kind of zero-margin result that can tip either way in
+// actual rendering rather than the JS measurement alone. Genuinely
+// different in kind from the earlier width-threshold mistakes: this isn't
+// "guess where a screen boundary sits," it's "always leave a small,
+// principled cushion around whatever the real measurement says."
+const SAFETY_MARGIN_PX = 4
+
 function pickHeaderStep(naturalWidthAtReference: number, availableWidth: number) {
   // naturalWidthAtReference is measured with the header at HEADER_STEPS[0]'s
   // size (text-2xl) — font-size scaling is linear (assuming no wrapping),
@@ -37,7 +48,7 @@ function pickHeaderStep(naturalWidthAtReference: number, availableWidth: number)
   // ratio from that one reference measurement, no matter what the current
   // visible step happens to be.
   const referencePx = HEADER_STEPS[0].px
-  const idealPx = referencePx * (availableWidth / naturalWidthAtReference)
+  const idealPx = referencePx * ((availableWidth - SAFETY_MARGIN_PX) / naturalWidthAtReference)
   return HEADER_STEPS.find(step => idealPx >= step.px) ?? HEADER_STEPS[HEADER_STEPS.length - 1]
 }
 
@@ -117,16 +128,18 @@ export default function Home() {
           negative offset (not display:none, which reports 0 for every
           dimension, useless for measurement) keeps it fully out of the
           visible layout and unreachable to keyboard/screen-reader users
-          via aria-hidden. Icon represented as a plain sized span, not a
-          real <img> — its width is fixed/known regardless of what image
-          loads, so a real image isn't needed just for measurement. */}
+          via aria-hidden. Real <img>, not a placeholder span (2026-08-31
+          fix) — a real device measured natural===available exactly, a
+          zero-margin tie; even a fixed-size placeholder isn't guaranteed
+          to render byte-identically to the real image element it stands
+          in for, and at zero margin that small a gap can matter. */}
       <div
         ref={measureRef}
         aria-hidden="true"
         className="absolute -top-[9999px] -left-[9999px] flex items-center gap-2 text-2xl font-bold whitespace-nowrap pointer-events-none"
       >
         <span>&#xFD3F;</span>
-        <span className="inline-block h-8 w-8" />
+        <img src="/assets/logo-512.png" alt="" className="h-8 w-8 object-contain" />
         <span>{HEADER_TITLE}</span>
         <span>&#xFD3E;</span>
       </div>
@@ -151,11 +164,10 @@ export default function Home() {
         <span className={`${headerStep.text} font-bold text-brand-blue`} aria-hidden="true">&#xFD3E;</span>
       </div>
 
-      {/* TEMPORARY DIAGNOSTIC (2026-08-31, round 2) — remove once
-          confirmed on the specific narrower device that wrapped even
-          after the measurement-based fix. Table extended to text-sm/14px
-          as the likely cause, but confirming with real numbers rather
-          than assuming the extension alone is sufficient. */}
+      {/* TEMPORARY DIAGNOSTIC (2026-08-31, round 3) — remove once
+          confirmed the safety margin + real-img measurer fix resolves the
+          zero-margin tie (natural=328 available=328) seen on the test
+          device. */}
       <div className="text-center text-xs text-gray-400" dir="ltr">
         {measureRef.current
           ? `natural=${measureRef.current.scrollWidth} available=${currentPortraitWidth() - HEADER_CONTAINER_PADDING_PX} → ${headerStep.text}`
