@@ -87,16 +87,38 @@ export default function Browser() {
     setCurrentWebView(WebViewPages[i])
   }
 
-  function refresh() {
+  // Shared by refresh() and goFirst() (2026-09-03) — both need to force a
+  // real reload via the DOM ref directly, not through React's src prop,
+  // for the same reason: setting CurrentWebView to a value React already
+  // believes it holds (because the iframe's own internal navigation can
+  // never be observed — see the top-bar/Share/goFirst note below) means
+  // React's diffing skips reapplying an "unchanged" prop, so the iframe
+  // never actually reloads. Writing to the ref bypasses that diffing
+  // entirely, forcing a genuine reload regardless of what React's state
+  // thinks changed.
+  function forceIframeLoad(url: string) {
     if (!iframeRef.current) return
     beginIframeLoad()
-    iframeRef.current.src = CurrentWebView
+    iframeRef.current.src = url
+  }
+
+  function refresh() {
+    forceIframeLoad(CurrentWebView)
   }
 
   function goFirst() {
     if (!WebViewPages.length) return
     setCurrentWebViewIndex(0)
     setCurrentWebView(WebViewPages[0])
+    // Real fix (2026-09-03) — previously only called setCurrentWebView,
+    // which does nothing when CurrentWebViewIndex is already 0: React
+    // sees the "new" value as identical to what it already holds (since
+    // nothing can observe the iframe's own internal navigation — a hard
+    // browser cross-origin restriction, not a bug in this app's code),
+    // so the src prop never gets reapplied and the iframe silently stays
+    // wherever it actually is. forceIframeLoad bypasses this the same
+    // way refresh() already does.
+    forceIframeLoad(WebViewPages[0])
   }
 
   function exitBrowser() { navigate('/') }
@@ -148,6 +170,16 @@ export default function Browser() {
 
   const canGoBack = CurrentWebViewIndex > 0
   const canGoForward = CurrentWebViewIndex < WebViewPages.length - 1
+  // Same pattern as canGoBack/canGoForward, not a blanket disable — the
+  // iframe's own internal navigation can never be observed (hard browser
+  // cross-origin restriction), so CurrentWebView only ever changes via
+  // this app's own nav functions. That means Refresh (reload
+  // CurrentWebView) and Home (reload WebViewPages[0]) do the exact same
+  // thing specifically when CurrentWebViewIndex is 0 — genuinely
+  // redundant right then, not redundant otherwise (after goForward/
+  // WebAppendix, Refresh reloads the actual current tracked page, Home
+  // still jumps back to the first one — a real, different action).
+  const refreshUseful = !!CurrentWebView && CurrentWebViewIndex !== 0
 
   return (
     <div className="flex flex-col h-dvh bg-brand-ivory pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
@@ -231,7 +263,12 @@ export default function Browser() {
         <button onClick={goFirst} className="text-brand-blue" aria-label="الصفحة الأولى">
           <Home size={20} />
         </button>
-        <button onClick={refresh} className="text-brand-blue" aria-label="تحديث">
+        <button
+          onClick={refresh}
+          disabled={!refreshUseful}
+          className={refreshUseful ? 'text-brand-blue' : 'text-brand-disabled'}
+          aria-label="تحديث"
+        >
           <RotateCw size={20} />
         </button>
         <button
