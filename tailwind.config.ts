@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         brand: {
-          blue: '#0010CF',
+          blue: '#FF6B00',
           green: '#2E8B57',
           ivory: '#FAF7F2',
           highlight: '#EEF2FF',
