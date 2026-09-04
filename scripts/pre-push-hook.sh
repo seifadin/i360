@@ -115,7 +115,56 @@ submit_to_stores() {
   echo "✓ Submitted to Google Play and Huawei AppGallery."
 }
 
-NATIVE_PATTERN='^(android/|ios/|capacitor\.config\.ts|package\.json|package-lock\.json)'
+# Reads the release state file pre-commit-hook.sh wrote and PATCHes
+# i360dbc's Version field in Baserow directly — no manual Baserow-console
+# step needed after a real submission. Uses a separate, write-capable
+# BASEROW_WRITE_KEY, deliberately never the client's own VITE_BASEROW_KEY
+# (confirmed read-only, per the security review documented in
+# i360-instructions.md — this write key must never get a VITE_ prefix or
+# it would bake into the public client bundle).
+#
+# Never aborts the push on failure — a Baserow update failing after a
+# real store submission has already succeeded is a real problem worth
+# surfacing loudly, but not one that should make the script look like the
+# whole release failed. Prints the value for manual entry either way.
+update_baserow_version() {
+  local baserow_version_string
+  baserow_version_string=$(node -p "require('$STATE_FILE').baserowVersionString")
+
+  if [ -z "$BASEROW_WRITE_KEY" ] || [ -z "$BASEROW_I360DBC_ROW_ID" ]; then
+    echo "⚠ BASEROW_WRITE_KEY or BASEROW_I360DBC_ROW_ID not set in .env —"
+    echo "  skipping the automatic Baserow update. Update i360dbc's Version"
+    echo "  field manually to:"
+    echo "    $baserow_version_string"
+    return 0
+  fi
+
+  echo "→ Updating i360dbc's Version field in Baserow..."
+  # JSON.stringify via node, not hand-built JSON string — same real bug
+  # already caught and fixed in pre-commit-hook.sh's state-file write:
+  # baserow_version_string contains literal backslashes (the requested
+  # yyyy\mm\dd date format), which aren't valid JSON escapes on their own
+  # and would otherwise produce a malformed request body.
+  local payload
+  payload=$(node -e 'console.log(JSON.stringify({ Version: process.argv[1] }))' "$baserow_version_string")
+  local http_code
+  http_code=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH \
+    "https://api.baserow.io/api/database/rows/table/${VITE_BASEROW_TABLE_RESOURCES}/${BASEROW_I360DBC_ROW_ID}/?user_field_names=true" \
+    -H "Authorization: Token ${BASEROW_WRITE_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "$payload")
+
+  if [ "$http_code" = "200" ]; then
+    echo "✓ Baserow Version field updated: $baserow_version_string"
+  else
+    echo "⚠ Baserow update failed (HTTP $http_code). Update manually:"
+    echo "    $baserow_version_string"
+  fi
+}
+
+# Shared with pre-commit-hook.sh — see scripts/native-pattern.sh for why
+# this is sourced rather than duplicated.
+source "$(git rev-parse --show-toplevel)/scripts/native-pattern.sh"
 IS_NATIVE=false
 if echo "$CHANGED_FILES" | grep -qE "$NATIVE_PATTERN"; then
   IS_NATIVE=true
@@ -222,6 +271,27 @@ else
   echo "  iOS: build & submit manually from the Mac VM — this Codespace"
   echo "  (Linux) can never run Xcode/xcodebuild, so iOS is never part of"
   echo "  this automated flow, regardless of what changed."
+
+  # Consumes the state file pre-commit-hook.sh writes when it detects the
+  # same native-relevant condition and prompts for a release version.
+  # Re-validated here, not just trusted — the state file's recorded
+  # version must still match current package.json (a commit could have
+  # been amended/reset since it was written). If invalid or absent
+  # (e.g. hooks bypassed with --no-verify, or the native-relevant commit
+  # predates this feature), gracefully degrades to the fully manual
+  # prompt below rather than failing.
+  STATE_FILE="$(git rev-parse --show-toplevel)/.git/i360-pending-release.json"
+  HAS_VALID_STATE=false
+  if [ -f "$STATE_FILE" ]; then
+    STATE_VERSION=$(node -p "try { require('$STATE_FILE').version } catch { '' }" 2>/dev/null || echo "")
+    PKG_VERSION=$(node -p "require('./package.json').version")
+    if [ "$STATE_VERSION" = "$PKG_VERSION" ] && [ -n "$STATE_VERSION" ]; then
+      HAS_VALID_STATE=true
+      echo "  Release version: $STATE_VERSION"
+      echo "  Baserow release string: $(node -p "require('$STATE_FILE').baserowVersionString")"
+    fi
+  fi
+
   # Read from /dev/tty explicitly, not stdin — git hooks receive ref info
   # via stdin (already consumed by the while-read loop above), so a plain
   # `read` here would hit EOF immediately and fail under set -e, silently
@@ -231,11 +301,19 @@ else
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     submit_to_stores
+    if [ "$HAS_VALID_STATE" = true ]; then
+      update_baserow_version
+      rm -f "$STATE_FILE"
+    fi
   else
     echo "  Skipped. Run manually when ready (build + clean sync first —"
     echo "  see submit_to_stores above for why the sync matters):"
     echo "    npm run build && env -u OTA_CHANNEL npx cap sync android"
     echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
+    if [ "$HAS_VALID_STATE" = true ]; then
+      echo "  The pending release state is preserved — this prompt will show"
+      echo "  the same version and Baserow string again on a later push."
+    fi
   fi
 
   # Deliberately a SEPARATE question from store submission above, not

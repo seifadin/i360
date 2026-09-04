@@ -1,4 +1,18 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// process.cwd(), not import.meta.url (2026-09-03) — vite.config.ts uses
+// import.meta.url safely since Vite itself is ESM-native, but Capacitor's
+// own CLI parses this specific file through a different, CommonJS-style
+// loader that doesn't support import.meta.url at all — confirmed directly:
+// npx cap config failed outright with "exports is not defined in ES
+// module scope" when this used the same pattern as vite.config.ts.
+// process.cwd() works in both contexts and is reliable here specifically
+// because this project's own established convention already requires
+// every caller (npm run build, npx cap sync, release-to-otakit.sh, etc.)
+// to run from the repo root.
+const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8'));
 
 const config: CapacitorConfig = {
   appId: 'com.appgyver.i360',
@@ -39,24 +53,35 @@ const config: CapacitorConfig = {
     //
     // runtimeVersion — native-compatibility lane, separate concern from
     // channel (channel = audience, runtimeVersion = which native shell a
-    // release is safe for). Bumped MANUALLY whenever a native-affecting
-    // change ships (new Capacitor plugin, native config change, Capacitor
-    // version bump) — never auto-generated per build like versionCode/
-    // CFBundleVersion, since it must stay stable across many otherwise-
-    // compatible OTA releases within one native shell's lifetime.
-    // Baseline set 2026-08-15 (yyyy.MM, matching OtaKit's own docs
-    // example format), reflecting current native shell state — no
-    // runtime-affecting change since this baseline.
-    // Lane-continuity requirement — SATISFIED and automated: a baseline
-    // release tagged 2026.08 was published to the base channel on
-    // 2026-08-15 (the "something must exist on the new lane" requirement
-    // before any native build ships with this value), and every genuine
-    // store submission now auto-runs scripts/release-to-otakit.sh
+    // release is safe for). Tied directly to package.json's version
+    // (2026-09-03), not hardcoded/manually bumped anymore — real incident
+    // that motivated this: @capacitor/browser shipped as a genuine native
+    // change without a manual runtimeVersion bump, so OtaKit had no signal
+    // the previously-staged base-channel bundle (JS-only, pre-migration)
+    // was now incompatible — a fresh install of the new binary still
+    // applied that stale bundle, silently reverting the native change.
+    //
+    // Why tying this to pkg.version is safe, not just convenient: this
+    // project's version bumps only ever happen for genuine store
+    // resubmissions (confirmed directly — every purely OTA-eligible
+    // change tonight, e.g. header sizing, never touched package.json's
+    // version at all), and versionName is itself derived from pkg.version
+    // at native build time (§12g) — so any version bump inherently
+    // requires a new native build to ever reach a store, regardless of
+    // whether the underlying change was native. The two are structurally
+    // linked, not just coincidentally aligned so far, which is what makes
+    // deriving runtimeVersion from it safe rather than a coincidence that
+    // could later drift apart.
+    //
+    // Lane-continuity requirement — still automatically satisfied, not
+    // reintroduced as a manual step by this change: every genuine store
+    // submission already auto-runs scripts/release-to-otakit.sh
     // (pre-push-hook.sh's Android/Huawei path, deploy_apple's iOS path,
-    // and Xcode Cloud's manual-gated ci_post_xcodebuild.sh), so any
-    // future runtimeVersion bump only needs the bump itself — the
-    // release-on-submission automation keeps the new lane populated with
-    // no separate step to remember. See i360-instructions.md §14/§15.
+    // Xcode Cloud's manual-gated ci_post_xcodebuild.sh), which publishes
+    // that same build's content immediately after — so each new
+    // runtimeVersion lane a version bump creates gets populated
+    // automatically, the same guarantee the old manual scheme relied on.
+    // See i360-instructions.md §14/§14k/§15.
     //
     // OTA_CHANNEL=development remains the deliberate, explicit isolation
     // mechanism for local test builds — don't rely on runtimeVersion
@@ -64,7 +89,7 @@ const config: CapacitorConfig = {
     OtaKit: {
       appId: '423c89c7-e4c3-40e9-891a-e9f6bfe27386',
       ...(process.env.OTA_CHANNEL ? { channel: process.env.OTA_CHANNEL } : {}),
-      runtimeVersion: '2026.08',
+      runtimeVersion: pkg.version,
       appReadyTimeout: 10000,
       launchPolicy: 'apply-staged',
       resumePolicy: 'shadow',
