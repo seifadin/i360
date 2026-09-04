@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/get-hijri-date.js
-// Outputs today's Hijri date as "dd\mm\yyyy" to stdout, source/diagnostic
+// Outputs today's Hijri date as "dd-mm-yyyy" to stdout, source/diagnostic
 // notes to stderr (so callers capturing stdout alone get a clean value).
 //
 // Primary source: Egypt's Dar al-Ifta's own official API — the date
@@ -124,7 +124,7 @@ async function main() {
     source = 'islamic calendar, calculated fallback — see the specific reason logged above';
   }
   process.stderr.write(`(Hijri date source: ${source})\n`);
-  process.stdout.write(`${pad(result.day)}\\${pad(result.month)}\\${result.year}\n`);
+  process.stdout.write(`${pad(result.day)}-${pad(result.month)}-${result.year}\n`);
 }
 
 main();
