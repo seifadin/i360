@@ -97,10 +97,10 @@ while true; do
 done
 
 echo "→ Calculating release date..."
-GREGORIAN_DATE=$(date +'%Y\%m\%d')
+GREGORIAN_DATE=$(date +'%d-%m-%Y')
 HIJRI_DATE=$(node scripts/get-hijri-date.js)
 
-BASEROW_VERSION_STRING="إصدار ${NEW_VERSION} @ ${GREGORIAN_DATE} م - ${HIJRI_DATE} هـ"
+BASEROW_VERSION_STRING="إصدار ${NEW_VERSION} @ ${GREGORIAN_DATE} م / ${HIJRI_DATE} هـ"
 
 echo "→ Bumping package.json to $NEW_VERSION..."
 npm version "$NEW_VERSION" --no-git-tag-version > /dev/null

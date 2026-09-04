@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/get-hijri-date.js
-// Outputs today's Hijri date as "yyyy\mm\dd" to stdout, source note to
-// stderr (so callers capturing stdout alone get a clean value).
+// Outputs today's Hijri date as "dd\mm\yyyy" to stdout, source/diagnostic
+// notes to stderr (so callers capturing stdout alone get a clean value).
 //
 // Primary source: Egypt's Dar al-Ifta's own official API — the date
 // they've actually, officially adopted (calculation combined with real
@@ -28,12 +28,17 @@
 // signals should actually govern here hasn't been resolved — flagged,
 // not silently decided.
 //
-// The exact raw response format ("22 ربيع الأول 1448", per a real,
-// manually-checked example) was NOT independently re-verified against a
-// live fetch while writing this — the parsing below is built to be
-// reasonably tolerant of spacing/spelling variance, but treat the first
-// few real runs as a check on that, not an assumption it's already
-// confirmed correct.
+// Diagnostics (2026-09-04): a real production run fell back silently
+// with no indication of why — the primary source may have genuinely
+// been unreachable, or the response format may not match what was
+// checked manually once ("22 ربيع الأول 1448", never independently
+// re-verified via a live fetch, since robots.txt blocked a direct check
+// while building this). Every failure point below now writes a specific
+// stderr reason, distinguishing a network/timeout failure, a non-200
+// response, an unparseable response (with the raw text included), and
+// an unrecognized month name (also with the raw text) — so the next
+// real run tells us definitively which case it actually was, rather
+// than leaving all of them looking identical.
 
 const HIJRI_MONTH_ALIASES = {
   'محرم': 1,
@@ -61,23 +66,42 @@ async function fetchDarAlIftaDate() {
     const res = await fetch('http://di107.dar-alifta.org/api/HijriDate?langID=1', {
       signal: controller.signal,
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      process.stderr.write(`(Dar al-Ifta returned HTTP ${res.status} ${res.statusText})\n`);
+      return null;
+    }
     const text = (await res.text()).trim();
 
     // Expected shape: "22 ربيع الأول 1448" — day, Arabic month name,
     // year. Extract the two numeric tokens and whatever text sits
     // between them, rather than assume exact whitespace/token count.
     const match = text.match(/(\d{1,2})\s+(.+?)\s+(\d{3,4})/);
-    if (!match) return null;
+    if (!match) {
+      process.stderr.write(`(Dar al-Ifta response didn't match the expected pattern. Raw response: ${JSON.stringify(text)})\n`);
+      return null;
+    }
 
     const [, dayStr, monthName, yearStr] = match;
     const day = parseInt(dayStr, 10);
     const year = parseInt(yearStr, 10);
-    const month = HIJRI_MONTH_ALIASES[monthName.trim()];
+    const trimmedMonth = monthName.trim();
+    const month = HIJRI_MONTH_ALIASES[trimmedMonth];
 
-    if (!month || !day || !year) return null;
+    if (!month) {
+      process.stderr.write(`(Dar al-Ifta month name not recognized: "${trimmedMonth}". Raw response: ${JSON.stringify(text)})\n`);
+      return null;
+    }
+    if (!day || !year) {
+      process.stderr.write(`(Dar al-Ifta day/year parsed as invalid. Raw response: ${JSON.stringify(text)})\n`);
+      return null;
+    }
     return { year, month, day };
-  } catch {
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      process.stderr.write('(Dar al-Ifta fetch timed out after 5s)\n');
+    } else {
+      process.stderr.write(`(Dar al-Ifta fetch failed: ${err.name}: ${err.message})\n`);
+    }
     return null;
   } finally {
     clearTimeout(timeout);
@@ -97,10 +121,11 @@ async function main() {
   let source = 'dar-alifta (official, observation-confirmed)';
   if (!result) {
     result = calculatedFallback();
-    source = 'islamic calendar, calculated fallback — Dar al-Ifta unreachable or unparseable';
+    source = 'islamic calendar, calculated fallback — see the specific reason logged above';
   }
   process.stderr.write(`(Hijri date source: ${source})\n`);
-  process.stdout.write(`${result.year}\\${pad(result.month)}\\${pad(result.day)}\n`);
+  process.stdout.write(`${pad(result.day)}\\${pad(result.month)}\\${result.year}\n`);
 }
 
 main();
+
