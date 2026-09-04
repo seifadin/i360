@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Browser } from '@capacitor/browser'
 import {
   Search, Bot, Keyboard,
   PencilSparkles, Minimize2, Languages, BookSearch,
@@ -40,9 +40,8 @@ function useBriefFlash(durationMs = 500): [boolean, () => void] {
 }
 
 export default function SearchBar() {
-  const { state, setState } = useAppState()
+  const { state } = useAppState()
   const { resource, findExegesisUrl } = useDataCache()
-  const navigate = useNavigate()
 
   const [EntityQueryTerm, setEntityQueryTerm] = useState('')
   const [EntityQueryTermOld, setEntityQueryTermOld] = useState('')
@@ -87,13 +86,16 @@ export default function SearchBar() {
   // window.open returns null — or an immediately-closed window — if blocked).
   //
   // context='default' (Search results, Exegesis pages): desktop always opens
-  // a new tab regardless of useWeb — bypasses X-Frame-Options embedding
-  // failures entirely, since these point at arbitrary external sites that
-  // may refuse to be iframed at all. Now also consults inWebList/URIschemes
-  // via resolveOpenMethod (the same function ScienceGrid.tsx uses) — a site
-  // known to refuse framing can be added there to force a tab instead of
-  // relying on in-page detection, which was tried and found unreliable
-  // inside this app's WebView (see Browser.tsx).
+  // a new tab regardless of useWeb — the desktop-always-tab rule inside
+  // resolveOpenMethod itself. Also consults inWebList/URIschemes via
+  // resolveOpenMethod (the same function ScienceGrid.tsx uses). Note
+  // (2026-09-03): "webview" now means @capacitor/browser's in-app overlay,
+  // not an iframe — neither route is subject to X-Frame-Options at all
+  // anymore, since @capacitor/browser genuinely loads the page rather than
+  // embedding it. The tab/webview distinction is now purely a UX choice
+  // (keep this app's own chrome visible vs. leave to a fully separate
+  // context), not an embedding-safety one the way it was when Browser.tsx
+  // was an iframe page.
   //
   // context='bot': routing is based on useWeb alone, ignoring isDesktop() —
   // identical behavior on any browser, mobile or desktop. Safe to skip the
@@ -111,8 +113,20 @@ export default function SearchBar() {
       : state.useWeb && resolveOpenMethod(url, uriSchemes, inWebList) === 'webview'
 
     if (useWebViewRoute) {
-      setState({ WebAppendix: null })
-      navigate('/browser', { state: { url } })
+      // Replaces the old navigate('/browser', ...) iframe page — opens
+      // the OS's own in-app browser (Custom Tabs/SFSafariViewController)
+      // instead, same as ScienceGrid's own resource-opening flow. Fire-
+      // and-forget (this function stays synchronous, matching every
+      // caller's existing expectation of an immediate boolean) — no
+      // synchronous failure signal exists for Browser.open() the way
+      // window.open() returning null signals a blocked popup, so this
+      // path still reports success unconditionally, same as before.
+      Browser.open({ url }).catch(() => {})
+      // The setState({ WebAppendix: null }) this replaced only ever
+      // existed to reset state Browser.tsx's own paperclip button read —
+      // Browser.tsx is no longer the destination for any resource-opening
+      // flow at all (see App.tsx/ScienceGrid.tsx), so that state has no
+      // remaining consumer.
       return true
     } else {
       return tryOpenNewTab(url)

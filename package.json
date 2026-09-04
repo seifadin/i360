@@ -1,7 +1,7 @@
 {
   "name": "i360",
   "private": true,
-  "version": "0.13.0",
+  "version": "0.13.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@capacitor/android": "8.4.2",
+    "@capacitor/browser": "8.0.4",
     "@capacitor/cli": "8.4.2",
     "@capacitor/core": "8.4.2",
     "@capacitor/ios": "^8.4.2",

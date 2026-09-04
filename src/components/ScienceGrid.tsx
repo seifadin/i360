@@ -1,12 +1,14 @@
-import { useMemo, useState, lazy, Suspense, ComponentType } from 'react'
-import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState, lazy, Suspense, ComponentType, Fragment } from 'react'
+import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
+import { Browser } from '@capacitor/browser'
+import { CapacitorHttp } from '@capacitor/core'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
 import { resolveOpenMethod, computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
 import { tryOpenNewTab } from '@/lib/openTab'
+import Dialog from '@/components/Dialog'
 
 interface MinorItem { science: Science }
 type MajorChild =
@@ -82,6 +84,42 @@ function groupSciences(sciences: Science[]): MajorGroup[] {
 // recreate a new lazy() wrapper (and re-trigger Suspense) every render.
 const iconCache = new Map<string, ComponentType<{ size?: number }>>()
 
+// Proactive reachability check (2026-09-03) — same timeout+retry shape as
+// dataSource.ts's fetchWithRetry, deliberately shorter numbers: this is a
+// pre-flight UX check the user is actively waiting on before the browser
+// opens, not a background data load. CapacitorHttp specifically, not plain
+// fetch — makes the request at the native layer, genuinely bypassing CORS
+// (confirmed via Capacitor's own docs) rather than getting an opaque,
+// unreadable response the way a no-cors fetch would. That's what makes a
+// real status-code check possible here at all.
+const STATUS_CHECK_TIMEOUT_MS = 5000
+const STATUS_CHECK_MAX_RETRIES = 1 // 1 initial + 1 retry = 2 total tries
+const STATUS_CHECK_RETRY_BACKOFF_MS = [800]
+
+async function checkUrlReachable(url: string): Promise<boolean> {
+  for (let attempt = 0; attempt <= STATUS_CHECK_MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await new Promise(resolve => setTimeout(resolve, STATUS_CHECK_RETRY_BACKOFF_MS[attempt - 1]))
+    }
+    try {
+      const response = await CapacitorHttp.get({
+        url,
+        connectTimeout: STATUS_CHECK_TIMEOUT_MS,
+        readTimeout: STATUS_CHECK_TIMEOUT_MS,
+      })
+      // A real, readable status this time (unlike a plain no-cors fetch's
+      // opaque response) — treat 2xx/3xx as genuinely reachable, anything
+      // else (4xx/5xx) as a real problem worth surfacing, not just "host
+      // responded at all." A thrown/rejected request (network failure,
+      // timeout) falls through to the catch below and the next attempt.
+      return response.status >= 200 && response.status < 400
+    } catch {
+      // loop continues to next attempt, unless this was the last one
+    }
+  }
+  return false
+}
+
 // Visible fallback for a missing/misnamed icon — silently rendering nothing
 // makes a bad icon name indistinguishable from "no icon set," same class of
 // problem as the Keyboard field-mismatch bug (zero visible failure = hard to
@@ -125,38 +163,60 @@ function MinorButton({
   science,
   indent,
   onTap,
+  onAppendixTap,
 }: {
   science: Science
   indent: 'nested' | 'direct'
   onTap: (science: Science) => void
+  onAppendixTap: (science: Science) => void
 }) {
   // Hover is the only tap feedback (pure CSS light-blue affordance) — the
   // brief green-bold tap-confirmation flash was removed; at 500ms it was
-  // negligibly brief to register. The class string lives inline here since
-  // this is its only consumer (the former minorButtonClass() helper was a
-  // zero-arg function returning a constant, left with one caller after the
-  // MinorButton extraction).
+  // negligibly brief to register. Moved from the button itself onto this
+  // wrapper (2026-09-03, alongside the new paperclip button) — CSS :hover
+  // on a parent still applies while hovering either child, so the whole
+  // row keeps the same hover affordance it always had.
   return (
-    <button
-      onClick={() => onTap(science)}
-      className={`flex w-full items-center gap-2 ${indent === 'nested' ? 'px-12' : 'px-8'} py-1 text-right text-base hover:bg-brand-highlight focus:outline-none text-brand-blue`}
-    >
-      {science.ScienceMinorIcon && (
-        <span className="text-brand-green">
-          <DynamicIcon name={science.ScienceMinorIcon} />
-        </span>
+    <div className="flex w-full items-center hover:bg-brand-highlight">
+      <button
+        onClick={() => onTap(science)}
+        className={`flex flex-1 items-center gap-2 ${indent === 'nested' ? 'px-12' : 'px-8'} py-1 text-right text-base focus:outline-none text-brand-blue`}
+      >
+        {science.ScienceMinorIcon && (
+          <span className="text-brand-green">
+            <DynamicIcon name={science.ScienceMinorIcon} />
+          </span>
+        )}
+        <span className="flex-1">{science.ScienceMinor_Ar}</span>
+      </button>
+      {science.WebAppendix && (
+        <button
+          // stopPropagation isn't actually needed here — this is a sibling
+          // of the row button, not nested inside it, so there's no bubbling
+          // "row tap" to prevent — but kept explicit anyway since it costs
+          // nothing and removes any doubt for a future reader.
+          onClick={e => { e.stopPropagation(); onAppendixTap(science) }}
+          className="px-3 py-1 text-brand-blue"
+          aria-label="فتح الملحق"
+        >
+          <Paperclip size={15} />
+        </button>
       )}
-      <span className="flex-1">{science.ScienceMinor_Ar}</span>
-    </button>
+    </div>
   )
 }
 
 export default function ScienceGrid() {
-  const { state, setState } = useAppState()
+  const { state } = useAppState()
   const { sciences, resource: globalResource, loading, error, isRetrying } = useDataCache()
-  const navigate = useNavigate()
   const [openMajorId, setOpenMajorId] = useState<number | null>(null)
   const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
+  // Reachability-check UI state (2026-09-03) — checkFlash is the brief
+  // "reachable" confirmation shown right before the browser overlay opens;
+  // unreachableUrl drives the warning dialog when the check genuinely
+  // fails.
+  const [checkFlash, setCheckFlash] = useState(false)
+  const [unreachableUrl, setUnreachableUrl] = useState<string | null>(null)
 
   const groups = useMemo(() => groupSciences(sciences), [sciences])
 
@@ -170,17 +230,13 @@ export default function ScienceGrid() {
     return science.Web ?? ''
   }
 
-  async function handleMinorTap(science: Science) {
-    const url = resolveUrl(science)
+  // Shared by the main resource tap and the WebAppendix paperclip
+  // (2026-09-03) — both need the exact same "resolve open method, then
+  // open" logic, just targeting different URLs. No mobile/desktop special-
+  // casing lives here beyond what resolveOpenMethod itself already
+  // handles — both callers go through the identical path.
+  async function openUrl(url: string) {
     if (!url) return
-
-    setState({ WebAppendix: science.WebAppendix ?? null })
-
-    // Native app-store mode (!useWeb) always opens a new tab — app-store
-    // links can't meaningfully render inside the WebView iframe. The
-    // desktop case is handled inside resolveOpenMethod itself (its first
-    // check), so it isn't repeated here — only useWeb mode consults
-    // inWebList/URIschemes.
     const openMethod: 'tab' | 'webview' =
       !state.useWeb
         ? 'tab'
@@ -188,12 +244,45 @@ export default function ScienceGrid() {
 
     if (openMethod === 'tab') {
       tryOpenNewTab(url)
-      // WebAppendix is a companion to the Web resource specifically — it
-      // doesn't make sense alongside an app-store link (native !useWeb mode).
-      if (state.useWeb && science.WebAppendix) tryOpenNewTab(science.WebAppendix)
     } else {
-      navigate('/browser', { state: { url } })
+      // Replaces the old navigate('/browser', ...) iframe page for the
+      // ScienceMinor/WebAppendix flow specifically — opens the OS's own
+      // in-app browser (Custom Tabs/SFSafariViewController) instead.
+      // NOTE: Browser.tsx and its route are NOT dead code — SearchBar.tsx
+      // still routes its own search-result flow through navigate('/browser'),
+      // untouched by this change. Only ScienceGrid's own resource-opening
+      // path was in scope here.
+      await Browser.open({ url })
     }
+  }
+
+  async function handleMinorTap(science: Science) {
+    const url = resolveUrl(science)
+    if (!url) return
+
+    if (globalResource?.WebsiteStatus) {
+      const reachable = await checkUrlReachable(url)
+      if (!reachable) {
+        setUnreachableUrl(url)
+        return
+      }
+      // Only flash when a check genuinely ran and passed — resources
+      // without WebsiteStatus configured skip the check entirely (no
+      // regression from today's conditional-availability behavior), so
+      // there's nothing to confirm for those.
+      setCheckFlash(true)
+      // Brief pause before opening, not simultaneous — Browser.open's
+      // full-screen overlay would otherwise cover this instantly, and the
+      // flash would never actually be seen.
+      await new Promise(resolve => setTimeout(resolve, 450))
+      setCheckFlash(false)
+    }
+
+    await openUrl(url)
+  }
+
+  async function handleAppendixTap(science: Science) {
+    if (science.WebAppendix) await openUrl(science.WebAppendix)
   }
 
   if (loading) return (
@@ -209,7 +298,41 @@ export default function ScienceGrid() {
   )
 
   return (
-    <div className="divide-y divide-gray-100">
+    <Fragment>
+      {checkFlash && (
+        <div
+          role="status"
+          // Positioned above the lower OrnamentDivider/SearchBar/OSRow
+          // footer, not at the top — fixed positioning is viewport-
+          // relative regardless of DOM nesting, so this works correctly
+          // even rendered from within ScienceGrid's own scrollable
+          // container. The 7rem offset (plus real safe-area-inset-bottom
+          // for devices with a home indicator) is an estimate covering
+          // that footer's combined height, not a measured value — worth
+          // confirming on a real device and adjusting if it sits wrong,
+          // same caution this project's own header-sizing investigation
+          // already established for hardcoded spacing guesses.
+          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+7rem)] z-50 mx-auto flex w-fit items-center gap-2 rounded-full bg-brand-green px-4 py-2 text-sm font-bold text-white shadow-lg"
+        >
+          <CircleCheck size={16} />
+          <span>الموقع متاح</span>
+        </div>
+      )}
+      <Dialog
+        open={!!unreachableUrl}
+        title="تعذر الوصول إلى الموقع"
+        message="يبدو أن هذا الموقع غير متاح حاليًا."
+        onClose={() => setUnreachableUrl(null)}
+        secondaryAction={{
+          label: 'المتابعة على أي حال',
+          onClick: () => {
+            const url = unreachableUrl
+            setUnreachableUrl(null)
+            if (url) openUrl(url)
+          },
+        }}
+      />
+      <div className="divide-y divide-gray-100">
       {groups.map(group => (
         <div key={group.majorId}>
           <button
@@ -268,6 +391,7 @@ export default function ScienceGrid() {
                             science={science}
                             indent="nested"
                             onTap={handleMinorTap}
+                            onAppendixTap={handleAppendixTap}
                           />
                         ))}
                       </div>
@@ -279,6 +403,7 @@ export default function ScienceGrid() {
                     science={child.science}
                     indent="direct"
                     onTap={handleMinorTap}
+                    onAppendixTap={handleAppendixTap}
                   />
                 )
               )}
@@ -286,6 +411,7 @@ export default function ScienceGrid() {
           )}
         </div>
       ))}
-    </div>
+      </div>
+    </Fragment>
   )
 }

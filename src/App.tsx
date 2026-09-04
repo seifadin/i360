@@ -8,7 +8,6 @@ import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 import Dialog from '@/components/Dialog'
 
 const Home = lazy(() => import('@/pages/Home'))
-const Browser = lazy(() => import('@/pages/Browser'))
 
 // ─── i360Privacy — one-time privacy notice ─────────────────────────────────────
 // Shared, not a local const inside the function — read from two places (the
@@ -146,7 +145,6 @@ function AppShell() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/browser" element={<Browser />} />
         </Routes>
       </Suspense>
 
