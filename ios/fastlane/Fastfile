@@ -52,6 +52,13 @@ platform :ios do
     # real "Bundle directory does not exist: .../ios/dist" failure when
     # this wasn't accounted for.
     #
+    # This lane previously had no check at all for whether dist/ actually
+    # changed since the last OTA release — every real deploy_apple run
+    # published a release unconditionally, unlike pre-push-hook.sh's own
+    # web-relevance check. That asymmetry now lives (2026-09-04) inside
+    # release-to-otakit.sh itself, shared across all three callers — this
+    # lane doesn't need its own copy, and needs no changes here.
+    #
     # Ruby's system() here, not Fastlane's sh() — system() returns
     # true/false rather than raising, and the shared script already
     # retries once internally, so wrapping it in Fastlane's own

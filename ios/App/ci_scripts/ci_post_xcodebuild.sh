@@ -52,4 +52,10 @@ cd ../../..
 # No set -e active in this script, so a non-zero exit here doesn't need
 # special handling to avoid aborting anything — but || true keeps it
 # explicit/robust regardless of whether that assumption ever changes.
+#
+# This script previously had no check at all for whether dist/ actually
+# changed since the last OTA release — every genuine manual-start build
+# reaching this point published a release unconditionally. That gap now
+# lives (2026-09-04) inside release-to-otakit.sh itself, shared across
+# all three callers — no changes needed here.
 bash scripts/release-to-otakit.sh || true

@@ -178,15 +178,10 @@ fi
 # byte-identical to the previous one. Harmless (OtaKit just republishes
 # the same content under a new timestamp-derived tag) but pure noise —
 # a fresh Downloaded/Applied event on the dashboard for zero real change.
-# Deliberately narrow/inclusive, not exhaustive: only files verified to
-# actually feed `npm run build`'s output. package.json/capacitor.config.ts
-# are already handled by NATIVE_PATTERN above (native path has its own,
-# separately-answered OTA prompt) so they're intentionally absent here —
-# this pattern only needs to cover the web-only branch's true positives.
-# tsconfig*.json deliberately excluded: `tsc -b` is noEmit, type-checking
-# only — a config-only change there can block or pass the build but
-# never changes dist/'s actual contents.
-OTA_RELEVANT_PATTERN='^(src/|public/|index\.html|vite\.config\.ts|tailwind\.config\.ts|postcss\.config\.js)'
+# Shared with release-to-otakit.sh (2026-09-04) — see
+# scripts/ota-relevant-pattern.sh for the full reasoning and why it's
+# sourced rather than duplicated.
+source "$(git rev-parse --show-toplevel)/scripts/ota-relevant-pattern.sh"
 OTA_RELEVANT=false
 if echo "$CHANGED_FILES" | grep -qE "$OTA_RELEVANT_PATTERN"; then
   OTA_RELEVANT=true
