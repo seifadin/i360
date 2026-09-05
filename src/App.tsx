@@ -71,7 +71,7 @@ function AppShell() {
   // Mount: privacy notice (one-time). checkPrivacyNotice() itself is
   // read-only (see its own comment) and computed exactly once via
   // useState's lazy initializer — safe to call here with no side effects.
-  const [needsPrivacyNotice] = useState(() => checkPrivacyNotice())
+  const [needsPrivacyNotice, setNeedsPrivacyNotice] = useState(() => checkPrivacyNotice())
 
   // Fix (2026-08-28): the dialog used to show immediately on mount,
   // regardless of anything else — the single fastest thing to render
@@ -100,11 +100,23 @@ function AppShell() {
   // fresh inline function on every render meant Dialog.tsx's own focus/
   // keydown effect (dependent on onClose) tore down and re-ran on every
   // unrelated AppShell re-render while a dialog was open, not just when
-  // it actually opened or closed. setStoredItem is a plain imported
-  // function (stable) and setPrivacyOpen is React-guaranteed stable, so
-  // an empty dependency array is correct.
+  // it actually opened or closed. setStoredItem and setNeedsPrivacyNotice/
+  // setPrivacyOpen are all React-guaranteed stable, so an empty
+  // dependency array is correct.
   const handlePrivacyClose = useCallback(() => {
     setStoredItem(PRIVACY_NOTICE_KEY, '1') // real fix — write moved here, see checkPrivacyNotice()'s own comment
+    // Real bug, confirmed on-device (2026-09-04): needsPrivacyNotice was
+    // previously never updated after dismissal, staying true for the
+    // rest of the session. Harmless under normal use (the effect below
+    // only re-runs if cacheLoading changes again, which normally
+    // happens once). But during a genuine, persistent data-loading
+    // failure, cacheLoading toggles repeatedly (loading → error →
+    // retrying, every ~10s, via dataCache.tsx's own retry loop) — each
+    // toggle re-ran the effect, and needsPrivacyNotice still being true
+    // reopened the dialog every cycle, regardless of the user having
+    // already dismissed it. Confirmed directly: reopening tracked
+    // exactly with the loading/retry cycle on a real device.
+    setNeedsPrivacyNotice(false)
     setPrivacyOpen(false)
   }, [])
 
