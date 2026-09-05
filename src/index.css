@@ -18,7 +18,7 @@
      correctly yielding to a closer ancestor's more specific class. */
   html,
   body {
-    color: #FF6B00;
+    @apply text-brand-blue;
   }
 
   /* No :root --color-* variables here — a set once existed but was
