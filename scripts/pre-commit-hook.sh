@@ -74,8 +74,30 @@ echo "  or package.json/package-lock.json)."
 echo "  Current version: $CURRENT_VERSION"
 
 while true; do
-  read -p "  Enter new version for this release (or 'q' to skip): " NEW_VERSION < /dev/tty
-  if [[ "$NEW_VERSION" = "q" || "$NEW_VERSION" = "cancel" ]]; then
+  # 'q' works as a single keypress here, matching the y/N prompts in
+  # pre-push-hook.sh (-n 1 -r) — no version this project will ever ask
+  # for starts with a literal "q" (the X.Y.Z regex below is purely
+  # numeric), so treating a leading "q" as an unambiguous, immediate
+  # cancel signal is safe. Reads one character first; if it's not "q",
+  # a second read picks up the rest of the line (whatever the user
+  # already typed, buffered on the tty, up to their Enter) and combines
+  # both into the full input — 'cancel' (the word) still works exactly
+  # as before, just still needs Enter, since a single keypress alone
+  # can't distinguish it from a real version starting with 'c' (it
+  # couldn't anyway — 'c' isn't a digit — but the point is generality:
+  # this only special-cases the one single-keypress signal that's safe to).
+  read -p "  Enter new version for this release (or 'q' to skip): " -n 1 -r FIRST_CHAR < /dev/tty
+  if [[ "$FIRST_CHAR" = "q" ]]; then
+    echo
+    rm -f "$STATE_FILE"
+    echo "  Skipped — this commit will proceed without a version bump."
+    echo "  A later store-submission attempt will fall back to the fully"
+    echo "  manual prompt, since no version will have been decided."
+    exit 0
+  fi
+  read -r REST_OF_INPUT < /dev/tty
+  NEW_VERSION="${FIRST_CHAR}${REST_OF_INPUT}"
+  if [[ "$NEW_VERSION" = "cancel" ]]; then
     rm -f "$STATE_FILE"
     echo "  Skipped — this commit will proceed without a version bump."
     echo "  A later store-submission attempt will fall back to the fully"
