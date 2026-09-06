@@ -89,10 +89,10 @@ export default function SearchBar() {
   // a new tab regardless of useWeb — the desktop-always-tab rule inside
   // resolveOpenMethod itself. Also consults inWebList/URIschemes via
   // resolveOpenMethod (the same function ScienceGrid.tsx uses). Note
-  // (2026-09-03): "webview" now means @capacitor/browser's in-app overlay,
+  // (2026-09-03): the in-app route now means @capacitor/browser's overlay,
   // not an iframe — neither route is subject to X-Frame-Options at all
   // anymore, since @capacitor/browser genuinely loads the page rather than
-  // embedding it. The tab/webview distinction is now purely a UX choice
+  // embedding it. The tab/in-app distinction is now purely a UX choice
   // (keep this app's own chrome visible vs. leave to a fully separate
   // context), not an embedding-safety one the way it was when Browser.tsx
   // was an iframe page.
@@ -108,11 +108,11 @@ export default function SearchBar() {
     const uriSchemes = resource?.URIschemes ?? ''
     const inWebList = resource?.inWebList ?? ''
 
-    const useWebViewRoute = context === 'bot'
+    const useInAppRoute = context === 'bot'
       ? state.useWeb && !matchesWebList(url, uriSchemes, inWebList)
-      : state.useWeb && resolveOpenMethod(url, uriSchemes, inWebList) === 'webview'
+      : state.useWeb && resolveOpenMethod(url, uriSchemes, inWebList) === 'in_app'
 
-    if (useWebViewRoute) {
+    if (useInAppRoute) {
       // Replaces the old navigate('/browser', ...) iframe page — opens
       // the OS's own in-app browser (Custom Tabs/SFSafariViewController)
       // instead, same as ScienceGrid's own resource-opening flow. Fire-

@@ -237,7 +237,7 @@ export default function ScienceGrid() {
   // handles — both callers go through the identical path.
   async function openUrl(url: string) {
     if (!url) return
-    const openMethod: 'tab' | 'webview' =
+    const openMethod: 'tab' | 'in_app' =
       !state.useWeb
         ? 'tab'
         : resolveOpenMethod(url, globalResource?.URIschemes ?? '', globalResource?.inWebList ?? '')
@@ -245,13 +245,12 @@ export default function ScienceGrid() {
     if (openMethod === 'tab') {
       tryOpenNewTab(url)
     } else {
-      // Replaces the old navigate('/browser', ...) iframe page for the
-      // ScienceMinor/WebAppendix flow specifically — opens the OS's own
-      // in-app browser (Custom Tabs/SFSafariViewController) instead.
-      // NOTE: Browser.tsx and its route are NOT dead code — SearchBar.tsx
-      // still routes its own search-result flow through navigate('/browser'),
-      // untouched by this change. Only ScienceGrid's own resource-opening
-      // path was in scope here.
+      // Replaces the old navigate('/browser', ...) iframe page — opens
+      // the OS's own in-app browser (Custom Tabs/SFSafariViewController)
+      // instead. Browser.tsx and its /browser route are fully deleted
+      // (2026-09-03) — SearchBar.tsx's own resource-opening flow migrated
+      // the same session and now goes through the identical Browser.open()
+      // path, not navigate('/browser') anymore.
       await Browser.open({ url })
     }
   }

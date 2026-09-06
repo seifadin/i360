@@ -97,7 +97,7 @@ export function resolveOpenMethod(
   webUrl: string,
   uriSchemes: string,
   inWebList: string
-): 'tab' | 'webview' {
+): 'tab' | 'in_app' {
   if (isDesktop()) return 'tab'
-  return matchesWebList(webUrl, uriSchemes, inWebList) ? 'tab' : 'webview'
+  return matchesWebList(webUrl, uriSchemes, inWebList) ? 'tab' : 'in_app'
 }

@@ -14,9 +14,6 @@ export interface AppState {
   // web mode by construction — no stale-flag leak possible (the class of
   // bug computeUseHuawei's !useWeb gate exists for).
   simIOS: boolean
-
-  // Content
-  WebAppendix: string | null
 }
 
 export interface AppStateContextType {
@@ -30,9 +27,6 @@ const defaultState: AppState = {
   isChina: false,
   useHMS: false,
   simIOS: false, // simulator starts on Android (Google) — today's exact behavior
-
-  // Content
-  WebAppendix: null,
 }
 
 const AppStateContext = createContext<AppStateContextType | null>(null)

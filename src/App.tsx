@@ -1,5 +1,4 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { OtaKit } from '@otakit/capacitor-updater'
 import { AppStateProvider } from '@/store/appState'
 import { DataCacheProvider, useDataCache } from '@/store/dataCache'
@@ -28,23 +27,32 @@ function checkPrivacyNotice(): boolean {
   return getStoredItem(PRIVACY_NOTICE_KEY) === null
 }
 
-// Renamed from AppRoutes — routing is now only one of several "runs once
-// per real app session" concerns living here (platform detection, OTA
-// readiness, privacy notice, Edition/Version/Revision dialogs), matching
-// the standard PWA "app shell" pattern: a top-level wrapper that mounts
-// once and never unmounts during in-app navigation, with actual page
-// content lazy-loading underneath it. Same renaming-for-role precedent as
+// Renamed from AppRoutes — this predates react-router-dom's removal
+// (2026-09-06): the app had a second route (/browser) at the time, and
+// this component's job was several "runs once per real app session"
+// concerns living alongside that router (platform detection, OTA
+// readiness, privacy notice, Edition/Version/Revision dialogs). With
+// Browser.tsx and /browser both deleted (2026-09-03), the router itself
+// became pure, functionless scaffolding — zero use anywhere of
+// useNavigate/useLocation/useParams/<Link>, wrapping a single route that
+// only ever rendered <Home />. Removed entirely; Home now renders
+// directly. AppShell's other job — the app-shell pattern itself, a
+// top-level wrapper that mounts once and never unmounts, with actual
+// page content lazy-loading underneath it — is unchanged and is the
+// actual reason for the name, same renaming-for-role precedent as
 // dataSource.ts (was baserow.ts) and OrnamentDivider.tsx (was
 // KhatamDivider.tsx).
 function AppShell() {
-  // Called here, not inside Home.tsx — App.tsx sits above the router and
-  // never unmounts during in-app navigation, so this detection effect
-  // genuinely runs once per app session (matching its own comment's
-  // intent), not once per Home.tsx mount. Previously, navigating to
-  // /browser and back would remount Home.tsx and silently re-run this,
-  // wiping out any manual MobileServicesToggle override — defeating the
-  // simulator's whole purpose, since testing routing via a science-minor
-  // tap is exactly the action that would reset the setting being tested.
+  // Called here, not inside Home.tsx — AppShell never unmounts during
+  // in-app navigation (there being no in-app navigation left at all,
+  // now that /browser is gone, only reinforces this), so this detection
+  // effect genuinely runs once per app session (matching its own
+  // comment's intent), not once per Home.tsx mount. Historically,
+  // navigating to /browser and back would remount Home.tsx and silently
+  // re-run this, wiping out any manual MobileServicesToggle override —
+  // defeating the simulator's whole purpose, since testing routing via a
+  // science-minor tap was exactly the action that would reset the
+  // setting being tested.
   usePlatform()
 
   // OtaKit (12h) — confirms the app shell mounted and ran successfully
@@ -155,9 +163,7 @@ function AppShell() {
   return (
     <>
       <Suspense fallback={null}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
+        <Home />
       </Suspense>
 
       {/* Privacy notice — first visit only */}
@@ -183,9 +189,7 @@ function App() {
   return (
     <AppStateProvider>
       <DataCacheProvider>
-        <BrowserRouter>
-          <AppShell />
-        </BrowserRouter>
+        <AppShell />
       </DataCacheProvider>
     </AppStateProvider>
   )
