@@ -127,5 +127,15 @@ async function main() {
   process.stdout.write(`${pad(result.day)}-${pad(result.month)}-${result.year}\n`);
 }
 
-main();
+// Belt-and-suspenders (2026-09-06): fetchDarAlIftaDate() always resolves
+// (its own try/catch never lets it throw), so this only ever fires if
+// calculatedFallback() itself throws — a genuinely broken Node/ICU
+// environment lacking Islamic-calendar support, for instance. Node
+// already crashes loudly on an unhandled rejection by default (not
+// silent), but a labeled message here is clearer than a raw stack
+// trace, matching every other failure point in this file.
+main().catch(err => {
+  process.stderr.write(`(get-hijri-date.js: unhandled failure — ${err.name}: ${err.message})\n`)
+  process.exit(1)
+})
 
