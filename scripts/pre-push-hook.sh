@@ -57,6 +57,10 @@ BRANCH="${LOCAL_REF#refs/heads/}"
 # path just prompts) and can never block a push that would otherwise
 # succeed.
 if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$REMOTE_SHA^{commit}" 2>/dev/null; then
+  echo "→ Remote SHA unresolvable (a new branch, or a git-internal lookup"
+  echo "  issue) — treating this push as though everything changed, the"
+  echo "  safe default here (costs nothing, can never block a push that"
+  echo "  would otherwise succeed)."
   CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
 else
   CHANGED_FILES=$(git diff --name-only "$REMOTE_SHA" "$LOCAL_SHA")
@@ -278,7 +282,11 @@ else
   STATE_FILE="$(git rev-parse --show-toplevel)/.git/i360-pending-release.json"
   HAS_VALID_STATE=false
   if [ -f "$STATE_FILE" ]; then
-    STATE_VERSION=$(node -p "try { require('$STATE_FILE').version } catch { '' }" 2>/dev/null || echo "")
+    if ! STATE_VERSION=$(node -p "try { require('$STATE_FILE').version } catch { '' }" 2>&1); then
+      echo "  ⚠ Could not run node to read $STATE_FILE ($STATE_VERSION) —"
+      echo "    treating as no saved version, falling back to the fully manual prompt."
+      STATE_VERSION=""
+    fi
     PKG_VERSION=$(node -p "require('./package.json').version")
     if [ "$STATE_VERSION" = "$PKG_VERSION" ] && [ -n "$STATE_VERSION" ]; then
       HAS_VALID_STATE=true

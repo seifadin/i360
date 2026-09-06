@@ -60,7 +60,11 @@ CURRENT_VERSION=$(node -p "require('./package.json').version")
 # written, that's a real, deliberate signal the earlier decision no
 # longer applies, not something to keep silently trusting.
 if [ -f "$STATE_FILE" ]; then
-  STATE_VERSION=$(node -p "try { require('$STATE_FILE').version } catch { '' }" 2>/dev/null || echo "")
+  if ! STATE_VERSION=$(node -p "try { require('$STATE_FILE').version } catch { '' }" 2>&1); then
+    echo "  ⚠ Could not run node to read $STATE_FILE ($STATE_VERSION) —"
+    echo "    treating as no saved version, falling back to a fresh prompt."
+    STATE_VERSION=""
+  fi
   if [ "$STATE_VERSION" = "$CURRENT_VERSION" ]; then
     # Already decided earlier this session, still consistent — reuse
     # silently, no re-prompt for a second native-relevant commit.

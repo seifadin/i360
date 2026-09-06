@@ -66,8 +66,13 @@ LAST_OTA_RELEASE_TAG="last-ota-release"
 git fetch origin "refs/tags/$LAST_OTA_RELEASE_TAG:refs/tags/$LAST_OTA_RELEASE_TAG" >/dev/null 2>&1
 
 if git rev-parse "$LAST_OTA_RELEASE_TAG" >/dev/null 2>&1; then
-  CHANGED_SINCE_LAST_RELEASE=$(git diff --name-only "$LAST_OTA_RELEASE_TAG" HEAD 2>/dev/null)
-  if [ $? -eq 0 ] && ! echo "$CHANGED_SINCE_LAST_RELEASE" | grep -qE "$OTA_RELEVANT_PATTERN"; then
+  CHANGED_SINCE_LAST_RELEASE=$(git diff --name-only "$LAST_OTA_RELEASE_TAG" HEAD 2>&1)
+  DIFF_STATUS=$?
+  if [ $DIFF_STATUS -ne 0 ]; then
+    echo "  ⚠ Could not diff against $LAST_OTA_RELEASE_TAG ($CHANGED_SINCE_LAST_RELEASE)"
+    echo "    — proceeding with the release rather than risk silently skipping"
+    echo "    one that's genuinely needed."
+  elif ! echo "$CHANGED_SINCE_LAST_RELEASE" | grep -qE "$OTA_RELEVANT_PATTERN"; then
     echo "→ Nothing web-bundle-relevant changed since the last OTA release ($LAST_OTA_RELEASE_TAG) — skipping."
     exit 0
   fi
@@ -98,8 +103,11 @@ if [ $STATUS -eq 0 ]; then
   # succeeded regardless — this project's own Codespace, which already
   # pushes on every real `git push`, will correctly re-sync the tag on
   # its own next release either way.
-  git tag -f "$LAST_OTA_RELEASE_TAG" HEAD >/dev/null 2>&1
-  if ! git push origin "refs/tags/$LAST_OTA_RELEASE_TAG" --force >/dev/null 2>&1; then
+  if ! TAG_ERROR=$(git tag -f "$LAST_OTA_RELEASE_TAG" HEAD 2>&1); then
+    echo "  ⚠ Could not create/move the local $LAST_OTA_RELEASE_TAG tag ($TAG_ERROR)"
+    echo "    — the release above still succeeded, but this environment's copy"
+    echo "    of the tag may now be stale until a future release corrects it."
+  elif ! git push origin "refs/tags/$LAST_OTA_RELEASE_TAG" --force >/dev/null 2>&1; then
     echo "  (Could not push the $LAST_OTA_RELEASE_TAG tag from this environment —"
     echo "   the release above still succeeded. A future release from an"
     echo "   environment with push access will re-sync it.)"
