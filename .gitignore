@@ -16,7 +16,6 @@ android/fastlane/google-play-key.json
 # fresh from the what's-new text before every real submission, same
 # reasoning as the other android/fastlane/ entries above (real per-run
 # artifacts, not source-controlled content).
-android/fastlane/huawei-changelog.txt
 android/fastlane/metadata/
 *.log
 npm-debug.log*

@@ -61,7 +61,30 @@ if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$RE
   echo "  issue) — treating this push as though everything changed, the"
   echo "  safe default here (costs nothing, can never block a push that"
   echo "  would otherwise succeed)."
-  CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
+  # Diagnostic (2026-09-07) — added after this branch was confirmed,
+  # twice, to be reached even on a plain, non-force push to an
+  # already-correctly-tracked branch (where REMOTE_SHA should have
+  # resolved cleanly) — genuinely surprising, not the new-branch/stale-
+  # object case this fallback was originally built for. Real values
+  # shown here rather than continuing to guess blind next time this
+  # fires.
+  echo "  (diagnostic — local_ref='$LOCAL_REF' local_sha='$LOCAL_SHA'"
+  echo "   remote_sha='$REMOTE_SHA')"
+  # LOCAL_SHA guarded too, not just REMOTE_SHA — a real, confirmed
+  # failure (2026-09-07): this exact fallback line crashed with "fatal:
+  # ambiguous argument ''" when LOCAL_SHA was itself unexpectedly empty,
+  # under set -e, killing the push before anything else in the hook
+  # could run — the same class of fragility REMOTE_SHA was already
+  # guarded against, just not this variable too. Falls through to the
+  # same safe default (changed everything) rather than crash.
+  if [ -z "$LOCAL_SHA" ]; then
+    echo "  ⚠ local_sha itself came back empty — skipping the diff"
+    echo "    entirely rather than risk the same crash from the other"
+    echo "    side; treating this push as though everything changed."
+    CHANGED_FILES=""
+  else
+    CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
+  fi
 else
   CHANGED_FILES=$(git diff --name-only "$REMOTE_SHA" "$LOCAL_SHA")
 fi
@@ -140,16 +163,28 @@ submit_to_stores() {
       mkdir -p android/fastlane/metadata/android/ar/changelogs
       printf '%s' "$whats_new" > android/fastlane/metadata/android/ar/changelogs/default.txt
 
-      # huawei_appgallery_connect takes a direct file path instead
-      # (changelog_path:, set in the Fastfile) — no metadata-directory
-      # convention needed for this one.
-      printf '%s' "$whats_new" > android/fastlane/huawei-changelog.txt
+      # huawei_appgallery_connect_update_app_localization (2026-09-07
+      # revision — see the Fastfile's own comment for the full reasoning)
+      # reads from this exact, directory-based convention instead — the
+      # earlier single-file changelog_path attempt is confirmed, via a
+      # real submission, to not populate what AppGallery Connect's own
+      # pre-submission app-info view actually shows.
+      mkdir -p android/fastlane/metadata/huawei/ar
+      printf '%s' "$whats_new" > android/fastlane/metadata/huawei/ar/release_notes
     fi
   fi
 
-  echo "→ Submitting to both stores..."
-  (cd android && fastlane deploy_google && fastlane deploy_huawei)
-  echo "✓ Submitted to Google Play and Huawei AppGallery."
+  # ⚠ TEMPORARY (2026-09-07) — Google Play submission disabled
+  # deliberately, to isolate testing of the new Huawei release-notes fix
+  # (Fastfile's deploy_huawei) without a redundant, unrelated Google Play
+  # resubmission (nothing changed there this round). REVERT before any
+  # release meant to genuinely reach both stores: delete the line below
+  # and uncomment the one above it, restore the echo messages too.
+  echo "→ Submitting to Huawei AppGallery only (Google Play disabled — see comment above)..."
+  # echo "→ Submitting to both stores..."
+  (cd android && fastlane deploy_huawei)
+  # (cd android && fastlane deploy_google && fastlane deploy_huawei)
+  echo "✓ Submitted to Huawei AppGallery. (Google Play was skipped this run.)"
 }
 
 # Reads the release state file pre-commit-hook.sh wrote and PATCHes
