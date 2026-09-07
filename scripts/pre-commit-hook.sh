@@ -129,14 +129,38 @@ HIJRI_DATE=$(node scripts/get-hijri-date.js)
 BASEROW_VERSION_STRING="إصدار ${NEW_VERSION} @ ${GREGORIAN_DATE} م / ${HIJRI_DATE} هـ"
 
 # What's-new text for Google Play/Huawei AppGallery release notes
-# (2026-09-06) — asked here, not at push time, matching the version
-# prompt's own reasoning: decided once, reused silently on a later push
-# via the same state file, rather than re-asked every time. Optional
-# (plain Enter skips) — not every release necessarily has a meaningful
-# user-facing change worth a note, and submit_to_stores() (pre-push-
-# hook.sh) already degrades gracefully to whatever was previously live
-# on each store when this is empty, rather than requiring one.
-read -p "  What's new for this release? (Arabic, or Enter to skip): " WHATS_NEW < /dev/tty
+# (2026-09-08 revision, second pass) — cat-based capture (read until
+# Ctrl+D) with a line-count confirmation, replacing the earlier
+# per-line `read` loop. Real, reported issue with that loop: pasting
+# multiple lines at once didn't work as expected — each line needed a
+# separate manual paste+Enter. Best explanation, not fully confirmed
+# (untestable from outside a real terminal): bracketed-paste handling
+# interacting with a read invoked fresh per line. A single `cat`
+# capturing everything up to EOF sidesteps that class of issue
+# entirely, regardless of the exact mechanism — one read operation, not
+# one per line, so nothing depends on how a paste's newlines are
+# delivered.
+#
+# Genuinely optional either way: 0 lines (nothing typed before Ctrl+D)
+# still shows the count and asks for confirmation, rather than silently
+# skipping — matches what was asked for directly. "N" re-prompts from
+# scratch rather than trying to edit/append to the rejected attempt.
+while true; do
+  echo "  What's new for this release? (Arabic, type or paste freely —"
+  echo "  press Ctrl+D on its own line when done):"
+  WHATS_NEW=$(cat < /dev/tty)
+  if [ -z "$WHATS_NEW" ]; then
+    LINE_COUNT=0
+  else
+    LINE_COUNT=$(printf '%s\n' "$WHATS_NEW" | wc -l)
+  fi
+  read -p "  Captured $LINE_COUNT line(s). Use this? (y/N) " -n 1 -r CONFIRM < /dev/tty
+  echo
+  if [[ $CONFIRM =~ ^[Yy]$ ]]; then
+    break
+  fi
+  echo "  Let's try again."
+done
 
 echo "→ Bumping package.json to $NEW_VERSION..."
 npm version "$NEW_VERSION" --no-git-tag-version > /dev/null
