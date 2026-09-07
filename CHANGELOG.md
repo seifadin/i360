@@ -6,6 +6,53 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 ---
 
+## [0.13.2] — 2026-09-07
+
+### Added
+- An optional "report this problem" action, available whenever data fails to load or an over-the-air update gets automatically reverted — copies the relevant details and opens a pre-filled email, using the same mechanism already behind the app's existing crash-report button
+- A notice shown if an over-the-air update ever genuinely fails and automatically reverts to the previous, working version — with the same optional report action
+- Release notes for Google Play and Huawei AppGallery can now be entered once, at commit time, alongside the version number, and are applied to both stores automatically on a real submission
+- A safeguard warning developers if web-app changes are about to be released over-the-air while a related native-code change hasn't yet been submitted to the app stores — preventing a mismatch that could otherwise break the app for anyone not yet on the newer native build
+
+### Changed
+- The data-loading error screen redesigned: a single, tappable status indicator now covers "loading," "retrying," and "failed" states together, opening a details-and-report dialog on tap rather than showing a separate button inline
+- The app's own "am I healthy?" signal to the over-the-air update system now waits for a genuine, successful data load (with a generous 45-second grace period for slow connections) rather than firing immediately on startup — a genuinely broken update can now be caught and automatically reverted, rather than always being treated as healthy regardless of whether data actually loaded
+
+### Fixed
+- A real production incident where a scripts-only, non-app-affecting commit somehow published a genuine over-the-air update, which turned out to be broken — traced to the iOS release path lacking a safeguard the Android path already had; both paths now share the same protection
+- A bug where the one-time privacy notice could reopen repeatedly during a persistent data-loading failure
+- A genuine, though rare, false-positive pattern where the "is this website reachable?" check would warn a site was unreachable even though it loaded fine when actually opened — caused by some sites treating the check itself differently from a real visit
+
+### Removed
+- An unused navigation library, no longer needed now that the app has a single screen (also trims roughly 37 KB from the app's download size)
+- Several small, genuinely unused code paths, and a leftover third-party "share" dependency that hadn't actually been called from anywhere since an earlier redesign
+
+### Security
+- Resolved a previously-deferred security advisory in the navigation library by removing it entirely, as a direct result of the cleanup above
+
+---
+
+## [0.13.1] — 2026-09-04
+
+### Added
+- A paperclip button next to relevant resources, opening a linked supplementary webpage via the same in-app browsing resources already use
+- A proactive "is this reachable?" check before opening a resource, with a brief on-screen confirmation on success and a warning (with an option to continue anyway) if the site appears unreachable
+- An automated version-bump and release-metadata workflow for the development team: prompts for a new version at commit time, calculates the current Hijri date from an official source, and writes the release record to Baserow automatically on a real store submission
+
+### Changed
+- Resource links and search results now open in the device's own, full system browser (Custom Tabs / SFSafariViewController) instead of an embedded in-app view — matches how a real browser tab behaves, including the system's own share/back/exit controls
+- The app's internal "runtime version" — used to keep over-the-air updates correctly matched to the installed native app — is now derived automatically from the app's own version number, rather than needing a manual update on every native change
+
+### Fixed
+- A real navigation bug where the in-app browser's Home and Refresh buttons didn't reliably work
+- A header-sizing bug where the app's title could wrap onto two lines on some narrower phones — replaced with genuine on-device measurement rather than fixed-size breakpoints
+- A real bug where a native-code update could silently keep running outdated JavaScript logic after a fresh install, until the next background sync — closed by the automatic version tie-in above
+
+### Removed
+- The original in-app browser (a full embedded page within the app) — fully replaced by opening resources in the device's own system browser
+
+---
+
 ## [0.13.0] — 2026-08-19
 
 ### Complete Platform Rewrite (SAP Build Apps / AppGyver → React + TypeScript + Vite)
