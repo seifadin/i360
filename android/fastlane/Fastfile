@@ -26,57 +26,27 @@ platform :android do
       task: "bundleRelease"
     )
 
-    # Release notes via huawei_appgallery_connect_update_app_localization
-    # (2026-09-07 revision) — replaces the earlier changelog_path attempt
-    # on the main upload action, which a real submission confirmed did
-    # NOT populate the release-notes field actually visible in AppGallery
-    # Connect's own pre-submission app-info view. Root cause, reasoned
-    # through rather than fully proven (this is a third-party plugin, not
-    # something testable from outside a real submission): the plugin's
-    # own internal helper has two separate methods —
-    # update_appinfo(privacy_policy_url) and a distinct
-    # update_app_localization_info(params) — strongly suggesting
-    # changelog_path on the main action either doesn't reach the second
-    # method at all, or reaches something narrower than the actual
-    # release-notes field. This dedicated action is what the plugin's own
-    # README explicitly documents for "release notes, app name, brief
-    # info and app description."
-    #
-    # Called BEFORE the main upload/submission, not after — a related
-    # tool's own documented failure ("update service failed... which
-    # can't be updated!") confirms metadata can't be edited once a
-    # version is already under review, which the main upload's own
-    # submit_for_review (on by default) reaches within the same call.
-    # Setting release notes on the app's current draft state first, then
-    # letting the upload carry that forward, avoids that specific,
-    # confirmed failure mode.
-    #
-    # Directory-based, matching supply's own convention rather than a
-    # single file — the plugin's own documented structure is
-    # fastlane/metadata/huawei/<locale>/release_notes (also app_name/
-    # app_description/introduction, none of which this project sets).
-    # "ar" (bare, no region suffix) mirrors Google Play's own confirmed-
-    # working locale choice — NOT independently confirmed for Huawei
-    # specifically, since AppGallery Connect's own locale list wasn't
-    # directly checked. Same honest caveat as "ar" was for Google Play
-    # before its first real, confirmed-successful submission — this
-    # needs the same real-world confirmation.
-    #
-    # Genuinely optional, matching the same file-existence pattern
-    # already established for the (now-removed) changelog_path attempt:
-    # pre-push-hook.sh's submit_to_stores() only writes this file when
-    # non-empty what's-new text was actually entered, so it may genuinely
-    # not exist (skipped prompt, or this lane run manually outside the
-    # normal flow) — unconfirmed how this action handles a metadata_path
-    # whose locale subfolder doesn't exist, so this is skipped entirely
-    # rather than risk passing something malformed.
-    release_notes_path = "./fastlane/metadata/huawei/ar/release_notes"
+    # Release notes via huawei_appgallery_connect_update_app_localization,
+    # called BEFORE the main upload/submission — changelog_path on the
+    # main action doesn't populate the real field (confirmed via a real
+    # submission); metadata can't be edited once a version is under
+    # review, which the main upload's default submit_for_review reaches
+    # within the same call. Directory-based
+    # (fastlane/metadata/huawei/<locale>/release_notes), matching the
+    # plugin's own documented convention. "ar" confirmed working via a
+    # real submission (2026-09-07). Genuinely optional (File.exist?
+    # guard) — the file may not exist if the what's-new prompt was
+    # skipped. __dir__-based absolute paths — Fastlane's own plain Ruby
+    # code runs with Dir.pwd set to fastlane/ itself, not android/ as
+    # might be assumed; confirmed via a real diagnostic (2026-09-07).
+    metadata_dir = File.expand_path("metadata/huawei", __dir__)
+    release_notes_path = File.join(metadata_dir, "ar", "release_notes")
     if File.exist?(release_notes_path)
       huawei_appgallery_connect_update_app_localization(
         client_id: ENV["HUAWEI_CLIENT_ID"],
         client_secret: ENV["HUAWEI_CLIENT_SECRET"],
         app_id: ENV["HUAWEI_APP_ID"],
-        metadata_path: "./fastlane/metadata/huawei"
+        metadata_path: metadata_dir
       )
     end
 

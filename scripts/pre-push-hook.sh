@@ -174,17 +174,9 @@ submit_to_stores() {
     fi
   fi
 
-  # ⚠ TEMPORARY (2026-09-07) — Google Play submission disabled
-  # deliberately, to isolate testing of the new Huawei release-notes fix
-  # (Fastfile's deploy_huawei) without a redundant, unrelated Google Play
-  # resubmission (nothing changed there this round). REVERT before any
-  # release meant to genuinely reach both stores: delete the line below
-  # and uncomment the one above it, restore the echo messages too.
-  echo "→ Submitting to Huawei AppGallery only (Google Play disabled — see comment above)..."
-  # echo "→ Submitting to both stores..."
-  (cd android && fastlane deploy_huawei)
-  # (cd android && fastlane deploy_google && fastlane deploy_huawei)
-  echo "✓ Submitted to Huawei AppGallery. (Google Play was skipped this run.)"
+  echo "→ Submitting to both stores..."
+  (cd android && fastlane deploy_google && fastlane deploy_huawei)
+  echo "✓ Submitted to Google Play and Huawei AppGallery."
 }
 
 # Reads the release state file pre-commit-hook.sh wrote and PATCHes
