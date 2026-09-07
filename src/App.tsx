@@ -1,9 +1,11 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { OtaKit } from '@otakit/capacitor-updater'
 import { AppStateProvider } from '@/store/appState'
 import { DataCacheProvider, useDataCache } from '@/store/dataCache'
 import { usePlatform } from '@/hooks/usePlatform'
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
+import { hadUnrecoveredStartupError, likelyGenuineDataFailure, SAFETY_NET_DELAY_MS } from '@/lib/startupHealth'
+import { resolveFeedbackMailto, copyAndEmailReport } from '@/lib/feedbackReport'
 import Dialog from '@/components/Dialog'
 
 const Home = lazy(() => import('@/pages/Home'))
@@ -55,16 +57,109 @@ function AppShell() {
   // setting being tested.
   usePlatform()
 
-  // OtaKit (12h) — confirms the app shell mounted and ran successfully
-  // within appReadyTimeout (capacitor.config.ts), or the plugin rolls back
-  // to the last known-good bundle automatically. No platform gating
-  // needed — the plugin ships its own web fallback, and its own docs
-  // state most apps only need this one call.
+  const { resource, changeFlags, loading: cacheLoading, error: cacheError } = useDataCache()
+
+  // OtaKit health handshake (2026-09-06 redesign) — previously fired
+  // unconditionally on mount, which only ever confirmed "the JS runtime
+  // started and executed," per OtaKit's own docs — nothing about whether
+  // the app can actually reach its data source. That meant a bundle
+  // that loaded fine but couldn't fetch data (the exact
+  // "تعذّر تحميل البيانات" class of bug this project has hit repeatedly —
+  // see i360-instructions.md §14/§14m) got marked "healthy" regardless,
+  // and OtaKit's own automatic rollback never had a reason to trigger.
+  //
+  // Now gated on the data cache's first genuine success (loading false,
+  // error null) — OtaKit's own appReadyTimeout (45s, capacitor.config.ts)
+  // is the natural grace period for an ordinary, transient connectivity
+  // blip to resolve via dataCache.tsx's own retry loop; genuinely
+  // persistent failure lets the timeout expire and OtaKit's real,
+  // automatic rollback do its job. hadUnrecoveredStartupError() is a
+  // belt-and-suspenders addition (startupHealth.ts) — a genuine JS error
+  // outside React's own render lifecycle (event handlers, timers) that
+  // ErrorBoundary alone can't catch; treated aggressively (blocks this
+  // call entirely) since that signal is far less ambiguous than a
+  // data-fetch failure.
+  const hasNotifiedReady = useRef(false)
   useEffect(() => {
+    if (hasNotifiedReady.current) return
+    if (cacheLoading) return
+    if (cacheError) return // this attempt failed — wait for a later, successful retry
+    if (hadUnrecoveredStartupError()) return
+    hasNotifiedReady.current = true
     OtaKit.notifyAppReady()
+  }, [cacheLoading, cacheError])
+
+  // Safety net for the one real risk the above introduces: a device with
+  // genuinely no connectivity would otherwise never confirm readiness at
+  // all, and OtaKit would roll back a perfectly good bundle over an
+  // ordinary connectivity gap that isn't its fault. Fires once, at
+  // SAFETY_NET_DELAY_MS (startupHealth.ts, derived from ota-timing.json —
+  // genuinely linked to appReadyTimeout, not a second, separately-
+  // hardcoded number that could drift out of sync with it).
+  // likelyGenuineDataFailure() (startupHealth.ts) combines a real check
+  // against the data source's own domain with navigator.onLine as a
+  // secondary signal; either one suggesting "likely not the bundle's
+  // fault" is enough to confirm health anyway, accepting that rare,
+  // harmless false-positive rather than engineer around it further — the
+  // device lands on its last known-good bundle either way, not a broken
+  // one.
+  useEffect(() => {
+    if (hasNotifiedReady.current) return
+    const timer = setTimeout(() => {
+      if (hasNotifiedReady.current) return
+      likelyGenuineDataFailure().then(genuine => {
+        if (hasNotifiedReady.current) return
+        if (!genuine) {
+          hasNotifiedReady.current = true
+          OtaKit.notifyAppReady()
+        }
+        // else: leave it alone — let appReadyTimeout expire naturally,
+        // triggering OtaKit's own real, automatic rollback.
+      })
+    }, SAFETY_NET_DELAY_MS)
+    return () => clearTimeout(timer)
   }, [])
 
-  const { resource, changeFlags, loading: cacheLoading } = useDataCache()
+  // Rollback visibility (2026-09-06) — OtaKit has no manual "roll back
+  // now" API (confirmed directly from its own docs), so this is purely
+  // about making a real rollback visible and reportable, not triggering
+  // one. Two sources, since a rollback can be discovered two different
+  // ways: getLastFailure() covers a startup rollback from a PREVIOUS
+  // session (it happens before any JS runs, so it never reaches a live
+  // listener — per OtaKit's own docs); the 'rollback' event covers one
+  // firing while this session is actually running (the timeout expiring
+  // mid-session). Both funnel into the same small state and the same
+  // shared reporting mechanism (feedbackReport.ts) ErrorBoundary uses —
+  // not the crash-screen UI itself, since this isn't a live crash, just
+  // its own small Dialog notice below.
+  const [rollbackDetails, setRollbackDetails] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+
+    OtaKit.getLastFailure()
+      .then(failure => {
+        if (!cancelled && failure) setRollbackDetails(JSON.stringify(failure))
+      })
+      .catch(() => {})
+
+    const listenerPromise = OtaKit.addListener('rollback', failure => {
+      if (!cancelled) setRollbackDetails(JSON.stringify(failure))
+    })
+
+    return () => {
+      cancelled = true
+      listenerPromise.then(handle => handle.remove()).catch(() => {})
+    }
+  }, [])
+
+  const handleRollbackReport = useCallback(() => {
+    copyAndEmailReport('تقرير تراجع تحديث - i360إ', rollbackDetails ?? '')
+    setRollbackDetails(null)
+  }, [rollbackDetails])
+
+  const handleRollbackDismiss = useCallback(() => {
+    setRollbackDetails(null)
+  }, [])
 
   const [privacyOpen, setPrivacyOpen] = useState(false)
 
@@ -180,6 +275,22 @@ function AppShell() {
         title={dialogQueue[0]?.title ?? ''}
         message={dialogQueue[0]?.message ?? ''}
         onClose={handleDialogClose}
+      />
+
+      {/* OTA rollback notice — see the state/effect above for the two
+          sources this can come from. secondaryAction only offered when a
+          feedback address is actually available, same pattern as
+          ScienceGrid.tsx's reachability-check dialog. */}
+      <Dialog
+        open={!!rollbackDetails}
+        title="تم التراجع عن آخر تحديث"
+        message="واجه آخر تحديث للتطبيق مشكلة، فتم التراجع تلقائيًا إلى النسخة السابقة العاملة."
+        onClose={handleRollbackDismiss}
+        secondaryAction={
+          resolveFeedbackMailto()
+            ? { label: 'الإبلاغ عن المشكلة', onClick: handleRollbackReport }
+            : undefined
+        }
       />
     </>
   )

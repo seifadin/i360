@@ -1,0 +1,4 @@
+{
+  "appReadyTimeoutMs": 45000,
+  "safetyNetMarginMs": 5000
+}

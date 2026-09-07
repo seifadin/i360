@@ -14,6 +14,20 @@ import { join } from 'node:path';
 // to run from the repo root.
 const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8'));
 
+// Single source of truth (2026-09-06), shared with startupHealth.ts's
+// client-side safety-net delay — see ota-timing.json's own consumers for
+// why this needed linking: appReadyTimeout here and App.tsx's safety-net
+// delay must stay in a specific relationship (the delay fires shortly
+// BEFORE this timeout expires), and two separate hardcoded numbers in two
+// files with no structural link between them could silently drift apart
+// if either changed later without remembering the other. A plain .json
+// file (not a .ts module) specifically because it's readable from both
+// this Node-context config (via readFileSync, the same proven pattern
+// already used for package.json above) and the client bundle (via vite's
+// native JSON import support) without either context needing to
+// understand the other's module system.
+const otaTiming = JSON.parse(readFileSync(join(process.cwd(), 'ota-timing.json'), 'utf-8'));
+
 const config: CapacitorConfig = {
   appId: 'com.appgyver.i360',
   appName: 'i360إ',
@@ -30,11 +44,18 @@ const config: CapacitorConfig = {
     // up immediately, later cold starts apply anything already staged),
     // resumePolicy 'shadow' (checks/stages in the background, never applies
     // mid-session), runtimePolicy 'immediate' (a new native shell always
-    // catches up right away). appReadyTimeout uses OtaKit's own documented
-    // example value (10s) rather than coupling it to the unrelated splash
-    // screen duration — this is a safety margin for slower devices/networks
-    // to still call notifyAppReady() before a false rollback, not a UI
-    // preference. See App.tsx for the notifyAppReady() call this pairs with.
+    // catches up right away).
+    //
+    // appReadyTimeout raised from the plugin's own documented example
+    // value (10s) to the ota-timing.json value (45s, 2026-09-06) — a real,
+    // related fix alongside App.tsx's notifyAppReady() gating change (see
+    // its own comment). 10s was already too short even on its own:
+    // dataSource.ts's fetchWithRetry (3 attempts, 1s/2s backoff, 10s
+    // timeout each) can legitimately take up to ~33s on a single, genuine
+    // attempt before giving up — the old timeout wouldn't have let one
+    // honest attempt finish. 45s gives comfortable margin past that worst
+    // case without waiting for a full second outer-retry cycle too. See App.tsx for
+    // the notifyAppReady() call this pairs with.
     // Channel driven by OTA_CHANNEL (build-time only, not VITE_-prefixed —
     // read by this Node-context config file, never exposed to the client
     // bundle). Per OtaKit's own docs: omitting `channel` entirely uses the
@@ -90,7 +111,7 @@ const config: CapacitorConfig = {
       appId: '423c89c7-e4c3-40e9-891a-e9f6bfe27386',
       ...(process.env.OTA_CHANNEL ? { channel: process.env.OTA_CHANNEL } : {}),
       runtimeVersion: pkg.version,
-      appReadyTimeout: 10000,
+      appReadyTimeout: otaTiming.appReadyTimeoutMs,
       launchPolicy: 'apply-staged',
       resumePolicy: 'shadow',
       runtimePolicy: 'immediate',

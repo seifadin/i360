@@ -1,4 +1,4 @@
-import { useMemo, useState, lazy, Suspense, ComponentType, Fragment } from 'react'
+import { useMemo, useState, useEffect, lazy, Suspense, ComponentType, Fragment } from 'react'
 import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
 import { Browser } from '@capacitor/browser'
 import { CapacitorHttp } from '@capacitor/core'
@@ -8,6 +8,7 @@ import { Science } from '@/api/dataSource'
 import { resolveOpenMethod, computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
 import { tryOpenNewTab } from '@/lib/openTab'
+import { resolveFeedbackMailto, copyAndEmailReport } from '@/lib/feedbackReport'
 import Dialog from '@/components/Dialog'
 
 interface MinorItem { science: Science }
@@ -106,13 +107,34 @@ async function checkUrlReachable(url: string): Promise<boolean> {
         url,
         connectTimeout: STATUS_CHECK_TIMEOUT_MS,
         readTimeout: STATUS_CHECK_TIMEOUT_MS,
+        // Headers (2026-09-06) — a real, confirmed false-positive pattern:
+        // this check reported "unreachable" on sites that then opened
+        // fine when the user proceeded anyway. Most likely cause: a bare
+        // CapacitorHttp request doesn't carry the headers a real browser
+        // sends, and many sites (behind Cloudflare/Akamai/similar
+        // protection) specifically reject non-browser-looking requests,
+        // typically with a 403 — while a real browser (which is exactly
+        // what @capacitor/browser opens when the user proceeds) sails
+        // through fine. navigator.userAgent, not a hardcoded string —
+        // this is the app's own, real, currently-running WebView's UA,
+        // so it's never stale as Chrome versions increment, and it
+        // genuinely matches what @capacitor/browser will present a
+        // moment later for the same URL.
+        headers: {
+          'User-Agent': navigator.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'ar,en;q=0.9',
+        },
       })
       // A real, readable status this time (unlike a plain no-cors fetch's
-      // opaque response) — treat 2xx/3xx as genuinely reachable, anything
-      // else (4xx/5xx) as a real problem worth surfacing, not just "host
-      // responded at all." A thrown/rejected request (network failure,
-      // timeout) falls through to the catch below and the next attempt.
-      return response.status >= 200 && response.status < 400
+      // opaque response) — treat 2xx/3xx as genuinely reachable. 403
+      // specifically treated as reachable too (2026-09-06) — it's often a
+      // "you don't look like a browser" signal rather than "this content
+      // is genuinely gone," unlike a 404/410/5xx, which still count as a
+      // real problem worth surfacing. A thrown/rejected request (network
+      // failure, timeout) falls through to the catch below and the next
+      // attempt.
+      return (response.status >= 200 && response.status < 400) || response.status === 403
     } catch {
       // loop continues to next attempt, unless this was the last one
     }
@@ -217,6 +239,26 @@ export default function ScienceGrid() {
   // fails.
   const [checkFlash, setCheckFlash] = useState(false)
   const [unreachableUrl, setUnreachableUrl] = useState<string | null>(null)
+  // Unified loading/retry/error indicator (2026-09-06 redesign) — replaces
+  // the earlier separate loading/error blocks and inline report button.
+  // lastErrorMessage deliberately does NOT just mirror dataCache.tsx's own
+  // `error` directly — that value resets to null at the START of every
+  // retry attempt (dataCache.tsx's own established behavior), so a naive
+  // binding would make the indicator flicker in and out of being
+  // interactive every ~10s retry cycle. This instead remembers the most
+  // recent real failure, staying set continuously through every
+  // subsequent retry, until a genuinely settled success (loading false,
+  // error null) resets it — mirroring App.tsx's own notifyAppReady()
+  // gating condition, the same "genuinely settled" signal used there.
+  const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null)
+  useEffect(() => {
+    if (error) {
+      setLastErrorMessage(error)
+    } else if (!loading) {
+      setLastErrorMessage(null)
+    }
+  }, [error, loading])
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
 
   const groups = useMemo(() => groupSciences(sciences), [sciences])
 
@@ -284,17 +326,57 @@ export default function ScienceGrid() {
     if (science.WebAppendix) await openUrl(science.WebAppendix)
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center gap-2 p-4 text-base text-gray-500">
-      <LoaderCircle size={20} className="animate-spin" />
-      <span>{isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...'}</span>
-    </div>
-  )
-  if (error) return (
-    <div className="flex items-center justify-center p-4 text-base text-red-500">
-      <span>{error}</span>
-    </div>
-  )
+  if (loading && !lastErrorMessage) {
+    // First load, no failure yet — plain, non-interactive status text,
+    // unchanged from the original behavior. Nothing to report yet, so
+    // this deliberately isn't a button at all.
+    return (
+      <div className="flex items-center justify-center gap-2 p-4 text-base text-gray-500">
+        <LoaderCircle size={20} className="animate-spin" />
+        <span>جارٍ التحميل...</span>
+      </div>
+    )
+  }
+  if (lastErrorMessage) {
+    // At least one failure has happened since the last genuine success —
+    // one unified, continuously-tappable indicator, replacing the
+    // earlier separate loading/error blocks and inline report button.
+    // Opens a dialog with the error details and an optional report
+    // action instead, matching the OTA rollback notice's own pattern
+    // (App.tsx) — same shared reporting mechanism, same Dialog.tsx
+    // component, closes immediately after reporting rather than staying
+    // open with a "reported" confirmation, since there's no content
+    // behind it worth returning to mid-failure either way.
+    const handleDataErrorReport = () => {
+      copyAndEmailReport('تقرير تعذّر تحميل البيانات - i360إ', lastErrorMessage)
+      setErrorDialogOpen(false)
+    }
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setErrorDialogOpen(true)}
+          className="flex w-full items-center justify-center gap-2 p-4 text-center text-base"
+        >
+          {loading && <LoaderCircle size={20} className="animate-spin text-gray-500" />}
+          <span className={loading ? 'text-gray-500' : 'text-red-500 underline'}>
+            {loading ? (isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...') : lastErrorMessage}
+          </span>
+        </button>
+        <Dialog
+          open={errorDialogOpen}
+          title="تعذّر تحميل البيانات"
+          message={lastErrorMessage}
+          onClose={() => setErrorDialogOpen(false)}
+          secondaryAction={
+            resolveFeedbackMailto()
+              ? { label: 'الإبلاغ عن المشكلة', onClick: handleDataErrorReport }
+              : undefined
+          }
+        />
+      </>
+    )
+  }
 
   return (
     <Fragment>

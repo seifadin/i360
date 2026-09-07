@@ -1,4 +1,11 @@
-const BASE_URL = import.meta.env.VITE_BASEROW_URL
+// Exported (2026-09-06) — this is the current data source's actual base
+// URL, so App.tsx's startupHealth.ts connectivity check imports it
+// directly rather than duplicating a second reference to
+// VITE_BASEROW_URL. If this project's data source ever changes, both the
+// real fetches below and that connectivity check automatically follow —
+// there's genuinely one source of truth here, not two things that could
+// silently drift apart.
+export const BASE_URL = import.meta.env.VITE_BASEROW_URL
 const API_KEY = import.meta.env.VITE_BASEROW_KEY
 const TABLE_SCIENCES = import.meta.env.VITE_BASEROW_TABLE_SCIENCES
 const TABLE_RESOURCES = import.meta.env.VITE_BASEROW_TABLE_RESOURCES

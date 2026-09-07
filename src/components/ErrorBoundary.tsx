@@ -1,7 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
-import { getStoredItem } from '@/lib/deviceStorage'
-import { FEEDBACK_MAILTO_KEY, CACHE_KEY_SCIENCES } from '@/store/dataCache'
-import { Science } from '@/api/dataSource'
+import { resolveFeedbackMailto, copyAndEmailReport } from '@/lib/feedbackReport'
 
 interface Props {
   children: ReactNode
@@ -30,69 +28,29 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     const errorDetails = `${error.message}\n\n${info.componentStack ?? ''}`.trim()
 
-    // Two-tier lookup, both reading localStorage directly — ErrorBoundary
-    // sits ABOVE DataCacheProvider in the tree (see main.tsx), so
-    // useDataCache() isn't reachable here. Tier 1: the small dedicated
-    // key (dataCache.tsx writes this on every successful Sciences load,
-    // not just during a crash — see its own comment for why). Tier 2:
-    // fall back to parsing the full Sciences cache directly, in case the
-    // dedicated key hasn't been written yet (e.g. an OTA update landing
-    // between a user's last successful Sciences fetch and this feature
-    // shipping). Both can come up empty only on a device's very first
-    // ever launch, before any successful fetch has happened at all — an
-    // unavoidable, narrow edge case handled by the render()-level
-    // fallback below, not something to solve here.
-    let feedbackMailto: string | null = getStoredItem(FEEDBACK_MAILTO_KEY)
-    if (!feedbackMailto) {
-      try {
-        const raw = getStoredItem(CACHE_KEY_SCIENCES)
-        const sciences: Science[] = raw ? JSON.parse(raw) : []
-        const feedbackRow = sciences.find(s => s.ScienceMinor_En === 'Feedback')
-        if (feedbackRow?.Web?.toLowerCase().startsWith('mailto:')) {
-          feedbackMailto = feedbackRow.Web
-        }
-      } catch {
-        // Corrupted cache — treat as absent, same stance as dataCache.tsx's
-        // own loadCached().
-      }
-    }
+    // resolveFeedbackMailto() (src/lib/feedbackReport.ts) handles the
+    // two-tier lookup — its own comment covers the ErrorBoundary-specific
+    // reasoning (sits ABOVE DataCacheProvider, so useDataCache() isn't
+    // reachable here) and the narrow first-launch edge case where both
+    // tiers can come up empty, handled at the render()-level fallback
+    // below, not here.
+    const feedbackMailto = resolveFeedbackMailto()
 
     this.setState({ errorDetails, feedbackMailto })
   }
 
   // Class property (auto-binds `this`), triggered directly by the button's
   // onClick — the synchronous user-gesture context this fires in is what
-  // makes navigator.clipboard.writeText() reliable to call here.
+  // makes navigator.clipboard.writeText() (inside copyAndEmailReport)
+  // reliable to call here.
   handleReport = () => {
-    const { errorDetails, feedbackMailto } = this.state
-
-    // Clipboard gets the FULL, untruncated details regardless of whether
-    // an email could be prepared — this is the actual fallback for the
-    // narrow first-launch edge case (see componentDidCatch), and also a
-    // safety net against mailto body truncation below on the devices
-    // that do have an email destination.
-    navigator.clipboard?.writeText(errorDetails).catch(() => {})
-
-    if (feedbackMailto) {
-      const subject = encodeURIComponent('تقرير خطأ - i360إ')
-      // Kept short deliberately — very long mailto bodies can get silently
-      // truncated by some mail clients. The clipboard copy above already
-      // carries the complete text regardless of this trim.
-      const body = encodeURIComponent(errorDetails.slice(0, 500))
-      const separator = feedbackMailto.includes('?') ? '&' : '?'
-      window.location.href = `${feedbackMailto}${separator}subject=${subject}&body=${body}`
-    }
-    // No feedbackMailto: clipboard copy above is the entire action — no
-    // navigation attempt, nothing silently fails, the button's own label
-    // already told the user this is what tapping it would do.
-
-    // Confirmation is worded to what's actually verifiable: the clipboard
-    // write is something this code can genuinely confirm it attempted;
-    // whether the mail app actually opened is not something JS can detect
-    // (window.location.href to a mailto: link fails silently on the rare
-    // device with no mail client configured) — so the wording says
-    // "opened" only when an email destination existed, never claims more
-    // than what's actually known.
+    // copyAndEmailReport() (src/lib/feedbackReport.ts) handles the actual
+    // clipboard write and, if a feedback address was found, opens the
+    // pre-filled mailto:. See its own comment for the full reasoning
+    // (why clipboard always gets the full text, why the mailto body is
+    // trimmed, why the return value is worded to what's actually
+    // verifiable).
+    copyAndEmailReport('تقرير خطأ - i360إ', this.state.errorDetails)
     this.setState({ reported: true })
   }
 
