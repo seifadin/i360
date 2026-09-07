@@ -114,6 +114,39 @@ submit_to_stores() {
     echo "  channel. Investigate before submitting (see §12.16c)."
     return 1
   fi
+
+  # What's-new release notes (2026-09-06) — pre-commit-hook.sh's own
+  # prompt saved this into $STATE_FILE alongside the version, if a
+  # native-relevant commit happened this session. Genuinely optional:
+  # this function is also called from the web-only OTA-failure fallback
+  # above, where no such state exists at all (not a native-relevant push
+  # to begin with) — degrades gracefully to whatever each store already
+  # has live, rather than requiring one.
+  if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
+    local whats_new
+    whats_new=$(node -p "try { require('$STATE_FILE').whatsNew || '' } catch { '' }" 2>/dev/null || echo "")
+    if [ -n "$whats_new" ]; then
+      echo "→ Writing release notes for both stores..."
+      # supply (Google Play) reads from this exact, file-based convention
+      # — confirmed directly, no direct inline parameter exists. "ar"
+      # (bare, no region suffix) is Google Play's own standard locale
+      # code for generic Arabic — worth confirming on the first real
+      # submission, same caution this project applies to every other
+      # untested-on-a-real-device assumption. default.txt specifically
+      # (not a version-code-named file): this project's version codes
+      # (yyyyDDDHH) are always unique, never repeated, so a version-
+      # specific file would never be found anyway — default.txt is
+      # correctly used as the fallback on every single release.
+      mkdir -p android/fastlane/metadata/android/ar/changelogs
+      printf '%s' "$whats_new" > android/fastlane/metadata/android/ar/changelogs/default.txt
+
+      # huawei_appgallery_connect takes a direct file path instead
+      # (changelog_path:, set in the Fastfile) — no metadata-directory
+      # convention needed for this one.
+      printf '%s' "$whats_new" > android/fastlane/huawei-changelog.txt
+    fi
+  fi
+
   echo "→ Submitting to both stores..."
   (cd android && fastlane deploy_google && fastlane deploy_huawei)
   echo "✓ Submitted to Google Play and Huawei AppGallery."
@@ -302,6 +335,7 @@ else
   # something the earlier file-detection tests could have revealed.
   read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
   echo
+  STORE_SUBMISSION_DECLINED=false
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     submit_to_stores
     if [ "$HAS_VALID_STATE" = true ]; then
@@ -309,6 +343,7 @@ else
       rm -f "$STATE_FILE"
     fi
   else
+    STORE_SUBMISSION_DECLINED=true
     echo "  Skipped. Run manually when ready (build + clean sync first —"
     echo "  see submit_to_stores above for why the sync matters):"
     echo "    npm run build && env -u OTA_CHANNEL npx cap sync android"
@@ -337,6 +372,24 @@ else
   if [ "$OTA_RELEVANT" = false ]; then
     echo "→ No web-bundle-relevant files changed — skipping OTA release."
   else
+    # Real, confirmed risk (2026-09-06), not a hypothetical: a JS change
+    # tied to a native-side value (e.g. capacitor.config.ts's
+    # appReadyTimeout) can look completely fine here, yet genuinely
+    # misbehave against an older native build's own, different
+    # compiled-in value — a device still on the previous binary would
+    # apply new JS that assumes a native change it was never actually
+    # given. This warning does NOT couple the two questions back
+    # together (that coupling was deliberately removed once already, see
+    # the comment above) — it only makes a real risk visible right
+    # before the same, still-independently-answerable question, for the
+    # one specific combination where it actually applies.
+    if [ "$STORE_SUBMISSION_DECLINED" = true ]; then
+      echo "  ⚠ Store submission was declined above, but this push also"
+      echo "    changes web-bundle-relevant files. If any of those changes"
+      echo "    assume a native-side value that hasn't actually reached"
+      echo "    real devices yet, releasing this bundle via OTA now could"
+      echo "    break the app for anyone still on the older native binary."
+    fi
     read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then

@@ -12,6 +12,12 @@ node_modules/
 keystore.properties
 android/fastlane/.env
 android/fastlane/google-play-key.json
+# Generated per-release (2026-09-06) — submit_to_stores() writes these
+# fresh from the what's-new text before every real submission, same
+# reasoning as the other android/fastlane/ entries above (real per-run
+# artifacts, not source-controlled content).
+android/fastlane/huawei-changelog.txt
+android/fastlane/metadata/
 *.log
 npm-debug.log*
 Thumbs.db

@@ -128,6 +128,16 @@ HIJRI_DATE=$(node scripts/get-hijri-date.js)
 
 BASEROW_VERSION_STRING="إصدار ${NEW_VERSION} @ ${GREGORIAN_DATE} م / ${HIJRI_DATE} هـ"
 
+# What's-new text for Google Play/Huawei AppGallery release notes
+# (2026-09-06) — asked here, not at push time, matching the version
+# prompt's own reasoning: decided once, reused silently on a later push
+# via the same state file, rather than re-asked every time. Optional
+# (plain Enter skips) — not every release necessarily has a meaningful
+# user-facing change worth a note, and submit_to_stores() (pre-push-
+# hook.sh) already degrades gracefully to whatever was previously live
+# on each store when this is empty, rather than requiring one.
+read -p "  What's new for this release? (Arabic, or Enter to skip): " WHATS_NEW < /dev/tty
+
 echo "→ Bumping package.json to $NEW_VERSION..."
 npm version "$NEW_VERSION" --no-git-tag-version > /dev/null
 git add package.json package-lock.json
@@ -146,9 +156,9 @@ git add package.json package-lock.json
 # initial off-by-one here silently produced an undefined stateFile path.
 node -e '
 const fs = require("fs");
-const [, version, baserowVersionString, gregorianDate, hijriDate, stateFile] = process.argv;
-fs.writeFileSync(stateFile, JSON.stringify({ version, baserowVersionString, gregorianDate, hijriDate }, null, 2));
-' "$NEW_VERSION" "$BASEROW_VERSION_STRING" "$GREGORIAN_DATE" "$HIJRI_DATE" "$STATE_FILE"
+const [, version, baserowVersionString, gregorianDate, hijriDate, whatsNew, stateFile] = process.argv;
+fs.writeFileSync(stateFile, JSON.stringify({ version, baserowVersionString, gregorianDate, hijriDate, whatsNew }, null, 2));
+' "$NEW_VERSION" "$BASEROW_VERSION_STRING" "$GREGORIAN_DATE" "$HIJRI_DATE" "$WHATS_NEW" "$STATE_FILE"
 
 echo "✓ Version bumped to $NEW_VERSION and staged for this commit."
 echo "  Baserow release string: $BASEROW_VERSION_STRING"

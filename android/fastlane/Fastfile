@@ -25,12 +25,25 @@ platform :android do
     gradle(
       task: "bundleRelease"
     )
-    huawei_appgallery_connect(
+    # changelog_path (2026-09-06) — written by pre-push-hook.sh's
+    # submit_to_stores() before this lane runs, from the what's-new text
+    # pre-commit-hook.sh asked for — but only when non-empty text was
+    # actually entered, so the file may genuinely not exist (skipped
+    # prompt, or this lane run manually outside the normal flow).
+    # Checked directly rather than assumed: unconfirmed how
+    # huawei_appgallery_connect handles a changelog_path pointing at a
+    # file that doesn't exist, so only pass the parameter at all when the
+    # file is confirmed present — omitting it entirely, not pointing at
+    # a missing path, when there's nothing to say.
+    changelog_path = "./fastlane/huawei-changelog.txt"
+    huawei_params = {
       client_id: ENV["HUAWEI_CLIENT_ID"],
       client_secret: ENV["HUAWEI_CLIENT_SECRET"],
       app_id: ENV["HUAWEI_APP_ID"],
       apk_path: "./app/build/outputs/bundle/release/app-release.aab",
       is_aab: true
-    )
+    }
+    huawei_params[:changelog_path] = changelog_path if File.exist?(changelog_path)
+    huawei_appgallery_connect(**huawei_params)
   end
 end
