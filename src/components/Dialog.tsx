@@ -18,9 +18,17 @@ interface DialogProps {
   // existing call site omits this and keeps its original single-button
   // behavior unchanged.
   secondaryAction?: { label: string; onClick: () => void }
+  // Emphasizes the secondary action as the filled, primary-style button
+  // (green, receives initial focus) instead of the usual "close" button
+  // — used specifically for the website-reachability warning on web,
+  // where the check is often unreliable (CORS-subject there, unlike
+  // native), so "continue anyway" is frequently the correct choice
+  // rather than a risky override. Every other call site omits this and
+  // keeps its original styling/focus unchanged.
+  emphasizeSecondary?: boolean
 }
 
-export default function Dialog({ open, title, message, onClose, secondaryAction }: DialogProps) {
+export default function Dialog({ open, title, message, onClose, secondaryAction, emphasizeSecondary = false }: DialogProps) {
   // useId() rather than a hardcoded string — Dialog is a single shared
   // component rendered from several independent call sites (privacy notice,
   // the queued Edition/Version/Revision dialogs, OSRow's version-info
@@ -49,6 +57,12 @@ export default function Dialog({ open, title, message, onClose, secondaryAction 
     // border-radius) also existed and needed its own real fix — see the
     // button's own className comment below for that half of the story.
     okButtonRef.current?.focus()
+    if (emphasizeSecondary && secondaryAction) {
+      // Overrides the focus set immediately above — the emphasized
+      // action is the one that should genuinely receive it, since it's
+      // now the visually primary, filled button.
+      secondaryButtonRef.current?.focus()
+    }
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -74,7 +88,7 @@ export default function Dialog({ open, title, message, onClose, secondaryAction 
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose, secondaryAction])
+  }, [open, onClose, secondaryAction, emphasizeSecondary])
 
   if (!open) return null
 
@@ -97,11 +111,20 @@ export default function Dialog({ open, title, message, onClose, secondaryAction 
           <button
             ref={secondaryButtonRef}
             onClick={secondaryAction.onClick}
-            // Outlined, not filled — deliberately less prominent than the
+            // Outlined by default — deliberately less prominent than the
             // primary button below. secondaryAction exists specifically
             // for a "proceed despite the warning" action, which shouldn't
             // visually compete with the safer, recommended dismiss action.
-            className="mb-2 w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green"
+            // emphasizeSecondary swaps this: filled green becomes the
+            // genuinely recommended choice in that specific case (see the
+            // prop's own comment above) — a contrasting blue focus ring,
+            // not the usual green, since a green ring on a green button
+            // would be hard to see.
+            className={
+              emphasizeSecondary
+                ? 'mb-2 w-full rounded-full bg-brand-green py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-blue'
+                : 'mb-2 w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green'
+            }
           >
             {secondaryAction.label}
           </button>
@@ -118,7 +141,15 @@ export default function Dialog({ open, title, message, onClose, secondaryAction 
           // was outline rendering as a squared bounding box, not spacing.
           // Tailwind's ring-* utilities use box-shadow instead, which
           // correctly clips to the element's own border-radius.
-          className="w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-green"
+          //
+          // emphasizeSecondary swaps this button to the outlined style
+          // instead — see secondaryAction's own button above for the
+          // full reasoning.
+          className={
+            emphasizeSecondary
+              ? 'w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green'
+              : 'w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-green'
+          }
         >
           موافق
         </button>

@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, lazy, Suspense, ComponentType, Fragment } from 'react'
 import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
 import { Browser } from '@capacitor/browser'
-import { CapacitorHttp } from '@capacitor/core'
+import { Capacitor, CapacitorHttp } from '@capacitor/core'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
@@ -404,6 +404,16 @@ export default function ScienceGrid() {
         title="تعذر الوصول إلى الموقع"
         message="يبدو أن هذا الموقع غير متاح حاليًا."
         onClose={() => setUnreachableUrl(null)}
+        // Native: the check genuinely reflects reachability, so "OK"
+        // stays the recommended, filled default. Web: CapacitorHttp
+        // falls back to the browser's own fetch there (subject to CORS),
+        // so this warning is often a false positive — confirmed directly
+        // via real console output ("blocked by CORS policy") across
+        // several, otherwise perfectly reachable sites (tanzil.net,
+        // archive.org, greattafsirs.com) — "continue anyway" is
+        // genuinely the more likely-correct choice there, so it's
+        // emphasized instead.
+        emphasizeSecondary={!Capacitor.isNativePlatform()}
         secondaryAction={{
           label: 'المتابعة على أي حال',
           onClick: () => {
