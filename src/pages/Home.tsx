@@ -139,7 +139,7 @@ export default function Home() {
         className="absolute -top-[9999px] -left-[9999px] flex items-center gap-2 text-2xl font-bold whitespace-nowrap pointer-events-none"
       >
         <span>&#xFD3F;</span>
-        <img src="/assets/logo-512.png" alt="" className="h-8 w-8 object-contain" />
+        <img src="/assets/icons/logo-512.png" alt="" className="h-8 w-8 object-contain" />
         <span>{HEADER_TITLE}</span>
         <span>&#xFD3E;</span>
       </div>
@@ -154,7 +154,7 @@ export default function Home() {
       <div className="flex items-center justify-center gap-2 bg-brand-ivory px-4 py-3 shadow-sm shrink-0">
         <span className={`${headerStep.text} font-bold text-brand-blue`} aria-hidden="true">&#xFD3F;</span>
         <img
-          src="/assets/logo-512.png"
+          src="/assets/icons/logo-512.png"
           alt="i360إ"
           className={`${headerStep.icon} object-contain shrink-0`}
         />

@@ -1,25 +1,45 @@
 {
   "name": "الموسوعة الإسلامية i360إ",
   "short_name": "i360إ",
-  "description": "موسوعة إسلامية لاكتشاف والبحث عن المصادر الإسلامية حسب التخصص",
+  "description": "إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط",
   "start_url": "/",
+  "id": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#FAF7F2",
   "theme_color": "#0010CF",
   "dir": "rtl",
   "lang": "ar",
+  "categories": ["education", "reference"],
   "icons": [
     {
-      "src": "/assets/logo-192.png",
+      "src": "/assets/icons/logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/logo-512.png",
+      "src": "/assets/icons/logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/narrow.png",
+      "sizes": "1080x2275",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "الصفحة الرئيسية على الهاتف"
+    },
+    {
+      "src": "/assets/screenshots/wide.png",
+      "sizes": "2560x1515",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "الصفحة الرئيسية على سطح المكتب"
     }
   ]
 }
