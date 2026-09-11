@@ -20,6 +20,21 @@ cd ../../..
 
 npm ci
 npm run build
+
+# Strip PWA-store-only assets (2026-09-12) — same reasoning as
+# pre-push-hook.sh's own equivalent step: screenshots exist solely for
+# the web manifest's own install-prompt/store-listing context (Microsoft
+# Store via PWABuilder), never displayed anywhere in the app's own UI on
+# any platform, unlike the icons (genuinely used in-app via Home.tsx, so
+# those stay). Done once here, before cap sync ios, rather than also in
+# ci_post_xcodebuild.sh — that script's own comment confirms it reuses
+# this exact dist/ unchanged, never rebuilding, so stripping here already
+# covers both the .ipa build and the later OTA release in one place.
+if [ -d dist/assets/screenshots ]; then
+  echo "Stripping PWA-only screenshots from dist/ before native sync/OTA..."
+  rm -rf dist/assets/screenshots
+fi
+
 npx cap sync ios
 
 # Deliberately NOT installing CocoaPods here — confirmed in 12f this

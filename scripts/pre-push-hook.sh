@@ -277,6 +277,22 @@ if [ "$BRANCH" != "vite" ] && [ "$BRANCH" != "main" ]; then
   exit 0
 fi
 
+# Strip PWA-store-only assets (2026-09-12) — screenshots exist solely
+# for the web manifest's own install-prompt/store-listing context
+# (Microsoft Store via PWABuilder); never displayed anywhere in the
+# app's own UI on any platform, unlike the icons (genuinely used
+# in-app via Home.tsx on every platform, so those stay). Both the
+# native apk/aab (via cap sync below) and the OTA bundle (via
+# release-to-otakit.sh, further down) independently reuse this exact
+# dist/ — done here, after the web deploy above already shipped the
+# full dist/ with screenshots intact, but before either downstream
+# path reuses it, so neither one carries image weight no installed
+# native app ever actually needs.
+if [ -d dist/assets/screenshots ]; then
+  echo "→ Stripping PWA-only screenshots from dist/ before native sync/OTA..."
+  rm -rf dist/assets/screenshots
+fi
+
 # otakit is a standalone CLI, not part of Vite's build — it has no
 # awareness of .env at all unless we explicitly load it. Vite itself
 # reads .env internally during npm run build above, but that's a
@@ -373,7 +389,7 @@ else
     STORE_SUBMISSION_DECLINED=true
     echo "  Skipped. Run manually when ready (build + clean sync first —"
     echo "  see submit_to_stores above for why the sync matters):"
-    echo "    npm run build && env -u OTA_CHANNEL npx cap sync android"
+    echo "    npm run build && rm -rf dist/assets/screenshots && env -u OTA_CHANNEL npx cap sync android"
     echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
     if [ "$HAS_VALID_STATE" = true ]; then
       echo "  The pending release state is preserved — this prompt will show"
