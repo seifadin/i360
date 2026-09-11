@@ -6,6 +6,7 @@
   "id": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone"],
   "orientation": "any",
   "background_color": "#FAF7F2",
   "theme_color": "#0010CF",
@@ -41,5 +42,17 @@
       "form_factor": "wide",
       "label": "الصفحة الرئيسية على سطح المكتب"
     }
-  ]
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.appgyver.i360",
+      "id": "com.appgyver.i360"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/الموسوعة-الإسلامية-إi360/id1632337666"
+    }
+  ],
+  "prefer_related_applications": false
 }
