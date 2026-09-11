@@ -97,12 +97,29 @@ echo "→ Checking what changed in this push..."
 # incident — Xcode Cloud's zsh fallback survived it once, but that's a
 # documented leniency, not a contract). Self-announcing + self-repairing
 # at the moment it matters, matching submit_to_stores()'s
-# verify-don't-trust pattern. Note: the fix lands in the INDEX — the push
-# currently in flight still carries the old mode; commit and include it
-# in a follow-up push.
-if git ls-files -s ios/App/ci_scripts/ | grep -q '^100644'; then
-  echo "⚠ ci_scripts lost exec bit — restoring in the index now:"
-  git update-index --chmod=+x ios/App/ci_scripts/*.sh
+# verify-don't-trust pattern.
+#
+# Real gap closed here (2026-09-12) — this same push already surfaced
+# it live: the previous version only checked git's own index
+# (git ls-files -s), which can already, genuinely say 100755 despite
+# the real file on disk being non-executable — exactly what happened
+# after the earlier, still-buggy safeguard ran `git update-index
+# --chmod=+x` once (fixing the index) without ever touching the real
+# file. That left the index permanently, falsely claiming everything
+# was fine, so this same check would never fire again on its own.
+# `[ ! -x "$f" ]` checks the real, on-disk file directly, independent
+# of whatever git's own index currently claims — catches both failure
+# classes now, not just the one the index happens to already agree on.
+NEEDS_EXEC_FIX=false
+for f in ios/App/ci_scripts/*.sh; do
+  if [ ! -x "$f" ]; then
+    NEEDS_EXEC_FIX=true
+  fi
+done
+if [ "$NEEDS_EXEC_FIX" = true ] || git ls-files -s ios/App/ci_scripts/ | grep -q '^100644'; then
+  echo "⚠ ci_scripts lost exec bit — restoring on disk and in the index:"
+  chmod +x ios/App/ci_scripts/*.sh
+  git add ios/App/ci_scripts/*.sh
   git ls-files -s ios/App/ci_scripts/
   echo "  Commit this mode change and include it in a follow-up push."
 fi
