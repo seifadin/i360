@@ -39,6 +39,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 source "$REPO_ROOT/scripts/native-pattern.sh"
+source "$REPO_ROOT/scripts/fix-ci-scripts-exec-bit.sh"
 
 STAGED_FILES=$(git diff --cached --name-only)
 
@@ -49,6 +50,22 @@ fi
 
 if [ "$IS_NATIVE" = false ]; then
   exit 0
+fi
+
+# ci_scripts exec-bit safeguard (2026-09-12) — shared with
+# pre-push-hook.sh via scripts/fix-ci-scripts-exec-bit.sh (full reasoning
+# lives there, not duplicated here). This is the primary fix location —
+# pre-commit runs BEFORE the commit object exists, so re-staging here
+# genuinely becomes part of THIS commit, closing the real, repeated
+# annoyance a pre-push-only fix had. Native-relevant gate above already
+# covers this (ios/ is part of NATIVE_PATTERN), so this only runs when
+# it could plausibly matter, same as everything below it.
+#
+# Called inside `if`, not as a bare statement — the function's own
+# return 1 (the common, nothing-to-fix case) would otherwise trip this
+# script's own `set -e` and silently abort the whole hook.
+if fix_ci_scripts_exec_bit; then
+  echo "  (folded into this commit automatically — no follow-up needed)"
 fi
 
 STATE_FILE="$REPO_ROOT/.git/i360-pending-release.json"

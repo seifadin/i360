@@ -99,28 +99,23 @@ echo "→ Checking what changed in this push..."
 # at the moment it matters, matching submit_to_stores()'s
 # verify-don't-trust pattern.
 #
-# Real gap closed here (2026-09-12) — this same push already surfaced
-# it live: the previous version only checked git's own index
-# (git ls-files -s), which can already, genuinely say 100755 despite
-# the real file on disk being non-executable — exactly what happened
-# after the earlier, still-buggy safeguard ran `git update-index
-# --chmod=+x` once (fixing the index) without ever touching the real
-# file. That left the index permanently, falsely claiming everything
-# was fine, so this same check would never fire again on its own.
-# `[ ! -x "$f" ]` checks the real, on-disk file directly, independent
-# of whatever git's own index currently claims — catches both failure
-# classes now, not just the one the index happens to already agree on.
-NEEDS_EXEC_FIX=false
-for f in ios/App/ci_scripts/*.sh; do
-  if [ ! -x "$f" ]; then
-    NEEDS_EXEC_FIX=true
-  fi
-done
-if [ "$NEEDS_EXEC_FIX" = true ] || git ls-files -s ios/App/ci_scripts/ | grep -q '^100644'; then
-  echo "⚠ ci_scripts lost exec bit — restoring on disk and in the index:"
-  chmod +x ios/App/ci_scripts/*.sh
-  git add ios/App/ci_scripts/*.sh
-  git ls-files -s ios/App/ci_scripts/
+# Secondary safety net only (2026-09-12) — the primary fix now lives in
+# pre-commit-hook.sh, since a fix here only ever lands in the working
+# directory/index, never the commit already in flight, needing a
+# separate follow-up commit+push every real time this fired. pre-commit
+# runs before the commit object exists, so re-staging there genuinely
+# becomes part of the same commit — this can't do that, structurally,
+# no matter how it's written. Kept here anyway for one real, narrow
+# edge case pre-commit can't reach at all: the bit lost with no new
+# commit made (nothing fires there without one). Harmless overlap in
+# the common case, where pre-commit already fixed it first — this then
+# finds nothing wrong and stays silent.
+#
+# Shared with pre-commit-hook.sh via scripts/fix-ci-scripts-exec-bit.sh
+# (full reasoning, including why the real disk file is checked directly
+# and not just git's index, lives there — not duplicated here).
+source "$(git rev-parse --show-toplevel)/scripts/fix-ci-scripts-exec-bit.sh"
+if fix_ci_scripts_exec_bit; then
   echo "  Commit this mode change and include it in a follow-up push."
 fi
 
