@@ -3,42 +3,46 @@
 // Outputs today's Hijri date as "dd-mm-yyyy" to stdout, source/diagnostic
 // notes to stderr (so callers capturing stdout alone get a clean value).
 //
-// Primary source: Egypt's Dar al-Ifta's own official API — the date
-// they've actually, officially adopted (calculation combined with real
-// observation-committee sighting, not a purely calculated approximation).
-// Confirmed directly from their own account: "دار الإفتاء بتجمع بين
-// الحساب الفلكي... وبين الرؤية الشرعية بالعين" — genuinely different
-// from either Intl calendar variant below, both of which are pure
-// calculation with no observational component at all.
+// Primary source (switched 2026-10-03, tested first in a separate app):
+// a dedicated Cloudflare Worker (dar-hijri.i36o.workers.dev) that itself
+// sources from Egypt's Dar al-Ifta — the date they've actually,
+// officially adopted (calculation combined with real observation-
+// committee sighting, not a purely calculated approximation). Confirmed
+// directly from their own account: "دار الإفتاء بتجمع بين الحساب
+// الفلكي... وبين الرؤية الشرعية بالعين" — genuinely different from
+// either Intl calendar variant below, both of which are pure
+// calculation with no observational component at all. The worker's own
+// response already includes a "via" field confirming its source
+// internally; this script doesn't branch on it, just logs it alongside
+// the date for visibility.
+//
+// This replaces an earlier direct call to Dar al-Ifta's own API
+// (di107.dar-alifta.org), retired here in favor of the worker now that
+// it's been tested directly and confirmed working — the previous,
+// direct integration's own real robots.txt ambiguity (disallowing
+// automated access generally, while a specific /api/ endpoint was
+// separately documented elsewhere as offered for embedding) is no
+// longer this script's own concern either way, since it now talks to
+// the worker's domain, not Dar al-Ifta's directly.
 //
 // Fallback: Node's built-in Intl islamic calendar — 'islamic',
 // deliberately NOT 'islamic-umalqura' (an explicit choice, not a
 // default; islamic-umalqura tracked Dar al-Ifta's real result more
 // closely in the one direct comparison made during development, but the
-// project owner chose islamic anyway). Used only if the API is
+// project owner chose islamic anyway). Used only if the worker is
 // unreachable, slow, or returns something unparseable. A calculated
 // approximation, not the officially-adopted date — accepted here since
 // this value only ever feeds a release-version timestamp, not anything
 // religiously load-bearing.
 //
-// Honest, unresolved note: di107.dar-alifta.org's robots.txt disallows
-// automated access generally, though this specific /api/ endpoint is
-// documented elsewhere on their own site as offered to third-party
-// websites for exactly this kind of embedding. Which of those two
-// signals should actually govern here hasn't been resolved — flagged,
-// not silently decided.
-//
-// Diagnostics (2026-09-04): a real production run fell back silently
-// with no indication of why — the primary source may have genuinely
-// been unreachable, or the response format may not match what was
-// checked manually once ("22 ربيع الأول 1448", never independently
-// re-verified via a live fetch, since robots.txt blocked a direct check
-// while building this). Every failure point below now writes a specific
+// Diagnostics (2026-09-04, still honored after the 2026-10-03 source
+// switch): a real production run once fell back silently with no
+// indication of why. Every failure point below writes a specific
 // stderr reason, distinguishing a network/timeout failure, a non-200
 // response, an unparseable response (with the raw text included), and
-// an unrecognized month name (also with the raw text) — so the next
-// real run tells us definitively which case it actually was, rather
-// than leaving all of them looking identical.
+// an unrecognized month name (also with the raw text) — so a real run
+// tells us definitively which case it actually was, rather than
+// leaving all of them looking identical.
 
 const HIJRI_MONTH_ALIASES = {
   'محرم': 1,
@@ -59,25 +63,46 @@ function pad(n) {
   return String(n).padStart(2, '0');
 }
 
-async function fetchDarAlIftaDate() {
+async function fetchHijriWorkerDate() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
-    const res = await fetch('http://di107.dar-alifta.org/api/HijriDate?langID=1', {
+    const res = await fetch('https://dar-hijri.i36o.workers.dev/', {
       signal: controller.signal,
     });
     if (!res.ok) {
-      process.stderr.write(`(Dar al-Ifta returned HTTP ${res.status} ${res.statusText})\n`);
+      process.stderr.write(`(hijri worker returned HTTP ${res.status} ${res.statusText})\n`);
       return null;
     }
-    const text = (await res.text()).trim();
 
-    // Expected shape: "22 ربيع الأول 1448" — day, Arabic month name,
-    // year. Extract the two numeric tokens and whatever text sits
-    // between them, rather than assume exact whitespace/token count.
+    // Expected shape: {"hijri":"21 ربيع الآخر 1448","cairo":"2026-10-03",
+    // "via":"site"} — confirmed directly 2026-10-03. "cairo" (the
+    // Gregorian date the worker resolved against) and "via" (the
+    // worker's own internal source) aren't needed for this script's own
+    // output, but are logged alongside the date below for visibility,
+    // the same spirit as every other diagnostic in this file.
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      const raw = await res.text().catch(() => '(body unreadable)');
+      process.stderr.write(`(hijri worker response wasn't valid JSON: ${err.message}. Raw response: ${JSON.stringify(raw)})\n`);
+      return null;
+    }
+
+    const text = String(data.hijri ?? '').trim();
+    if (!text) {
+      process.stderr.write(`(hijri worker response missing a "hijri" field. Raw response: ${JSON.stringify(data)})\n`);
+      return null;
+    }
+
+    // Same shape the old Dar al-Ifta API used, and the same parsing —
+    // day, Arabic month name, year. Extract the two numeric tokens and
+    // whatever text sits between them, rather than assume exact
+    // whitespace/token count.
     const match = text.match(/(\d{1,2})\s+(.+?)\s+(\d{3,4})/);
     if (!match) {
-      process.stderr.write(`(Dar al-Ifta response didn't match the expected pattern. Raw response: ${JSON.stringify(text)})\n`);
+      process.stderr.write(`(hijri worker's "hijri" field didn't match the expected pattern. Raw value: ${JSON.stringify(text)})\n`);
       return null;
     }
 
@@ -88,19 +113,22 @@ async function fetchDarAlIftaDate() {
     const month = HIJRI_MONTH_ALIASES[trimmedMonth];
 
     if (!month) {
-      process.stderr.write(`(Dar al-Ifta month name not recognized: "${trimmedMonth}". Raw response: ${JSON.stringify(text)})\n`);
+      process.stderr.write(`(hijri worker month name not recognized: "${trimmedMonth}". Raw value: ${JSON.stringify(text)})\n`);
       return null;
     }
     if (!day || !year) {
-      process.stderr.write(`(Dar al-Ifta day/year parsed as invalid. Raw response: ${JSON.stringify(text)})\n`);
+      process.stderr.write(`(hijri worker day/year parsed as invalid. Raw value: ${JSON.stringify(text)})\n`);
       return null;
+    }
+    if (data.cairo || data.via) {
+      process.stderr.write(`(hijri worker: cairo=${data.cairo ?? 'n/a'}, via=${data.via ?? 'n/a'})\n`);
     }
     return { year, month, day };
   } catch (err) {
     if (err.name === 'AbortError') {
-      process.stderr.write('(Dar al-Ifta fetch timed out after 5s)\n');
+      process.stderr.write('(hijri worker fetch timed out after 5s)\n');
     } else {
-      process.stderr.write(`(Dar al-Ifta fetch failed: ${err.name}: ${err.message})\n`);
+      process.stderr.write(`(hijri worker fetch failed: ${err.name}: ${err.message})\n`);
     }
     return null;
   } finally {
@@ -117,8 +145,8 @@ function calculatedFallback() {
 }
 
 async function main() {
-  let result = await fetchDarAlIftaDate();
-  let source = 'dar-alifta (official, observation-confirmed)';
+  let result = await fetchHijriWorkerDate();
+  let source = 'dar-hijri worker (official, observation-confirmed via Dar al-Ifta)';
   if (!result) {
     result = calculatedFallback();
     source = 'islamic calendar, calculated fallback — see the specific reason logged above';
@@ -127,11 +155,11 @@ async function main() {
   process.stdout.write(`${pad(result.day)}-${pad(result.month)}-${result.year}\n`);
 }
 
-// Belt-and-suspenders (2026-09-06): fetchDarAlIftaDate() always resolves
-// (its own try/catch never lets it throw), so this only ever fires if
-// calculatedFallback() itself throws — a genuinely broken Node/ICU
-// environment lacking Islamic-calendar support, for instance. Node
-// already crashes loudly on an unhandled rejection by default (not
+// Belt-and-suspenders (2026-09-06): fetchHijriWorkerDate() always
+// resolves (its own try/catch never lets it throw), so this only ever
+// fires if calculatedFallback() itself throws — a genuinely broken
+// Node/ICU environment lacking Islamic-calendar support, for instance.
+// Node already crashes loudly on an unhandled rejection by default (not
 // silent), but a labeled message here is clearer than a raw stack
 // trace, matching every other failure point in this file.
 main().catch(err => {
