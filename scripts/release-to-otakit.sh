@@ -72,7 +72,7 @@ if git rev-parse "$LAST_OTA_RELEASE_TAG" >/dev/null 2>&1; then
     echo "  ⚠ Could not diff against $LAST_OTA_RELEASE_TAG ($CHANGED_SINCE_LAST_RELEASE)"
     echo "    — proceeding with the release rather than risk silently skipping"
     echo "    one that's genuinely needed."
-  elif ! echo "$CHANGED_SINCE_LAST_RELEASE" | grep -qE "$OTA_RELEVANT_PATTERN"; then
+  elif ! any_file_outside "$OTA_UNAFFECTED_PATTERN" "$CHANGED_SINCE_LAST_RELEASE"; then
     echo "→ Nothing web-bundle-relevant changed since the last OTA release ($LAST_OTA_RELEASE_TAG) — skipping."
     exit 0
   fi

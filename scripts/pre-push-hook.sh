@@ -43,6 +43,13 @@ done
 
 BRANCH="${LOCAL_REF#refs/heads/}"
 
+# True only when the changed-file list is genuinely UNKNOWN (as opposed to
+# empty because nothing changed) — see the one branch below that sets it.
+# The hosting gate further down needs to tell those two apart: an empty
+# list from "nothing changed" should skip a deploy, an empty list from
+# "couldn't compute the diff" must not.
+DIFF_UNKNOWN=false
+
 # New branch / first push — remote_sha is all zeros, nothing to diff
 # against. Treat as "changed everything" to be safe (routes to native
 # path, which just prompts rather than silently doing anything).
@@ -82,6 +89,7 @@ if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$RE
     echo "    entirely rather than risk the same crash from the other"
     echo "    side; treating this push as though everything changed."
     CHANGED_FILES=""
+    DIFF_UNKNOWN=true
   else
     CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
   fi
@@ -257,25 +265,72 @@ fi
 # Shared with release-to-otakit.sh (2026-09-04) — see
 # scripts/ota-relevant-pattern.sh for the full reasoning and why it's
 # sourced rather than duplicated.
+#
+# Rewritten 2026-10-03 as EXCLUSION lists (see ota-relevant-pattern.sh for
+# why, and for the superset relationship between the two). Both checks go
+# through any_file_outside(), called inside `if` — a bare call's exit 1
+# would trip `set -e`.
 source "$(git rev-parse --show-toplevel)/scripts/ota-relevant-pattern.sh"
 OTA_RELEVANT=false
-if echo "$CHANGED_FILES" | grep -qE "$OTA_RELEVANT_PATTERN"; then
+if any_file_outside "$OTA_UNAFFECTED_PATTERN" "$CHANGED_FILES"; then
   OTA_RELEVANT=true
+fi
+
+# Does this push change anything Firebase Hosting could serve differently?
+# (Hosting gate, 2026-10-03.) A strict superset of OTA_RELEVANT — it also
+# counts firebase.json/.firebaserc, tsconfig*.json and package*.json, which
+# the OTA list deliberately sets aside — so OTA_RELEVANT=true always
+# implies DEPLOY_NEEDED=true, and a skipped build can never leave the OTA
+# path below without a dist/. An unknown diff (DIFF_UNKNOWN) always
+# deploys: the safe direction.
+DEPLOY_NEEDED=false
+if [ "$DIFF_UNKNOWN" = true ] || any_file_outside "$HOSTING_UNAFFECTED_PATTERN" "$CHANGED_FILES"; then
+  DEPLOY_NEEDED=true
 fi
 
 # Build once, shared by Firebase deploy below and OTA further down —
 # avoids building dist/ twice for the same push.
+#
+# Gated (2026-10-03). This used to build and deploy on EVERY push to
+# vite/main, "matching the two retired workflows' own behavior exactly" —
+# a deliberate parity choice during the GitHub Actions migration, not a
+# requirement. A scripts/-only push still uploaded all 1,753 files for a
+# dist/ that was byte-identical. Now:
+#   - main ALWAYS builds and deploys. A production push is a rare,
+#     deliberate release, and an unconditional deploy there guarantees
+#     production matches what was just pushed — worth more than the
+#     saved minute, given the stale-dist/ incident in §15b.
+#   - vite builds when DEPLOY_NEEDED, or when IS_NATIVE (the native path's
+#     submit_to_stores relies on this build having run, even if the
+#     preview deploy itself is skipped).
+#   - A skipped build leaves local dist/ untouched. That is safe because
+#     nothing below uses it in that case (OTA_RELEVANT implies
+#     DEPLOY_NEEDED), but §15b's rule still holds for MANUAL deploys:
+#     always `npm run build` first, never trust whatever dist/ holds.
 if [ "$BRANCH" = "vite" ] || [ "$BRANCH" = "main" ]; then
-  npm run build
+  if [ "$BRANCH" = "main" ] || [ "$DEPLOY_NEEDED" = true ] || [ "$IS_NATIVE" = true ]; then
+    npm run build
+  else
+    echo "→ No hosting-relevant files changed — skipping build and deploy."
+  fi
 fi
 
-# --- Firebase Hosting — every push to vite/main, regardless of what
-# changed, matching the two retired workflows' own behavior exactly
-# (they had no path-filtering either). ---
+# --- Firebase Hosting. Preview (vite) is gated on DEPLOY_NEEDED; production
+# (main) is not — see the build comment above. The preview channel is
+# created with --expires 30d (Firebase's maximum) and every deploy renews
+# it, so with this gate it can now lapse after 30 days with no hosting-
+# relevant push. Deliberately not engineered around: the next relevant
+# push recreates it (a deploy to a missing channel creates it, though the
+# URL's random suffix will change), and a manual refresh is one line:
+#   npm run build && firebase hosting:channel:deploy pwa-test --expires 30d
 if [ "$BRANCH" = "vite" ]; then
-  echo "→ Deploying preview channel (pwa-test)..."
-  firebase hosting:channel:deploy pwa-test --expires 30d
-  echo "✓ Preview channel updated."
+  if [ "$DEPLOY_NEEDED" = true ]; then
+    echo "→ Deploying preview channel (pwa-test)..."
+    firebase hosting:channel:deploy pwa-test --expires 30d
+    echo "✓ Preview channel updated."
+  elif [ "$IS_NATIVE" = true ]; then
+    echo "→ No hosting-relevant files changed — skipping preview deploy (the build above still ran, for the native path)."
+  fi
 elif [ "$BRANCH" = "main" ]; then
   echo "→ Deploying to production..."
   firebase deploy --only hosting
@@ -327,7 +382,7 @@ fi
 if [ "$IS_NATIVE" = false ]; then
   if [ "$OTA_RELEVANT" = false ]; then
     # Nothing in this push could change dist/'s actual contents (see
-    # OTA_RELEVANT_PATTERN above) — deliberately distinct from "tried and
+    # OTA_UNAFFECTED_PATTERN above) — deliberately distinct from "tried and
     # failed" below: this is "nothing to ship," so no store-submission
     # fallback offer here, that fallback exists for a genuine failed
     # release, not a skipped one.
