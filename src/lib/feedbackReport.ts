@@ -66,21 +66,32 @@ export function resolveFeedbackMailto(): string | null {
 // clear-data-and-repro cycle each time). On web, OtaKit concepts don't
 // apply — same fallback OSRow.tsx already uses (__APP_VERSION__ again),
 // rather than showing a meaningless literal '0.0.0'.
-async function buildDiagnosticContext(): Promise<string> {
+//
+// Read ONCE at startup and cached (2026-10-03) — see copyAndEmailReport()
+// for why nothing in the report path may await anymore.
+let cachedOtaBuild: string | null = null
+
+// Called once from main.tsx, as early as possible. A no-op on web. Fully
+// caught on purpose: an unhandled rejection here would trip
+// startupHealth.ts's startup error guard and block notifyAppReady().
+export function primeDiagnosticContext(): void {
+  if (!Capacitor.isNativePlatform()) return
+  OtaKit.getState()
+    .then(state => { cachedOtaBuild = state.current.version })
+    .catch(() => {
+      // Left unknown — buildDiagnosticContext() reports it as such.
+    })
+}
+
+function buildDiagnosticContext(): string {
   const os = detectOS()
   const isHuawei = /huawei|hmscore|harmony/i.test(navigator.userAgent)
   const platform = os === 'android' && isHuawei ? 'android (Huawei)' : os
 
-  let otaBuild = __APP_VERSION__
-  if (Capacitor.isNativePlatform()) {
-    try {
-      const state = await OtaKit.getState()
-      otaBuild = state.current.version
-    } catch {
-      // Leave as the __APP_VERSION__ fallback — same stance as every
-      // other OtaKit.getState() call site in this app (OSRow.tsx).
-    }
-  }
+  // Native: whatever primeDiagnosticContext() read; 'unknown' if it
+  // hasn't resolved yet or failed — deliberately NOT __APP_VERSION__
+  // there, since on native that would state a value nobody actually read.
+  const otaBuild = Capacitor.isNativePlatform() ? (cachedOtaBuild ?? 'unknown') : __APP_VERSION__
 
   return [
     `Platform: ${platform}`,
@@ -106,16 +117,18 @@ async function buildDiagnosticContext(): Promise<string> {
 // pre-filled mailto: with a trimmed body (very long mailto bodies can get
 // silently truncated by some mail clients).
 //
-// Async now (2026-09-12), for buildDiagnosticContext()'s own await —
-// every existing call site already calls this without awaiting or using
-// a return value (confirmed directly, 2026-09-06, when this had none),
-// so none needed updating: a fire-and-forget call to an async function
-// is ordinary, valid JS/TS, and this project runs no lint step
-// (package.json's own build script is just `tsc -b && vite build`) that
-// would flag it either.
-export async function copyAndEmailReport(subjectAr: string, details: string): Promise<void> {
-  const diagnostics = await buildDiagnosticContext()
-  const fullDetails = `${diagnostics}\n\n${details}`
+// SYNCHRONOUS ON PURPOSE — keep it that way (2026-10-03). Clipboard
+// writes are only allowed during a user gesture, and WebKit (iOS) rejects
+// one that happens after an await — an async bridge round-trip in
+// particular. The 2026-09-12 version awaited OtaKit.getState() before
+// writing, so on iOS the copy could fail silently (the .catch below hides
+// it), including on ErrorBoundary's crash screen, where with no feedback
+// address the copy is the only way out. The OTA build is now read at
+// startup instead (primeDiagnosticContext()), so nothing here awaits:
+// the clipboard call runs inside the tap itself. Call sites never awaited
+// this, so returning void instead of a Promise changes nothing for them.
+export function copyAndEmailReport(subjectAr: string, details: string): void {
+  const fullDetails = `${buildDiagnosticContext()}\n\n${details}`
 
   navigator.clipboard?.writeText(fullDetails).catch(() => {})
 
