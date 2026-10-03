@@ -1,9 +1,6 @@
-// Shared "copy + email" reporting mechanism (2026-09-06) — extracted from
-// ErrorBoundary's own original implementation so it can be reused by the
-// OTA rollback notice (App.tsx) and the data-loading error screen
-// (ScienceGrid.tsx) too, rather than three separate, independently-drifting
-// copies of the same feedback-address resolution and copy+mailto logic.
-// ErrorBoundary itself now calls into this too — see its own comment.
+// Shared "copy + email" report mechanism — used by ErrorBoundary and
+// ReportNotice (rollback notice, data-loading error): one place for the feedback
+// address and the copy + mailto logic.
 
 import { Capacitor } from '@capacitor/core'
 import { OtaKit } from '@otakit/capacitor-updater'
@@ -50,33 +47,12 @@ export function resolveFeedbackMailto(): string | null {
   return feedbackMailto
 }
 
-// Diagnostic context (2026-09-12) — a real bug email arrived with only the
-// error string and a manually-typed name, nothing to identify platform or
-// version, making it much harder to act on than it needed to be. Every
-// value here is either already public/derivable from the request itself
-// (platform, a standard header servers already see on every request) or
-// purely technical/non-personal (versions, timestamp) — nothing here is
-// PII, and nothing beyond what a developer would need to triage a report.
-//
-// Reuses detectOS() (usePlatform.ts) rather than re-deriving OS detection
-// independently — same source of truth as everywhere else in the app.
-// Huawei/HMS noted separately, via the same regex usePlatform.ts's own
-// usePlatform() hook already uses, since this project's own history has
-// confirmed real, Huawei-specific behavior differences worth knowing at a
-// glance (computeUseHuawei()).
-//
-// otaBuild vs appVersion deliberately kept distinct, matching OSRow.tsx's
-// own reasoning: appVersion is this build's real, package.json-derived
-// version (__APP_VERSION__) — what code shipped. otaBuild is which OTA
-// bundle is actually running on this device right now — these can differ
-// (the original motivation for showing both in the About dialog was a
-// real bug where confirming "is the fix actually live" needed a full
-// clear-data-and-repro cycle each time). On web, OtaKit concepts don't
-// apply — same fallback OSRow.tsx already uses (__APP_VERSION__ again),
-// rather than showing a meaningless literal '0.0.0'.
-//
-// Read ONCE at startup and cached (2026-10-03) — see copyAndEmailReport()
-// for why nothing in the report path may await anymore.
+// Diagnostic context prepended to every report (§15d) — nothing personal:
+// platform (detectOS(), plus a Huawei/HMS flag via usePlatform()'s regex), the
+// app version (__APP_VERSION__, what shipped) and the OTA build actually running
+// (they can differ), time and timezone. On web, OTA doesn't apply, so the OTA
+// build is __APP_VERSION__. Read once at startup and cached — see
+// copyAndEmailReport() for why nothing in the report path may await.
 let cachedOtaBuild: string | null = null
 
 // Called once from main.tsx, as early as possible. A no-op on web. Fully
@@ -125,23 +101,15 @@ function buildDiagnosticContext(): string {
   ].join('\n')
 }
 
-// Copies the full, untruncated details to clipboard regardless of whether
-// an email destination is available (the reliable, complete copy — also a
-// safety net against the mailto body truncation below on devices that do
-// have one) and, if resolveFeedbackMailto() finds an address, opens a
-// pre-filled mailto: with a trimmed body (very long mailto bodies can get
-// silently truncated by some mail clients).
+// Copies the full details to the clipboard (the complete copy — mailto bodies
+// can be truncated), then, if a feedback address exists, opens a pre-filled
+// mailto: with the first 500 characters.
 //
-// SYNCHRONOUS ON PURPOSE — keep it that way (2026-10-03). Clipboard
-// writes are only allowed during a user gesture, and WebKit (iOS) rejects
-// one that happens after an await — an async bridge round-trip in
-// particular. The 2026-09-12 version awaited OtaKit.getState() before
-// writing, so on iOS the copy could fail silently (the .catch below hides
-// it), including on ErrorBoundary's crash screen, where with no feedback
-// address the copy is the only way out. The OTA build is now read at
-// startup instead (primeDiagnosticContext()), so nothing here awaits:
-// the clipboard call runs inside the tap itself. Call sites never awaited
-// this, so returning void instead of a Promise changes nothing for them.
+// SYNCHRONOUS ON PURPOSE — keep it that way (§15g). Clipboard writes are only
+// allowed during a user gesture, and WebKit (iOS) rejects one made after an
+// await; failing silently there would hit ErrorBoundary's crash screen, where
+// the copy can be the only way out. So the OTA build is read at startup and
+// nothing here awaits.
 export function copyAndEmailReport(subjectAr: string, details: string): void {
   const fullDetails = `${buildDiagnosticContext()}\n\n${details}`
 

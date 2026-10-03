@@ -9,20 +9,13 @@ import Dialog from './Dialog'
 
 const TOOLTIP_MS = 1500 // how long a toggle's tooltip stays up
 
-// Fallback only — the VersionMenu dialog prefers the live Baserow `Version`
-// field (i360dbc), so a Baserow version bump shows up without a code change.
-// Kept short and clearly placeholder-looking ("إصدار -") rather than a fake
-// full version string, so a cold-start-before-data-loads moment doesn't
-// look like a real, specific version number.
-// Not exported (2026-08-25 review) — both were exported but never actually
-// imported anywhere else in src/; the export implied a dependency that
-// doesn't exist. Genuinely file-local, kept as named constants rather than
-// inlined for the same self-documenting reason they were named in the
-// first place.
+// Fallback only — VersionMenu prefers the live Baserow `Version` field (i360dbc).
+// Deliberately placeholder-looking ("إصدار -"), so the moment before data loads
+// doesn't look like a real version number.
 const AppVersionFallback = 'إصدار -'
 const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 
-// Layout order confirmed: OS_WebToggle (leftmost) → MobileServicesToggle → VersionMenu (rightmost)
+// Layout order: OS_WebToggle (leftmost) → MobileServicesToggle → VersionMenu (rightmost)
 // RTL rule used throughout this project: first item in HTML = rightmost visually,
 // last item in HTML = leftmost visually. So HTML order here is:
 // VersionMenu, MobileServicesToggle, OS_WebToggle.
@@ -88,13 +81,8 @@ function ToggleItem({
           triPosition !== undefined || active ? 'bg-brand-green' : 'bg-brand-disabled'
         }`}
         aria-pressed={triPosition === undefined ? active : undefined}
-        // Real Lighthouse finding (2026-08-25): this button had no
-        // accessible name at all — no visible text, and the label lives
-        // on the separate sibling icon below, not referenced by this
-        // element. A screen reader announced only "button, pressed" with
-        // no indication of what it toggles. Reusing the same ariaLabel
-        // already passed in for the icon closes this correctly, since
-        // it's already the accurate, current-state-aware label.
+        // The label lives on the sibling icon, so the button needs its own accessible
+        // name — the same ariaLabel (§14e).
         aria-label={ariaLabel}
       >
         <span
@@ -143,21 +131,8 @@ export default function OSRow() {
   const { resource } = useDataCache()
   const [versionOpen, setVersionOpen] = useState(false)
 
-  // useCallback (2026-08-29) — same real pattern already fixed on the
-  // other two dialogs (App.tsx): a fresh inline function every render
-  // means Dialog.tsx's own focus/keydown effect (dependent on onClose)
-  // tears down and rebuilds on every unrelated OSRow re-render while
-  // this dialog is open. Applied here on the reasonable suspicion it was
-  // contributing to a real, separately-investigated ring-visibility bug
-  // — but a later on-device diagnostic directly confirmed focus was
-  // never actually broken by this, even before this fix existed; the
-  // real causes turned out to be a testing artifact (missing
-  // OTA_CHANNEL=development) and a genuine CSS bug (outline not
-  // following border-radius), both unrelated to this. Kept anyway: still
-  // real, wasteful effect churn worth avoiding on its own merits, same
-  // as the other two dialogs — just not the fix that solved what this
-  // was investigating. setVersionOpen is React-guaranteed stable, so an
-  // empty dependency array is correct.
+  // Stable (useCallback), so Dialog's focus/keydown effect isn't rebuilt on every
+  // OSRow render while the dialog is open — same as App.tsx's dialogs.
   const handleVersionClose = useCallback(() => {
     setVersionOpen(false)
   }, [])

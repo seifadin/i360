@@ -3,20 +3,12 @@ import { ReactNode, useEffect, useId, useRef } from 'react'
 interface DialogProps {
   open: boolean
   title: string
-  // ReactNode, not just string (2026-08-29) — needed so OSRow's version
-  // dialog can render its OTA-build line in a different, smaller text
-  // size than the rest of the message. Fully backward-compatible: a plain
-  // string is itself a valid ReactNode, so the privacy/Edition dialogs'
-  // existing string messages need no changes at all.
+  // ReactNode, not string, so OSRow's version dialog can size its OTA line
+  // differently; a plain string is still valid.
   message: ReactNode
   onClose: () => void
-  // Optional second button (2026-09-03) — needed for the website-
-  // reachability check specifically: the check can have false negatives
-  // (a temporary network blip, or a site that blocks automated requests
-  // but works fine in a real browser), so fully blocking on one failed
-  // check would be too aggressive. Fully backward-compatible — every
-  // existing call site omits this and keeps its original single-button
-  // behavior unchanged.
+  // Optional second button — e.g. "continue anyway" after the reachability check,
+  // whose false negatives make a hard block too aggressive.
   secondaryAction?: { label: string; onClick: () => void }
   // Emphasizes the secondary action as the filled, primary-style button
   // (green, receives initial focus) instead of the usual "close" button
@@ -45,17 +37,9 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
   useEffect(() => {
     if (!open) return
 
-    // Move focus into the dialog on open. Without this, whatever element
-    // was focused before the dialog opened stays focused — meaning a
-    // keyboard/screen-reader user could be left "on" page content that's
-    // now visually hidden behind the overlay, with no indication a modal
-    // appeared at all. Confirmed via real on-device diagnostic logging
-    // (2026-08-29) that focus-SETTING itself was never actually broken —
-    // it landed here correctly, immediately, on every dialog throughout.
-    // That's a narrower claim than "the ring-visibility saga was nothing
-    // real": a genuine, separate CSS bug (outline not following
-    // border-radius) also existed and needed its own real fix — see the
-    // button's own className comment below for that half of the story.
+    // Move focus into the dialog on open, so keyboard/screen-reader users aren't
+    // left on page content now hidden behind the overlay. (The separate focus-ring
+    // fix is on the button below, §14h.)
     okButtonRef.current?.focus()
     if (emphasizeSecondary && secondaryAction) {
       // Overrides the focus set immediately above — the emphasized
@@ -68,12 +52,8 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
       if (e.key === 'Escape') {
         onClose()
       }
-      // Focus trap: with no secondaryAction, this dialog has exactly one
-      // focusable element (the OK button) — "trapping" Tab/Shift+Tab just
-      // means never letting focus leave it. With secondaryAction present
-      // (2026-09-03, the first real use of this), there are genuinely two
-      // focusable elements — cycle between them instead of re-focusing the
-      // same one every time.
+      // Focus trap: one focusable button (OK), or two with secondaryAction —
+      // Tab/Shift+Tab never leave the dialog.
       if (e.key === 'Tab') {
         e.preventDefault()
         if (!secondaryAction) {
@@ -132,19 +112,9 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
         <button
           ref={okButtonRef}
           onClick={onClose}
-          // ring, not outline (2026-08-29 fix) — outline doesn't reliably
-          // follow border-radius in every WebView implementation, and this
-          // button uses rounded-full (a full pill shape). That produced a
-          // visible gap specifically at the rounded ends regardless of
-          // outline-offset value, confirmed via real screenshots — no
-          // offset value was ever going to fix it, since the actual cause
-          // was outline rendering as a squared bounding box, not spacing.
-          // Tailwind's ring-* utilities use box-shadow instead, which
-          // correctly clips to the element's own border-radius.
-          //
-          // emphasizeSecondary swaps this button to the outlined style
-          // instead — see secondaryAction's own button above for the
-          // full reasoning.
+          // ring, not outline: outline doesn't follow border-radius in every WebView,
+          // leaving gaps on this pill shape; ring is a box-shadow and clips correctly
+          // (§14h). emphasizeSecondary swaps this to the outlined style (see above).
           className={
             emphasizeSecondary
               ? 'w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green'

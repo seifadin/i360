@@ -1,35 +1,16 @@
-// src/lib/startupHealth.ts
-// Supports App.tsx's notifyAppReady() gating decision (see its own comment
-// for the full reasoning) — two independent, unrelated signals live here:
+// Two signals behind useOtaHealth's notifyAppReady() decision (§14o):
 //
-// 1. A global error/unhandledrejection guard, installed as early as
-//    possible (main.tsx, before ErrorBoundary/App even mount) — catches
-//    genuine JS errors ErrorBoundary can't (event handlers, timers, any
-//    non-React code path), not just React render-time crashes. Treated
-//    aggressively: any such error blocks notifyAppReady() from firing at
-//    all, since this signal is far less ambiguous than a data-fetch
-//    failure — dataSource.ts's own try/catch already, correctly absorbs
-//    every ordinary fetch failure before it could ever become unhandled,
-//    so something that escapes to here is a real, unanticipated fault.
+// 1. A global error/unhandledrejection guard, installed first thing in
+//    main.tsx — catches what ErrorBoundary can't (event handlers, timers,
+//    non-React code). Aggressive: any such error blocks notifyAppReady(), since
+//    dataSource.ts already absorbs ordinary fetch failures — anything reaching
+//    here is a real, unanticipated fault.
 //
-// 2. A connectivity check, used specifically once the data fetch has
-//    persistently failed close to notifyAppReady()'s own timeout —
-//    combines a real, lightweight HTTP request to the actual data
-//    source's own domain (BASE_URL, imported from dataSource.ts — see its
-//    own comment there) with navigator.onLine as a secondary signal.
-//    Deliberately NOT navigator.onLine alone: confirmed via direct
-//    research that it's genuinely unreliable specifically in
-//    Chromium-based environments (this app's own Android WebView
-//    included) — TanStack Query's own docs cite "a lot of issues around
-//    false negatives" as the reason they stopped trusting it as a primary
-//    signal. The lightweight domain check sidesteps that entirely, since
-//    it's a real network request through the same CapacitorHttp mechanism
-//    already proven working elsewhere in this app, not a browser-level
-//    heuristic. Either signal suggesting "likely not this bundle's fault"
-//    is enough — a deliberately conservative OR, not AND: it takes
-//    agreement from BOTH being wrong (domain reachable AND device
-//    online) before a rollback is allowed to proceed, rather than
-//    trusting either alone.
+// 2. A connectivity check for the OTA safety net: a real request to the data
+//    source's domain (BASE_URL, via reachability.ts) plus navigator.onLine —
+//    never navigator.onLine alone, which is unreliable in Chromium WebViews
+//    (false negatives). A rollback is allowed only when both say "online and
+//    reachable", i.e. the failure is likely this bundle's own.
 
 import { probeStatus } from '@/lib/reachability'
 import { BASE_URL } from '@/api/dataSource'
@@ -44,10 +25,10 @@ export const SAFETY_NET_DELAY_MS = otaTiming.appReadyTimeoutMs - otaTiming.safet
 let hadStartupError = false
 
 export function installStartupErrorGuard() {
-  // Only real JavaScript errors count (2026-10-03). Events without an Error
-  // object — cross-origin "Script error.", browser notices such as the
-  // ResizeObserver loop message — say nothing about this bundle, and a false
-  // positive here blocks notifyAppReady() and rolls back a good bundle.
+  // Only real JavaScript errors count. Events without an Error object —
+  // cross-origin "Script error.", browser notices such as the ResizeObserver loop
+  // message — say nothing about this bundle, and a false positive here blocks
+  // notifyAppReady() and rolls back a good bundle.
   window.addEventListener('error', e => { if (e.error instanceof Error) hadStartupError = true })
   window.addEventListener('unhandledrejection', () => { hadStartupError = true })
 }

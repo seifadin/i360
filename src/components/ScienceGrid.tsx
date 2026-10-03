@@ -107,12 +107,8 @@ function MinorButton({
   onTap: (science: Science) => void
   onAppendixTap: (science: Science) => void
 }) {
-  // Hover is the only tap feedback (pure CSS light-blue affordance) — the
-  // brief green-bold tap-confirmation flash was removed; at 500ms it was
-  // negligibly brief to register. Moved from the button itself onto this
-  // wrapper (2026-09-03, alongside the new paperclip button) — CSS :hover
-  // on a parent still applies while hovering either child, so the whole
-  // row keeps the same hover affordance it always had.
+  // Hover is the only tap feedback (CSS). It sits on this wrapper so the whole row,
+  // paperclip included, keeps it.
   return (
     <div className="flex w-full items-center hover:bg-brand-highlight">
       <button
@@ -166,10 +162,8 @@ export default function ScienceGrid() {
   const { sciences, resource: globalResource, loading, isRetrying, lastFailure } = useDataCache()
   const [openMajorId, setOpenMajorId] = useState<number | null>(null)
   const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
-  // Reachability-check UI state (2026-09-03) — checkFlash is the brief
-  // "reachable" confirmation shown right before the browser overlay opens;
-  // unreachableUrl drives the warning dialog when the check genuinely
-  // fails.
+  // Reachability-check UI: checkFlash = the brief "available" pill before opening;
+  // unreachableUrl drives the warning dialog.
   const [checkFlash, setCheckFlash] = useState(false)
   const [unreachableUrl, setUnreachableUrl] = useState<string | null>(null)
   // Unified loading/retry/error indicator. lastFailure (dataCache.tsx) persists
@@ -288,15 +282,9 @@ export default function ScienceGrid() {
         title="تعذر الوصول إلى الموقع"
         message="يبدو أن هذا الموقع غير متاح حاليًا."
         onClose={() => setUnreachableUrl(null)}
-        // Native: the check genuinely reflects reachability, so "OK"
-        // stays the recommended, filled default. Web: CapacitorHttp
-        // falls back to the browser's own fetch there (subject to CORS),
-        // so this warning is often a false positive — confirmed directly
-        // via real console output ("blocked by CORS policy") across
-        // several, otherwise perfectly reachable sites (tanzil.net,
-        // archive.org, greattafsirs.com) — "continue anyway" is
-        // genuinely the more likely-correct choice there, so it's
-        // emphasized instead.
+        // Native: the check is reliable, so "OK" stays the default. Web: CapacitorHttp
+        // falls back to fetch, so CORS often makes this a false positive (§14q) —
+        // "continue anyway" is emphasized there.
         emphasizeSecondary={!Capacitor.isNativePlatform()}
         secondaryAction={{
           label: 'المتابعة على أي حال',

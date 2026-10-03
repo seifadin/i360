@@ -1,10 +1,5 @@
-// Exported (2026-09-06) — this is the current data source's actual base
-// URL, so App.tsx's startupHealth.ts connectivity check imports it
-// directly rather than duplicating a second reference to
-// VITE_BASEROW_URL. If this project's data source ever changes, both the
-// real fetches below and that connectivity check automatically follow —
-// there's genuinely one source of truth here, not two things that could
-// silently drift apart.
+// Exported so startupHealth.ts's connectivity check uses the same base URL as
+// the fetches below — one source of truth for the data source.
 export const BASE_URL = import.meta.env.VITE_BASEROW_URL
 const API_KEY = import.meta.env.VITE_BASEROW_KEY
 const TABLE_SCIENCES = import.meta.env.VITE_BASEROW_TABLE_SCIENCES
@@ -78,15 +73,8 @@ interface BaserowResponse<T> {
 
 // ─── Pagination helper ────────────────────────────────────────────────────────
 
-// Real root cause of a production bug (2026-08-16/17): a single transient
-// network failure — from ANY source, not just OtaKit's own launch/resume
-// checks competing at startup — permanently broke data loading for the rest
-// of that app session, since a plain fetch() has no timeout and no retry,
-// and dataCache.tsx's init() only ever runs once per mount. Disabling
-// OtaKit's runtimePolicy only removed one contributor to that race, which is
-// why the bug still recurred, just less often ("took several tries"), not
-// zero. The actual fix belongs here, not in more OtaKit policy tweaking —
-// resilience to any transient failure, regardless of its source.
+// Why timeout + retry (§14): one transient network failure, from any source,
+// used to break data loading for the whole session — a plain fetch() has neither.
 const FETCH_TIMEOUT_MS = 10000
 const MAX_RETRIES = 2 // 1 initial attempt + 2 retries = 3 total tries
 const RETRY_BACKOFF_MS = [1000, 2000]
@@ -142,11 +130,9 @@ async function fetchAllPages<T>(url: string): Promise<T[]> {
 // ─── Fetchers ─────────────────────────────────────────────────────────────────
 
 export async function fetchSciences(): Promise<Science[]> {
-  // Sort by ScienceMinorId alone — the table's primary key, confirmed to
-  // already respect ScienceMajorId/ScienceIntermediateId grouping in the
-  // actual data. This also preserves each row's true original position,
-  // which groupSciences() now relies on to interleave intermediate groups
-  // and direct minor items in their real relative order (see ScienceGrid.tsx).
+  // Sort by ScienceMinorId alone — the primary key, which already respects the
+  // Major/Intermediate grouping and keeps each row's original position, which
+  // groupSciences() relies on to interleave intermediate groups and direct items.
   return fetchAllPages<Science>(
     `${BASE_URL}${TABLE_SCIENCES}/?user_field_names=true&exclude_fields=BotKB,CustomSearchAIKBlessBotKB&order_by=ScienceMinorId`
   )

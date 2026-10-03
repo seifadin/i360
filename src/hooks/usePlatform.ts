@@ -73,12 +73,9 @@ export function usePlatform() {
 // ─── URL resolution ───────────────────────────────────────────────────────────
 // inWebList  → comma-separated domains that force browser tab
 // URIschemes → comma-separated schemes that force browser tab
-// Default    → WebView
+// Default    → the in-app browser overlay ('in_app')
 
-// Extracts the domain from a URL — shared by matchesWebList below and,
-// historically, Browser.tsx's own handleWebsiteStatus (deleted 2026-09-03
-// alongside the rest of that page) — both once hand-wrote the same
-// one-line extraction independently before this was pulled out.
+// Extracts the domain from a URL (used by matchesWebList below).
 function getDomain(url: string): string {
   return url.split('/')[2]?.trim() ?? ''
 }

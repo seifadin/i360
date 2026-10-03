@@ -23,8 +23,8 @@ const EXEGESIS_PATTERN = /^\d+\.\d+$/
 // 'invalid': malformed chapter.verse input (exegesis only).
 // 'notfound': valid input, but no exegesis match exists (exegesis only) —
 // genuinely "no matching data," distinct from an open failure below.
-// 'openfailed': the browser action itself failed (popup blocked) — used by
-// every path that calls openViaWebBrowser, regardless of why it got there.
+// 'openfailed': the browser action itself failed (e.g. a blocked popup) — any
+// path that opens via openResource().
 type FlashIcon = 'invalid' | 'notfound' | 'openfailed' | null
 type SearchPhase = 'translating' | 'opening' | null
 
@@ -138,11 +138,8 @@ export default function SearchBar() {
   // wired up this session; both fall back to their VITE_* env var if the
   // Baserow field is empty/not yet loaded.
   async function handleSearch() {
-    // Consistently the trimmed value throughout — handleSubmit already
-    // validated `trimmed`, so guarding/deduping/translating on the raw
-    // untrimmed state here meant "قرآن " and "قرآن" counted as different
-    // for the dedupe and shipped stray encoded whitespace into the search
-    // URL (caught in the 2026-08-19 review; harmless but inconsistent).
+    // The trimmed value throughout, as handleSubmit validated it — otherwise
+    // "قرآن " and "قرآن" dedupe differently and stray spaces reach the URL.
     if (!trimmed) return
     if (trimmed === EntityQueryTermOld) return
     setEntityQueryTermOld(trimmed)
@@ -187,19 +184,10 @@ export default function SearchBar() {
     if (!tryOpenNewTab(keyboardUrl)) triggerKeyboardFailed()
   }
 
-  // Dynamic accessible name for the search-options button — mirrors the
-  // exact same conditional chain used below to pick which icon renders, so
-  // a screen reader user gets the same information a sighted user reads
-  // from the icon changing (previously a static "خيارات البحث" regardless
-  // of state — a real gap manual review caught, on top of the Lighthouse-
-  // driven fixes, since Lighthouse's automated a11y check only catches a
-  // subset of real issues by its own admission).
-  // Shared by both computed values below — the flash/searchPhase portion
-  // is identical logic for both (same state, same messages), so it's
-  // computed once here rather than duplicated in two separate ternary
-  // chains. null (not '') when nothing transient applies, so each
-  // consumer's own ?? fallback reads clearly as "nothing transient, fall
-  // through to my own non-transient default."
+  // Accessible name for the search-options button — mirrors the icon choice
+  // below, so screen readers get what the changing icon shows. transientStatus is
+  // shared by both values (same state, same messages); null when nothing
+  // transient applies, so each ?? falls through to its own default.
   const transientStatus: string | null =
     flash === 'invalid' ? 'إدخال غير صالح' :
     flash === 'notfound' ? 'لم يتم العثور على تفسير لهذه الآية' :

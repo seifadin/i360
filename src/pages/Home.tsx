@@ -4,16 +4,9 @@ import SearchBar from '@/components/SearchBar'
 import ScienceGrid from '@/components/ScienceGrid'
 import OrnamentDivider from '@/components/OrnamentDivider'
 
-// Header sizing (2026-08-31) — genuinely content-aware, not width-threshold-
-// based at all. Two earlier attempts both hardcoded a "screen width at
-// which point X" number (clamp()'s vw ceiling, then a discrete step
-// table's fixed 360px/410px marks) and both were real, confirmed
-// miscalibrations — a threshold-based approach always needs a number to be
-// right, and there's no way to know the right number without testing more
-// devices one at a time, forever. This removes the guessing entirely:
-// measure the header's own real, unconstrained rendered width, measure the
-// real available space, and pick the largest standard Tailwind step that
-// actually fits — the same technique regardless of device or font.
+// Header sizing (§14i): measure the header's real rendered width and the space
+// available, then pick the largest standard Tailwind step that fits — no
+// device-width thresholds (two threshold-based attempts were miscalibrated).
 const HEADER_STEPS = [
   { text: 'text-2xl', icon: 'h-8 w-8', px: 24 }, // original fixed size — explicitly agreed not to exceed this even on very wide screens
   { text: 'text-xl', icon: 'h-7 w-7', px: 20 },
@@ -30,15 +23,8 @@ const HEADER_CONTAINER_PADDING_PX = 32
 
 const HEADER_TITLE = 'الموسوعة الإسلامية إi360'
 
-// Tolerance for sub-pixel rounding and any tiny discrepancy between the
-// hidden measurer and the real visible header — not a device-width guess,
-// a measurement-imprecision buffer. Real, confirmed need (2026-08-31): a
-// real device measured natural=328 available=328, a dead-even tie —
-// exactly the kind of zero-margin result that can tip either way in
-// actual rendering rather than the JS measurement alone. Genuinely
-// different in kind from the earlier width-threshold mistakes: this isn't
-// "guess where a screen boundary sits," it's "always leave a small,
-// principled cushion around whatever the real measurement says."
+// A measurement-imprecision cushion, not a width guess: a real device measured a
+// dead-even 328/328, and a zero-margin tie can tip either way when rendered.
 const SAFETY_MARGIN_PX = 4
 
 function pickHeaderStep(naturalWidthAtReference: number, availableWidth: number) {

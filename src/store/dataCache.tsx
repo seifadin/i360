@@ -11,10 +11,10 @@ import {
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 
 // ─── "value changed since last seen" ──────────────────────────────────────────
-// Two-phase (2026-10-03): read here; the baseline is written only after the
-// data it gates has actually loaded (commitBaseline, in init()). The old single
-// call read AND overwrote it, so an attempt that failed after the check hid the
-// change from every retry and every later launch — stale content indefinitely.
+// Two-phase: read here; the baseline is written only after the data it gates has
+// actually loaded (commitBaseline, in init()). The old single call read AND
+// overwrote it, so an attempt that failed after the check hid the change from
+// every retry and every later launch — stale content indefinitely (§15h).
 function hasChanged(itemKey: string, value: string | null | undefined): boolean {
   if (!value) return false
   const stored = getStoredItem(itemKey)
@@ -46,19 +46,11 @@ function saveCached<T>(cacheKey: string, data: T[]): void {
 export const CACHE_KEY_SCIENCES = 'i360CacheSciences'
 const CACHE_KEY_QURAN = 'i360CacheQuran'
 
-// Redundant, tiny persisted copy of the feedback mailto: link — separate
-// from the full Sciences cache above. ErrorBoundary sits ABOVE
-// DataCacheProvider in the tree (main.tsx wraps <App/>, not the reverse),
-// so it can't use useDataCache() and reads localStorage directly instead;
-// this key exists so that read doesn't depend on the FULL Sciences cache
-// having survived intact, and so a crash-time lookup succeeds even if the
-// CURRENT session's own Sciences fetch hasn't completed yet, as long as
-// ANY previous session ever wrote it. Sourced from i360dbs (not i360dbc,
-// which is fetched fresh every launch with zero localStorage persistence
-// at all — confirmed via grep, no CACHE_KEY_RESOURCE exists — making it
-// strictly worse for this purpose, not just the same edge case moved
-// earlier). Written opportunistically on every successful Sciences load,
-// not only during a crash.
+// Small persisted copy of the feedback mailto: link. ErrorBoundary sits above
+// DataCacheProvider (main.tsx), so it reads localStorage directly; this key
+// works even if the full Sciences cache didn't survive or this session's fetch
+// hasn't finished. Sourced from i360dbs (i360dbc is never cached). Written on
+// every successful Sciences load.
 export const FEEDBACK_MAILTO_KEY = 'i360FeedbackMailto'
 
 function cacheFeedbackMailto(sciences: Science[]): void {
@@ -73,19 +65,12 @@ function cacheFeedbackMailto(sciences: Science[]): void {
   // exactly this kind of transient gap.
 }
 
-// Consolidates the 3 actually-consumed icon fields (IconName is a 4th field
-// that exists in Baserow but is confirmed unused anywhere in the app) into
-// one set of unique names — no static/hardcoded list, purely derived from
-// whatever Sciences data is actually loaded right now.
+// The 3 icon fields the app uses (Baserow's IconName is unused), as unique
+// names derived from the loaded data — no hardcoded list.
 type IconTier = 'major' | 'intermediate' | 'minor'
 
-// Single pass over sciences, building all three tiers' unique-icon sets
-// together — one loop, not three (2026-08-25 review). Each tier's Set
-// dedupes on its own by construction; a tier legitimately reusing the same
-// icon across many rows (e.g. 13 Major rows sharing 3 distinct icons)
-// collapses to exactly that count automatically, no separate dedup step
-// needed. Tiers stay separate (not one flat union) so callers can preload
-// by priority — see the staged Major/Intermediate/Minor calls below.
+// One pass, three tier sets; each Set dedupes by construction. Tiers stay
+// separate so callers can preload by priority (below).
 function collectIconNamesByTier(sciences: Science[]): Record<IconTier, Set<string>> {
   const tiers: Record<IconTier, Set<string>> = { major: new Set(), intermediate: new Set(), minor: new Set() }
   for (const s of sciences) {
@@ -155,18 +140,11 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
     let isFetching = false
     let hasAttempted = false
 
-    // Real production bug (2026-08-16/17): a single transient network
-    // failure — from any source, not specifically OtaKit — permanently
-    // broke data loading for the rest of the app session, since this
-    // effect only ran once per mount and a mere close/reopen on Android
-    // is usually just a resume of the same still-running process, not a
-    // fresh mount. fetchWithRetry (dataSource.ts) already retries/times
-    // out at the network layer; this adds session-level retry on top —
-    // if that still fails, keep retrying automatically every 10s until it
-    // succeeds, with zero need to close/reopen the app at all. The
-    // isFetching guard (not the interval length) is what actually
-    // prevents overlap with a still-running attempt — so this interval
-    // is free to be short for faster recovery, not held long defensively.
+    // Session-level retry on top of fetchWithRetry (§14): a transient failure once
+    // broke loading for the whole session (on Android, reopening is usually a
+    // resume, not a fresh mount). Retry every 10 s until success — no need to
+    // reopen the app. The isFetching guard prevents overlap, so the interval can
+    // stay short.
     async function init() {
       if (isFetching) return
       isFetching = true
@@ -210,27 +188,11 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         setChangeFlags({ editionChanged, versionChanged, revisionChanged })
         setLastFailure(null)
 
-        // Staged icon preloading, by tier priority — real fix for a real,
-        // measured problem (2026-08-25): the previous one-shot preload of
-        // every icon (Major+Intermediate+Minor together) fired ~50 dynamic
-        // imports immediately on page load, and their staggered module
-        // evaluation as each one resolved was traced (via Lighthouse
-        // long-tasks + console.time profiling) to ~1-1.8s of scattered
-        // main-thread blocking during the most critical load window — even
-        // though only Major-tier icons are actually visible before any
-        // category is expanded (ScienceGrid.tsx's openMajorId/
-        // openIntermediateId gates mean Intermediate/Minor rows aren't
-        // rendered at all until tapped open).
-        //
-        // Staged, not lazy-per-tap: Major loads immediately (small,
-        // genuinely needed now); Intermediate and Minor are deferred to
-        // idle time, in that order, rather than dropped entirely — a fully
-        // lazy per-tap approach would reintroduce a real, previously-fixed
-        // bug (2026-08-12: a burst of fresh per-icon requests firing
-        // simultaneously the moment a category was tapped, causing a
-        // perceptible pause). This keeps that fix's benefit (icons already
-        // warm by the time a user taps) while removing Intermediate/Minor
-        // from the initial page-load critical path.
+        // Staged icon preloading by tier (§14e): preloading every icon at once (~50
+        // dynamic imports) blocked the main thread for ~1–1.8 s at load, though only
+        // Major icons are visible before a tap. Major loads now; Intermediate, then
+        // Minor, at idle time — not lazily per tap, which would bring back the burst
+        // of requests on a category's first tap.
         import('@/lib/iconLoader').then(({ preloadIcons, scheduleIdle }) => {
           const tiers = collectIconNamesByTier(freshSciences)
 

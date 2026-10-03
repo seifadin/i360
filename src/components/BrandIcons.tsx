@@ -1,19 +1,7 @@
-// Hand-picked brand icons — sourced from Simple Icons (CC0 license, simpleicons.org),
-// inlined directly rather than adding a new npm dependency. This is a small, fixed
-// set of 4 known icons (not an unbounded lookup like ScienceGrid's DynamicIcon),
-// so no dynamic-import/dispatcher mechanism is needed — plain components are simplest.
-// "Web" intentionally uses lucide-react's existing Globe icon instead, since useWeb
-// isn't a brand/company — no new icon needed there at all.
-//
-// Deliberately no role="img" on these SVGs (2026-08-25 review — a stray role="img"
-// with no accompanying label was here, an anti-pattern in its own right: an
-// unlabeled role="img" announces as "image, unnamed" to a screen reader, worse
-// than no role at all). Matches how every lucide-react icon elsewhere in the app
-// already behaves — plain, decorative-by-default SVGs, meaningful only via
-// whatever wrapping element actually carries the accessible name. Every current
-// call site (OSRow.tsx) already wraps these in aria-hidden, so this wasn't
-// causing live harm — but the icon component itself shouldn't rely on every
-// future caller remembering to wrap it correctly.
+// Brand icons from Simple Icons (CC0, simpleicons.org), inlined: a fixed set of
+// 4, so no dependency or dynamic loading. "Web" uses lucide's Globe (not a brand).
+// No role="img" — an unlabeled one is announced as "image, unnamed"; like the
+// lucide icons, these are decorative and the caller's wrapper carries the name.
 
 interface BrandIconProps {
   size?: number
