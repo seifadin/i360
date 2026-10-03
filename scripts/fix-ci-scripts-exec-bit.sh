@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # scripts/fix-ci-scripts-exec-bit.sh — sourced by both pre-commit-hook.sh
 # and pre-push-hook.sh, not duplicated in each. Extracted 2026-09-12, same
 # reasoning as native-pattern.sh's own extraction: the two consumers now

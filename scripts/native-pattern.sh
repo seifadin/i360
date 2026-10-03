@@ -1,3 +1,5 @@
+# shellcheck shell=bash disable=SC2034
+# (sourced, not executed: the variables below are used by the scripts that source it)
 # scripts/native-pattern.sh — sourced by both pre-commit-hook.sh and
 # pre-push-hook.sh, not duplicated in each. Extracted 2026-09-04, the
 # same night a version-bump reminder was added to pre-commit specifically

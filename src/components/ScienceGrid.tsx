@@ -403,7 +403,7 @@ export default function ScienceGrid() {
           onClick: () => {
             const url = unreachableUrl
             setUnreachableUrl(null)
-            if (url) openUrl(url)
+            if (url) openUrl(url).catch(() => {})
           },
         }}
       />

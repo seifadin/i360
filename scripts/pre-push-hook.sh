@@ -35,7 +35,7 @@ set -e
 LOCAL_REF=""
 REMOTE_SHA=""
 LOCAL_SHA=""
-while read -r local_ref local_sha remote_ref remote_sha; do
+while read -r local_ref local_sha _remote_ref remote_sha; do
   LOCAL_REF="$local_ref"
   LOCAL_SHA="$local_sha"
   REMOTE_SHA="$remote_sha"
@@ -396,6 +396,7 @@ fi
 if [ "$IS_NATIVE" = true ] || [ "$OTA_RELEVANT" = true ]; then
   if [ -f .env ]; then
     set -a
+    # shellcheck source=/dev/null  # git-ignored, so there is nothing to follow
     source .env
     set +a
   fi

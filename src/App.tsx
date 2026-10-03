@@ -86,7 +86,7 @@ function AppShell() {
     if (cacheError) return // this attempt failed — wait for a later, successful retry
     if (hadUnrecoveredStartupError()) return
     hasNotifiedReady.current = true
-    OtaKit.notifyAppReady()
+    OtaKit.notifyAppReady().catch(() => {})
   }, [cacheLoading, cacheError])
 
   // Safety net for the one real risk the above introduces: a device with
@@ -107,11 +107,11 @@ function AppShell() {
     if (hasNotifiedReady.current) return
     const timer = setTimeout(() => {
       if (hasNotifiedReady.current) return
-      likelyGenuineDataFailure().then(genuine => {
+      void likelyGenuineDataFailure().then(genuine => { // never rejects (catches internally)
         if (hasNotifiedReady.current) return
         if (!genuine) {
           hasNotifiedReady.current = true
-          OtaKit.notifyAppReady()
+          OtaKit.notifyAppReady().catch(() => {})
         }
         // else: leave it alone — let appReadyTimeout expire naturally,
         // triggering OtaKit's own real, automatic rollback.

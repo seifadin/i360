@@ -67,7 +67,7 @@ export function usePlatform() {
       Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Urumqi')
 
     setState({ isChina, useHMS })
-  }, [])
+  }, [setState])
 }
 
 // ─── URL resolution ───────────────────────────────────────────────────────────

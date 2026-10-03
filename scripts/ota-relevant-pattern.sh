@@ -1,3 +1,5 @@
+# shellcheck shell=bash disable=SC2034
+# (sourced, not executed: the variables below are used by the scripts that source it)
 # scripts/ota-relevant-pattern.sh — sourced by both pre-push-hook.sh and
 # release-to-otakit.sh, not duplicated in each. Extracted 2026-09-04
 # alongside the release-to-otakit.sh safeguard — the same reasoning as
@@ -45,7 +47,8 @@
 #
 # Root-level anchoring is deliberate: `[^/]+\.md$` excludes root docs
 # (README.md, CHANGELOG.md) but NOT public/*.md, which would ship in dist/.
-_UNAFFECTED_COMMON='scripts/|android/|ios/|[^/]+\.md$|\.gitignore$|\.env\.example$'
+# eslint.config.js (2026-10-03): lint config only, never read by the build.
+_UNAFFECTED_COMMON='scripts/|android/|ios/|[^/]+\.md$|\.gitignore$|\.env\.example$|eslint\.config\.js$'
 HOSTING_UNAFFECTED_PATTERN="^(${_UNAFFECTED_COMMON})"
 OTA_UNAFFECTED_PATTERN="^(${_UNAFFECTED_COMMON}|firebase\.json\$|\.firebaserc\$|tsconfig[^/]*\.json\$|package\.json\$|package-lock\.json\$|capacitor\.config\.ts\$)"
 

@@ -270,7 +270,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
           })
           if (!retryTimer) {
             retryTimer = setInterval(() => {
-              if (!cancelled) init()
+              if (!cancelled) void init()
             }, 10000)
           }
         }
@@ -280,7 +280,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
       }
     }
 
-    init()
+    void init() // never rejects: its own try/catch/finally
     return () => {
       cancelled = true
       if (retryTimer) clearInterval(retryTimer)

@@ -49,7 +49,7 @@ function pickHeaderStep(naturalWidthAtReference: number, availableWidth: number)
   // visible step happens to be.
   const referencePx = HEADER_STEPS[0].px
   const idealPx = referencePx * ((availableWidth - SAFETY_MARGIN_PX) / naturalWidthAtReference)
-  return HEADER_STEPS.find(step => idealPx >= step.px) ?? HEADER_STEPS[HEADER_STEPS.length - 1]
+  return HEADER_STEPS.find(step => idealPx >= step.px) ?? HEADER_STEPS[HEADER_STEPS.length - 1] ?? HEADER_STEPS[0]
 }
 
 // Math.min(innerWidth, innerHeight) — always the portrait-equivalent width
@@ -99,7 +99,7 @@ export default function Home() {
     // fallback. This removes the need to trust that direction at all, at
     // the cost of one extra, usually-imperceptible step change right when
     // Amiri finishes loading.
-    document.fonts.ready.then(recalculate)
+    void document.fonts.ready.then(recalculate) // never rejects, by spec
 
     // Real resize handling too (PWA/desktop-browser window resize).
     window.addEventListener('resize', recalculate)
