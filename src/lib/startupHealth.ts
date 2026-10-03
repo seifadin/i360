@@ -60,10 +60,12 @@ export function hadUnrecoveredStartupError(): boolean {
 // before appReadyTimeout. Anything under 500 counts — even a 404 at the bare
 // origin means the domain answered; only a server error or a failed request
 // counts as unreachable.
+const DOMAIN_TIMEOUT_MS = 5000
+
 async function isDataSourceDomainReachable(): Promise<boolean> {
   let origin: string
   try { origin = new URL(BASE_URL).origin } catch { return false }
-  const status = await probeStatus(origin, 5000, 'application/json,text/html,*/*;q=0.8')
+  const status = await probeStatus(origin, DOMAIN_TIMEOUT_MS, 'application/json,text/html,*/*;q=0.8')
   return status !== null && status < 500
 }
 

@@ -11,6 +11,11 @@ export function tryOpenNewTab(url: string): boolean {
   try {
     const win = window.open(url, '_blank')
     if (!win) return false
+    // The new page must not be able to reach back into this one through
+    // window.opener (search results can be any site). 'noopener' would do it
+    // too, but makes window.open() return null — which is how a blocked popup
+    // is detected here.
+    try { win.opener = null } catch { /* already cross-origin: nothing to clear */ }
     return !win.closed
   } catch {
     return false

@@ -32,7 +32,6 @@ export interface Science {
   ScienceMajor_Ar: string
   ScienceMajor_En: string
   ScienceMajorIcon: string
-  IconName: string
   GooglePlayStore: string
   HuaweiAppGallery: string
   AppleAppStore: string

@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, Fragment, lazy, Suspense, ComponentType, Rea
 import { LoaderCircle, Paperclip, CircleCheck, CircleSlash, ChevronDown, ChevronLeft } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
 import { useAppState } from '@/store/appState'
-import { useDataCache } from '@/store/dataCache'
+import { useDataCache, LOAD_ERROR } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
 import { computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { groupSciences } from '@/lib/groupSciences'
@@ -147,6 +147,8 @@ function MinorButton({
 // relative, so it works from inside the scrolling grid). The 7rem offset —
 // plus the real safe-area inset — is an estimate of the footer's height
 // (OrnamentDivider + SearchBar + OSRow), not a measured value.
+const CHECK_FLASH_MS = 450 // "site available" shows this long before the open
+
 function StatusPill({ busy, text }: { busy?: boolean; text: string }) {
   return (
     <div
@@ -218,7 +220,7 @@ export default function ScienceGrid() {
           return
         }
         setCheckFlash(true)
-        await new Promise(resolve => setTimeout(resolve, 450))
+        await new Promise(resolve => setTimeout(resolve, CHECK_FLASH_MS))
         setCheckFlash(false)
       }
       await openOrOffer(url)
@@ -267,7 +269,7 @@ export default function ScienceGrid() {
         </button>
         <ReportNotice
           open={errorDialogOpen}
-          title="تعذّر تحميل البيانات"
+          title={LOAD_ERROR}
           message={lastFailure.message}
           subject={REPORT_SUBJECTS.dataLoad}
           details={`${lastFailure.message}\n\n${lastFailure.detail}`}

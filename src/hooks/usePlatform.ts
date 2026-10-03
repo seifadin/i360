@@ -79,7 +79,7 @@ export function usePlatform() {
 // historically, Browser.tsx's own handleWebsiteStatus (deleted 2026-09-03
 // alongside the rest of that page) — both once hand-wrote the same
 // one-line extraction independently before this was pulled out.
-export function getDomain(url: string): string {
+function getDomain(url: string): string {
   return url.split('/')[2]?.trim() ?? ''
 }
 

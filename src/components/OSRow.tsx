@@ -7,6 +7,8 @@ import { detectOS, isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { AndroidIcon, AppleIcon, GoogleIcon, HuaweiIcon } from './BrandIcons'
 import Dialog from './Dialog'
 
+const TOOLTIP_MS = 1500 // how long a toggle's tooltip stays up
+
 // Fallback only — the VersionMenu dialog prefers the live Baserow `Version`
 // field (i360dbc), so a Baserow version bump shows up without a code change.
 // Kept short and clearly placeholder-looking ("إصدار -") rather than a fake
@@ -64,7 +66,7 @@ function ToggleItem({
   function handleToggle() {
     onToggle()
     setShowTooltip(true)
-    setTimeout(() => setShowTooltip(false), 1500)
+    setTimeout(() => setShowTooltip(false), TOOLTIP_MS)
   }
 
   // Knob stop for tri mode: track w-9 (36px), knob w-4 (16px), 2px inset →

@@ -2,7 +2,7 @@ import { ComponentType } from 'react'
 
 // PascalCase (as stored in Baserow, matching lucide-react's named exports) →
 // kebab-case (matching lucide-react's individual icon file names).
-export function toKebabCase(name: string): string {
+function toKebabCase(name: string): string {
   return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 }
 
@@ -45,10 +45,13 @@ export function preloadIcons(names: Iterable<string>) {
 // rather than Android's WebView). 200ms is a reasonable "the browser has
 // likely settled by now" guess where requestIdleCallback isn't available,
 // not a precise substitute for it.
+// WebKit has no requestIdleCallback; a short timeout stands in.
+const IDLE_FALLBACK_MS = 200
+
 export function scheduleIdle(callback: () => void): void {
   if (typeof requestIdleCallback === 'function') {
     requestIdleCallback(callback)
   } else {
-    setTimeout(callback, 200)
+    setTimeout(callback, IDLE_FALLBACK_MS)
   }
 }

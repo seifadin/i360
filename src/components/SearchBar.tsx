@@ -39,6 +39,8 @@ function useBriefFlash(durationMs = 500): [boolean, () => void] {
   return [active, trigger]
 }
 
+const FLASH_MS = 500 // how long a status icon flashes
+
 export default function SearchBar() {
   const { state } = useAppState()
   const { resource, findExegesisUrl } = useDataCache()
@@ -70,7 +72,7 @@ export default function SearchBar() {
 
   function flashIconFor(kind: 'invalid' | 'notfound' | 'openfailed') {
     setFlash(kind)
-    setTimeout(() => setFlash(null), 500)
+    setTimeout(() => setFlash(null), FLASH_MS)
   }
 
   const [botFailed, triggerBotFailed] = useBriefFlash()

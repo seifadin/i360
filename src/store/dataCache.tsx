@@ -25,7 +25,7 @@ function commitBaseline(itemKey: string, value: string | null | undefined): void
   if (value) setStoredItem(itemKey, value)
 }
 
-const LOAD_ERROR = 'تعذّر تحميل البيانات'
+export const LOAD_ERROR = 'تعذّر تحميل البيانات'
 
 function loadCached<T>(cacheKey: string): T[] | null {
   const raw = getStoredItem(cacheKey)
@@ -37,12 +37,10 @@ function loadCached<T>(cacheKey: string): T[] | null {
   }
 }
 
+// setStoredItem() already swallows storage errors (full/unavailable) — the
+// next mount just refetches.
 function saveCached<T>(cacheKey: string, data: T[]): void {
-  try {
-    setStoredItem(cacheKey, JSON.stringify(data))
-  } catch {
-    // storage full/unavailable — silently skipped, next mount just refetches
-  }
+  setStoredItem(cacheKey, JSON.stringify(data))
 }
 
 export const CACHE_KEY_SCIENCES = 'i360CacheSciences'
@@ -88,16 +86,12 @@ type IconTier = 'major' | 'intermediate' | 'minor'
 // collapses to exactly that count automatically, no separate dedup step
 // needed. Tiers stay separate (not one flat union) so callers can preload
 // by priority — see the staged Major/Intermediate/Minor calls below.
-function collectIconNamesByTier(sciences: Science[]): Map<IconTier, Set<string>> {
-  const tiers = new Map<IconTier, Set<string>>([
-    ['major', new Set<string>()],
-    ['intermediate', new Set<string>()],
-    ['minor', new Set<string>()],
-  ])
+function collectIconNamesByTier(sciences: Science[]): Record<IconTier, Set<string>> {
+  const tiers: Record<IconTier, Set<string>> = { major: new Set(), intermediate: new Set(), minor: new Set() }
   for (const s of sciences) {
-    if (s.ScienceMajorIcon) tiers.get('major')!.add(s.ScienceMajorIcon)
-    if (s.ScienceIntermediateIcon) tiers.get('intermediate')!.add(s.ScienceIntermediateIcon)
-    if (s.ScienceMinorIcon) tiers.get('minor')!.add(s.ScienceMinorIcon)
+    if (s.ScienceMajorIcon) tiers.major.add(s.ScienceMajorIcon)
+    if (s.ScienceIntermediateIcon) tiers.intermediate.add(s.ScienceIntermediateIcon)
+    if (s.ScienceMinorIcon) tiers.minor.add(s.ScienceMinorIcon)
   }
   return tiers
 }
@@ -240,12 +234,12 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         import('@/lib/iconLoader').then(({ preloadIcons, scheduleIdle }) => {
           const tiers = collectIconNamesByTier(freshSciences)
 
-          preloadIcons(tiers.get('major')!)
+          preloadIcons(tiers.major)
 
           scheduleIdle(() => {
-            preloadIcons(tiers.get('intermediate')!)
+            preloadIcons(tiers.intermediate)
             scheduleIdle(() => {
-              preloadIcons(tiers.get('minor')!)
+              preloadIcons(tiers.minor)
             })
           })
         })

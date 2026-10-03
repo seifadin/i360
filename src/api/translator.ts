@@ -16,23 +16,34 @@ export function isArabic(text: string): boolean {
 // is empty or not yet loaded — only the fallback needs params appended.
 // The API key stays a fixed env var regardless — a secret shouldn't live in
 // a shared Baserow table with broader read access.
+// Like dataSource.ts's fetches: a hung request must not leave the search
+// stuck in its translating phase (the caller falls back to the original text).
+const TRANSLATE_TIMEOUT_MS = 10000
+
 export async function translateToArabic(text: string, translatorUrl?: string): Promise<string> {
   if (isArabic(text)) return text
   const url = translatorUrl || `${TRANSLATOR_URL_DEFAULT}?api-version=3.0&to=ar`
 
-  const res = await fetch(
-    url,
-    {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
-        'Ocp-Apim-Subscription-Region': 'global',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify([{ text }]),
-    }
-  )
-  if (!res.ok) throw new Error(`translateToArabic failed: ${res.status}`)
-  const data = await res.json()
-  return data[0]?.translations[0]?.text ?? text
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TRANSLATE_TIMEOUT_MS)
+  try {
+    const res = await fetch(
+      url,
+      {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
+          'Ocp-Apim-Subscription-Region': 'global',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([{ text }]),
+      }
+    )
+    if (!res.ok) throw new Error(`translateToArabic failed: ${res.status}`)
+    const data = await res.json()
+    return data[0]?.translations?.[0]?.text ?? text
+  } finally {
+    clearTimeout(timer)
+  }
 }

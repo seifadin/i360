@@ -424,7 +424,7 @@ if [ "$IS_NATIVE" = false ]; then
       echo "  attempted automatically. If this push needs them, run manually:"
       echo "    npm run build && rm -rf dist/assets/screenshots && env -u OTA_CHANNEL npx cap sync android"
       echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
-      echo "    unset OTA_CHANNEL && otakit upload --release"
+      echo "    set -a && source .env && set +a && bash scripts/release-to-otakit.sh"
     else
       echo "→ No web-bundle-relevant files changed — skipping OTA release."
     fi
@@ -551,7 +551,7 @@ else
       I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh || true
     else
       echo "  Skipped. Run manually when ready:"
-      echo "    unset OTA_CHANNEL && otakit upload --release"
+      echo "    set -a && source .env && set +a && bash scripts/release-to-otakit.sh"
     fi
   fi
 fi
