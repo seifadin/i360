@@ -65,9 +65,8 @@ DIFF_UNKNOWN=false
 # succeed.
 if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$REMOTE_SHA^{commit}" 2>/dev/null; then
   echo "→ Remote SHA unresolvable (a new branch, or a git-internal lookup"
-  echo "  issue) — treating this push as though everything changed, the"
-  echo "  safe default here (costs nothing, can never block a push that"
-  echo "  would otherwise succeed)."
+  echo "  issue) — falling back to a safe default instead of failing the"
+  echo "  push (which default is printed just below)."
   # Diagnostic (2026-09-07) — added after this branch was confirmed,
   # twice, to be reached even on a plain, non-force push to an
   # already-correctly-tracked branch (where REMOTE_SHA should have
@@ -82,15 +81,26 @@ if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$RE
   # ambiguous argument ''" when LOCAL_SHA was itself unexpectedly empty,
   # under set -e, killing the push before anything else in the hook
   # could run — the same class of fragility REMOTE_SHA was already
-  # guarded against, just not this variable too. Falls through to the
-  # same safe default (changed everything) rather than crash.
+  # guarded against, just not this variable too. Falls through rather
+  # than crash — but NOT to "changed everything": with no local SHA there
+  # is nothing to diff, so CHANGED_FILES stays empty and DIFF_UNKNOWN=true.
+  # Only the build + preview deploy honor DIFF_UNKNOWN (they always run);
+  # native submission and OTA release see an empty list and are left to
+  # the developer, with the manual commands printed at the end. Messages
+  # reworded 2026-10-03 to say exactly that (they used to claim
+  # "everything changed"); the behavior itself was kept deliberately.
   if [ -z "$LOCAL_SHA" ]; then
     echo "  ⚠ local_sha itself came back empty — skipping the diff"
     echo "    entirely rather than risk the same crash from the other"
-    echo "    side; treating this push as though everything changed."
+    echo "    side. Changed files are UNKNOWN: the build and preview"
+    echo "    deploy still run, but native submission and OTA release"
+    echo "    are NOT attempted automatically (manual commands at the end)."
     CHANGED_FILES=""
     DIFF_UNKNOWN=true
   else
+    echo "  Treating every tracked file as changed (diff against an empty"
+    echo "  tree) — each step below runs or prompts as for a full change;"
+    echo "  every prompt can still be declined."
     CHANGED_FILES=$(git diff --name-only "$(git hash-object -t tree /dev/null)" "$LOCAL_SHA")
   fi
 else
@@ -307,9 +317,11 @@ fi
 #     nothing below uses it in that case (OTA_RELEVANT implies
 #     DEPLOY_NEEDED), but §15b's rule still holds for MANUAL deploys:
 #     always `npm run build` first, never trust whatever dist/ holds.
+BUILT=false
 if [ "$BRANCH" = "vite" ] || [ "$BRANCH" = "main" ]; then
   if [ "$BRANCH" = "main" ] || [ "$DEPLOY_NEEDED" = true ] || [ "$IS_NATIVE" = true ]; then
     npm run build
+    BUILT=true
   else
     echo "→ No hosting-relevant files changed — skipping build and deploy."
   fi
@@ -355,7 +367,14 @@ fi
 # full dist/ with screenshots intact, but before either downstream
 # path reuses it, so neither one carries image weight no installed
 # native app ever actually needs.
-if [ -d dist/assets/screenshots ]; then
+#
+# Only when THIS push built dist/ (2026-10-03). With the hosting gate a
+# push can skip the build entirely; stripping then would silently modify
+# whatever dist/ is on disk (one built by hand for a local preview or a
+# web zip, say) and announce a native sync/OTA that isn't going to
+# happen. Nothing downstream needs dist/ when no build ran: the native
+# path always builds (IS_NATIVE), and OTA_RELEVANT implies DEPLOY_NEEDED.
+if [ "$BUILT" = true ] && [ -d dist/assets/screenshots ]; then
   echo "→ Stripping PWA-only screenshots from dist/ before native sync/OTA..."
   rm -rf dist/assets/screenshots
 fi
@@ -369,14 +388,21 @@ fi
 # used to live only inside the web-only branch, so the native branch's
 # OTA release call had no OTAKIT_TOKEN available at all unless the
 # calling shell happened to already have it from something else.
-if [ -f .env ]; then
-  set -a
-  source .env
-  set +a
-fi
-if ! command -v otakit &> /dev/null; then
-  echo "  (otakit CLI not found, installing...)"
-  npm install -g @otakit/cli
+#
+# Gated (2026-10-03): every consumer — otakit itself, and submit_to_stores'
+# Baserow update (BASEROW_WRITE_KEY etc.) — sits behind IS_NATIVE or
+# OTA_RELEVANT, so a push that can reach neither no longer sources .env
+# or installs a global CLI it will never use.
+if [ "$IS_NATIVE" = true ] || [ "$OTA_RELEVANT" = true ]; then
+  if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+  fi
+  if ! command -v otakit &> /dev/null; then
+    echo "  (otakit CLI not found, installing...)"
+    npm install -g @otakit/cli
+  fi
 fi
 
 if [ "$IS_NATIVE" = false ]; then
@@ -386,7 +412,21 @@ if [ "$IS_NATIVE" = false ]; then
     # failed" below: this is "nothing to ship," so no store-submission
     # fallback offer here, that fallback exists for a genuine failed
     # release, not a skipped one.
-    echo "→ No web-bundle-relevant files changed — skipping OTA release."
+    if [ "$DIFF_UNKNOWN" = true ]; then
+      # Not "nothing changed": the list is unknown (see the fallback at the
+      # top). Same behavior as before — no automatic release — with an
+      # honest message and the hook's own manual commands, reused verbatim.
+      # (The native branch's identical skip line below needs no such case:
+      # it is unreachable with an unknown diff, since an empty list can
+      # never match NATIVE_PATTERN.)
+      echo "→ Changed files unknown — native submission and OTA release were not"
+      echo "  attempted automatically. If this push needs them, run manually:"
+      echo "    npm run build && rm -rf dist/assets/screenshots && env -u OTA_CHANNEL npx cap sync android"
+      echo "    cd android && fastlane deploy_google && fastlane deploy_huawei"
+      echo "    unset OTA_CHANNEL && otakit upload --release"
+    else
+      echo "→ No web-bundle-relevant files changed — skipping OTA release."
+    fi
   else
     echo "→ Web-only change detected — pushing OTA update..."
 

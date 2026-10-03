@@ -255,7 +255,8 @@ async function fetchHijriWorkerDate() {
       process.stderr.write(`(hijri worker month name not recognized: ${show(trimmedMonth)}. Raw value: ${show(text)})\n`);
       return null;
     }
-    if (!day || !year) {
+    // A Hijri month has 29 or 30 days; !day already covers 0 and NaN.
+    if (!day || day > 30 || !year) {
       process.stderr.write(`(hijri worker day/year parsed as invalid. Raw value: ${show(text)})\n`);
       return null;
     }
@@ -286,14 +287,16 @@ function calculatedFallback() {
 
 async function main() {
   let result = await fetchHijriWorkerDate();
-  // Only claim "official" when the worker itself says it read Dar al-Ifta's
-  // site. Confirmed value so far: "site". Any other value (or none) is
-  // reported as-is rather than assumed to be the same thing — this script
-  // doesn't know what else the worker can emit, so it shouldn't vouch for it.
-  let source = result && result.via === 'site'
-    ? 'dar-hijri worker (via=site: official, observation-confirmed via Dar al-Ifta)'
-    : `dar-hijri worker (via=${result ? result.via ?? 'n/a' : 'n/a'} — NOT confirmed as Dar al-Ifta's own site)`;
-  if (!result) {
+  let source;
+  if (result) {
+    // Only claim "official" when the worker itself says it read Dar al-Ifta's
+    // site. Confirmed value so far: "site". Any other value (or none) is
+    // reported as-is rather than assumed to be the same thing — this script
+    // doesn't know what else the worker can emit, so it shouldn't vouch for it.
+    source = result.via === 'site'
+      ? 'dar-hijri worker (via=site: official, observation-confirmed via Dar al-Ifta)'
+      : `dar-hijri worker (via=${result.via ?? 'n/a'} — NOT confirmed as Dar al-Ifta's own site)`;
+  } else {
     result = calculatedFallback();
     source = 'islamic calendar, calculated fallback — see the specific reason logged above';
   }
