@@ -438,7 +438,7 @@ if [ "$IS_NATIVE" = false ]; then
     # here nothing has explicitly confirmed a manual release is even
     # wanted; a persistently-failing OTA server means mobile users need
     # another way to receive this update at all.
-    if ! bash scripts/release-to-otakit.sh; then
+    if ! I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh; then
       read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -548,7 +548,7 @@ else
       # This script has set -e active — the shared script's own non-zero
       # exit (on genuine failure after its internal retry) must not be
       # allowed to abort the whole push. || true absorbs that here.
-      bash scripts/release-to-otakit.sh || true
+      I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh || true
     else
       echo "  Skipped. Run manually when ready:"
       echo "    unset OTA_CHANNEL && otakit upload --release"

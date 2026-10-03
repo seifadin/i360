@@ -107,6 +107,19 @@ if [ $STATUS -eq 0 ]; then
     echo "  ⚠ Could not create/move the local $LAST_OTA_RELEASE_TAG tag ($TAG_ERROR)"
     echo "    — the release above still succeeded, but this environment's copy"
     echo "    of the tag may now be stale until a future release corrects it."
+  elif [ -n "${I360_DEFER_TAG_PUSH_UNTIL_PID:-}" ]; then
+    # Called from pre-push-hook.sh, i.e. while git's own push is still in
+    # progress. Pushing from inside that push raced it (2026-10-03: the tag
+    # landed, the branch push was rejected "missing necessary objects"), so
+    # push the tag only once that process has exited. Detached and fully
+    # redirected, so git doesn't wait on it; --no-verify, as a tag push
+    # needs no hook. If the shell closes first, the tag update is skipped:
+    # fail-safe — at worst one redundant OTA release later.
+    # shellcheck disable=SC2016  # $0/$1 expand in the inner shell, on purpose
+    nohup bash -c 'while kill -0 "$0" 2>/dev/null; do sleep 1; done
+      git push --no-verify origin "refs/tags/$1" --force' \
+      "$I360_DEFER_TAG_PUSH_UNTIL_PID" "$LAST_OTA_RELEASE_TAG" >/dev/null 2>&1 </dev/null &
+    echo "  ($LAST_OTA_RELEASE_TAG tag will be pushed once this push has finished.)"
   elif ! git push origin "refs/tags/$LAST_OTA_RELEASE_TAG" --force >/dev/null 2>&1; then
     echo "  (Could not push the $LAST_OTA_RELEASE_TAG tag from this environment —"
     echo "   the release above still succeeded. A future release from an"
