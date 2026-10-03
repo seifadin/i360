@@ -10,18 +10,22 @@ import {
 } from '@/api/dataSource'
 import { getStoredItem, setStoredItem } from '@/lib/deviceStorage'
 
-// ─── fInfo — generic "value changed since last seen" check ────────────────────
-// Reads AND overwrites the localStorage baseline in one call. Must be called
-// exactly ONCE per key per app mount: a second call for the same key would
-// always see "unchanged," since the first call already rebaselined it. This
-// is why Home.tsx no longer calls this itself — it reads `changeFlags` below.
-function checkChanged(itemKey: string, data2store: string | null | undefined): boolean {
-  if (!data2store) return false
+// ─── "value changed since last seen" ──────────────────────────────────────────
+// Two-phase (2026-10-03): read here; the baseline is written only after the
+// data it gates has actually loaded (commitBaseline, in init()). The old single
+// call read AND overwrote it, so an attempt that failed after the check hid the
+// change from every retry and every later launch — stale content indefinitely.
+function hasChanged(itemKey: string, value: string | null | undefined): boolean {
+  if (!value) return false
   const stored = getStoredItem(itemKey)
-  const changed = stored !== null && stored !== data2store
-  setStoredItem(itemKey, data2store)
-  return changed
+  return stored !== null && stored !== value
 }
+
+function commitBaseline(itemKey: string, value: string | null | undefined): void {
+  if (value) setStoredItem(itemKey, value)
+}
+
+const LOAD_ERROR = 'تعذّر تحميل البيانات'
 
 function loadCached<T>(cacheKey: string): T[] | null {
   const raw = getStoredItem(cacheKey)
@@ -128,6 +132,9 @@ export interface DataCacheContextType {
   changeFlags: ChangeFlags
   loading: boolean
   error: string | null
+  // Last real failure, kept through retries until a success — user-facing
+  // text plus the technical cause, so a bug report says WHAT failed.
+  lastFailure: { message: string; detail: string } | null
   isRetrying: boolean
   findExegesisUrl: (chapter: number, verse: number) => string | null
 }
@@ -146,6 +153,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isRetrying, setIsRetrying] = useState(false)
+  const [lastFailure, setLastFailure] = useState<{ message: string; detail: string } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -177,6 +185,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
       setError(null)
       setLoading(true)
 
+      let stage = 'i360dbc'
       try {
         // i360dbc — always fetched fresh (small, cheap), drives all change checks
         const resources = await fetchResources()
@@ -184,12 +193,10 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         if (cancelled) return
         setResource(globalResource)
 
-        // Single-call-per-key contract (see checkChanged note above)
-        const editionChanged = checkChanged('i360Edition', globalResource?.Edition)
-        const versionChanged = checkChanged('i360Version', globalResource?.Version)
-        const revisionChanged = checkChanged('i360Revision', globalResource?.Revision)
-        if (cancelled) return
-        setChangeFlags({ editionChanged, versionChanged, revisionChanged })
+        const editionChanged = hasChanged('i360Edition', globalResource?.Edition)
+        const versionChanged = hasChanged('i360Version', globalResource?.Version)
+        const revisionChanged = hasChanged('i360Revision', globalResource?.Revision)
+        stage = 'sciences/quran'
 
         // Sciences + Quran resolved concurrently — each independently cached-or-fetched
         const [freshSciences, freshQuran] = await Promise.all([
@@ -200,6 +207,14 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         setSciences(freshSciences)
         setQuran(freshQuran)
         cacheFeedbackMailto(freshSciences)
+        // Everything the flags gate has loaded: only now record the new
+        // baselines and surface the flags (no "new edition" notice for content
+        // that never arrived).
+        commitBaseline('i360Edition', globalResource?.Edition)
+        commitBaseline('i360Version', globalResource?.Version)
+        commitBaseline('i360Revision', globalResource?.Revision)
+        setChangeFlags({ editionChanged, versionChanged, revisionChanged })
+        setLastFailure(null)
 
         // Staged icon preloading, by tier priority — real fix for a real,
         // measured problem (2026-08-25): the previous one-shot preload of
@@ -246,9 +261,13 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
           clearInterval(retryTimer)
           retryTimer = null
         }
-      } catch {
+      } catch (err) {
         if (!cancelled) {
-          setError('تعذّر تحميل البيانات')
+          setError(LOAD_ERROR)
+          setLastFailure({
+            message: LOAD_ERROR,
+            detail: `${stage}: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`,
+          })
           if (!retryTimer) {
             retryTimer = setInterval(() => {
               if (!cancelled) init()
@@ -275,8 +294,8 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
   )
 
   const value = useMemo(
-    () => ({ resource, sciences, quran, changeFlags, loading, error, isRetrying, findExegesisUrl }),
-    [resource, sciences, quran, changeFlags, loading, error, isRetrying, findExegesisUrl]
+    () => ({ resource, sciences, quran, changeFlags, loading, error, lastFailure, isRetrying, findExegesisUrl }),
+    [resource, sciences, quran, changeFlags, loading, error, lastFailure, isRetrying, findExegesisUrl]
   )
 
   return (

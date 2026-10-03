@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, lazy, Suspense, ComponentType, Fragment } from 'react'
+import { useMemo, useState, lazy, Suspense, ComponentType, Fragment } from 'react'
 import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
 import { Browser } from '@capacitor/browser'
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
@@ -230,7 +230,7 @@ function MinorButton({
 
 export default function ScienceGrid() {
   const { state } = useAppState()
-  const { sciences, resource: globalResource, loading, error, isRetrying } = useDataCache()
+  const { sciences, resource: globalResource, loading, isRetrying, lastFailure } = useDataCache()
   const [openMajorId, setOpenMajorId] = useState<number | null>(null)
   const [openIntermediateId, setOpenIntermediateId] = useState<number | null>(null)
   // Reachability-check UI state (2026-09-03) — checkFlash is the brief
@@ -239,25 +239,9 @@ export default function ScienceGrid() {
   // fails.
   const [checkFlash, setCheckFlash] = useState(false)
   const [unreachableUrl, setUnreachableUrl] = useState<string | null>(null)
-  // Unified loading/retry/error indicator (2026-09-06 redesign) — replaces
-  // the earlier separate loading/error blocks and inline report button.
-  // lastErrorMessage deliberately does NOT just mirror dataCache.tsx's own
-  // `error` directly — that value resets to null at the START of every
-  // retry attempt (dataCache.tsx's own established behavior), so a naive
-  // binding would make the indicator flicker in and out of being
-  // interactive every ~10s retry cycle. This instead remembers the most
-  // recent real failure, staying set continuously through every
-  // subsequent retry, until a genuinely settled success (loading false,
-  // error null) resets it — mirroring App.tsx's own notifyAppReady()
-  // gating condition, the same "genuinely settled" signal used there.
-  const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null)
-  useEffect(() => {
-    if (error) {
-      setLastErrorMessage(error)
-    } else if (!loading) {
-      setLastErrorMessage(null)
-    }
-  }, [error, loading])
+  // Unified loading/retry/error indicator. lastFailure (dataCache.tsx) persists
+  // through retries until a real success, so the indicator stays tappable
+  // instead of flickering every ~10s retry cycle.
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
 
   const groups = useMemo(() => groupSciences(sciences), [sciences])
@@ -326,7 +310,7 @@ export default function ScienceGrid() {
     if (science.WebAppendix) await openUrl(science.WebAppendix)
   }
 
-  if (loading && !lastErrorMessage) {
+  if (loading && !lastFailure) {
     // First load, no failure yet — plain, non-interactive status text,
     // unchanged from the original behavior. Nothing to report yet, so
     // this deliberately isn't a button at all.
@@ -337,7 +321,7 @@ export default function ScienceGrid() {
       </div>
     )
   }
-  if (lastErrorMessage) {
+  if (lastFailure) {
     // At least one failure has happened since the last genuine success —
     // one unified, continuously-tappable indicator, replacing the
     // earlier separate loading/error blocks and inline report button.
@@ -348,7 +332,7 @@ export default function ScienceGrid() {
     // open with a "reported" confirmation, since there's no content
     // behind it worth returning to mid-failure either way.
     const handleDataErrorReport = () => {
-      copyAndEmailReport('تقرير تعذّر تحميل البيانات - i360إ', lastErrorMessage)
+      copyAndEmailReport('تقرير تعذّر تحميل البيانات - i360إ', `${lastFailure.message}\n\n${lastFailure.detail}`)
       setErrorDialogOpen(false)
     }
     return (
@@ -360,13 +344,13 @@ export default function ScienceGrid() {
         >
           {loading && <LoaderCircle size={20} className="animate-spin text-gray-500" />}
           <span className={loading ? 'text-gray-500' : 'text-red-500 underline'}>
-            {loading ? (isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...') : lastErrorMessage}
+            {loading ? (isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...') : lastFailure.message}
           </span>
         </button>
         <Dialog
           open={errorDialogOpen}
           title="تعذّر تحميل البيانات"
-          message={lastErrorMessage}
+          message={lastFailure.message}
           onClose={() => setErrorDialogOpen(false)}
           secondaryAction={
             resolveFeedbackMailto()
