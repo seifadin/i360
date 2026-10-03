@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState, CSSProperties } from 'react'
+import { useCallback, useState, CSSProperties } from 'react'
 import { EllipsisVertical, Globe } from 'lucide-react'
-import { Capacitor } from '@capacitor/core'
-import { OtaKit } from '@otakit/capacitor-updater'
+import { getOtaBuild } from '@/lib/feedbackReport'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { detectOS, isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
@@ -161,35 +160,9 @@ export default function OSRow() {
     setVersionOpen(false)
   }, [])
 
-  // OTA bundle identifier (2026-08-29) — shown as a permanent, smaller
-  // third line in the version dialog below, distinct from the Baserow
-  // Version above it: that reflects content, this reflects which OTA
-  // bundle is actually running (useful precisely because they can differ
-  // — the original motivation was a real bug where confirming "is the fix
-  // actually live" needed a full clear-data-and-repro cycle each time).
-  // Fetched once here, not lazily on dialog open — getState() reads
-  // already-known local plugin state, no network call, so it's cheap
-  // enough to have ready before the user ever taps to open the dialog.
-  // Shown verbatim, not reformatted — OtaKit's own CLI calls this an
-  // "auto-generated version," meaning the exact otk.<hash>.<timestamp>
-  // shape is a default, not a permanently guaranteed format; displaying
-  // whatever it reports avoids any risk of parsing logic breaking later
-  // if that shape ever changes.
-  const [otaVersion, setOtaVersion] = useState<string | null>(null)
-  useEffect(() => {
-    // Web/PWA branch (2026-08-29) — checked via the plugin's own real
-    // source, not assumed: OtaKitWeb hardcodes current.version to the
-    // literal '0.0.0' unconditionally, since OTA concepts don't apply on
-    // web at all. That would show as a meaningless "(0.0.0)" — shown
-    // __APP_VERSION__ (the real, build-time app version, see
-    // vite.config.ts) instead, matching what native shows before any OTA
-    // has ever applied.
-    if (!Capacitor.isNativePlatform()) {
-      setOtaVersion(__APP_VERSION__)
-      return
-    }
-    OtaKit.getState().then(s => setOtaVersion(s.current.version)).catch(() => {})
-  }, [])
+  // One source for the OTA build (feedbackReport.ts — read once at startup).
+  // Read at render: opening the About dialog re-renders, so it's current.
+  const otaVersion = getOtaBuild()
 
   const appVersion = resource?.Version || AppVersionFallback
 

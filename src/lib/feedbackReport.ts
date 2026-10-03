@@ -91,6 +91,13 @@ export function primeDiagnosticContext(): void {
     })
 }
 
+// The running OTA build: web → __APP_VERSION__ (OTA doesn't apply); native →
+// what primeDiagnosticContext() read, or null while unknown. Shared with
+// OSRow's About dialog, so both always show the same value.
+export function getOtaBuild(): string | null {
+  return Capacitor.isNativePlatform() ? cachedOtaBuild : __APP_VERSION__
+}
+
 function buildDiagnosticContext(): string {
   const os = detectOS()
   const isHuawei = /huawei|hmscore|harmony/i.test(navigator.userAgent)
@@ -99,7 +106,7 @@ function buildDiagnosticContext(): string {
   // Native: whatever primeDiagnosticContext() read; 'unknown' if it
   // hasn't resolved yet or failed — deliberately NOT __APP_VERSION__
   // there, since on native that would state a value nobody actually read.
-  const otaBuild = Capacitor.isNativePlatform() ? (cachedOtaBuild ?? 'unknown') : __APP_VERSION__
+  const otaBuild = getOtaBuild() ?? 'unknown'
 
   return [
     `Platform: ${platform}`,
