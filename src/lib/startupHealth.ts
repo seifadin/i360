@@ -31,7 +31,7 @@
 //    online) before a rollback is allowed to proceed, rather than
 //    trusting either alone.
 
-import { CapacitorHttp } from '@capacitor/core'
+import { probeStatus } from '@/lib/reachability'
 import { BASE_URL } from '@/api/dataSource'
 import otaTiming from '../../ota-timing.json'
 
@@ -56,37 +56,15 @@ export function hadUnrecoveredStartupError(): boolean {
   return hadStartupError
 }
 
-// Lightweight — just confirms the domain itself responds at all, not a
-// real data fetch. 5s timeout, single attempt: this only ever runs once,
-// shortly before notifyAppReady()'s own 45s timeout would expire anyway,
-// so it doesn't need dataSource.ts's own fetchWithRetry shape (3 attempts,
-// backoff) — a single quick check is enough to inform this decision.
-// Accepts anything under 500 as "reachable" — even a 404 at the bare
-// origin (no specific route there) still means the domain itself
-// responded; only a genuine server error or a thrown/rejected request
-// (network failure, timeout, caught below) counts as unreachable.
+// Does the data source's domain respond at all? Single 5s try, shortly
+// before appReadyTimeout. Anything under 500 counts — even a 404 at the bare
+// origin means the domain answered; only a server error or a failed request
+// counts as unreachable.
 async function isDataSourceDomainReachable(): Promise<boolean> {
-  try {
-    const domain = new URL(BASE_URL).origin
-    const response = await CapacitorHttp.get({
-      url: domain,
-      connectTimeout: 5000,
-      readTimeout: 5000,
-      // Same reasoning as ScienceGrid.tsx's checkUrlReachable (2026-09-06)
-      // — a bare CapacitorHttp request can get rejected by bot/WAF
-      // protection even when the domain is genuinely reachable. Less
-      // likely here specifically (Baserow is an API endpoint, not a
-      // general website), but not a guarantee, and matching the fix
-      // applied elsewhere in this same session for consistency.
-      headers: {
-        'User-Agent': navigator.userAgent,
-        'Accept': 'application/json,text/html,*/*;q=0.8',
-      },
-    })
-    return response.status < 500
-  } catch {
-    return false
-  }
+  let origin: string
+  try { origin = new URL(BASE_URL).origin } catch { return false }
+  const status = await probeStatus(origin, 5000, 'application/json,text/html,*/*;q=0.8')
+  return status !== null && status < 500
 }
 
 // True only when both signals suggest the data source should genuinely be

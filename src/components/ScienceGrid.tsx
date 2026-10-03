@@ -1,187 +1,18 @@
-import { useMemo, useState, lazy, Suspense, ComponentType, Fragment } from 'react'
-import { ChevronDown, ChevronLeft, CircleSlash, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
-import { Browser } from '@capacitor/browser'
-import { Capacitor, CapacitorHttp } from '@capacitor/core'
+import { useMemo, useState, Fragment } from 'react'
+import { ChevronDown, ChevronLeft, LoaderCircle, Paperclip, CircleCheck } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
-import { resolveOpenMethod, computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
-import { loadIcon } from '@/lib/iconLoader'
-import { tryOpenNewTab } from '@/lib/openTab'
+import { computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
+import { groupSciences } from '@/lib/groupSciences'
+import { checkPageReachable } from '@/lib/reachability'
+import { openResource } from '@/lib/openResource'
 import { REPORT_SUBJECTS } from '@/lib/feedbackReport'
 import Dialog from '@/components/Dialog'
 import ReportNotice from '@/components/ReportNotice'
+import DynamicIcon from '@/components/DynamicIcon'
 
-interface MinorItem { science: Science }
-type MajorChild =
-  | { kind: 'intermediate'; intermediateId: number; intermediate: string; intermediateIcon: string; items: MinorItem[] }
-  | { kind: 'minor'; science: Science }
-interface MajorGroup {
-  majorId: number
-  major: string
-  majorIcon: string
-  children: MajorChild[]
-}
-
-// Builds one ordered `children` list per major, instead of separate
-// "intermediates" and "direct items" arrays — the old two-array approach
-// meant direct items always rendered after every intermediate group,
-// regardless of their true relative position by ScienceMinorId (the
-// table's primary key, which the data's actual insertion order respects).
-// Here, an intermediate group's position is set by its FIRST-encountered
-// item; later items for that same intermediate append to the existing
-// entry rather than creating a new position — this genuinely interleaves
-// intermediate groups and direct items in original minor-ID order.
-function groupSciences(sciences: Science[]): MajorGroup[] {
-  const majorMap = new Map<number, {
-    major: string
-    majorIcon: string
-    children: MajorChild[]
-    intPositions: Map<number, Extract<MajorChild, { kind: 'intermediate' }>>
-  }>()
-
-  for (const s of sciences) {
-    // Explicit Number() coercion — Baserow may serialize these as strings
-    // despite the TS type declaring `number` (see Section 4's callout).
-    // Guarantees Map keys are genuine numbers regardless of runtime type.
-    const majorKey = Number(s.ScienceMajorId)
-    if (!majorMap.has(majorKey)) {
-      majorMap.set(majorKey, {
-        major: s.ScienceMajor_Ar,
-        majorIcon: s.ScienceMajorIcon ?? '',
-        children: [],
-        intPositions: new Map(),
-      })
-    }
-    const majorEntry = majorMap.get(majorKey)!
-    const intId = s.ScienceIntermediateId != null ? Number(s.ScienceIntermediateId) : null
-    if (intId) {
-      let intChild = majorEntry.intPositions.get(intId)
-      if (!intChild) {
-        intChild = {
-          kind: 'intermediate',
-          intermediateId: intId,
-          intermediate: s.ScienceIntermediate_Ar,
-          intermediateIcon: s.ScienceIntermediateIcon ?? '',
-          items: [],
-        }
-        majorEntry.intPositions.set(intId, intChild)
-        majorEntry.children.push(intChild)
-      }
-      intChild.items.push({ science: s })
-    } else {
-      majorEntry.children.push({ kind: 'minor', science: s })
-    }
-  }
-
-  return Array.from(majorMap.entries()).map(([majorId, entry]) => ({
-    majorId,
-    major: entry.major,
-    majorIcon: entry.majorIcon,
-    children: entry.children,
-  }))
-}
-
-// Caches each lazy component so repeated renders of the same icon name don't
-// recreate a new lazy() wrapper (and re-trigger Suspense) every render.
-const iconCache = new Map<string, ComponentType<{ size?: number }>>()
-
-// Proactive reachability check (2026-09-03) — same timeout+retry shape as
-// dataSource.ts's fetchWithRetry, deliberately shorter numbers: this is a
-// pre-flight UX check the user is actively waiting on before the browser
-// opens, not a background data load. CapacitorHttp specifically, not plain
-// fetch — makes the request at the native layer, genuinely bypassing CORS
-// (confirmed via Capacitor's own docs) rather than getting an opaque,
-// unreadable response the way a no-cors fetch would. That's what makes a
-// real status-code check possible here at all.
-const STATUS_CHECK_TIMEOUT_MS = 5000
-const STATUS_CHECK_MAX_RETRIES = 1 // 1 initial + 1 retry = 2 total tries
-const STATUS_CHECK_RETRY_BACKOFF_MS = [800]
-
-async function checkUrlReachable(url: string): Promise<boolean> {
-  for (let attempt = 0; attempt <= STATUS_CHECK_MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      await new Promise(resolve => setTimeout(resolve, STATUS_CHECK_RETRY_BACKOFF_MS[attempt - 1]))
-    }
-    try {
-      const response = await CapacitorHttp.get({
-        url,
-        connectTimeout: STATUS_CHECK_TIMEOUT_MS,
-        readTimeout: STATUS_CHECK_TIMEOUT_MS,
-        // Headers (2026-09-06) — a real, confirmed false-positive pattern:
-        // this check reported "unreachable" on sites that then opened
-        // fine when the user proceeded anyway. Most likely cause: a bare
-        // CapacitorHttp request doesn't carry the headers a real browser
-        // sends, and many sites (behind Cloudflare/Akamai/similar
-        // protection) specifically reject non-browser-looking requests,
-        // typically with a 403 — while a real browser (which is exactly
-        // what @capacitor/browser opens when the user proceeds) sails
-        // through fine. navigator.userAgent, not a hardcoded string —
-        // this is the app's own, real, currently-running WebView's UA,
-        // so it's never stale as Chrome versions increment, and it
-        // genuinely matches what @capacitor/browser will present a
-        // moment later for the same URL.
-        headers: {
-          'User-Agent': navigator.userAgent,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'ar,en;q=0.9',
-        },
-      })
-      // A real, readable status this time (unlike a plain no-cors fetch's
-      // opaque response) — treat 2xx/3xx as genuinely reachable. 403
-      // specifically treated as reachable too (2026-09-06) — it's often a
-      // "you don't look like a browser" signal rather than "this content
-      // is genuinely gone," unlike a 404/410/5xx, which still count as a
-      // real problem worth surfacing. A thrown/rejected request (network
-      // failure, timeout) falls through to the catch below and the next
-      // attempt.
-      return (response.status >= 200 && response.status < 400) || response.status === 403
-    } catch {
-      // loop continues to next attempt, unless this was the last one
-    }
-  }
-  return false
-}
-
-// Visible fallback for a missing/misnamed icon — silently rendering nothing
-// makes a bad icon name indistinguishable from "no icon set," same class of
-// problem as the Keyboard field-mismatch bug (zero visible failure = hard to
-// diagnose). CircleSlash makes a bad name immediately noticeable instead.
-function FallbackIcon({ size }: { size?: number }) {
-  return <CircleSlash size={size} />
-}
-
-function DynamicIcon({ name, size = 15 }: { name: string; size?: number }) {
-  const LazyIcon = useMemo(() => {
-    if (!iconCache.has(name)) {
-      iconCache.set(
-        name,
-        lazy(() => {
-          const promise = loadIcon(name)
-          return promise
-            ? promise.then(mod => ({ default: mod.default }))
-            : Promise.resolve({ default: FallbackIcon })
-        })
-      )
-    }
-    return iconCache.get(name)!
-  }, [name])
-
-  return (
-    <Suspense fallback={null}>
-      <LazyIcon size={size} />
-    </Suspense>
-  )
-}
-
-// Extracted after the intermediate-nested minor button and the direct
-// minor button (rendered when a science has no intermediate parent) were
-// found to be identical except for indent depth (px-12 vs px-8). Defined
-// at module scope, not nested inside ScienceGrid, with onTap passed as a
-// prop rather than closed over — a component defined inside another
-// component's render body gets a fresh function identity every render,
-// which React treats as a brand-new component type and remounts instead
-// of reconciling.
 function MinorButton({
   science,
   indent,
@@ -257,37 +88,16 @@ export default function ScienceGrid() {
     return science.Web ?? ''
   }
 
-  // Shared by the main resource tap and the WebAppendix paperclip
-  // (2026-09-03) — both need the exact same "resolve open method, then
-  // open" logic, just targeting different URLs. No mobile/desktop special-
-  // casing lives here beyond what resolveOpenMethod itself already
-  // handles — both callers go through the identical path.
-  async function openUrl(url: string) {
-    if (!url) return
-    const openMethod: 'tab' | 'in_app' =
-      !state.useWeb
-        ? 'tab'
-        : resolveOpenMethod(url, globalResource?.URIschemes ?? '', globalResource?.inWebList ?? '')
-
-    if (openMethod === 'tab') {
-      tryOpenNewTab(url)
-    } else {
-      // Replaces the old navigate('/browser', ...) iframe page — opens
-      // the OS's own in-app browser (Custom Tabs/SFSafariViewController)
-      // instead. Browser.tsx and its /browser route are fully deleted
-      // (2026-09-03) — SearchBar.tsx's own resource-opening flow migrated
-      // the same session and now goes through the identical Browser.open()
-      // path, not navigate('/browser') anymore.
-      await Browser.open({ url })
-    }
-  }
+  // Where a URL opens: one shared decision (lib/openResource.ts).
+  const openCtx = { useWeb: state.useWeb, uriSchemes: globalResource?.URIschemes ?? '', inWebList: globalResource?.inWebList ?? '' }
+  const open = (url: string) => openResource(url, openCtx)
 
   async function handleMinorTap(science: Science) {
     const url = resolveUrl(science)
     if (!url) return
 
     if (globalResource?.WebsiteStatus) {
-      const reachable = await checkUrlReachable(url)
+      const reachable = await checkPageReachable(url)
       if (!reachable) {
         setUnreachableUrl(url)
         return
@@ -304,11 +114,11 @@ export default function ScienceGrid() {
       setCheckFlash(false)
     }
 
-    await openUrl(url)
+    await open(url)
   }
 
   async function handleAppendixTap(science: Science) {
-    if (science.WebAppendix) await openUrl(science.WebAppendix)
+    if (science.WebAppendix) await open(science.WebAppendix)
   }
 
   if (loading && !lastFailure) {
@@ -397,7 +207,7 @@ export default function ScienceGrid() {
           onClick: () => {
             const url = unreachableUrl
             setUnreachableUrl(null)
-            if (url) openUrl(url).catch(() => {})
+            if (url) void open(url) // never rejects
           },
         }}
       />

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Browser } from '@capacitor/browser'
 import {
   Search, Bot, Keyboard,
   PencilSparkles, Minimize2, Languages, BookSearch,
@@ -8,8 +7,9 @@ import {
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { isArabic, translateToArabic } from '@/api/translator'
-import { computeUseHuawei, resolveOpenMethod, matchesWebList } from '@/hooks/usePlatform'
+import { computeUseHuawei } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
+import { openResource } from '@/lib/openResource'
 
 // Icon mapping confirmation:
 // Search   → search icon inside input LEFT side
@@ -81,57 +81,9 @@ export default function SearchBar() {
   const keyboardUrl = (useHuawei ? resource?.Huawei_VirtualKeyboard : resource?.Google_VirtualKeyboard) ?? ''
   const botUrl = (useHuawei ? resource?.Huawei_BotSearch : resource?.BotSearch) ?? ''
 
-  // fWebBrowser-equivalent — useWeb-aware WebView/new-tab branching.
-  // Returns whether the open succeeded (WebView navigation always does;
-  // window.open returns null — or an immediately-closed window — if blocked).
-  //
-  // context='default' (Search results, Exegesis pages): desktop always opens
-  // a new tab regardless of useWeb — the desktop-always-tab rule inside
-  // resolveOpenMethod itself. Also consults inWebList/URIschemes via
-  // resolveOpenMethod (the same function ScienceGrid.tsx uses). Note
-  // (2026-09-03): the in-app route now means @capacitor/browser's overlay,
-  // not an iframe — neither route is subject to X-Frame-Options at all
-  // anymore, since @capacitor/browser genuinely loads the page rather than
-  // embedding it. The tab/in-app distinction is now purely a UX choice
-  // (keep this app's own chrome visible vs. leave to a fully separate
-  // context), not an embedding-safety one the way it was when Browser.tsx
-  // was an iframe page.
-  //
-  // context='bot': routing is based on useWeb alone, ignoring isDesktop() —
-  // identical behavior on any browser, mobile or desktop. Safe to skip the
-  // X-Frame-Options safeguard here specifically because Botpress's webchat
-  // URL is purpose-built for iframe embedding, not arbitrary content. Still
-  // consults inWebList/URIschemes via matchesWebList (not resolveOpenMethod,
-  // which would also pull in the desktop check bot deliberately skips) in
-  // case a bot URL ever needs to be force-opened in a tab too.
-  function openViaWebBrowser(url: string, context: 'default' | 'bot' = 'default'): boolean {
-    const uriSchemes = resource?.URIschemes ?? ''
-    const inWebList = resource?.inWebList ?? ''
-
-    const useInAppRoute = context === 'bot'
-      ? state.useWeb && !matchesWebList(url, uriSchemes, inWebList)
-      : state.useWeb && resolveOpenMethod(url, uriSchemes, inWebList) === 'in_app'
-
-    if (useInAppRoute) {
-      // Replaces the old navigate('/browser', ...) iframe page — opens
-      // the OS's own in-app browser (Custom Tabs/SFSafariViewController)
-      // instead, same as ScienceGrid's own resource-opening flow. Fire-
-      // and-forget (this function stays synchronous, matching every
-      // caller's existing expectation of an immediate boolean) — no
-      // synchronous failure signal exists for Browser.open() the way
-      // window.open() returning null signals a blocked popup, so this
-      // path still reports success unconditionally, same as before.
-      Browser.open({ url }).catch(() => {})
-      // The setState({ WebAppendix: null }) this replaced only ever
-      // existed to reset state Browser.tsx's own paperclip button read —
-      // Browser.tsx is no longer the destination for any resource-opening
-      // flow at all (see App.tsx/ScienceGrid.tsx), so that state has no
-      // remaining consumer.
-      return true
-    } else {
-      return tryOpenNewTab(url)
-    }
-  }
+  // Where a URL opens: one shared decision (lib/openResource.ts). It now
+  // reports in-app browser failures too, so 'openfailed' is truthful there.
+  const openCtx = { useWeb: state.useWeb, uriSchemes: resource?.URIschemes ?? '', inWebList: resource?.inWebList ?? '' }
 
   async function handleSubmit() {
     if (!trimmed) {
@@ -143,14 +95,14 @@ export default function SearchBar() {
     if (overrideArmed) setOverrideArmed(false) // one-shot — consumed on submit
 
     if (routeToExegesis) {
-      handleExegesisSubmit(trimmed)
+      await handleExegesisSubmit(trimmed)
     } else {
       await handleSearch()
     }
   }
 
   // fExegesis-equivalent — chapter.verse dot format, chapter=split[0], verse=split[1]
-  function handleExegesisSubmit(value: string) {
+  async function handleExegesisSubmit(value: string) {
     const [chapterStr, verseStr] = value.split('.')
     const chapter = Number(chapterStr)
     const verse = Number(verseStr)
@@ -171,7 +123,7 @@ export default function SearchBar() {
       return
     }
 
-    const opened = openViaWebBrowser(url)
+    const opened = await openResource(url, openCtx)
     if (!opened) flashIconFor('openfailed')
   }
 
@@ -210,7 +162,7 @@ export default function SearchBar() {
     const csTemplate = (useHuawei ? resource?.Huawei_CustomSearch : resource?.CustomSearch)
       || `https://cse.google.com/cse?cx=${import.meta.env.VITE_PSE_CX}#gsc.tab=0&gsc.sort=&gsc.q=`
     const pseUrl = `${csTemplate}${encodeURIComponent(arabicTerm)}`
-    const opened = openViaWebBrowser(pseUrl)
+    const opened = await openResource(pseUrl, openCtx)
 
     setSearchPhase(null)
     if (!opened) {
@@ -219,9 +171,9 @@ export default function SearchBar() {
     }
   }
 
-  function handleBot() {
+  async function handleBot() {
     if (!botUrl) return
-    const opened = openViaWebBrowser(botUrl, 'bot')
+    const opened = await openResource(botUrl, openCtx, 'bot')
     if (!opened) triggerBotFailed()
   }
 
