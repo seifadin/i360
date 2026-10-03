@@ -12,6 +12,14 @@ import { FEEDBACK_MAILTO_KEY, CACHE_KEY_SCIENCES } from '@/store/dataCache'
 import { Science } from '@/api/dataSource'
 import { detectOS } from '@/hooks/usePlatform'
 
+// Shared report wording — one definition for every report path.
+export const REPORT_LABEL = 'الإبلاغ عن المشكلة'
+export const REPORT_SUBJECTS = {
+  crash: 'تقرير خطأ - i360إ',
+  otaRollback: 'تقرير تراجع تحديث - i360إ',
+  dataLoad: 'تقرير تعذّر تحميل البيانات - i360إ',
+} as const
+
 // Two-tier lookup, both reading localStorage directly — this needs to work
 // even from ErrorBoundary, which sits ABOVE DataCacheProvider in the tree
 // (main.tsx), so useDataCache() isn't reachable from every caller. Tier 1:

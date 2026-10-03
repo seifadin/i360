@@ -44,7 +44,11 @@ export const SAFETY_NET_DELAY_MS = otaTiming.appReadyTimeoutMs - otaTiming.safet
 let hadStartupError = false
 
 export function installStartupErrorGuard() {
-  window.addEventListener('error', () => { hadStartupError = true })
+  // Only real JavaScript errors count (2026-10-03). Events without an Error
+  // object — cross-origin "Script error.", browser notices such as the
+  // ResizeObserver loop message — say nothing about this bundle, and a false
+  // positive here blocks notifyAppReady() and rolls back a good bundle.
+  window.addEventListener('error', e => { if (e.error instanceof Error) hadStartupError = true })
   window.addEventListener('unhandledrejection', () => { hadStartupError = true })
 }
 

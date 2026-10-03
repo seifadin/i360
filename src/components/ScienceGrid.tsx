@@ -8,8 +8,9 @@ import { Science } from '@/api/dataSource'
 import { resolveOpenMethod, computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { loadIcon } from '@/lib/iconLoader'
 import { tryOpenNewTab } from '@/lib/openTab'
-import { resolveFeedbackMailto, copyAndEmailReport } from '@/lib/feedbackReport'
+import { REPORT_SUBJECTS } from '@/lib/feedbackReport'
 import Dialog from '@/components/Dialog'
+import ReportNotice from '@/components/ReportNotice'
 
 interface MinorItem { science: Science }
 type MajorChild =
@@ -331,10 +332,6 @@ export default function ScienceGrid() {
     // component, closes immediately after reporting rather than staying
     // open with a "reported" confirmation, since there's no content
     // behind it worth returning to mid-failure either way.
-    const handleDataErrorReport = () => {
-      copyAndEmailReport('تقرير تعذّر تحميل البيانات - i360إ', `${lastFailure.message}\n\n${lastFailure.detail}`)
-      setErrorDialogOpen(false)
-    }
     return (
       <>
         <button
@@ -347,16 +344,13 @@ export default function ScienceGrid() {
             {loading ? (isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...') : lastFailure.message}
           </span>
         </button>
-        <Dialog
+        <ReportNotice
           open={errorDialogOpen}
           title="تعذّر تحميل البيانات"
           message={lastFailure.message}
+          subject={REPORT_SUBJECTS.dataLoad}
+          details={`${lastFailure.message}\n\n${lastFailure.detail}`}
           onClose={() => setErrorDialogOpen(false)}
-          secondaryAction={
-            resolveFeedbackMailto()
-              ? { label: 'الإبلاغ عن المشكلة', onClick: handleDataErrorReport }
-              : undefined
-          }
         />
       </>
     )

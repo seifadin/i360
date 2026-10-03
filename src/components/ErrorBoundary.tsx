@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
-import { resolveFeedbackMailto, copyAndEmailReport } from '@/lib/feedbackReport'
+import { resolveFeedbackMailto, copyAndEmailReport, REPORT_LABEL, REPORT_SUBJECTS } from '@/lib/feedbackReport'
 
 interface Props {
   children: ReactNode
@@ -50,7 +50,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     // (why clipboard always gets the full text, why the mailto body is
     // trimmed, why the return value is worded to what's actually
     // verifiable).
-    copyAndEmailReport('تقرير خطأ - i360إ', this.state.errorDetails)
+    copyAndEmailReport(REPORT_SUBJECTS.crash, this.state.errorDetails)
     this.setState({ reported: true })
   }
 
@@ -65,7 +65,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       // verifiable (see handleReport's own comment on this).
       const reportLabel = reported
         ? (canEmail ? 'تم النسخ، وفُتح تطبيق البريد' : 'تم النسخ')
-        : (canEmail ? 'الإبلاغ عن المشكلة' : 'نسخ تفاصيل الخطأ')
+        : (canEmail ? REPORT_LABEL : 'نسخ تفاصيل الخطأ')
       return (
         <div
           dir="rtl"
