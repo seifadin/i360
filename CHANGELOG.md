@@ -113,4 +113,4 @@ This release replaces the original low-code SAP Build Apps (AppGyver) implementa
 
 ## [0.12.4] and earlier
 
-Original implementation, built on SAP Build Apps (AppGyver). See prior release history for details.
+Original implementation, built on SAP Build Apps (AppGyver). Its release history is kept in [README.md](README.md) (collapsed entries).

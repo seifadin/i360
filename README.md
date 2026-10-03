@@ -2,6 +2,8 @@
 إi360 تطبيق إسلامي موسوعي للعلوم الإسلامية الأساسية بشكل متكامل مختصر بسيط
 • https://i36O.wordpress.com
 
+Release notes from v0.13.0 on (the React/TypeScript rewrite) are in [CHANGELOG.md](CHANGELOG.md). The collapsed entries below are the v0.12.4-and-earlier history (SAP Build Apps / AppGyver).
+
 <details>
 <summary>v 0.12.4</summary>
 
