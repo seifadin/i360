@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-QQ2Tqp/5bXkr9a+BI6aUR61XsjXVUWGksVT7AVgOlHo='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-pTsVDjuIAsXGjMvRhvgGmKyPATJC2xIe220P4YQypcw='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1056,6 +1056,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   const SEARCH_LIST_MAX = 300;                   // results shown in the list; the count shows all
   const SNIPPET_CHARS = 45;
   const SAVE_DEBOUNCE_MS = 500;
+  const PIN_MS = 1500;                           // a jump is held in place at least this long…
+  const PIN_SETTLE_MS = 800;                     // …and this long after the fonts finish loading…
+  const PIN_MAX_MS = 10000;                      // …but never longer than this
   const POSITIONS_MAX = 100;                     // books remembered; the oldest are dropped
   const TOAST_MS = 1800;
   // Leaf text blocks: places where a paragraph's text lives.
@@ -1685,11 +1688,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     if (!pos || typeof pos.idx !== 'number' || pos.idx >= state.sheets.length) return;
     if (pos.idx === 0 && !(pos.frac > 0.02)) return;
     const anchor = { idx: pos.idx, frac: Math.max(0, Math.min(1, Number(pos.frac) || 0)) };
-    restoreAnchor(anchor);
-    // Pages near the target lay out only now; a second pass lands exactly.
-    await nextFrame(); await nextFrame();
-    if (state.bookKey !== key) return;
-    restoreAnchor(anchor);
+    restoreAnchor(anchor);      // pinned until the layout settles
     updateCounter(true);
   }
 
@@ -2071,6 +2070,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const vTop = viewerContainer.getBoundingClientRect().top;
     const r = sheet.getBoundingClientRect();
     viewerContainer.scrollTop += (r.top - vTop) + anchor.frac * r.height;
+    pinElement(sheet, 0, anchor.frac);
   }
 
   function setZoom(z, keepAnchor = true) {
@@ -2209,12 +2209,65 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
   }, { passive: true });
 
+  /* ----------------------------------------------------------------
+     Holding a jump in place
+     After a jump, content above the target can still grow: the Arabic
+     fonts finish loading and rewrap the text, and a page that was only
+     estimated (content-visibility) is laid out for real. Without help the
+     target slides down and the wrong page becomes current (a link to
+     #p=3 turned into #n=2). So every jump "pins" its target: until the
+     layout settles, the target is put back where it was placed. Any
+     touch, wheel, click or key from the reader releases the pin.
+     ---------------------------------------------------------------- */
+  let pin = null;
+
+  // Keep el's top at (viewer top + offset − frac × el's height).
+  function pinElement(el, offset, frac = 0) {
+    const now = performance.now();
+    const p = { el, offset, frac, started: now, until: now + PIN_MS };
+    pin = p;
+    if (document.fonts && document.fonts.status === 'loading') {
+      document.fonts.ready.then(() => {
+        if (pin === p) p.until = Math.max(p.until, performance.now() + PIN_SETTLE_MS);
+      });
+    }
+    requestAnimationFrame(pinStep);
+  }
+
+  function placePinned(p) {
+    const r = p.el.getBoundingClientRect();
+    const want = viewerContainer.getBoundingClientRect().top + p.offset - p.frac * r.height;
+    const d = r.top - want;
+    if (Math.abs(d) >= 1) viewerContainer.scrollTop += d;
+  }
+
+  function pinStep() {
+    const p = pin;
+    if (!p) return;
+    if (!p.el.isConnected || performance.now() > Math.min(p.until, p.started + PIN_MAX_MS)) {
+      pin = null;
+      updateCounter(true);
+      return;
+    }
+    placePinned(p);
+    requestAnimationFrame(pinStep);
+  }
+
+  function releasePin() { pin = null; }
+
+  for (const ev of ['wheel', 'touchstart', 'pointerdown']) {
+    viewerContainer.addEventListener(ev, releasePin, { passive: true });
+  }
+  // Capture phase: a key releases the old pin before its own jump sets a new one.
+  document.addEventListener('keydown', releasePin, true);
+
   function scrollToSheet(idx) {
     const sheet = state.sheets[idx];
     if (!sheet) return;
-    const vTop = viewerContainer.getBoundingClientRect().top;
     const pad = parseFloat(getComputedStyle(viewerContainer).paddingTop) || 0;
-    viewerContainer.scrollTop += sheet.getBoundingClientRect().top - vTop - pad;
+    const p = { el: sheet, offset: pad, frac: 0 };
+    placePinned(p);
+    pinElement(sheet, pad);
   }
 
   // Next/previous page. "Previous" first goes back to the top of the
@@ -2312,6 +2365,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const v = viewerContainer.getBoundingClientRect();
     const r = target.getBoundingClientRect();
     viewerContainer.scrollTop += r.top - v.top - viewerContainer.clientHeight / 3;
+    pinElement(target, target.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
     target.classList.remove('flash');
     void target.offsetWidth;
     target.classList.add('flash');
@@ -2363,6 +2417,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       await nextFrame(); await nextFrame();
       const v = viewerContainer.getBoundingClientRect();
       viewerContainer.scrollTop += el.getBoundingClientRect().top - v.top - remPx(0.75);
+      pinElement(el, remPx(0.75));
     }
     updateCounter(true);
     if (panelCoversPage()) closePanel();
@@ -2812,6 +2867,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     if (r.left < v.left || r.right > v.right) {
       viewerContainer.scrollLeft += (r.left + r.right) / 2 - (v.left + v.right) / 2;
     }
+    const startEl = range.startContainer.parentElement;
+    const block = startEl && (startEl.closest(BLOCK_SEL) || startEl);
+    if (block) pinElement(block, block.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
   }
 
   function updateSearchCountDisplay() {
