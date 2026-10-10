@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "i360-e"
+  },
+  "targets": {
+    "i360-e": {
+      "hosting": {
+        "md": ["i360-md"]
+      }
+    }
+  }
+}
