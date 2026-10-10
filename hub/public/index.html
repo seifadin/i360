@@ -493,7 +493,16 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     .page-sheet hr { border: 0; height: 1px; background: var(--rule); margin: 1.5em 0; }
     .page-sheet a { color: var(--link); }
 
-    .quran { font-family: 'Amiri Quran', 'Amiri', serif; font-size: 1.05em; color: var(--quran); }
+    /* Quran quotations: the King Fahd Complex font (Madinah Mushaf style) when the
+       reader has installed it on their device, otherwise Amiri Quran. Its licence
+       doesn't allow us to host or redistribute it, so it is never downloaded:
+       only a copy already on the device is used. Both family names below are
+       ones its versions have used. */
+    .quran {
+      font-family: 'KFGQPC HAFS Uthmanic Script', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Amiri', serif;
+      font-size: 1.05em;
+      color: var(--quran);
+    }
 
     .footnotes { margin-top: auto; padding-top: 1rem; }
     .footnotes::before {
