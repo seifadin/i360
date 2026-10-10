@@ -1,9 +1,9 @@
 # i360-md — i360 Markdown Reader hosting
 
-Firebase Hosting site **`i360-md`** in project **`i360-e`** → https://i360-md.web.app/
+Firebase project **`i360-md`** (its default Hosting site) → https://i360-md.web.app/
 
-Separate from the i360إ app: its own folder, its own `firebase.json`, deployed only with the
-`md` target. It never touches `https://i360-e.web.app/` or the app's pre-push pipeline.
+Separate from the i360إ app (Firebase project `i360-e`): its own Firebase project, repo and
+config, so its traffic, storage and deploys can never affect `https://i360-e.web.app/`.
 
 ## Layout
 ```
