@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-pTsVDjuIAsXGjMvRhvgGmKyPATJC2xIe220P4YQypcw='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-dYgCn6osd2GxjnnyBDvYMzJtLreMEw4us4pTapp4KPk='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -462,11 +462,25 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       text-justify: inter-word;
     }
     .page-sheet ul, .page-sheet ol { margin-bottom: 1em; padding-inline-start: 2em; font-size: 1.1em; }
-    .page-sheet li { margin-bottom: 0.4em; line-height: 1.85; text-align: justify; }
+    .page-sheet li { margin-bottom: 0.4em; line-height: 1.85; text-align: justify; text-justify: inter-word; }
+    /* Nested lists (mind maps, trees): same text size at every level, with a
+       guide line joining each branch to its parent */
+    .page-sheet .sublist {
+      font-size: 1em;
+      margin: 0.35em 0 0.2em;
+      padding-inline-start: 1.4em;
+      border-inline-start: 1px solid var(--rule);
+      margin-inline-start: 0.2em;
+    }
+    .page-sheet .sublist > li { position: relative; margin-bottom: 0.25em; }
+    /* Mind-map boxes are short labels: justifying them would stretch the gaps */
+    .page-sheet li:has(> .sublist), .page-sheet .sublist li { text-align: start; }
     /* Items separated by blank lines hold a <p>: same size and spacing as tight items */
     .page-sheet li > p { font-size: inherit; margin-bottom: 0; }
 
     .page-sheet blockquote {
+      text-align: justify;
+      text-justify: inter-word;
       border-inline-start: 4px solid var(--link);
       background-color: var(--quote-bg);
       padding: 0.75rem 1rem;
@@ -474,9 +488,35 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     }
     .page-sheet blockquote p:last-child { margin-bottom: 0; }
 
-    .page-sheet table { width: 100%; border-collapse: collapse; margin: 1.2em 0; }
-    .page-sheet th, .page-sheet td { border: 1px solid var(--rule); padding: 0.5rem 0.75rem; text-align: start; line-height: 1.7; }
+    /* Tables: a wide table scrolls sideways inside the page instead of
+       squeezing its columns; the first column follows the page direction
+       (rightmost in Arabic). Cells stay aligned to their start, not justified. */
+    .page-sheet .table-wrap { overflow-x: auto; margin: 1.2em 0; max-width: 100%; }
+    .page-sheet table { width: 100%; border-collapse: collapse; font-size: 1em; }
+    .page-sheet th, .page-sheet td {
+      border: 1px solid var(--rule);
+      padding: 0.45em 0.7em;
+      text-align: start;
+      vertical-align: top;
+      line-height: 1.7;
+      min-width: 3.5em;
+    }
     .page-sheet th { background-color: var(--code-bg); font-weight: 700; }
+    .page-sheet tbody tr:nth-child(even) td { background-color: color-mix(in srgb, var(--code-bg) 45%, transparent); }
+    .page-sheet table.no-head thead { display: none; }
+
+    /* "[شكل]" / "[شكل: caption]": a figure in the book that the text can't show */
+    .page-sheet p.figure-label {
+      display: inline-block;
+      text-align: start;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.95em;
+      color: var(--muted);
+      border: 1px dashed var(--rule);
+      border-radius: 0.375rem;
+      padding: 0.2em 0.75em;
+      margin-bottom: 0.5em;
+    }
 
     .page-sheet code { background-color: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
     .page-sheet pre {
@@ -514,7 +554,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       margin-bottom: 0.5rem;
     }
     .footnotes-list { font-size: 0.92em; line-height: 1.8; color: var(--note-text); }
-    .fn-note { margin-bottom: 0.3em; text-align: justify; }
+    .fn-note { margin-bottom: 0.3em; text-align: justify; text-justify: inter-word; }
     .fn-back, .fn-ref { color: var(--link); text-decoration: none; }
     .fn-back:hover, .fn-ref:hover { text-decoration: underline; }
     .fn-back { margin-inline-end: 0.3em; }
@@ -1211,7 +1251,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      Markdown rendering (safe)
      Book text never needs raw HTML, links or images, so:
      - HTML comments (running headers, notes) are removed before parsing;
-     - any other raw HTML is shown as text, never run;
+     - any other raw HTML is shown as text, never run — except <br>, which
+       the OCR engine uses for a line break inside a table cell;
      - "[" is escaped, so "[القيامة: 22–23](5)" can't turn into a link;
      - only bare http(s) URLs become links.
      Line breaks: the OCR engine joins the printed lines of a paragraph
@@ -1222,7 +1263,10 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      ================================================================ */
   const SAFE_RENDERER = {
     renderer: {
-      html(token) { return escapeHtml(token.text); },
+      html(token) {
+        if (/^<br\s*\/?>$/i.test(token.text.trim())) return '<br>';
+        return escapeHtml(token.text);
+      },
       link(token) {
         const text = this.parser.parseInline(token.tokens);
         if (/^https?:\/\//i.test(token.href)) {
@@ -1500,6 +1544,18 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       if (el.querySelector(BLOCK_SEL) == null && el.matches(BLOCK_SEL)) continue;  // a leaf <li>
       el.setAttribute('dir', mode === 'auto' ? (firstStrongDir(el.textContent) || fallback) : mode);
     }
+    // A table's column order follows its own language (header first): an
+    // English table in an Arabic book reads left to right, and vice versa.
+    for (const table of root.querySelectorAll('table')) {
+      const head = table.tHead ? table.tHead.textContent : '';
+      const dir = mode === 'auto'
+        ? (firstStrongDir(head) || firstStrongDir(table.textContent) || fallback) : mode;
+      table.setAttribute('dir', dir);
+      // The scroll box follows too, so a wide table opens at its first column.
+      if (table.parentElement && table.parentElement.classList.contains('table-wrap')) {
+        table.parentElement.setAttribute('dir', dir);
+      }
+    }
   }
 
   // Show the book's digits in the chosen numerals. Code and real links keep theirs.
@@ -1581,6 +1637,32 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   /* ================================================================
      Building the pages
      ================================================================ */
+  /* Tables, mind maps and figures, as the OCR engine writes them:
+     - tables scroll sideways inside the page when they're wider than it;
+       a continuation table (empty header row added at export) shows no header;
+     - nested lists (mind maps, trees) get guide lines, styled in CSS;
+     - a "[شكل]" / "[شكل: caption]" line is shown as a figure label. */
+  const FIGURE_RE = /^\s*\[\s*شكل\s*(?::[^\]]*)?\]\s*$/;
+
+  function enhanceBody(root) {
+    for (const table of root.querySelectorAll('table')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+      const head = table.tHead;
+      if (head && ![...head.querySelectorAll('th')].some((th) => th.textContent.trim())) {
+        table.classList.add('no-head');
+      }
+    }
+    for (const el of root.querySelectorAll('p')) {
+      if (FIGURE_RE.test(el.textContent)) el.classList.add('figure-label');
+    }
+    for (const list of root.querySelectorAll('li > ul, li > ol')) {
+      list.classList.add('sublist');
+    }
+  }
+
   function buildSheet(p, idx) {
     const tr = t();
     const sheet = document.createElement('article');
@@ -1597,6 +1679,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const bodyEl = document.createElement('div');
     bodyEl.className = 'markdown-body';
     if (hasVisibleContent(body)) bodyEl.innerHTML = renderBlock(body);
+    enhanceBody(bodyEl);
     content.appendChild(bodyEl);
 
     if (p.kind === 'untranscribed' && !hasVisibleContent(body)) {
