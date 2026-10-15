@@ -4,12 +4,13 @@
   "description": "i360 Markdown Reader and i360 CSE",
   "scripts": {
     "build": "node scripts/build.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "inventory": "node --env-file=.env indexer/inventory.js"
   },
   "devDependencies": {
     "marked": "18.1.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.6"
   }
 }

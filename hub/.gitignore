@@ -1,2 +1,4 @@
 node_modules/
 .firebase/
+.env
+indexer/out/
