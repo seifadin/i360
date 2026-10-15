@@ -563,7 +563,11 @@ async function run({ fetchFn = fetch, key, table = DEFAULT_TABLE, outDir, all = 
   return inv;
 }
 
-module.exports = { run, parseCell, normalizeUrl, fieldText, summary, causeText, ARCHIVE_HELPERS };
+// Forget archive.org metadata from an earlier run in the same process.
+const clearProbeCache = () => archiveMeta.clear();
+
+// Also used by the indexer (indexer/build-index.js).
+module.exports = { run, clearProbeCache, parseCell, normalizeUrl, fieldText, summary, causeText, readRows, collectSources, probe, fetchWithRetry, ARCHIVE_HELPERS, DEFAULT_TABLE, USER_AGENT };
 
 if (require.main === module) {
   run({

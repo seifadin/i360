@@ -18,8 +18,8 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const DROP_RE = /[ؐ-ًؚ-ٰٟۖ-ۭـ​-‏؜]/;
-  const INVISIBLE_RE = /[ـ​-‏؜]/;
+  const DROP_RE = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640\u200B-\u200F\u061C]/;
+  const INVISIBLE_RE = /[\u0640\u200B-\u200F\u061C]/;
   const WORD_CHAR_RE = /[\p{L}\p{N}\p{M}]/u;
   const LETTER_MAP = {
     'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ٲ': 'ا', 'ٳ': 'ا',

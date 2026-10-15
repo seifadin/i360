@@ -5,7 +5,9 @@
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test test/*.test.js",
-    "inventory": "node --env-file=.env indexer/inventory.js"
+    "inventory": "node --env-file=.env indexer/inventory.js",
+    "index": "node --env-file=.env indexer/build-index.js",
+    "search": "node indexer/search.js"
   },
   "devDependencies": {
     "marked": "18.1.0"

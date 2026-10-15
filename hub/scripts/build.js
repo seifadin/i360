@@ -2,9 +2,10 @@
 //
 //   npm run build
 //
-// From src/reader.src.html it fills three placeholders:
+// From src/reader.src.html it fills four placeholders:
 //   /*@@MARKED@@*/       marked (pinned in package.json), inlined so the
 //                        reader works offline and can't change under us
+//   /*@@BOOK_FORMAT@@*/  src/book-format.js, the book format shared with the CSE indexer
 //   /*@@SEARCH_CORE@@*/  src/search-core.js, the search shared with the CSE
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
@@ -35,10 +36,12 @@ function fill(html, placeholder, value) {
 const marked = read(join(root, 'node_modules/marked/lib/marked.umd.js'))
   .replace('//# sourceMappingURL=marked.umd.js.map', '')
   .trim();
+const bookFormat = read(join(root, 'src/book-format.js'));
 const searchCore = read(join(root, 'src/search-core.js'));
 
 let html = read(join(root, 'src/reader.src.html'));
 html = fill(html, '/*@@MARKED@@*/', inlineScript(marked, 'marked'));
+html = fill(html, '/*@@BOOK_FORMAT@@*/', inlineScript(bookFormat, 'book-format.js'));
 html = fill(html, '/*@@SEARCH_CORE@@*/', inlineScript(searchCore, 'search-core.js'));
 
 // Only these inline scripts may run; no external scripts, plugins or
