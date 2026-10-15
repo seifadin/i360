@@ -1,7 +1,2 @@
-# Firebase CLI cache and logs
-.firebase/
-firebase-debug.log*
-
-# Tools and OS files
 node_modules/
-.DS_Store
+.firebase/

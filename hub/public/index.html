@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-dYgCn6osd2GxjnnyBDvYMzJtLreMEw4us4pTapp4KPk='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-nVWQhVK7p/zUN5KrJ4zpSNETEm993J4GDhQw2290JbY=' 'sha256-k9eE/ehfgo1u4Tfbz9gEGDB0LKXAOTtZhPHNQvw66MQ='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -937,6 +937,147 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
     <div class="pages-wrapper" id="pages-wrapper"></div>
   </main>
+
+  <!-- Shared search (src/search-core.js), inlined at build time -->
+  <script>/* i360 search core — shared by the Markdown Reader, the i360 CSE page and
+   the CSE indexer, so all three find exactly the same matches.
+
+   No page code here: a page is fed in as text pieces (paragraph breaks,
+   printed line breaks, text runs). The reader feeds its rendered page; the
+   indexer feeds a book file. Works as a plain <script> (window.SearchCore)
+   and as a Node module (require / import).
+
+   Default matching ignores diacritics, tatweel and Quranic marks, treats
+   أ/إ/آ/ٱ/ٲ/ٳ as ا, ى/ی/ئ as ي, ة as ه, ؤ as و, ک as ك, and Eastern or
+   Persian digits as Western. "Exact" compares letters and marks exactly
+   (only invisible marks are skipped). "Word" skips matches inside a longer
+   word. Matches never cross from one paragraph into the next; a printed
+   line break counts as a space. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.SearchCore = factory();
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const DROP_RE = /[ؐ-ًؚ-ٰٟۖ-ۭـ​-‏؜]/;
+  const INVISIBLE_RE = /[ـ​-‏؜]/;
+  const WORD_CHAR_RE = /[\p{L}\p{N}\p{M}]/u;
+  const LETTER_MAP = {
+    'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ٲ': 'ا', 'ٳ': 'ا',
+    'ى': 'ي', 'ی': 'ي', 'ئ': 'ي', 'ة': 'ه', 'ؤ': 'و', 'ک': 'ك'
+  };
+
+  // One character as search sees it: '' when it's skipped.
+  function normChar(c, exact) {
+    if (exact ? INVISIBLE_RE.test(c) : DROP_RE.test(c)) return '';
+    if (!exact && LETTER_MAP[c]) return LETTER_MAP[c];
+    const code = c.charCodeAt(0);
+    if (code >= 0x0660 && code <= 0x0669) return String(code - 0x0660);
+    if (code >= 0x06F0 && code <= 0x06F9) return String(code - 0x06F0);
+    if (/\s/.test(c)) return ' ';
+    const lower = c.toLowerCase();
+    return lower.length === 1 ? lower : c;
+  }
+
+  // A mark that search ignores by default (used to extend a highlight over
+  // the diacritics sitting on its last letter).
+  function isDropChar(c) {
+    return DROP_RE.test(c);
+  }
+
+  function normalizeQuery(q, exact) {
+    let out = '';
+    for (const c of q) {
+      const n = normChar(c, exact);
+      if (n === ' ' && (out === '' || out.endsWith(' '))) continue;
+      out += n;
+    }
+    return out.trim();
+  }
+
+  /* A searchable page, built piece by piece.
+     page.norm   — normalized text ('\n' between paragraphs)
+     page.oNode  — for each norm char: index of its text run (-1 = break)
+     page.oOff   — for each norm char: offset inside that run
+     page.orig   — original text, runs joined ('\n' between paragraphs)
+     page.nodes  — the caller's reference for each run (a DOM node, …)
+     page.nodeStart — where each run starts in orig */
+  function createPage(exact) {
+    const page = { nodes: [], nodeStart: [], orig: '', norm: '', oNode: [], oOff: [] };
+    return {
+      page,
+      // Start a new paragraph: matches never cross it.
+      paragraph() {
+        if (page.norm && !page.norm.endsWith('\n')) { page.norm += '\n'; page.oNode.push(-1); page.oOff.push(-1); }
+        if (page.orig) page.orig += '\n';
+      },
+      // A printed line break (<br>): read as a space.
+      lineBreak() {
+        if (page.norm && !page.norm.endsWith(' ') && !page.norm.endsWith('\n')) { page.norm += ' '; page.oNode.push(-1); page.oOff.push(-1); }
+        page.orig += ' ';
+      },
+      text(v, ref) {
+        const ni = page.nodes.length;
+        page.nodes.push(ref);
+        page.nodeStart.push(page.orig.length);
+        page.orig += v;
+        for (let k = 0; k < v.length; k++) {
+          const n = normChar(v[k], exact);
+          if (!n) continue;
+          if (n === ' ' && (page.norm === '' || page.norm.endsWith(' ') || page.norm.endsWith('\n'))) continue;
+          page.norm += n;
+          page.oNode.push(ni);
+          page.oOff.push(k);
+        }
+      }
+    };
+  }
+
+  // q: a normalized query (normalizeQuery). Returns [{ page, s, e }] with
+  // s/e as positions in page.norm, at most opts.max matches.
+  function findMatches(pages, q, opts) {
+    const word = !!(opts && opts.word);
+    const max = (opts && opts.max) || Infinity;
+    const matches = [];
+    if (!q) return matches;
+    outer:
+    for (const page of pages) {
+      let from = 0;
+      for (;;) {
+        const i = page.norm.indexOf(q, from);
+        if (i < 0) break;
+        from = i + 1;
+        if (word) {
+          const before = page.norm[i - 1];
+          const after = page.norm[i + q.length];
+          if ((before && WORD_CHAR_RE.test(before)) || (after && WORD_CHAR_RE.test(after))) continue;
+        }
+        matches.push({ page, s: i, e: i + q.length });
+        from = i + q.length;
+        if (matches.length >= max) break outer;
+      }
+    }
+    return matches;
+  }
+
+  // The original text around a match: { before, hit, after }.
+  function snippet(m, chars) {
+    const p = m.page;
+    const a = p.nodeStart[p.oNode[m.s]] + p.oOff[m.s];
+    const b = p.nodeStart[p.oNode[m.e - 1]] + p.oOff[m.e - 1] + 1;
+    const from = Math.max(0, a - chars);
+    const to = Math.min(p.orig.length, b + chars);
+    const clean = (s) => s.replace(/\s+/g, ' ');
+    return {
+      before: (from > 0 ? '…' : '') + clean(p.orig.slice(from, a)),
+      hit: clean(p.orig.slice(a, b)),
+      after: clean(p.orig.slice(b, to)) + (to < p.orig.length ? '…' : '')
+    };
+  }
+
+  return { VERSION: 1, normChar, isDropChar, normalizeQuery, createPage, findMatches, snippet };
+}));
+</script>
 
   <script>
   'use strict';
@@ -2764,87 +2905,37 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   /* ================================================================
      Search
-     Default: ignores diacritics, tatweel and Quranic marks, treats
-     أ/إ/آ/ٱ as ا, ى as ي, ة as ه, ؤ as و, ئ as ي, and Eastern digits as
-     Western. "Match diacritics" compares letters and marks exactly.
-     "Whole word" skips matches inside a longer word. Works across bold
-     and other formatting inside a paragraph. Highlights use the CSS
-     Custom Highlight API: the page DOM is never changed.
+     The matching rules live in src/search-core.js (SearchCore), shared
+     with the i360 CSE page and its indexer, so all of them find exactly
+     the same matches. This part feeds the rendered page to it and shows
+     the results. Works across bold and other formatting inside a
+     paragraph. Highlights use the CSS Custom Highlight API: the page DOM
+     is never changed.
      ================================================================ */
-  const SEARCH_DROP_RE = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640\u200B-\u200F\u061C]/;
-  const INVISIBLE_RE = /[\u0640\u200B-\u200F\u061C]/;
-  const WORD_CHAR_RE = /[\p{L}\p{N}\p{M}]/u;
-  const SEARCH_MAP = {
-    'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ٲ': 'ا', 'ٳ': 'ا',
-    'ى': 'ي', 'ی': 'ي', 'ئ': 'ي', 'ة': 'ه', 'ؤ': 'و', 'ک': 'ك'
-  };
-
-  function normChar(c, exact) {
-    if (exact ? INVISIBLE_RE.test(c) : SEARCH_DROP_RE.test(c)) return '';
-    if (!exact && SEARCH_MAP[c]) return SEARCH_MAP[c];
-    const code = c.charCodeAt(0);
-    if (code >= 0x0660 && code <= 0x0669) return String(code - 0x0660);
-    if (code >= 0x06F0 && code <= 0x06F9) return String(code - 0x06F0);
-    if (/\s/.test(c)) return ' ';
-    const lower = c.toLowerCase();
-    return lower.length === 1 ? lower : c;
-  }
-
-  function normalizeQuery(q, exact) {
-    let out = '';
-    for (const c of q) {
-      const n = normChar(c, exact);
-      if (n === ' ' && (out === '' || out.endsWith(' '))) continue;
-      out += n;
-    }
-    return out.trim();
-  }
-
+  // Each page as text pieces for the shared core: a new paragraph wherever
+  // the text moves into another block (matches never cross it), a printed
+  // line break (<br>) as a space, and every text node as a run whose
+  // reference is the node itself (for highlighting).
   function buildSearchIndex(exact) {
     const pages = [];
     state.sheets.forEach((sheet, idx) => {
       const root = sheet.querySelector('.page-content');
-      const nodes = [];
-      const nodeStart = [];
-      let orig = '';
-      let norm = '';
-      const oNode = [];
-      const oOff = [];
+      const b = SearchCore.createPage(exact);
       let lastBlock = null;
-      // Elements are visited too, only so that a printed line break (<br>)
-      // counts as a space: a phrase wrapped onto the next line is still found.
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
       let node;
       while ((node = walker.nextNode())) {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.tagName === 'BR') {
-            if (norm && !norm.endsWith(' ') && !norm.endsWith('\n')) { norm += ' '; oNode.push(-1); oOff.push(-1); }
-            orig += ' ';
-          }
+          if (node.tagName === 'BR') b.lineBreak();
           continue;
         }
         const block = node.parentElement ? node.parentElement.closest(BLOCK_SEL) : null;
-        if (block !== lastBlock) {
-          // Matches never cross from one paragraph into the next.
-          if (norm && !norm.endsWith('\n')) { norm += '\n'; oNode.push(-1); oOff.push(-1); }
-          if (orig) orig += '\n';
-          lastBlock = block;
-        }
-        const ni = nodes.length;
-        nodes.push(node);
-        nodeStart.push(orig.length);
-        const v = node.nodeValue;
-        orig += v;
-        for (let k = 0; k < v.length; k++) {
-          const n = normChar(v[k], exact);
-          if (!n) continue;
-          if (n === ' ' && (norm === '' || norm.endsWith(' ') || norm.endsWith('\n'))) continue;
-          norm += n;
-          oNode.push(ni);
-          oOff.push(k);
-        }
+        if (block !== lastBlock) { b.paragraph(); lastBlock = block; }
+        b.text(node.nodeValue, node);
       }
-      pages.push({ sheet, idx, nodes, nodeStart, orig, norm, oNode, oOff });
+      b.page.sheet = sheet;
+      b.page.idx = idx;
+      pages.push(b.page);
     });
     return pages;
   }
@@ -2859,7 +2950,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const endNode = page.nodes[page.oNode[e - 1]];
     let eo = page.oOff[e - 1] + 1;
     // Include diacritics that sit on the last matched letter.
-    while (eo < endNode.nodeValue.length && SEARCH_DROP_RE.test(endNode.nodeValue[eo])) eo++;
+    while (eo < endNode.nodeValue.length && SearchCore.isDropChar(endNode.nodeValue[eo])) eo++;
     return {
       startContainer: page.nodes[page.oNode[s]], startOffset: page.oOff[s],
       endContainer: endNode, endOffset: eo
@@ -2891,30 +2982,13 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   }
 
   function performSearch(rawQuery) {
-    const q = normalizeQuery(rawQuery, search.exact);
+    const q = SearchCore.normalizeQuery(rawQuery, search.exact);
     if (q === search.query) return;
     clearSearch();
     search.query = q;
     if (q.length < SEARCH_MIN_CHARS || state.sheets.length === 0) return;
 
-    const matches = [];
-    outer:
-    for (const page of getIndex()) {
-      let from = 0;
-      for (;;) {
-        const i = page.norm.indexOf(q, from);
-        if (i < 0) break;
-        from = i + 1;
-        if (search.word) {
-          const before = page.norm[i - 1];
-          const after = page.norm[i + q.length];
-          if ((before && WORD_CHAR_RE.test(before)) || (after && WORD_CHAR_RE.test(after))) continue;
-        }
-        matches.push({ page, s: i, e: i + q.length });
-        from = i + q.length;
-        if (matches.length >= SEARCH_MAX_MATCHES) break outer;
-      }
-    }
+    const matches = SearchCore.findMatches(getIndex(), q, { word: search.word, max: SEARCH_MAX_MATCHES });
     search.matches = matches;
     renderResultsList();
     if (matches.length === 0) { updateSearchCountDisplay(); return; }
@@ -2979,21 +3053,6 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     showMatch((search.current + delta + n) % n);
   }
 
-  // Results list: page and a snippet around each match (text nodes only).
-  function snippetFor(m) {
-    const p = m.page;
-    const a = p.nodeStart[p.oNode[m.s]] + p.oOff[m.s];
-    const b = p.nodeStart[p.oNode[m.e - 1]] + p.oOff[m.e - 1] + 1;
-    const from = Math.max(0, a - SNIPPET_CHARS);
-    const to = Math.min(p.orig.length, b + SNIPPET_CHARS);
-    const clean = (s) => s.replace(/\s+/g, ' ');
-    return {
-      before: (from > 0 ? '…' : '') + clean(p.orig.slice(from, a)),
-      hit: clean(p.orig.slice(a, b)),
-      after: clean(p.orig.slice(b, to)) + (to < p.orig.length ? '…' : '')
-    };
-  }
-
   function renderResultsList() {
     searchResults.textContent = '';
     searchResults.hidden = !search.listOpen || search.matches.length === 0;
@@ -3011,7 +3070,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       page.textContent = state.format === 'plain' ? '' : pageLabelText(state.pages[m.page.idx], tr);
       const text = document.createElement('span');
       text.dir = 'auto';
-      const sn = snippetFor(m);
+      const sn = SearchCore.snippet(m, SNIPPET_CHARS);
       const mark = document.createElement('mark');
       mark.textContent = sn.hit;
       text.append(document.createTextNode(sn.before), mark, document.createTextNode(sn.after));
@@ -3088,7 +3147,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     if (e.key === 'Enter') {
       e.preventDefault();
       clearTimeout(search.timer);
-      if (normalizeQuery(searchInput.value, search.exact) !== search.query) performSearch(searchInput.value);
+      if (SearchCore.normalizeQuery(searchInput.value, search.exact) !== search.query) performSearch(searchInput.value);
       else stepMatch(e.shiftKey ? -1 : 1);
     } else if (e.key === 'Escape') {
       e.preventDefault();
