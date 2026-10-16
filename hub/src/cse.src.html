@@ -455,18 +455,8 @@
       const catalog = await fetchData(`b/${buildId}/catalog.json`);
       state.catalog = catalog;
       state.counts = CseView.itemFileCounts(catalog);
-      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), dayMonthYear(catalog.builtAt)));
+      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), String(catalog.builtAt || '').slice(0, 10)));
       return true;
-    }
-
-    // The build's date as day-month-year (16-10-2026), on this device's calendar day.
-    // In Arabic text, digits joined by "-" are reordered (shown 2026-10-16):
-    // a left-to-right isolate (LRI … PDI, invisible) keeps them as written.
-    function dayMonthYear(iso) {
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return '';
-      const two = (n) => String(n).padStart(2, '0');
-      return `\u2066${two(d.getDate())}-${two(d.getMonth() + 1)}-${d.getFullYear()}\u2069`;
     }
 
     function newSearcher() {
