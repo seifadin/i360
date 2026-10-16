@@ -101,18 +101,41 @@
   }
 
   /* ---------------- Groups ----------------
-     The candidate pages, grouped as results are (ScienceMajor_Ar →
-     ScienceIntermediate_Ar, in the app's order). Each intermediate group
-     lists its candidate pages in order, source by source; the page confirms
-     them a step at a time. */
+     The candidate pages, grouped as the app groups sciences: majors in ID
+     order; inside a major, its units — one per ScienceIntermediate_Ar, plus
+     one "direct" unit (name null) for rows without an intermediate — in ID
+     order (an intermediate by its ID, the direct unit by its first minor's
+     ID; IDs compared as numbers, as groupSciences() does). Each unit lists
+     its candidate pages in order, source by source; the page confirms them
+     a step at a time. A source used by several rows shows under each. */
+  const num = (v) => (v === '' || v == null || Number.isNaN(Number(v)) ? Infinity : Number(v));
+
   function candidateGroups(searcher, gps) {
-    const cands = gps.map((gp) => ({ gp, ...searcher.locate(gp) }));
-    return CseIndex.groupResults(cands).map((M) => ({
+    const majors = new Map();
+    for (const gp of gps) {
+      const { source } = searcher.locate(gp);
+      const rows = source.usedBy && source.usedBy.length ? source.usedBy : [{}];
+      const seen = new Set();
+      for (const u of rows) {
+        const mk = u.majorId || '';
+        const ik = u.intermediateId || '';
+        if (!majors.has(mk)) majors.set(mk, { majorId: u.majorId, major: u.major || '—', units: new Map() });
+        const M = majors.get(mk);
+        if (!M.units.has(ik)) {
+          M.units.set(ik, ik
+            ? { name: u.intermediate || M.major, order: num(ik), gps: [] }
+            : { name: null, order: Infinity, gps: [] });
+        }
+        const U = M.units.get(ik);
+        if (!ik) U.order = Math.min(U.order, num(u.minorId));
+        if (seen.has(ik)) continue;   // the same unit twice for one page: list it once
+        seen.add(ik);
+        U.gps.push(gp);
+      }
+    }
+    return [...majors.values()].sort((a, b) => num(a.majorId) - num(b.majorId)).map((M) => ({
       major: M.major,
-      intermediates: M.intermediates.map((I) => ({
-        name: I.intermediate || M.major,
-        gps: I.sources.flatMap((S) => S.pages.map((p) => p.gp))
-      }))
+      units: [...M.units.values()].sort((a, b) => a.order - b.order).map(({ name, gps: list }) => ({ name, gps: list }))
     }));
   }
 

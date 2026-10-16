@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-tBLwtklNZCcAu6D14YrZ1O674lK4FCp3t6a1D68DYx4=' 'sha256-u1MkHMBT4J40K1gxkmixNbchcjTjIO6fwsX2uAxgoXM='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-xZc5zyuq0pYmyiAQl4rMNKlCv+XW56KMgZaqFZ9tcyM=' 'sha256-v3oaLToJCgeyu6KiwcAe4OEOWGJHxrSn1OaPrmX7B/Q='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية i360إ</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -20,30 +20,35 @@
     })();
   </script>
 
-  <!-- Fonts: Cairo (UI), Amiri (book text) -->
+  <!-- Font: Amiri, the i360إ app's font (only 400 and 700 exist) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ---------- Themes (the Reader's colours) ---------- */
+    /* ---------- Themes ----------
+       Light: the i360إ app's colours (i360-instructions.md §7): blue text,
+       ivory surfaces, #EEF2FF hover, green accent, #CBD5E1 lines.
+       Sepia and dark: the Reader's. */
     :root, [data-theme="light"] {
       color-scheme: light;
-      --bg-color: #e2e8f0;
-      --toolbar-bg: #f8fafc;
-      --toolbar-border: #cbd5e1;
-      --panel-bg: #ffffff;
-      --text-color: #1e293b;
-      --heading: #0f172a;
-      --muted: #64748b;
-      --icon-color: #475569;
-      --icon-hover: #0f172a;
-      --hover-bg: #e2e8f0;
-      --active-bg: #dbeafe;
-      --link: #0369a1;
-      --rule: #cbd5e1;
-      --input-bg: #ffffff;
-      --focus: #0284c7;
+      --bg-color: #FAF7F2;
+      --toolbar-bg: #FAF7F2;
+      --toolbar-border: #CBD5E1;
+      --panel-bg: #FAF7F2;
+      --text-color: #0010CF;
+      --heading: #0010CF;
+      --muted: #5A62C9;
+      --icon-color: #0010CF;
+      --icon-hover: #0010CF;
+      --hover-bg: #EEF2FF;
+      --active-bg: #EEF2FF;
+      --link: #2E8B57;
+      --rule: #CBD5E1;
+      --input-bg: #FAF7F2;
+      --focus: #0010CF;
+      --btn-bg: #0010CF;
+      --btn-text: #FAF7F2;
       --banner-bg: #fef2f2;
       --banner-border: #fecaca;
       --banner-text: #991b1b;
@@ -66,6 +71,8 @@
       --rule: #d6c7a6;
       --input-bg: #fffaf0;
       --focus: #a16207;
+      --btn-bg: #a16207;
+      --btn-text: #fffaf0;
       --banner-bg: #f8e3d6;
       --banner-border: #e8c0a8;
       --banner-text: #7f2d12;
@@ -88,6 +95,8 @@
       --rule: #334155;
       --input-bg: #0f172a;
       --focus: #38bdf8;
+      --btn-bg: #38bdf8;
+      --btn-text: #0b1220;
       --banner-bg: #3b0d0d;
       --banner-border: #7f1d1d;
       --banner-text: #fecaca;
@@ -100,7 +109,8 @@
     [hidden] { display: none !important; }
 
     body {
-      font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Amiri', 'Traditional Arabic', serif;
+      font-size: 1.05rem;
       background-color: var(--bg-color);
       color: var(--text-color);
       min-height: 100vh;
@@ -148,7 +158,7 @@
       width: 1.15rem; height: 1.15rem;
       stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
     }
-    .numerals-btn { font-weight: 600; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
+    .numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
 
     /* ---------- Search ---------- */
     main { width: var(--page-w); max-width: 100%; margin: 0 auto; padding: var(--gap) 1rem calc(var(--gap) + env(safe-area-inset-bottom)); }
@@ -163,7 +173,7 @@
       border-radius: 0.5rem;
       background: var(--input-bg);
       color: var(--text-color);
-      font-family: 'Amiri', 'Cairo', serif;
+      font-family: inherit;
       font-size: 1.15rem;
       outline: none;
     }
@@ -173,14 +183,13 @@
       padding: 0 1.1rem;
       border: none;
       border-radius: 0.5rem;
-      background: var(--focus);
-      color: #fff;
+      background: var(--btn-bg);
+      color: var(--btn-text);
       font-family: inherit;
       font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
     }
-    [data-theme="dark"] .search-btn { color: #0b1220; }
     .search-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 40%, transparent); }
 
     .options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
@@ -198,7 +207,7 @@
       font-size: 0.85rem;
       cursor: pointer;
     }
-    .chip[aria-pressed="true"] { background: var(--active-bg); border-color: var(--focus); color: var(--heading); font-weight: 600; }
+    .chip[aria-pressed="true"] { background: var(--active-bg); border-color: var(--focus); color: var(--heading); font-weight: 700; }
     .chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
     .chip-box { width: 0.9rem; height: 0.9rem; border: 1.5px solid currentColor; border-radius: 0.2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1; }
     .chip[aria-pressed="true"] .chip-box::after { content: '✓'; }
@@ -215,40 +224,47 @@
 
     .about { margin-top: 2rem; color: var(--muted); font-size: 0.85rem; line-height: 1.9; }
 
-    /* ---------- Results ---------- */
-    .major { margin-top: 1.5rem; }
-    .major-head { display: flex; align-items: baseline; gap: 0.5rem; font-size: 1.15rem; font-weight: 700; color: var(--heading); border-bottom: 2px solid var(--rule); padding-bottom: 0.2rem; }
-    .count { font-size: 0.8rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+    /* ---------- Results ----------
+       As in the app: each major opens and closes; rows without an
+       intermediate sit directly under it; each intermediate opens and
+       closes inside it. */
+    .results-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 1rem; }
+    .results-bar .status { margin-top: 0; }
+    .bar-btns { display: flex; gap: 0.4rem; }
+    .count { font-size: 0.8rem; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-    details.inter { margin-top: 0.6rem; background: var(--panel-bg); border: 1px solid var(--toolbar-border); border-radius: 0.5rem; }
-    details.inter > summary {
+    details.major { margin-top: 0.85rem; background: var(--panel-bg); border: 1px solid var(--toolbar-border); border-radius: 0.5rem; }
+    details.inter { margin-top: 0.6rem; border: 1px solid var(--toolbar-border); border-radius: 0.5rem; }
+    details.major > summary, details.inter > summary {
       list-style: none;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.55rem 0.85rem;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--heading);
       user-select: none;
     }
-    details.inter > summary::-webkit-details-marker { display: none; }
-    details.inter > summary::before { content: '◂'; color: var(--muted); font-size: 0.8rem; transition: transform 0.15s; }
-    details.inter[open] > summary::before { transform: rotate(-90deg); }
-    details.inter > summary:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); border-radius: 0.5rem; }
-    details.inter.empty > summary { color: var(--muted); font-weight: 400; }
+    details.major > summary { font-size: 1.2rem; }
+    details.major > summary:hover, details.inter > summary:hover { background: var(--hover-bg); border-radius: 0.5rem; }
+    details > summary::-webkit-details-marker { display: none; }
+    details.major > summary::before, details.inter > summary::before { content: '◂'; color: var(--muted); font-size: 0.8rem; transition: transform 0.15s; }
+    details.major[open] > summary::before, details.inter[open] > summary::before { transform: rotate(-90deg); }
+    details.major > summary:focus-visible, details.inter > summary:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); border-radius: 0.5rem; }
+    .major-body { padding: 0 0.85rem 0.75rem; }
     .inter-body { padding: 0 0.85rem 0.75rem; }
 
     .source { padding-top: 0.6rem; }
     .source + .source { border-top: 1px solid var(--rule); margin-top: 0.4rem; }
     .source-name { font-weight: 700; color: var(--heading); font-size: 0.95rem; }
     .source-name .sep { color: var(--muted); font-weight: 400; margin: 0 0.3rem; }
-    .source-name .file { font-weight: 600; }
+    .source-name .file { font-weight: 700; }
 
     .hit { display: block; margin-top: 0.35rem; padding: 0.35rem 0.5rem; border-radius: 0.375rem; color: inherit; text-decoration: none; }
     .hit:hover { background: var(--hover-bg); }
     .hit:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
-    .hit-meta { display: flex; gap: 0.6rem; font-size: 0.8rem; color: var(--link); font-weight: 600; }
+    .hit-meta { display: flex; gap: 0.6rem; font-size: 0.8rem; color: var(--link); font-weight: 700; }
     .hit-meta .more-spots { color: var(--muted); font-weight: 400; }
     .hit-text { font-family: 'Amiri', serif; font-size: 1.08rem; line-height: 1.9; }
     .hit-text mark { background: var(--highlight-bg); color: inherit; border-radius: 0.15rem; padding: 0 0.1rem; }
@@ -257,7 +273,7 @@
     .more-btn {
       font-family: inherit;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--link);
       background: transparent;
       border: 1px solid var(--toolbar-border);
@@ -288,7 +304,13 @@
       <button class="chip" id="opt-word" type="button" aria-pressed="false" title="تجاهل النتائج التي تقع داخل كلمة أطول"><span class="chip-box"></span>كلمة كاملة</button>
     </div>
 
-    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="results-bar">
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="bar-btns" id="bar-btns" hidden>
+        <button class="more-btn" id="btn-expand" type="button">توسيع الكل</button>
+        <button class="more-btn" id="btn-collapse" type="button">طي الكل</button>
+      </div>
+    </div>
     <div id="results"></div>
     <div class="about" id="about"></div>
   </main>
@@ -836,18 +858,41 @@
   }
 
   /* ---------------- Groups ----------------
-     The candidate pages, grouped as results are (ScienceMajor_Ar →
-     ScienceIntermediate_Ar, in the app's order). Each intermediate group
-     lists its candidate pages in order, source by source; the page confirms
-     them a step at a time. */
+     The candidate pages, grouped as the app groups sciences: majors in ID
+     order; inside a major, its units — one per ScienceIntermediate_Ar, plus
+     one "direct" unit (name null) for rows without an intermediate — in ID
+     order (an intermediate by its ID, the direct unit by its first minor's
+     ID; IDs compared as numbers, as groupSciences() does). Each unit lists
+     its candidate pages in order, source by source; the page confirms them
+     a step at a time. A source used by several rows shows under each. */
+  const num = (v) => (v === '' || v == null || Number.isNaN(Number(v)) ? Infinity : Number(v));
+
   function candidateGroups(searcher, gps) {
-    const cands = gps.map((gp) => ({ gp, ...searcher.locate(gp) }));
-    return CseIndex.groupResults(cands).map((M) => ({
+    const majors = new Map();
+    for (const gp of gps) {
+      const { source } = searcher.locate(gp);
+      const rows = source.usedBy && source.usedBy.length ? source.usedBy : [{}];
+      const seen = new Set();
+      for (const u of rows) {
+        const mk = u.majorId || '';
+        const ik = u.intermediateId || '';
+        if (!majors.has(mk)) majors.set(mk, { majorId: u.majorId, major: u.major || '—', units: new Map() });
+        const M = majors.get(mk);
+        if (!M.units.has(ik)) {
+          M.units.set(ik, ik
+            ? { name: u.intermediate || M.major, order: num(ik), gps: [] }
+            : { name: null, order: Infinity, gps: [] });
+        }
+        const U = M.units.get(ik);
+        if (!ik) U.order = Math.min(U.order, num(u.minorId));
+        if (seen.has(ik)) continue;   // the same unit twice for one page: list it once
+        seen.add(ik);
+        U.gps.push(gp);
+      }
+    }
+    return [...majors.values()].sort((a, b) => num(a.majorId) - num(b.majorId)).map((M) => ({
       major: M.major,
-      intermediates: M.intermediates.map((I) => ({
-        name: I.intermediate || M.major,
-        gps: I.sources.flatMap((S) => S.pages.map((p) => p.gp))
-      }))
+      units: [...M.units.values()].sort((a, b) => a.order - b.order).map(({ name, gps: list }) => ({ name, gps: list }))
     }));
   }
 
@@ -898,6 +943,7 @@
     const btnExact = $('opt-exact'), btnWord = $('opt-word');
     const btnNumerals = $('btn-numerals'), btnTheme = $('btn-theme');
     const statusEl = $('status'), resultsEl = $('results'), aboutEl = $('about');
+    const barEl = $('bar-btns');
 
     const ICON = {
       system: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>',
@@ -924,7 +970,6 @@
       exactTitle: 'عدد الصفحات المطابقة',
       more: 'المزيد',
       checking: 'جارٍ الفحص…',
-      noneInGroup: 'لا نتائج في هذه المجموعة.',
       spots: (n) => `مواضع: ${n}`,
       openTitle: 'فتح في المصدر',
       about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
@@ -1051,6 +1096,7 @@
       const run = ++state.run;
       const q = raw.trim();
       resultsEl.textContent = '';
+      barEl.hidden = true;
       syncAddress(q, push);
       setRobots(q);
       document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية i360إ` : 'البحث في كتب الموسوعة الإسلامية i360إ';
@@ -1084,70 +1130,100 @@
       resultsEl.textContent = '';
       if (gps.length === 0) { setStatus(T.noResults); return; }
 
-      const majors = CseView.candidateGroups(searcher, gps);
       const hits = new Map();   // gp → Promise<hit | null>, shared by groups that list the same source
-      const ctx = { run, q, searcher, opts, hits, groups: [] };
-      for (const M of majors) {
-        const sec = document.createElement('section');
-        sec.className = 'major';
-        const head = document.createElement('h2');
-        head.className = 'major-head';
-        const name = document.createElement('span');
-        name.textContent = M.major;
-        const count = document.createElement('span');
-        count.className = 'count';
-        head.append(name, count);
-        sec.append(head);
-        const majorRef = { count, groups: [] };
-        for (const I of M.intermediates) {
-          const g = makeGroup(ctx, I, majorRef);
-          majorRef.groups.push(g);
-          ctx.groups.push(g);
-          sec.append(g.el);
-        }
-        updateMajor(majorRef);
-        resultsEl.append(sec);
+      const ctx = { run, q, searcher, opts, hits, majors: [], groups: [] };
+      for (const M of CseView.candidateGroups(searcher, gps)) {
+        const m = makeMajor(ctx, M);
+        ctx.majors.push(m);
+        resultsEl.append(m.el);
       }
+      barEl.hidden = false;
       updateSummary(ctx);
       applyNumerals();
 
       // Open groups in order until about one step of results shows.
       let shown = 0;
-      for (const g of ctx.groups) {
-        if (run !== state.run || shown >= CseView.RESULTS_PER_STEP) break;
-        g.el.open = true;
-        await loadMore(ctx, g);
-        shown += g.shown;
+      outer:
+      for (const m of ctx.majors) {
+        for (const g of m.groups) {
+          if (run !== state.run || shown >= CseView.RESULTS_PER_STEP) break outer;
+          m.el.open = true;
+          if (g.details) g.el.open = true;
+          await loadMore(ctx, g);
+          shown += g.shown;
+        }
       }
     }
 
-    function makeGroup(ctx, I, majorRef) {
-      const el = document.createElement('details');
-      el.className = 'inter';
+    // A summary line: name, then its count.
+    function summaryLine(name) {
       const summary = document.createElement('summary');
-      const name = document.createElement('span');
-      name.textContent = I.name;
+      const n = document.createElement('span');
+      n.textContent = name;
       const count = document.createElement('span');
       count.className = 'count';
-      summary.append(name, count);
+      summary.append(n, count);
+      return { summary, count };
+    }
+
+    function makeMajor(ctx, M) {
+      const el = document.createElement('details');
+      el.className = 'major';
+      const { summary, count } = summaryLine(M.major);
       const body = document.createElement('div');
-      body.className = 'inter-body';
+      body.className = 'major-body';
+      el.append(summary, body);
+      const m = { el, count, groups: [] };
+      for (const U of M.units) {
+        const g = makeGroup(ctx, U, m);
+        m.groups.push(g);
+        ctx.groups.push(g);
+        body.append(g.el);
+      }
+      updateMajor(m);
+      // Rows without an intermediate show as soon as the major opens.
+      el.addEventListener('toggle', () => {
+        if (el.open) for (const g of m.groups) if (!g.details && g.next === 0 && !g.loading) loadMore(ctx, g);
+      });
+      return m;
+    }
+
+    // One unit: an intermediate (its own box that opens and closes) or the
+    // rows without one (directly in the major).
+    function makeGroup(ctx, U, m) {
       const list = document.createElement('div');
       const foot = document.createElement('div');
       foot.className = 'group-foot';
-      body.append(list, foot);
-      el.append(summary, body);
-      const g = { el, count, list, foot, gps: I.gps, next: 0, shown: 0, done: false, loading: null, sources: new Map(), majorRef };
+      const details = U.name != null;
+      let el, count = null;
+      if (details) {
+        el = document.createElement('details');
+        el.className = 'inter';
+        const line = summaryLine(U.name);
+        count = line.count;
+        const body = document.createElement('div');
+        body.className = 'inter-body';
+        body.append(list, foot);
+        el.append(line.summary, body);
+      } else {
+        el = document.createElement('div');
+        el.className = 'direct';
+        el.append(list, foot);
+      }
+      const g = { el, details, count, list, foot, gps: U.gps, next: 0, shown: 0, done: false, loading: null, sources: new Map(), major: m };
       setCount(g);
-      el.addEventListener('toggle', () => { if (el.open && g.next === 0 && !g.loading) loadMore(ctx, g); });
+      if (details) el.addEventListener('toggle', () => { if (el.open && g.next === 0 && !g.loading) loadMore(ctx, g); });
       return g;
     }
 
     function setCount(g) {
-      const n = g.done ? g.shown : g.gps.length;
-      g.count.textContent = fmt(g.done ? fmtNum(n) : `≈ ${fmtNum(n)}`);
-      g.count.title = g.done ? T.exactTitle : T.approxTitle;
-      g.el.classList.toggle('empty', g.done && g.shown === 0);
+      if (g.count) {
+        const n = g.done ? g.shown : g.gps.length;
+        g.count.textContent = fmt(g.done ? fmtNum(n) : `≈ ${fmtNum(n)}`);
+        g.count.title = g.done ? T.exactTitle : T.approxTitle;
+      }
+      // A group with no real match disappears once checked.
+      g.el.hidden = g.done && g.shown === 0;
     }
 
     function updateMajor(m) {
@@ -1155,6 +1231,7 @@
       const n = m.groups.reduce((a, g) => a + (g.done ? g.shown : g.gps.length), 0);
       m.count.textContent = fmt(exact ? fmtNum(n) : `≈ ${fmtNum(n)}`);
       m.count.title = exact ? T.exactTitle : T.approxTitle;
+      m.el.hidden = exact && n === 0;
     }
 
     // Pages in several groups are counted once.
@@ -1169,6 +1246,7 @@
         let n = 0;
         for (const gp of pages) if (ctx.confirmed && ctx.confirmed.has(gp)) n++;
         setStatus(n ? T.summary(fmtNum(n), fmtNum(ctx.groups.filter((g) => g.shown).length), true) : T.noResults);
+        if (!n) barEl.hidden = true;
       } else {
         setStatus(T.summary(fmtNum(pages.size), fmtNum(ctx.groups.length), false));
       }
@@ -1213,7 +1291,7 @@
           g.loading = null;
         }
         setCount(g);
-        updateMajor(g.majorRef);
+        updateMajor(g.major);
         updateSummary(ctx);
         drawFoot(ctx, g);
         applyNumerals();
@@ -1223,10 +1301,7 @@
 
     function drawFoot(ctx, g) {
       g.foot.textContent = '';
-      if (g.done) {
-        if (g.shown === 0) g.foot.textContent = T.noneInGroup;
-        return;
-      }
+      if (g.done) return;
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'more-btn'; b.textContent = T.more;
       b.addEventListener('click', () => loadMore(ctx, g));
@@ -1317,6 +1392,13 @@
       state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
       storeSet('theme', state.theme);
       applyTheme();
+    });
+    // Opening a group loads its first step of results, as a tap does.
+    $('btn-expand').addEventListener('click', () => {
+      for (const d of resultsEl.querySelectorAll('details')) d.open = true;
+    });
+    $('btn-collapse').addEventListener('click', () => {
+      for (const d of resultsEl.querySelectorAll('details')) d.open = false;
     });
     window.addEventListener('popstate', () => fromAddress());
 

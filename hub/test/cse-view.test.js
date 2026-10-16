@@ -60,18 +60,24 @@ test('address: shared search, ?data only on this computer', () => {
   assert.equal(CseView.writeAddress({ q: '', exact: true, word: true }), '');
 });
 
-test('candidate groups follow the app order (IDs as numbers: 2.10 before 2.2); a source in two groups is listed in both', () => {
+test('candidate groups follow the app: majors and units in ID order (as numbers), rows without an intermediate directly under the major', () => {
   const cat = {
     sources: [
-      { key: 's1', id: '1', firstPage: 0, pageCount: 3, chunks: [0], usedBy: [{ majorId: '10', major: 'ثقافة', intermediateId: '10.3', intermediate: 'سياسة' }] },
+      { key: 's1', id: '1', firstPage: 0, pageCount: 3, chunks: [0], usedBy: [{ majorId: '10', major: 'ثقافة', intermediateId: '10.3', intermediate: 'سياسة', minorId: '10.3.1' }] },
       { key: 's2', id: '2', firstPage: 3, pageCount: 2, chunks: [0], usedBy: [
-        { majorId: '2', major: 'الفقه', intermediateId: '2.10', intermediate: 'ب' },
-        { majorId: '2', major: 'الفقه', intermediateId: '2.2', intermediate: 'أ' }] }
+        { majorId: '2', major: 'الفقه', intermediateId: '2.10', intermediate: 'ب', minorId: '2.10.1' },
+        { majorId: '2', major: 'الفقه', intermediateId: '2.2', intermediate: 'أ', minorId: '2.2.1' },
+        { majorId: '2', major: 'الفقه', intermediateId: '2.2', intermediate: 'أ', minorId: '2.2.2' }] },
+      { key: 's3', id: '3', firstPage: 5, pageCount: 2, chunks: [0], usedBy: [{ majorId: '2', major: 'الفقه', intermediateId: '', intermediate: '', minorId: '2.15' }] },
+      { key: 's4', id: '4', firstPage: 7, pageCount: 1, chunks: [0], usedBy: [{ majorId: '1', major: 'القرآن', intermediateId: '', intermediate: '', minorId: '1.1' }] }
     ]
   };
   const searcher = CseIndex.createSearcher(cat, () => { throw new Error('no loading here'); });
-  const g = CseView.candidateGroups(searcher, [0, 2, 3, 4]);
-  assert.deepEqual(g.map((M) => M.major), ['الفقه', 'ثقافة']);
-  assert.deepEqual(g[0].intermediates.map((I) => [I.name, I.gps]), [['ب', [3, 4]], ['أ', [3, 4]]]);
-  assert.deepEqual(g[1].intermediates[0].gps, [0, 2]);
+  const g = CseView.candidateGroups(searcher, [0, 2, 3, 4, 5, 7]);
+  assert.deepEqual(g.map((M) => M.major), ['القرآن', 'الفقه', 'ثقافة']);
+  assert.deepEqual(g[0].units, [{ name: null, gps: [7] }], 'no intermediate: directly under the major');
+  assert.deepEqual(g[1].units.map((U) => [U.name, U.gps]), [['ب', [3, 4]], [null, [5]], ['أ', [3, 4]]]);
+  assert.deepEqual(g[1].units.map((U) => U.name), ['ب', null, 'أ'], '2.10 (=2.1) < 2.15 < 2.2, as numbers');
+  assert.deepEqual(g[1].units[2].gps, [3, 4], 'a page used twice in one unit is listed once');
+  assert.deepEqual(g[2].units[0].gps, [0, 2]);
 });
