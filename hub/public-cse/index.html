@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-5UqfENBd4sOevuqZHCtq7y8WHBpJlhcQEGuA9ungE1o='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-ptQR+AGbFpY8++KznlMxp9GwkvQdDc0DCF7CGFTP06A='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية i360إ</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -1064,8 +1064,18 @@
       const catalog = await fetchData(`b/${buildId}/catalog.json`);
       state.catalog = catalog;
       state.counts = CseView.itemFileCounts(catalog);
-      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), String(catalog.builtAt || '').slice(0, 10)));
+      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), dayMonthYear(catalog.builtAt)));
       return true;
+    }
+
+    // The build's date as day-month-year (16-10-2026), on this device's calendar day.
+    // In Arabic text, digits joined by "-" are reordered (shown 2026-10-16):
+    // a left-to-right isolate (LRI … PDI, invisible) keeps them as written.
+    function dayMonthYear(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const two = (n) => String(n).padStart(2, '0');
+      return `\u2066${two(d.getDate())}-${two(d.getMonth() + 1)}-${d.getFullYear()}\u2069`;
     }
 
     function newSearcher() {
