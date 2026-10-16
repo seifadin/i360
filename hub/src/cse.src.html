@@ -222,7 +222,7 @@
     }
     .status .retry { margin-inline-start: 0.5rem; font-family: inherit; font-size: 0.85rem; border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 0.25rem; padding: 0 0.5rem; cursor: pointer; }
 
-    .about { margin-top: 2rem; color: var(--muted); font-size: 0.85rem; line-height: 1.9; }
+    .about { margin-top: 2rem; color: var(--text-color); font-size: 0.85rem; line-height: 1.9; }
 
     /* ---------- Results ----------
        As in the app: each major opens and closes; rows without an
@@ -460,11 +460,13 @@
     }
 
     // The build's date as day-month-year (16-10-2026), on this device's calendar day.
+    // In Arabic text, digits joined by "-" are reordered (shown 2026-10-16):
+    // a left-to-right isolate (LRI … PDI, invisible) keeps them as written.
     function dayMonthYear(iso) {
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return '';
       const two = (n) => String(n).padStart(2, '0');
-      return `${two(d.getDate())}-${two(d.getMonth() + 1)}-${d.getFullYear()}`;
+      return `\u2066${two(d.getDate())}-${two(d.getMonth() + 1)}-${d.getFullYear()}\u2069`;
     }
 
     function newSearcher() {
