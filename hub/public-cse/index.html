@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-rpACOAu5jC3UztS/FOrog0vsn0MX8esgGKz2ji4ZjSo='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-PUQfEn1zR3FeTsojCtpaO/URmYITR+/rU/dFWOflyRw='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -288,8 +288,9 @@
 <body>
   <header class="toolbar">
     <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
-         the إ after "i360" (otherwise it shows as "إi360"). -->
-    <div class="brand">البحث في كتب الموسوعة الإسلامية <bdi dir="ltr">i360إ</bdi></div>
+         the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
+         mark before the إ keeps it there with Eastern digits ("i٣٦٠إ"). -->
+    <div class="brand">البحث في كتب الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></div>
     <div class="tb-end">
       <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
@@ -934,7 +935,7 @@
   'use strict';
   (function () {
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
-    const BRAND = '\u2066i360إ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
+    const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
     const STORE_PREFIX = 'i360cse.';
     const THEMES = ['system', 'light', 'sepia', 'dark'];
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
@@ -1013,12 +1014,15 @@
       btnNumerals.textContent = state.numerals === 'eastern' ? '١٢٣' : '123';
       btnNumerals.title = state.numerals === 'eastern' ? T.numeralsEastern : T.numeralsWestern;
       btnNumerals.setAttribute('aria-label', btnNumerals.title);
-      const walker = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
       const conv = state.numerals === 'eastern' ? toEastern : toWestern;
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        if (n.parentElement && n.parentElement.closest('form')) continue;
-        const v = conv(n.nodeValue);
-        if (v !== n.nodeValue) n.nodeValue = v;
+      // The page and the header's name; not what the visitor typed.
+      for (const root of [document.querySelector('.brand'), document.querySelector('main')]) {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          if (n.parentElement && n.parentElement.closest('form')) continue;
+          const v = conv(n.nodeValue);
+          if (v !== n.nodeValue) n.nodeValue = v;
+        }
       }
     }
 
@@ -1079,7 +1083,8 @@
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return '';
       const two = (n) => String(n).padStart(2, '0');
-      return `\u2066${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}\u2069`;
+      // Left-to-right marks around each "-" hold the parts in place with Eastern digits too.
+      return `\u2066${d.getFullYear()}\u200E-\u200E${two(d.getMonth() + 1)}\u200E-\u200E${two(d.getDate())}\u2069`;
     }
 
     function newSearcher() {
