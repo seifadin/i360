@@ -1,20 +1,24 @@
-// Builds the self-contained reader page: public/index.html.
+// Builds the two self-contained pages:
+//   public/index.html      the Reader    (from src/reader.src.html)
+//   public-cse/index.html  the i360 CSE  (from src/cse.src.html)
 //
 //   npm run build
 //
-// From src/reader.src.html it fills four placeholders:
+// Placeholders, each filled once:
 //   /*@@MARKED@@*/       marked (pinned in package.json), inlined so the
 //                        reader works offline and can't change under us
 //   /*@@BOOK_FORMAT@@*/  src/book-format.js, the book format shared with the CSE indexer
-//   /*@@SEARCH_CORE@@*/  src/search-core.js, the search shared with the CSE
+//   /*@@SEARCH_CORE@@*/  src/search-core.js, the search shared by both pages and the indexer
+//   /*@@CSE_INDEX@@*/    src/cse-index.js, the index format shared with the indexer
+//   /*@@CSE_VIEW@@*/     src/cse-view.js, what the CSE page shows for a result
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
 //                        after everything else is in place
-// Editing public/index.html by hand breaks those hashes: edit src/ and rebuild.
+// Editing the built pages by hand breaks those hashes: edit src/ and rebuild.
 'use strict';
-const { readFileSync, writeFileSync } = require('node:fs');
+const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
 const { createHash } = require('node:crypto');
-const { join } = require('node:path');
+const { join, dirname } = require('node:path');
 
 const root = join(__dirname, '..');
 const read = (p) => readFileSync(p, 'utf8');
@@ -32,37 +36,62 @@ function fill(html, placeholder, value) {
   return html.replace(placeholder, () => value);
 }
 
-// marked's package exports don't list this file, so it's read by path.
-const marked = read(join(root, 'node_modules/marked/lib/marked.umd.js'))
-  .replace('//# sourceMappingURL=marked.umd.js.map', '')
-  .trim();
-const bookFormat = read(join(root, 'src/book-format.js'));
-const searchCore = read(join(root, 'src/search-core.js'));
-
-let html = read(join(root, 'src/reader.src.html'));
-html = fill(html, '/*@@MARKED@@*/', inlineScript(marked, 'marked'));
-html = fill(html, '/*@@BOOK_FORMAT@@*/', inlineScript(bookFormat, 'book-format.js'));
-html = fill(html, '/*@@SEARCH_CORE@@*/', inlineScript(searchCore, 'search-core.js'));
-
-// Only these inline scripts may run; no external scripts, plugins or
-// images; fonts from Google; ?file= may fetch from anywhere.
-const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
-  .map((m) => `'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
-if (/<script\b[^>]*\bsrc=/i.test(html.replace(/<script>[\s\S]*?<\/script>/g, ''))) {
-  throw new Error('external <script src> found: the CSP would block it');
+// Only the page's own inline scripts may run; no external scripts, plugins
+// or images; fonts from Google; fetches only where connectSrc allows.
+function buildPage({ src, out, scripts, connectSrc }) {
+  let html = read(join(root, src));
+  for (const [placeholder, file] of scripts) html = fill(html, placeholder, inlineScript(file.code, file.name));
+  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((m) => `'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
+  if (/<script\b[^>]*\bsrc=/i.test(html.replace(/<script>[\s\S]*?<\/script>/g, ''))) {
+    throw new Error(`${src}: external <script src> found: the CSP would block it`);
+  }
+  const csp = [
+    "default-src 'none'",
+    `script-src ${hashes.join(' ')}`,
+    "style-src 'unsafe-inline' https://fonts.googleapis.com",
+    'font-src https://fonts.gstatic.com',
+    `connect-src ${connectSrc}`,
+    "img-src 'none'",
+    "base-uri 'none'",
+    "form-action 'none'",
+    "object-src 'none'"
+  ].join('; ');
+  html = fill(html, '<!--@@CSP@@-->', `<meta http-equiv="Content-Security-Policy" content="${csp}">`);
+  mkdirSync(dirname(join(root, out)), { recursive: true });
+  writeFileSync(join(root, out), html);
+  console.log(`${out}: ${html.length} chars, ${hashes.length} scripts hashed`);
 }
-const csp = [
-  "default-src 'none'",
-  `script-src ${hashes.join(' ')}`,
-  "style-src 'unsafe-inline' https://fonts.googleapis.com",
-  'font-src https://fonts.gstatic.com',
-  'connect-src *',
-  "img-src 'none'",
-  "base-uri 'none'",
-  "form-action 'none'",
-  "object-src 'none'"
-].join('; ');
-html = fill(html, '<!--@@CSP@@-->', `<meta http-equiv="Content-Security-Policy" content="${csp}">`);
 
-writeFileSync(join(root, 'public/index.html'), html);
-console.log(`public/index.html: ${html.length} chars, ${hashes.length} scripts hashed`);
+const file = (p, name) => ({ code: read(join(root, p)), name: name || p.split('/').pop() });
+
+// marked's package exports don't list this file, so it's read by path.
+const marked = {
+  code: read(join(root, 'node_modules/marked/lib/marked.umd.js')).replace('//# sourceMappingURL=marked.umd.js.map', '').trim(),
+  name: 'marked'
+};
+
+// The Reader: ?file= may fetch from anywhere.
+buildPage({
+  src: 'src/reader.src.html',
+  out: 'public/index.html',
+  scripts: [
+    ['/*@@MARKED@@*/', marked],
+    ['/*@@BOOK_FORMAT@@*/', file('src/book-format.js')],
+    ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')]
+  ],
+  connectSrc: '*'
+});
+
+// The CSE page: reads only the lib site (and, for testing on this computer,
+// a local copy of the build: ?data=http://localhost:…).
+buildPage({
+  src: 'src/cse.src.html',
+  out: 'public-cse/index.html',
+  scripts: [
+    ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')],
+    ['/*@@CSE_INDEX@@*/', file('src/cse-index.js')],
+    ['/*@@CSE_VIEW@@*/', file('src/cse-view.js')]
+  ],
+  connectSrc: 'https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*'
+});

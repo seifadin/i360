@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!--@@CSP@@-->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>البحث في كتب الموسوعة الإسلامية i360إ</title>
+  <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
+
+  <!-- The saved theme, applied before anything is drawn (no flash) -->
+  <script>
+    (function () {
+      var t = 'system';
+      try { t = JSON.parse(localStorage.getItem('i360cse.theme')) || 'system'; } catch (e) { /* default */ }
+      if (t === 'system' || ['light', 'sepia', 'dark'].indexOf(t) < 0) {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Fonts: Cairo (UI), Amiri (book text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Themes (the Reader's colours) ---------- */
+    :root, [data-theme="light"] {
+      color-scheme: light;
+      --bg-color: #e2e8f0;
+      --toolbar-bg: #f8fafc;
+      --toolbar-border: #cbd5e1;
+      --panel-bg: #ffffff;
+      --text-color: #1e293b;
+      --heading: #0f172a;
+      --muted: #64748b;
+      --icon-color: #475569;
+      --icon-hover: #0f172a;
+      --hover-bg: #e2e8f0;
+      --active-bg: #dbeafe;
+      --link: #0369a1;
+      --rule: #cbd5e1;
+      --input-bg: #ffffff;
+      --focus: #0284c7;
+      --banner-bg: #fef2f2;
+      --banner-border: #fecaca;
+      --banner-text: #991b1b;
+      --highlight-bg: #fef08a;
+    }
+    [data-theme="sepia"] {
+      color-scheme: light;
+      --bg-color: #e6dcc6;
+      --toolbar-bg: #f6efdf;
+      --toolbar-border: #d6c7a6;
+      --panel-bg: #fbf5e8;
+      --text-color: #3b2f1e;
+      --heading: #2a2014;
+      --muted: #7a6a50;
+      --icon-color: #6b5a40;
+      --icon-hover: #2a2014;
+      --hover-bg: #ebe0c6;
+      --active-bg: #eadbb8;
+      --link: #8a4b0f;
+      --rule: #d6c7a6;
+      --input-bg: #fffaf0;
+      --focus: #a16207;
+      --banner-bg: #f8e3d6;
+      --banner-border: #e8c0a8;
+      --banner-text: #7f2d12;
+      --highlight-bg: #f5d76e;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-color: #0b1220;
+      --toolbar-bg: #111827;
+      --toolbar-border: #334155;
+      --panel-bg: #111827;
+      --text-color: #e2e8f0;
+      --heading: #f8fafc;
+      --muted: #94a3b8;
+      --icon-color: #cbd5e1;
+      --icon-hover: #ffffff;
+      --hover-bg: #1f2937;
+      --active-bg: #1e3a5f;
+      --link: #7dd3fc;
+      --rule: #334155;
+      --input-bg: #0f172a;
+      --focus: #38bdf8;
+      --banner-bg: #3b0d0d;
+      --banner-border: #7f1d1d;
+      --banner-text: #fecaca;
+      --highlight-bg: #854d0e;
+    }
+
+    :root { --page-w: 50rem; --gap: clamp(0.75rem, 2vw, 1.5rem); }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    body {
+      font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      min-height: 100dvh;
+      line-height: 1.6;
+    }
+
+    /* ---------- Toolbar ---------- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      background-color: var(--toolbar-bg);
+      border-bottom: 1px solid var(--toolbar-border);
+      min-height: 3rem;
+      padding-top: env(safe-area-inset-top);
+      padding-inline: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .brand { flex: 1; min-width: 0; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+
+    .toolbar-btn {
+      background: transparent;
+      border: none;
+      color: var(--icon-color);
+      height: 2rem;
+      min-width: 2rem;
+      padding: 0 0.4rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .toolbar-btn:hover { background-color: var(--hover-bg); color: var(--icon-hover); }
+    .toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+    .toolbar-btn svg {
+      width: 1.15rem; height: 1.15rem;
+      stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
+    }
+    .numerals-btn { font-weight: 600; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
+
+    /* ---------- Search ---------- */
+    main { width: var(--page-w); max-width: 100%; margin: 0 auto; padding: var(--gap) 1rem calc(var(--gap) + env(safe-area-inset-bottom)); }
+
+    .search-form { display: flex; gap: 0.5rem; }
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      height: 2.75rem;
+      padding: 0 0.85rem;
+      border: 1px solid var(--toolbar-border);
+      border-radius: 0.5rem;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-family: 'Amiri', 'Cairo', serif;
+      font-size: 1.15rem;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent); }
+    .search-btn {
+      height: 2.75rem;
+      padding: 0 1.1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: var(--focus);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    [data-theme="dark"] .search-btn { color: #0b1220; }
+    .search-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 40%, transparent); }
+
+    .options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      height: 2rem;
+      padding: 0 0.75rem;
+      border: 1px solid var(--toolbar-border);
+      border-radius: 999px;
+      background: var(--panel-bg);
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .chip[aria-pressed="true"] { background: var(--active-bg); border-color: var(--focus); color: var(--heading); font-weight: 600; }
+    .chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+    .chip-box { width: 0.9rem; height: 0.9rem; border: 1.5px solid currentColor; border-radius: 0.2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1; }
+    .chip[aria-pressed="true"] .chip-box::after { content: '✓'; }
+
+    .status { margin-top: 1rem; color: var(--muted); font-size: 0.9rem; min-height: 1.5rem; }
+    .status.error {
+      background: var(--banner-bg);
+      border: 1px solid var(--banner-border);
+      color: var(--banner-text);
+      border-radius: 0.375rem;
+      padding: 0.6rem 0.9rem;
+    }
+    .status .retry { margin-inline-start: 0.5rem; font-family: inherit; font-size: 0.85rem; border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 0.25rem; padding: 0 0.5rem; cursor: pointer; }
+
+    .about { margin-top: 2rem; color: var(--muted); font-size: 0.85rem; line-height: 1.9; }
+
+    /* ---------- Results ---------- */
+    .major { margin-top: 1.5rem; }
+    .major-head { display: flex; align-items: baseline; gap: 0.5rem; font-size: 1.15rem; font-weight: 700; color: var(--heading); border-bottom: 2px solid var(--rule); padding-bottom: 0.2rem; }
+    .count { font-size: 0.8rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    details.inter { margin-top: 0.6rem; background: var(--panel-bg); border: 1px solid var(--toolbar-border); border-radius: 0.5rem; }
+    details.inter > summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--heading);
+      user-select: none;
+    }
+    details.inter > summary::-webkit-details-marker { display: none; }
+    details.inter > summary::before { content: '◂'; color: var(--muted); font-size: 0.8rem; transition: transform 0.15s; }
+    details.inter[open] > summary::before { transform: rotate(-90deg); }
+    details.inter > summary:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); border-radius: 0.5rem; }
+    details.inter.empty > summary { color: var(--muted); font-weight: 400; }
+    .inter-body { padding: 0 0.85rem 0.75rem; }
+
+    .source { padding-top: 0.6rem; }
+    .source + .source { border-top: 1px solid var(--rule); margin-top: 0.4rem; }
+    .source-name { font-weight: 700; color: var(--heading); font-size: 0.95rem; }
+    .source-name .sep { color: var(--muted); font-weight: 400; margin: 0 0.3rem; }
+    .source-name .file { font-weight: 600; }
+
+    .hit { display: block; margin-top: 0.35rem; padding: 0.35rem 0.5rem; border-radius: 0.375rem; color: inherit; text-decoration: none; }
+    .hit:hover { background: var(--hover-bg); }
+    .hit:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+    .hit-meta { display: flex; gap: 0.6rem; font-size: 0.8rem; color: var(--link); font-weight: 600; }
+    .hit-meta .more-spots { color: var(--muted); font-weight: 400; }
+    .hit-text { font-family: 'Amiri', serif; font-size: 1.08rem; line-height: 1.9; }
+    .hit-text mark { background: var(--highlight-bg); color: inherit; border-radius: 0.15rem; padding: 0 0.1rem; }
+
+    .group-foot { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.85rem; }
+    .more-btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--link);
+      background: transparent;
+      border: 1px solid var(--toolbar-border);
+      border-radius: 0.375rem;
+      padding: 0.15rem 0.85rem;
+      cursor: pointer;
+    }
+    .more-btn:hover { background: var(--hover-bg); }
+    .more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+  </style>
+</head>
+<body>
+  <header class="toolbar">
+    <div class="brand">البحث في كتب الموسوعة الإسلامية i360إ</div>
+    <div class="tb-end">
+      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
+      <button class="toolbar-btn" id="btn-theme" type="button"></button>
+    </div>
+  </header>
+
+  <main>
+    <form class="search-form" id="search-form" role="search" autocomplete="off">
+      <input class="search-input" id="q" type="search" name="q" enterkeyhint="search" spellcheck="false" aria-label="نص البحث" placeholder="ابحث في نصوص الكتب…">
+      <button class="search-btn" type="submit">بحث</button>
+    </form>
+    <div class="options">
+      <button class="chip" id="opt-exact" type="button" aria-pressed="false" title="بدون هذا الخيار يُتجاهل التشكيل وتُعامل أ/إ/آ كـ ا، وة كـ ه، وى كـ ي"><span class="chip-box"></span>مطابقة التشكيل</button>
+      <button class="chip" id="opt-word" type="button" aria-pressed="false" title="تجاهل النتائج التي تقع داخل كلمة أطول"><span class="chip-box"></span>كلمة كاملة</button>
+    </div>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div id="results"></div>
+    <div class="about" id="about"></div>
+  </main>
+
+  <script>/*@@SEARCH_CORE@@*/</script>
+  <script>/*@@CSE_INDEX@@*/</script>
+  <script>/*@@CSE_VIEW@@*/</script>
+
+  <script>
+  'use strict';
+  (function () {
+    const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
+    const STORE_PREFIX = 'i360cse.';
+    const THEMES = ['system', 'light', 'sepia', 'dark'];
+    const CONFIRM_BATCH = 8;   // candidate pages checked at once
+
+    const $ = (id) => document.getElementById(id);
+    const form = $('search-form'), input = $('q');
+    const btnExact = $('opt-exact'), btnWord = $('opt-word');
+    const btnNumerals = $('btn-numerals'), btnTheme = $('btn-theme');
+    const statusEl = $('status'), resultsEl = $('results'), aboutEl = $('about');
+
+    const ICON = {
+      system: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>',
+      sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+      sepia: '<svg viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+      moon: '<svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'
+    };
+    const T = {
+      themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
+      themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
+      themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
+      themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
+      numeralsWestern: 'الأرقام: غربية 123 (انقر للتبديل إلى ١٢٣)',
+      numeralsEastern: 'الأرقام: مشرقية ١٢٣ (انقر للتبديل إلى 123)',
+      tooShort: (n) => `اكتب ${n} أحرف على الأقل.`,
+      loadingIndex: 'جارٍ تحميل الفهرس…',
+      searching: 'جارٍ البحث…',
+      noResults: 'لا نتائج.',
+      loadError: 'تعذّر تحميل الفهرس. تحقق من الاتصال ثم أعد المحاولة.',
+      searchError: 'تعذّر إكمال البحث. تحقق من الاتصال ثم أعد المحاولة.',
+      retry: 'إعادة المحاولة',
+      summary: (pages, groups, exact) => `الصفحات: ${exact ? '' : '≈ '}${pages} · المجموعات: ${groups}`,
+      approxTitle: 'عدد تقريبي للصفحات؛ يصبح دقيقًا بعد فحص المجموعة',
+      exactTitle: 'عدد الصفحات المطابقة',
+      more: 'المزيد',
+      checking: 'جارٍ الفحص…',
+      noneInGroup: 'لا نتائج في هذه المجموعة.',
+      spots: (n) => `مواضع: ${n}`,
+      openTitle: 'فتح في المصدر',
+      about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
+    };
+
+    /* ---------------- Saved settings ---------------- */
+    function storeGet(key, fallback) {
+      try {
+        const v = localStorage.getItem(STORE_PREFIX + key);
+        return v == null ? fallback : JSON.parse(v);
+      } catch { return fallback; }
+    }
+    function storeSet(key, value) {
+      try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); } catch { /* not remembered */ }
+    }
+
+    const state = {
+      theme: 'system',
+      numerals: 'western',
+      exact: false,
+      word: false,
+      dataBase: DEFAULT_DATA,
+      catalog: null,
+      counts: null,
+      searcher: null,
+      run: 0          // the current search; older ones stop when it changes
+    };
+
+    /* ---------------- Numerals ---------------- */
+    const toWestern = (s) => String(s)
+      .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+      .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06F0));
+    const toEastern = (s) => toWestern(s).replace(/[0-9]/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+    const fmt = (s) => (state.numerals === 'eastern' ? toEastern(s) : toWestern(s));
+    const fmtNum = (n) => fmt(Number(n).toLocaleString('en-US'));
+
+    // Re-draws every number on the page in the chosen numerals.
+    function applyNumerals() {
+      btnNumerals.textContent = state.numerals === 'eastern' ? '١٢٣' : '123';
+      btnNumerals.title = state.numerals === 'eastern' ? T.numeralsEastern : T.numeralsWestern;
+      btnNumerals.setAttribute('aria-label', btnNumerals.title);
+      const walker = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
+      const conv = state.numerals === 'eastern' ? toEastern : toWestern;
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (n.parentElement && n.parentElement.closest('form')) continue;
+        const v = conv(n.nodeValue);
+        if (v !== n.nodeValue) n.nodeValue = v;
+      }
+    }
+
+    /* ---------------- Theme ---------------- */
+    const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    function applyTheme() {
+      const shown = state.theme === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.theme;
+      document.documentElement.dataset.theme = shown;
+      btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
+      btnTheme.title = { system: T.themeSystem, light: T.themeLight, sepia: T.themeSepia, dark: T.themeDark }[state.theme];
+      btnTheme.setAttribute('aria-label', btnTheme.title);
+    }
+    if (darkQuery) {
+      const follow = () => { if (state.theme === 'system') applyTheme(); };
+      if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else darkQuery.addListener(follow);
+    }
+
+    /* ---------------- Status line ---------------- */
+    function setStatus(text, { error = false, retry = null } = {}) {
+      statusEl.textContent = '';
+      statusEl.classList.toggle('error', error);
+      if (text) statusEl.append(fmt(text));
+      if (retry) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'retry'; b.textContent = T.retry;
+        b.addEventListener('click', retry);
+        statusEl.append(b);
+      }
+    }
+
+    /* ---------------- Data ---------------- */
+    class BuildGone extends Error {}
+
+    async function fetchData(path, kind) {
+      const res = await fetch(state.dataBase + path, path === 'latest.json' ? { cache: 'no-cache' } : {});
+      if (res.status === 404 && path.startsWith('b/')) throw new BuildGone(path);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
+      return kind === 'bin' ? res.arrayBuffer() : res.json();
+    }
+
+    // Reads latest.json and, if the build changed, its catalog.
+    // Returns true when a new catalog was loaded.
+    async function loadCatalog() {
+      const { buildId } = await fetchData('latest.json');
+      if (state.catalog && state.catalog.buildId === buildId) return false;
+      const catalog = await fetchData(`b/${buildId}/catalog.json`);
+      state.catalog = catalog;
+      state.counts = CseView.itemFileCounts(catalog);
+      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), String(catalog.builtAt || '').slice(0, 10)));
+      return true;
+    }
+
+    function newSearcher() {
+      const base = `b/${state.catalog.buildId}/`;
+      return CseIndex.createSearcher(state.catalog, (p) => fetchData(base + p, p.endsWith('.bin') ? 'bin' : 'json'));
+    }
+
+    /* ---------------- Address ---------------- */
+    function syncAddress(q, push) {
+      const s = CseView.writeAddress({ q, exact: state.exact, word: state.word, data: state.dataBase === DEFAULT_DATA ? null : state.dataBase });
+      const url = window.location.pathname + s;
+      if (url === window.location.pathname + window.location.search) return;
+      if (push) history.pushState(null, '', url); else history.replaceState(null, '', url);
+    }
+
+    // Result pages aren't for search engines; the home page is.
+    function setRobots(q) {
+      let m = document.querySelector('meta[name="robots"]');
+      if (q && !m) { m = document.createElement('meta'); m.name = 'robots'; m.content = 'noindex'; document.head.append(m); }
+      if (!q && m) m.remove();
+    }
+
+    /* ---------------- Searching ---------------- */
+    function setOption(btn, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+    async function search(raw, { push = false } = {}) {
+      const run = ++state.run;
+      const q = raw.trim();
+      resultsEl.textContent = '';
+      syncAddress(q, push);
+      setRobots(q);
+      document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية i360إ` : 'البحث في كتب الموسوعة الإسلامية i360إ';
+      if (!q) { setStatus(''); aboutEl.hidden = false; return; }
+      aboutEl.hidden = true;
+      if (SearchCore.normalizeQuery(q, false).length < CseIndex.MIN_QUERY) { setStatus(T.tooShort(CseIndex.MIN_QUERY)); return; }
+
+      try {
+        if (!state.catalog) { setStatus(T.loadingIndex); await loadCatalog(); }
+        if (run !== state.run) return;
+        setStatus(T.searching);
+        await runSearch(run, q);
+      } catch (err) {
+        if (run !== state.run) return;
+        if (err instanceof BuildGone) {
+          // A new build was published while searching: load it and search again, once.
+          try {
+            if (await loadCatalog()) { if (run === state.run) await runSearch(run, q); return; }
+          } catch { /* reported below */ }
+        }
+        resultsEl.textContent = '';
+        setStatus(state.catalog ? T.searchError : T.loadError, { error: true, retry: () => search(input.value) });
+      }
+    }
+
+    async function runSearch(run, q) {
+      const searcher = newSearcher();   // one per search, so memory doesn't grow
+      const opts = { exact: state.exact, word: state.word, snippetChars: 60, maxSnippets: 1 };
+      const gps = await searcher.candidates(q);
+      if (run !== state.run) return;
+      resultsEl.textContent = '';
+      if (gps.length === 0) { setStatus(T.noResults); return; }
+
+      const majors = CseView.candidateGroups(searcher, gps);
+      const hits = new Map();   // gp → Promise<hit | null>, shared by groups that list the same source
+      const ctx = { run, q, searcher, opts, hits, groups: [] };
+      for (const M of majors) {
+        const sec = document.createElement('section');
+        sec.className = 'major';
+        const head = document.createElement('h2');
+        head.className = 'major-head';
+        const name = document.createElement('span');
+        name.textContent = M.major;
+        const count = document.createElement('span');
+        count.className = 'count';
+        head.append(name, count);
+        sec.append(head);
+        const majorRef = { count, groups: [] };
+        for (const I of M.intermediates) {
+          const g = makeGroup(ctx, I, majorRef);
+          majorRef.groups.push(g);
+          ctx.groups.push(g);
+          sec.append(g.el);
+        }
+        updateMajor(majorRef);
+        resultsEl.append(sec);
+      }
+      updateSummary(ctx);
+      applyNumerals();
+
+      // Open groups in order until about one step of results shows.
+      let shown = 0;
+      for (const g of ctx.groups) {
+        if (run !== state.run || shown >= CseView.RESULTS_PER_STEP) break;
+        g.el.open = true;
+        await loadMore(ctx, g);
+        shown += g.shown;
+      }
+    }
+
+    function makeGroup(ctx, I, majorRef) {
+      const el = document.createElement('details');
+      el.className = 'inter';
+      const summary = document.createElement('summary');
+      const name = document.createElement('span');
+      name.textContent = I.name;
+      const count = document.createElement('span');
+      count.className = 'count';
+      summary.append(name, count);
+      const body = document.createElement('div');
+      body.className = 'inter-body';
+      const list = document.createElement('div');
+      const foot = document.createElement('div');
+      foot.className = 'group-foot';
+      body.append(list, foot);
+      el.append(summary, body);
+      const g = { el, count, list, foot, gps: I.gps, next: 0, shown: 0, done: false, loading: null, sources: new Map(), majorRef };
+      setCount(g);
+      el.addEventListener('toggle', () => { if (el.open && g.next === 0 && !g.loading) loadMore(ctx, g); });
+      return g;
+    }
+
+    function setCount(g) {
+      const n = g.done ? g.shown : g.gps.length;
+      g.count.textContent = fmt(g.done ? fmtNum(n) : `≈ ${fmtNum(n)}`);
+      g.count.title = g.done ? T.exactTitle : T.approxTitle;
+      g.el.classList.toggle('empty', g.done && g.shown === 0);
+    }
+
+    function updateMajor(m) {
+      const exact = m.groups.every((g) => g.done);
+      const n = m.groups.reduce((a, g) => a + (g.done ? g.shown : g.gps.length), 0);
+      m.count.textContent = fmt(exact ? fmtNum(n) : `≈ ${fmtNum(n)}`);
+      m.count.title = exact ? T.exactTitle : T.approxTitle;
+    }
+
+    // Pages in several groups are counted once.
+    function updateSummary(ctx) {
+      const pages = new Set();
+      let exact = true;
+      for (const g of ctx.groups) {
+        if (!g.done) exact = false;
+        for (const gp of g.gps) pages.add(gp);
+      }
+      if (exact) {
+        let n = 0;
+        for (const gp of pages) if (ctx.confirmed && ctx.confirmed.has(gp)) n++;
+        setStatus(n ? T.summary(fmtNum(n), fmtNum(ctx.groups.filter((g) => g.shown).length), true) : T.noResults);
+      } else {
+        setStatus(T.summary(fmtNum(pages.size), fmtNum(ctx.groups.length), false));
+      }
+    }
+
+    function confirmPage(ctx, gp) {
+      if (!ctx.hits.has(gp)) {
+        ctx.hits.set(gp, ctx.searcher.confirm([gp], ctx.q, ctx.opts).then((r) => {
+          const hit = r[0] || null;
+          if (hit) (ctx.confirmed || (ctx.confirmed = new Set())).add(gp);
+          return hit;
+        }));
+      }
+      return ctx.hits.get(gp);
+    }
+
+    // Shows the group's next step of results (about RESULTS_PER_STEP pages).
+    function loadMore(ctx, g) {
+      if (g.loading || g.done) return g.loading;
+      g.loading = (async () => {
+        g.foot.textContent = T.checking;
+        let added = 0;
+        try {
+          while (added < CseView.RESULTS_PER_STEP && g.next < g.gps.length) {
+            const batch = g.gps.slice(g.next, g.next + CONFIRM_BATCH);
+            const got = await Promise.all(batch.map((gp) => confirmPage(ctx, gp)));
+            if (ctx.run !== state.run) return;
+            // Stop at exactly one step; pages checked beyond it are kept for «المزيد».
+            for (const hit of got) {
+              if (added >= CseView.RESULTS_PER_STEP) break;
+              g.next++;
+              if (hit) { addHit(ctx, g, hit); added++; }
+            }
+          }
+          g.done = g.next >= g.gps.length;
+        } catch (err) {
+          if (ctx.run !== state.run) return;
+          if (err instanceof BuildGone) { search(input.value); return; }
+          showGroupError(ctx, g);
+          return;
+        } finally {
+          g.loading = null;
+        }
+        setCount(g);
+        updateMajor(g.majorRef);
+        updateSummary(ctx);
+        drawFoot(ctx, g);
+        applyNumerals();
+      })();
+      return g.loading;
+    }
+
+    function drawFoot(ctx, g) {
+      g.foot.textContent = '';
+      if (g.done) {
+        if (g.shown === 0) g.foot.textContent = T.noneInGroup;
+        return;
+      }
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'more-btn'; b.textContent = T.more;
+      b.addEventListener('click', () => loadMore(ctx, g));
+      g.foot.append(b);
+    }
+
+    function showGroupError(ctx, g) {
+      g.foot.textContent = '';
+      g.foot.append(T.searchError);
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'more-btn'; b.textContent = T.retry;
+      b.addEventListener('click', () => loadMore(ctx, g));
+      g.foot.append(b);
+    }
+
+    function sourceBlock(ctx, g, source) {
+      if (g.sources.has(source.key)) return g.sources.get(source.key);
+      const block = document.createElement('div');
+      block.className = 'source';
+      const head = document.createElement('div');
+      head.className = 'source-name';
+      const nm = CseView.sourceName(source, state.counts);
+      const title = document.createElement('span');
+      title.textContent = `«${nm.title}»`;
+      head.append(title);
+      if (nm.file) {
+        const sep = document.createElement('span');
+        sep.className = 'sep'; sep.textContent = '\\';
+        const file = document.createElement('span');
+        file.className = 'file'; file.textContent = `«${nm.file}»`;
+        head.append(sep, file);
+      }
+      block.append(head);
+      g.list.append(block);
+      g.sources.set(source.key, block);
+      return block;
+    }
+
+    function addHit(ctx, g, hit) {
+      g.shown++;
+      const block = sourceBlock(ctx, g, hit.source);
+      const sn = hit.snippets[0];
+      const a = document.createElement('a');
+      a.className = 'hit';
+      a.href = CseView.resultLink(hit, ctx.q, sn ? sn.hit : '');
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.title = T.openTitle;
+      const label = CseView.pageLabel(hit);
+      if (label || hit.count > 1) {
+        const meta = document.createElement('div');
+        meta.className = 'hit-meta';
+        if (label) { const l = document.createElement('span'); l.textContent = label; meta.append(l); }
+        if (hit.count > 1) { const c = document.createElement('span'); c.className = 'more-spots'; c.textContent = T.spots(hit.count); meta.append(c); }
+        a.append(meta);
+      }
+      if (sn) {
+        const t = document.createElement('div');
+        t.className = 'hit-text';
+        const mark = document.createElement('mark');
+        mark.textContent = sn.hit;
+        t.append(sn.before, mark, sn.after);
+        a.append(t);
+      }
+      block.append(a);
+    }
+
+    /* ---------------- Events ---------------- */
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      input.blur();
+      search(input.value, { push: true });
+    });
+    btnExact.addEventListener('click', () => {
+      state.exact = !state.exact; setOption(btnExact, state.exact);
+      if (input.value.trim()) search(input.value);
+    });
+    btnWord.addEventListener('click', () => {
+      state.word = !state.word; setOption(btnWord, state.word);
+      if (input.value.trim()) search(input.value);
+    });
+    btnNumerals.addEventListener('click', () => {
+      state.numerals = state.numerals === 'eastern' ? 'western' : 'eastern';
+      storeSet('numerals', state.numerals);
+      applyNumerals();
+    });
+    btnTheme.addEventListener('click', () => {
+      state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
+      storeSet('theme', state.theme);
+      applyTheme();
+    });
+    window.addEventListener('popstate', () => fromAddress());
+
+    function fromAddress() {
+      const a = CseView.readAddress(window.location.search, window.location.hostname);
+      state.exact = a.exact; state.word = a.word;
+      setOption(btnExact, a.exact); setOption(btnWord, a.word);
+      input.value = a.q;
+      search(a.q);
+    }
+
+    /* ---------------- Start ---------------- */
+    function init() {
+      const theme = storeGet('theme', 'system');
+      state.theme = THEMES.includes(theme) ? theme : 'system';
+      state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
+      applyTheme();
+      applyNumerals();
+      const a = CseView.readAddress(window.location.search, window.location.hostname);
+      if (a.data) state.dataBase = a.data;
+      fromAddress();
+      if (!a.q) {
+        input.focus();
+        // The index details under the search box.
+        loadCatalog().then(applyNumerals).catch(() => { /* shown when a search is made */ });
+      }
+    }
+    init();
+  })();
+  </script>
+</body>
+</html>

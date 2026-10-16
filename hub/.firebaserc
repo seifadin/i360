@@ -5,8 +5,14 @@
   "targets": {
     "i360-md": {
       "hosting": {
-        "md": ["i360-md"]
+        "md": [
+          "i360-md"
+        ],
+        "cse": [
+          "i360-cse"
+        ]
       }
     }
-  }
+  },
+  "etags": {}
 }

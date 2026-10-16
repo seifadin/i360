@@ -1,0 +1,3 @@
+# The search page is for search engines; result pages (?q=…) are not.
+User-agent: *
+Disallow: /*?

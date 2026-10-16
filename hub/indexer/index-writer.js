@@ -38,7 +38,7 @@ function walkFiles(dir) {
   return out;
 }
 
-async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = CHUNK_BYTES, log = () => {} }) {
+async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = CHUNK_BYTES, log = () => {}, extractor = null, books = [] }) {
   const base = join(outDir, 'b', buildId);
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(join(base, 'index'), { recursive: true });
@@ -79,7 +79,8 @@ async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = C
     flush();
     catalogSources.push({
       key, id: s.id, url: s.url, links: s.links, type: s.type, title: s.title || null,
-      fingerprint: s.fingerprint || null, firstPage: pageCount, pageCount: pages.length, chunks, usedBy: s.usedBy
+      fingerprint: s.fingerprint || null, ...(s.how ? { how: s.how } : {}),
+      firstPage: pageCount, pageCount: pages.length, chunks, usedBy: s.usedBy
     });
     pageCount += pages.length;
   }
@@ -114,9 +115,9 @@ async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = C
   // 3. Catalog and the pointer to this build.
   const catalog = {
     format: CseIndex.FORMAT, buildId, builtAt: new Date().toISOString(),
-    searchCore: SearchCore.VERSION, bookFormat: BookFormat.VERSION,
+    searchCore: SearchCore.VERSION, bookFormat: BookFormat.VERSION, extractor,
     shards: CseIndex.SHARDS, minQuery: CseIndex.MIN_QUERY,
-    pageCount, sources: catalogSources, unindexed
+    pageCount, sources: catalogSources, unindexed, books
   };
   writeFileSync(join(base, 'catalog.json'), JSON.stringify(catalog));
   writeFileSync(join(outDir, 'latest.json'), JSON.stringify({ buildId }));

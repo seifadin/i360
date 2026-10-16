@@ -7,6 +7,7 @@
     "test": "node --test test/*.test.js",
     "inventory": "node --env-file=.env indexer/inventory.js",
     "index": "node --env-file=.env indexer/build-index.js",
+    "publish-lib": "npx --yes wrangler@4.145.0 deploy",
     "search": "node indexer/search.js"
   },
   "devDependencies": {

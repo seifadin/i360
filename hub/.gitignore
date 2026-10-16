@@ -2,6 +2,6 @@ node_modules/
 .firebase/
 .env
 indexer/out/
-indexer/cache/
+indexer/work/
 indexer/dist/
 indexer/dist-report.json

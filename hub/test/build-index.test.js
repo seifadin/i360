@@ -134,27 +134,35 @@ test('the indexer builds, reuses unchanged text and keeps old text when a source
   const both = (await search(join(dir, 'dist'), 'علم')).groups.map((g) => g.major);
   assert.deepEqual(both, ['القرآن'], 'groups follow the app order');
 
-  // Second run: nothing changed → no archive download, text reused, and the
-  // storage server isn't even contacted (the md5 comes from the metadata).
+  // Later runs take unchanged text from the previous build (S4: the live
+  // build on lib; here the local one, --previous dist).
+  // Second run: nothing changed → no archive download, text reused, the
+  // storage server isn't even contacted (the md5 comes from the metadata),
+  // and no new build is written.
   state.calls.length = 0;
-  const r2 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'two', log: () => {} });
+  const r2 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'two', log: () => {}, previous: 'dist' });
   assert.equal(state.archiveDownloads, 1);
   assert.ok(r2.report.status.reused.some((s) => s.id.startsWith('archive:')));
   assert.ok(!state.calls.some((u) => u.startsWith('https://archive.org/download/')), 'unchanged book: no download request at all');
-  assert.equal(JSON.parse(readFileSync(join(dir, 'dist', 'latest.json'), 'utf8')).buildId, 'two');
+  assert.equal(r2.changed, false);
+  assert.equal(JSON.parse(readFileSync(join(dir, 'dist', 'latest.json'), 'utf8')).buildId, 'one', 'nothing changed: nothing to publish');
+  assert.ok(!existsSync(join(dir, 'cache')), 'no cache folder');
 
   // The book changed (new md5) but its storage server is down → old text kept, still searchable.
   state.md5 = 'b2'; state.archiveDown = true;
-  const r3 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'three', log: () => {} });
+  const r3 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'three', log: () => {}, previous: 'dist' });
   assert.equal(r3.report.status.stale.length, 1);
   assert.match(r3.report.status.stale[0].reason, /refused|failed/);
   assert.equal((await search(join(dir, 'dist'), 'إنما الأعمال')).hits.length, 1);
 
-  // Back up → downloaded again with the new fingerprint.
+  // Back up → downloaded again with the new fingerprint, and a new build.
   state.archiveDown = false;
-  const r4 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'four', log: () => {} });
+  const r4 = await idx.run({ fetchFn: services(state), key: 'K', rootDir: dir, archivePages: fakeArchive(state), passes: 2, buildId: 'four', log: () => {}, previous: 'dist' });
   assert.ok(r4.report.status.fresh.some((s) => s.id.startsWith('archive:')));
   assert.equal(state.archiveDownloads, 2);
+  assert.equal(r4.changed, true);
+  assert.equal(JSON.parse(readFileSync(join(dir, 'dist', 'latest.json'), 'utf8')).buildId, 'four');
+  assert.equal((await search(join(dir, 'dist'), 'إنما الأعمال')).hits.length, 1);
 });
 
 test('a source that never worked is listed as not indexed, the rest still builds', async () => {

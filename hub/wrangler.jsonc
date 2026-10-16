@@ -1,0 +1,15 @@
+// The lib site (lib.i36o.workers.dev): an assets-only Worker serving the
+// CSE build — books, catalog, index and text. No Worker code.
+// Published by .github/workflows/cse-index.yml (or by hand: npm run publish-lib),
+// which needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+// Headers (CORS, caching) come from indexer/dist/_headers, written with every build.
+{
+  "name": "lib",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./indexer/dist",
+    "not_found_handling": "none"
+  },
+  "workers_dev": true,
+  "preview_urls": false
+}
