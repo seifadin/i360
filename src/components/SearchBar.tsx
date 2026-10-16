@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Search, Bot, Keyboard,
   PencilSparkles, Minimize2, Languages, BookSearch,
@@ -46,7 +46,11 @@ export default function SearchBar() {
   const { resource, findExegesisUrl } = useDataCache()
 
   const [EntityQueryTerm, setEntityQueryTerm] = useState('')
-  const [EntityQueryTermOld, setEntityQueryTermOld] = useState('')
+  // One submit at a time: blocks double-taps while a search/exegesis open is
+  // in flight (translation can take seconds). A ref, not state — two quick
+  // taps can both land before a state update. Repeating a finished search is
+  // allowed, e.g. after closing the results.
+  const busyRef = useRef(false)
 
   // One-shot forced-search-only override — armed by tapping SearchIcon.
   // Bypasses pattern detection for the NEXT submission only, then reverts.
@@ -93,13 +97,20 @@ export default function SearchBar() {
       return
     }
 
+    if (busyRef.current) return
+    busyRef.current = true
+
     const routeToExegesis = !overrideArmed && isExegesisMatch
     if (overrideArmed) setOverrideArmed(false) // one-shot — consumed on submit
 
-    if (routeToExegesis) {
-      await handleExegesisSubmit(trimmed)
-    } else {
-      await handleSearch()
+    try {
+      if (routeToExegesis) {
+        await handleExegesisSubmit(trimmed)
+      } else {
+        await handleSearch()
+      }
+    } finally {
+      busyRef.current = false
     }
   }
 
@@ -132,17 +143,14 @@ export default function SearchBar() {
   // fSearchCustom-equivalent. Choreography: Arabic text → BookSearch while
   // opening, then reverts. Non-Arabic text → Languages while translating,
   // then BookSearch while opening, then reverts. CircleX flash only on a
-  // genuine open failure; EntityQueryTermOld reset on failure so the same
-  // term can be retried. CustomSearch/Huawei_CustomSearch (search engine cx)
+  // genuine open failure. CustomSearch/Huawei_CustomSearch (search engine cx)
   // and Translator (translator endpoint URL) are read from cached i360dbc —
   // wired up this session; both fall back to their VITE_* env var if the
   // Baserow field is empty/not yet loaded.
   async function handleSearch() {
-    // The trimmed value throughout, as handleSubmit validated it — otherwise
-    // "قرآن " and "قرآن" dedupe differently and stray spaces reach the URL.
+    // The trimmed value throughout, as handleSubmit validated it — no stray
+    // spaces in the translation or the search URL.
     if (!trimmed) return
-    if (trimmed === EntityQueryTermOld) return
-    setEntityQueryTermOld(trimmed)
 
     let arabicTerm = trimmed
     if (!isArabic(trimmed)) {
@@ -164,10 +172,7 @@ export default function SearchBar() {
     const opened = await openResource(pseUrl, openCtx)
 
     setSearchPhase(null)
-    if (!opened) {
-      setEntityQueryTermOld('')
-      flashIconFor('openfailed')
-    }
+    if (!opened) flashIconFor('openfailed')
   }
 
   async function handleBot() {
