@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <!--@@CSP@@-->
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>البحث في كتب الموسوعة الإسلامية i360إ</title>
+  <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
 
   <!-- The saved theme, applied before anything is drawn (no flash) -->
@@ -287,7 +287,9 @@
 </head>
 <body>
   <header class="toolbar">
-    <div class="brand">البحث في كتب الموسوعة الإسلامية i360إ</div>
+    <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
+         the إ after "i360" (otherwise it shows as "إi360"). -->
+    <div class="brand">البحث في كتب الموسوعة الإسلامية <bdi dir="ltr">i360إ</bdi></div>
     <div class="tb-end">
       <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
@@ -323,6 +325,7 @@
   'use strict';
   (function () {
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
+    const BRAND = '\u2066i360إ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
     const STORE_PREFIX = 'i360cse.';
     const THEMES = ['system', 'light', 'sepia', 'dark'];
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
@@ -500,7 +503,7 @@
       barEl.hidden = true;
       syncAddress(q, push);
       setRobots(q);
-      document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية i360إ` : 'البحث في كتب الموسوعة الإسلامية i360إ';
+      document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية ${BRAND}` : `البحث في كتب الموسوعة الإسلامية ${BRAND}`;
       if (!q) { setStatus(''); aboutEl.hidden = false; return; }
       aboutEl.hidden = true;
       if (SearchCore.normalizeQuery(q, false).length < CseIndex.MIN_QUERY) { setStatus(T.tooShort(CseIndex.MIN_QUERY)); return; }
