@@ -7,39 +7,56 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
-  <!-- Fonts: Cairo (UI), Amiri (book text), Amiri Quran (Quran quotations) -->
+  <!-- The saved theme, applied before anything is drawn (no flash). "system"
+       (the default) follows the device's light/dark setting. -->
+  <script>
+    (function () {
+      var t = 'system';
+      try { t = JSON.parse(localStorage.getItem('i360reader.theme')) || 'system'; } catch (e) { /* default */ }
+      if (t === 'system' || ['light', 'sepia', 'dark'].indexOf(t) < 0) {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Fonts: Amiri (the i360إ app's font, for everything but Quran quotations; only 400 and 700 exist), Amiri Quran (Quran quotations) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&display=swap" rel="stylesheet">
 
   <!-- marked (pinned, inlined so the reader works offline and can't change under us) -->
   <script>/*@@MARKED@@*/</script>
 
   <style>
-    /* ---------- Themes ---------- */
+    /* ---------- Themes ----------
+       Light: the i360إ app's colours (i360-instructions.md §7): blue text,
+       ivory surfaces, #EEF2FF hover, green accent, #CBD5E1 lines; the
+       desk behind the pages a shade darker so a page stands out.
+       Sepia and dark: the Reader's own. */
     :root, [data-theme="light"] {
       color-scheme: light;
-      --bg-color: #e2e8f0;
-      --toolbar-bg: #f8fafc;
-      --toolbar-border: #cbd5e1;
-      --panel-bg: #ffffff;
-      --text-color: #1e293b;
-      --heading: #0f172a;
-      --muted: #64748b;
-      --icon-color: #475569;
-      --icon-hover: #0f172a;
-      --hover-bg: #e2e8f0;
-      --active-bg: #dbeafe;
-      --link: #0369a1;
-      --page-bg: #ffffff;
-      --page-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --rule: #cbd5e1;
-      --note-text: #334155;
-      --quran: #14532d;
-      --code-bg: #f1f5f9;
-      --quote-bg: #f8fafc;
-      --input-bg: #ffffff;
-      --focus: #0284c7;
+      --bg-color: #ECE7DD;
+      --toolbar-bg: #FAF7F2;
+      --toolbar-border: #CBD5E1;
+      --panel-bg: #FAF7F2;
+      --text-color: #0010CF;
+      --heading: #0010CF;
+      --muted: #5A62C9;
+      --icon-color: #0010CF;
+      --icon-hover: #0010CF;
+      --hover-bg: #EEF2FF;
+      --active-bg: #EEF2FF;
+      --link: #2E8B57;
+      --page-bg: #FAF7F2;
+      --page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
+      --rule: #CBD5E1;
+      --note-text: #2A35C4;
+      --quran: #2E8B57;
+      --code-bg: #F1ECE2;
+      --quote-bg: #F4F0E8;
+      --input-bg: #FAF7F2;
+      --focus: #0010CF;
       --banner-bg: #fef2f2;
       --banner-border: #fecaca;
       --banner-text: #991b1b;
@@ -121,7 +138,7 @@
     [hidden] { display: none !important; }
 
     body {
-      font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Amiri', 'Traditional Arabic', serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       height: 100vh;
@@ -194,9 +211,9 @@
     #btn-bookmark[aria-pressed="true"] svg { fill: var(--ribbon); stroke: var(--ribbon); }
     #btn-bookmark[aria-pressed="true"] { background-color: transparent; }
 
-    .text-size-btn { font-weight: 700; font-size: 1.05rem; font-family: 'Cairo', 'Amiri', sans-serif; gap: 0.05rem; }
-    .text-size-btn small { font-size: 0.75em; font-weight: 600; }
-    .numerals-btn { font-weight: 600; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
+    .text-size-btn { font-weight: 700; font-size: 1.05rem; font-family: 'Amiri', serif; gap: 0.05rem; }
+    .text-size-btn small { font-size: 0.75em; font-weight: 700; }
+    .numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
 
     .divider { width: 1px; height: 1.25rem; background-color: var(--toolbar-border); margin: 0 0.2rem; flex-shrink: 0; }
 
@@ -227,7 +244,7 @@
     .btn-open-file {
       background-color: var(--input-bg);
       border: 1px solid var(--toolbar-border);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     /* "More" menu: on narrow screens the less-used groups move in here */
@@ -355,7 +372,7 @@
     .page-content { flex: 1; display: flex; flex-direction: column; }
     .markdown-body { flex: 1; }
 
-    .page-sheet[dir="rtl"] { direction: rtl; font-family: 'Amiri', 'Cairo', serif; }
+    .page-sheet[dir="rtl"] { direction: rtl; font-family: 'Amiri', serif; }
     .page-sheet[dir="ltr"] { direction: ltr; font-family: 'Amiri', Georgia, serif; }
 
     .page-sheet h1, .page-sheet h2, .page-sheet h3, .page-sheet h4, .page-sheet h5, .page-sheet h6 {
@@ -429,7 +446,7 @@
     .page-sheet p.figure-label {
       display: inline-block;
       text-align: start;
-      font-family: 'Cairo', sans-serif;
+      font-family: 'Amiri', serif;
       font-size: 0.95em;
       color: var(--muted);
       border: 1px dashed var(--rule);
@@ -488,7 +505,7 @@
       align-items: center;
       justify-content: center;
       color: var(--muted);
-      font-family: 'Cairo', sans-serif;
+      font-family: 'Amiri', serif;
       font-size: 0.95rem;
       border: 1px dashed var(--rule);
       border-radius: 4px;
@@ -503,7 +520,7 @@
       padding-top: 0.75rem;
       margin-top: 1rem;
       border-top: 1px dashed var(--rule);
-      font-family: 'Cairo', sans-serif;
+      font-family: 'Amiri', serif;
       font-variant-numeric: tabular-nums;
     }
 
@@ -567,13 +584,13 @@
       border: none;
       color: var(--text-color);
       padding: 0.4rem 0.75rem;
-      font-family: 'Amiri', 'Cairo', serif;
+      font-family: 'Amiri', serif;
       font-size: 0.95rem;
       line-height: 1.6;
       cursor: pointer;
     }
     .search-results button:hover, .search-results li.active button { background: var(--hover-bg); }
-    .search-results .res-page { display: block; font-family: 'Cairo', sans-serif; font-size: 0.72rem; color: var(--muted); }
+    .search-results .res-page { display: block; font-family: 'Amiri', serif; font-size: 0.72rem; color: var(--muted); }
     .search-results mark { background: var(--highlight-bg); color: inherit; border-radius: 2px; }
     .search-results .res-more { padding: 0.4rem 0.75rem; font-size: 0.8rem; color: var(--muted); }
 
@@ -613,7 +630,7 @@
       color: var(--muted);
       font-family: inherit;
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 0.4rem 0.25rem;
       border-radius: 0.375rem;
       cursor: pointer;
@@ -645,14 +662,14 @@
       border: none;
       color: var(--text-color);
       padding: 0.45rem 0.85rem;
-      font-family: 'Amiri', 'Cairo', serif;
+      font-family: 'Amiri', serif;
       font-size: 1rem;
       line-height: 1.5;
       cursor: pointer;
     }
     .panel-item:hover, .panel-item.current { background: var(--hover-bg); }
     .panel-item .item-text { flex: 1; min-width: 0; }
-    .panel-item .item-page { font-family: 'Cairo', sans-serif; font-size: 0.75rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .panel-item .item-page { font-family: 'Amiri', serif; font-size: 0.75rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
     .panel-item.lvl-1, .panel-item.lvl-2 { font-weight: 700; }
     .panel-item.lvl-3 { padding-inline-start: 1.6rem; }
     .panel-item.lvl-4 { padding-inline-start: 2.4rem; font-size: 0.95rem; }
@@ -770,6 +787,9 @@
       <div class="tb-slot" id="slot-view">
         <div class="divider"></div>
         <div class="tb-group" id="group-view">
+          <button class="toolbar-btn" id="btn-scan" type="button" hidden>
+            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h10"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
+          </button>
           <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
           <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
           <button class="toolbar-btn" id="btn-theme" type="button"></button>
@@ -858,9 +878,10 @@
     <div class="pages-wrapper" id="pages-wrapper"></div>
   </main>
 
-  <!-- Shared code, inlined at build time: book format (src/book-format.js) and search (src/search-core.js) -->
+  <!-- Shared code, inlined at build time: book format (src/book-format.js), search (src/search-core.js) and our copies on the lib site (src/lib-copy.js) -->
   <script>/*@@BOOK_FORMAT@@*/</script>
   <script>/*@@SEARCH_CORE@@*/</script>
+  <script>/*@@LIB_COPY@@*/</script>
 
   <script>
   'use strict';
@@ -876,6 +897,7 @@
     sun: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`,
     sepia: `<svg viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>`,
     moon: `<svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>`,
+    system: `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>`,
     trash: `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
   };
 
@@ -893,9 +915,12 @@
       nextPage: (key) => `الصفحة التالية (${key})`,
       dirRTL: 'الاتجاه الحالي: من اليمين لليسار (انقر للتغيير إلى LTR)',
       dirLTR: 'الاتجاه الحالي: من اليسار لليمين (انقر للتغيير إلى RTL)',
+      themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
       themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
       themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
-      themeDark: 'المظهر: داكن (انقر للتبديل إلى فاتح)',
+      themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
+      scan: 'الصفحة الأصلية: صورة هذه الصفحة على archive.org',
+      libLoading: (done, total) => (total ? `جارٍ تحميل الكتاب من مكتبة i360… ${done}/${total}` : 'جارٍ تحميل الكتاب من مكتبة i360…'),
       bookmarkAdd: 'إضافة علامة لهذه الصفحة',
       bookmarkRemove: 'إزالة علامة هذه الصفحة',
       bookmarkAdded: 'أُضيفت العلامة',
@@ -956,9 +981,12 @@
       nextPage: (key) => `Next page (${key})`,
       dirRTL: 'Current Direction: RTL (Click for LTR)',
       dirLTR: 'Current Direction: LTR (Click for RTL)',
+      themeSystem: 'Theme: follows this device (click for light)',
       themeLight: 'Theme: light (click for sepia)',
       themeSepia: 'Theme: sepia (click for dark)',
-      themeDark: 'Theme: dark (click for light)',
+      themeDark: 'Theme: dark (click to follow this device)',
+      scan: 'Original page: the scan of this page on archive.org',
+      libLoading: (done, total) => (total ? `Loading the book from the i360 library… ${done}/${total}` : 'Loading the book from the i360 library…'),
       bookmarkAdd: 'Bookmark this page',
       bookmarkRemove: 'Remove this page’s bookmark',
       bookmarkAdded: 'Bookmark added',
@@ -1017,7 +1045,7 @@
   const ZOOM_MAX = 2.5;
   const ZOOM_STEP = 0.1;
   const TEXT_SCALES = [0.85, 0.92, 1, 1.1, 1.2, 1.32, 1.45, 1.6];
-  const THEMES = ['light', 'sepia', 'dark'];
+  const THEMES = ['system', 'light', 'sepia', 'dark'];   // "system" follows the device's light/dark setting
   // No fixed screen widths: the toolbar layout is chosen by measuring whether it
   // fits (labels, language, digits and fonts all change its width), and the
   // side panel closes after a jump when it covers most of the page.
@@ -1052,7 +1080,8 @@
     notices: [],
     currentIdx: 0,
     numerals: 'western',    // 'western' 123 | 'eastern' ١٢٣ — display only, saved on this device
-    theme: 'light',
+    theme: 'system',
+    libSource: null,        // the catalog entry when the book is our copy from the lib site
     textScale: 1,
     bookKey: null,          // identifies the open book (saved position, bookmarks)
     panelTab: 'contents'
@@ -1088,6 +1117,7 @@
   const btnDirToggle = $('btn-dir-toggle');
   const btnNumerals = $('btn-numerals');
   const btnTheme = $('btn-theme');
+  const btnScan = $('btn-scan');
   const btnBookmark = $('btn-bookmark');
   const btnReading = $('btn-reading');
   const btnExitReading = $('btn-exit-reading');
@@ -1242,6 +1272,8 @@
         }).join(tr.listSep));
       } else if (n.type === 'loadError') {
         line.textContent = tr.loadError(n.message);
+      } else if (n.type === 'libLoading') {
+        line.textContent = tr.libLoading(n.done, n.total);
       } else if (n.type === 'readError') {
         line.textContent = tr.readError;
       }
@@ -1735,11 +1767,30 @@
     const target = isLinkable() ? hashTargetIdx() : -1;
     if (target >= 0) { scrollToSheet(target); updateCounter(true); }
     else restorePosition();
+    updateScanButton();
   }
+
+  /* ================================================================
+     Our copy of a book (from the lib site): its scan on archive.org
+     ================================================================ */
+  function updateScanButton() {
+    const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0));
+    if (btnScan.hidden === !show) return;
+    btnScan.hidden = !show;
+    queueFitToolbar();
+  }
+
+  // Pages of our copy are the scan's pages, in order: position n is scan page n.
+  btnScan.addEventListener('click', () => {
+    const url = LibCopy.scanLink(state.libSource, Math.max(0, state.currentIdx));
+    if (url) window.open(url, '_blank', 'noopener');
+  });
 
   function renderEmpty(notices) {
     saveNow();
     state.bookKey = null;
+    state.libSource = null;
+    updateScanButton();
     clearSearch();
     search.indexes = {};
     state.pages = [];
@@ -1789,8 +1840,9 @@
     btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
     btnNumerals.textContent = state.numerals === 'eastern' ? '١٢٣' : '123';
     setTitle(btnNumerals, state.numerals === 'eastern' ? tr.numeralsEastern : tr.numeralsWestern);
-    btnTheme.innerHTML = state.theme === 'dark' ? ICON.moon : (state.theme === 'sepia' ? ICON.sepia : ICON.sun);
-    setTitle(btnTheme, state.theme === 'dark' ? tr.themeDark : (state.theme === 'sepia' ? tr.themeSepia : tr.themeLight));
+    btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
+    setTitle(btnTheme, { system: tr.themeSystem, light: tr.themeLight, sepia: tr.themeSepia, dark: tr.themeDark }[state.theme]);
+    setTitle(btnScan, tr.scan);
     setTitle(btnReading, tr.reading);
     setTitle(btnExitReading, tr.exitReading);
     setTitle(btnMore, tr.more);
@@ -1861,9 +1913,17 @@
     if (search.query) { const q = searchInput.value; search.query = ''; performSearch(q); }
   });
 
+  const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  const shownTheme = () => (state.theme === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.theme);
+
   function applyTheme() {
-    document.documentElement.dataset.theme = state.theme;
+    document.documentElement.dataset.theme = shownTheme();
     applyLocalization();
+  }
+  // "system" follows the device as it changes (at sunset, say).
+  if (darkQuery) {
+    const follow = () => { if (state.theme === 'system') applyTheme(); };
+    if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else darkQuery.addListener(follow);
   }
 
   btnTheme.addEventListener('click', () => {
@@ -2810,6 +2870,7 @@
       const text = String(reader.result);
       // Name plus the book's opening text: a re-export of the same book keeps
       // its place, two different books with the same file name don't mix.
+      state.libSource = null;
       renderDocument(text, null, `file:${file.name}|${hashText(text.slice(0, 4000))}`);
     };
     reader.onerror = () => renderEmpty([{ type: 'readError' }]);
@@ -2828,9 +2889,9 @@
     statusIcon.innerHTML = isLocal ? ICON.globeX : ICON.globeCheck;
 
     state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
-    const theme = storeGet('theme', 'light');
-    state.theme = THEMES.includes(theme) ? theme : 'light';
-    document.documentElement.dataset.theme = state.theme;
+    const theme = storeGet('theme', 'system');
+    state.theme = THEMES.includes(theme) ? theme : 'system';
+    document.documentElement.dataset.theme = shownTheme();
     const scale = Number(storeGet('textScale', 1));
     search.exact = storeGet('searchExact', false) === true;
     search.word = storeGet('searchWord', false) === true;
@@ -2847,9 +2908,27 @@
     const fileUrl = new URLSearchParams(window.location.search).get('file');
     if (fileUrl) {
       try {
-        const response = await fetch(fileUrl);
+        const link = new URL(fileUrl, window.location.href).href;
+        const key = `url:${link}`;
+        // A book from another site that the CSE has indexed (archive.org,
+        // Wikipedia, …): our page-split copy from the lib site. Our own
+        // books on the lib site, and anything not in the catalog, are read
+        // from the link itself.
+        let copy = null;
+        if (/^https?:/i.test(link) && new URL(link).origin !== window.location.origin && !LibCopy.isLibBook(link)) {
+          try {
+            copy = await LibCopy.open(link, fetch, (done, total) => renderEmpty([{ type: 'libLoading', done, total }]));
+          } catch { copy = null; }   // lib site unreachable: try the link itself
+        }
+        if (copy) {
+          renderEmpty([]);
+          state.libSource = copy.source;
+          renderDocument(copy.text, null, key);
+          return;
+        }
+        const response = await fetch(LibCopy.fetchableUrl(link));
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        renderDocument(await response.text(), null, `url:${new URL(fileUrl, window.location.href).href}`);
+        renderDocument(await response.text(), null, key);
       } catch (err) {
         renderEmpty([{ type: 'loadError', message: err && err.message ? err.message : String(err) }]);
       }

@@ -11,6 +11,7 @@
 //   /*@@SEARCH_CORE@@*/  src/search-core.js, the search shared by both pages and the indexer
 //   /*@@CSE_INDEX@@*/    src/cse-index.js, the index format shared with the indexer
 //   /*@@CSE_VIEW@@*/     src/cse-view.js, what the CSE page shows for a result
+//   /*@@LIB_COPY@@*/     src/lib-copy.js, our copies of indexed books on the lib site (Reader)
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
 //                        after everything else is in place
@@ -78,7 +79,8 @@ buildPage({
   scripts: [
     ['/*@@MARKED@@*/', marked],
     ['/*@@BOOK_FORMAT@@*/', file('src/book-format.js')],
-    ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')]
+    ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')],
+    ['/*@@LIB_COPY@@*/', file('src/lib-copy.js')]
   ],
   connectSrc: '*'
 });

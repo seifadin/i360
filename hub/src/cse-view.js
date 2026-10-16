@@ -76,25 +76,23 @@
   // Characters a text fragment (#:~:text=) needs escaped.
   const fragment = (s) => encodeURIComponent(s).replace(/-/g, '%2D').replace(/,/g, '%2C');
 
+  // The Reader at a page of a book, by its link (our copy is found from
+  // it): #p=<printed page> ("vol:page" in a multi-volume book), or #n=<position>.
+  function readerLink(link, hit) {
+    const at = isLabel(hit.label) ? `#p=${encodeURIComponent(hit.vol ? `${hit.vol}:${hit.label}` : hit.label)}` : `#n=${hit.local + 1}`;
+    return `${READER}?file=${encodeURIComponent(link)}${at}`;
+  }
+
   // Where a result opens. hitText: the matched text as written on the page.
+  // archive.org books and our own books: the Reader at that page (S5; the
+  // scan stays one tap away there). Articles: the original, at the match.
   function resultLink(hit, query, hitText) {
     const s = hit.source;
     const a = archiveParts(s.id);
-    if (a && s.type === 'djvu-txt') {
-      // The BookReader at that page, with the term highlighted. The file
-      // part picks the book inside an item that holds several.
-      const sub = a.file.replace(/_djvu\.txt$/i, '');
-      const parts = ['https://archive.org/details', encodeURIComponent(a.item)];
-      if (sub) parts.push(encodeURIComponent(sub));
-      return `${parts.join('/')}/page/n${hit.local}/mode/1up?q=${encodeURIComponent(query)}`;
-    }
+    if (a && s.type === 'djvu-txt') return readerLink((s.links && s.links[0]) || s.url, hit);
     let u;
     try { u = new URL(s.url); } catch { return s.url; }
-    if (u.hostname === LIB_HOST && u.pathname.startsWith('/books/')) {
-      // Our own book: the Reader at that page.
-      const at = isLabel(hit.label) ? `#p=${encodeURIComponent(hit.vol ? `${hit.vol}:${hit.label}` : hit.label)}` : `#n=${hit.local + 1}`;
-      return `${READER}?file=${encodeURIComponent(s.url)}${at}`;
-    }
+    if (u.hostname === LIB_HOST && u.pathname.startsWith('/books/')) return readerLink(s.url, hit);
     if (s.type === 'pdf') return `${s.url.split('#')[0]}#page=${hit.local + 1}`;
     if (hitText && hitText.trim()) return `${s.url.split('#')[0]}#:~:text=${fragment(hitText.trim())}`;
     return s.url;

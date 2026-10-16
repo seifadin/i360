@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-xZc5zyuq0pYmyiAQl4rMNKlCv+XW56KMgZaqFZ9tcyM=' 'sha256-v3oaLToJCgeyu6KiwcAe4OEOWGJHxrSn1OaPrmX7B/Q='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-5UqfENBd4sOevuqZHCtq7y8WHBpJlhcQEGuA9ungE1o='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية i360إ</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -833,25 +833,23 @@
   // Characters a text fragment (#:~:text=) needs escaped.
   const fragment = (s) => encodeURIComponent(s).replace(/-/g, '%2D').replace(/,/g, '%2C');
 
+  // The Reader at a page of a book, by its link (our copy is found from
+  // it): #p=<printed page> ("vol:page" in a multi-volume book), or #n=<position>.
+  function readerLink(link, hit) {
+    const at = isLabel(hit.label) ? `#p=${encodeURIComponent(hit.vol ? `${hit.vol}:${hit.label}` : hit.label)}` : `#n=${hit.local + 1}`;
+    return `${READER}?file=${encodeURIComponent(link)}${at}`;
+  }
+
   // Where a result opens. hitText: the matched text as written on the page.
+  // archive.org books and our own books: the Reader at that page (S5; the
+  // scan stays one tap away there). Articles: the original, at the match.
   function resultLink(hit, query, hitText) {
     const s = hit.source;
     const a = archiveParts(s.id);
-    if (a && s.type === 'djvu-txt') {
-      // The BookReader at that page, with the term highlighted. The file
-      // part picks the book inside an item that holds several.
-      const sub = a.file.replace(/_djvu\.txt$/i, '');
-      const parts = ['https://archive.org/details', encodeURIComponent(a.item)];
-      if (sub) parts.push(encodeURIComponent(sub));
-      return `${parts.join('/')}/page/n${hit.local}/mode/1up?q=${encodeURIComponent(query)}`;
-    }
+    if (a && s.type === 'djvu-txt') return readerLink((s.links && s.links[0]) || s.url, hit);
     let u;
     try { u = new URL(s.url); } catch { return s.url; }
-    if (u.hostname === LIB_HOST && u.pathname.startsWith('/books/')) {
-      // Our own book: the Reader at that page.
-      const at = isLabel(hit.label) ? `#p=${encodeURIComponent(hit.vol ? `${hit.vol}:${hit.label}` : hit.label)}` : `#n=${hit.local + 1}`;
-      return `${READER}?file=${encodeURIComponent(s.url)}${at}`;
-    }
+    if (u.hostname === LIB_HOST && u.pathname.startsWith('/books/')) return readerLink(s.url, hit);
     if (s.type === 'pdf') return `${s.url.split('#')[0]}#page=${hit.local + 1}`;
     if (hitText && hitText.trim()) return `${s.url.split('#')[0]}#:~:text=${fragment(hitText.trim())}`;
     return s.url;
@@ -972,6 +970,7 @@
       checking: 'جارٍ الفحص…',
       spots: (n) => `مواضع: ${n}`,
       openTitle: 'فتح في المصدر',
+      openReader: 'فتح في القارئ',
       about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
     };
 
@@ -1349,7 +1348,7 @@
       a.href = CseView.resultLink(hit, ctx.q, sn ? sn.hit : '');
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.title = T.openTitle;
+      a.title = a.href.startsWith(CseView.READER) ? T.openReader : T.openTitle;
       const label = CseView.pageLabel(hit);
       if (label || hit.count > 1) {
         const meta = document.createElement('div');

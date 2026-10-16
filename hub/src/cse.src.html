@@ -361,6 +361,7 @@
       checking: 'جارٍ الفحص…',
       spots: (n) => `مواضع: ${n}`,
       openTitle: 'فتح في المصدر',
+      openReader: 'فتح في القارئ',
       about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
     };
 
@@ -738,7 +739,7 @@
       a.href = CseView.resultLink(hit, ctx.q, sn ? sn.hit : '');
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.title = T.openTitle;
+      a.title = a.href.startsWith(CseView.READER) ? T.openReader : T.openTitle;
       const label = CseView.pageLabel(hit);
       if (label || hit.count > 1) {
         const meta = document.createElement('div');

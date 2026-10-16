@@ -41,7 +41,9 @@ test('page labels: printed, volume, position, one-page source', () => {
 
 test('result links', () => {
   assert.equal(CseView.resultLink({ source: S('a'), local: 12, label: '' }, 'قواعد الفقه'),
-    `https://archive.org/details/IslamicKB/${encodeURIComponent('عقيدة-المسلم')}/page/n12/mode/1up?q=${encodeURIComponent('قواعد الفقه')}`);
+    `https://i360-md.web.app/?file=${encodeURIComponent(S('a').url)}#n=13`, 'archive.org books open our copy in the Reader');
+  assert.equal(CseView.resultLink({ source: S('a'), local: 12, label: '96' }, 'x'),
+    `https://i360-md.web.app/?file=${encodeURIComponent(S('a').url)}#p=96`);
   assert.equal(CseView.resultLink({ source: S('d'), local: 0, label: '' }, 'x', 'وزن-الدرهم, الشرعي'),
     `https://ar.wikipedia.org/wiki/مقادير_شرعية#:~:text=${encodeURIComponent('وزن')}%2D${encodeURIComponent('الدرهم')}%2C${encodeURIComponent(' الشرعي')}`);
   assert.equal(CseView.resultLink({ source: S('e'), local: 4, label: '17', vol: '2' }, 'x'),
