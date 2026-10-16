@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-PUQfEn1zR3FeTsojCtpaO/URmYITR+/rU/dFWOflyRw='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-qkmSOX+lMQm5TRzbJY1+bS0GwT07K/yaV/y/B3tlqlE=' 'sha256-Bd/aqQ1DKU38kSBsxpTUYSile9MJiATJJIMuwqB9Q/M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -113,15 +113,22 @@
       font-size: 1.05rem;
       background-color: var(--bg-color);
       color: var(--text-color);
-      min-height: 100vh;
-      min-height: 100dvh;
       line-height: 1.6;
+      /* The page scrolls inside .scroller, not the window: browsers keep the
+         window's scrollbar on the right even in Arabic, but put a
+         right-to-left element's scrollbar on the left. */
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
+    .scroller { flex: 1; min-height: 0; overflow-y: auto; direction: rtl; overscroll-behavior: contain; }
+    .scroller:focus { outline: none; }
 
     /* ---------- Toolbar ---------- */
     .toolbar {
-      position: sticky;
-      top: 0;
+      flex-shrink: 0;
       background-color: var(--toolbar-bg);
       border-bottom: 1px solid var(--toolbar-border);
       min-height: 3rem;
@@ -297,6 +304,7 @@
     </div>
   </header>
 
+  <div class="scroller" id="scroller" tabindex="-1">
   <main>
     <form class="search-form" id="search-form" role="search" autocomplete="off">
       <input class="search-input" id="q" type="search" name="q" enterkeyhint="search" spellcheck="false" aria-label="نص البحث" placeholder="ابحث في نصوص الكتب…">
@@ -317,6 +325,7 @@
     <div id="results"></div>
     <div class="about" id="about"></div>
   </main>
+  </div>
 
   <script>/* i360 search core — shared by the Markdown Reader, the i360 CSE page and
    the CSE indexer, so all three find exactly the same matches.
@@ -1429,6 +1438,12 @@
     }
 
     /* ---------------- Start ---------------- */
+    // Keys scroll the results, as they would scroll a normal page.
+    document.addEventListener('keydown', (e) => {
+      const t = e.target;
+      if (t === document.body && ['PageDown', 'PageUp', 'Home', 'End', 'ArrowDown', 'ArrowUp', ' '].includes(e.key)) $('scroller').focus({ preventScroll: true });
+    });
+
     function init() {
       const theme = storeGet('theme', 'system');
       state.theme = THEMES.includes(theme) ? theme : 'system';
