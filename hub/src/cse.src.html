@@ -455,8 +455,16 @@
       const catalog = await fetchData(`b/${buildId}/catalog.json`);
       state.catalog = catalog;
       state.counts = CseView.itemFileCounts(catalog);
-      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), String(catalog.builtAt || '').slice(0, 10)));
+      aboutEl.textContent = fmt(T.about(fmtNum(catalog.sources.length), fmtNum(catalog.pageCount), dayMonthYear(catalog.builtAt)));
       return true;
+    }
+
+    // The build's date as day-month-year (16-10-2026), on this device's calendar day.
+    function dayMonthYear(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const two = (n) => String(n).padStart(2, '0');
+      return `${two(d.getDate())}-${two(d.getMonth() + 1)}-${d.getFullYear()}`;
     }
 
     function newSearcher() {
