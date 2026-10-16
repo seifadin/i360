@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LK0Esye2Lj4w5A1k4BfD7tLTNEML1U/QC3pC1i7YAwA=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-1m2p4c8P1xNRiWm/wedRUh9vEsn3NnTGD0JxcB8CetY=' 'sha256-yH0uTZaOmqf+lEF7tdJd3O+VDgyI9s4YCVO5caAkdfM='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LK0Esye2Lj4w5A1k4BfD7tLTNEML1U/QC3pC1i7YAwA=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-gaO2ojwvYh+J85iBOYJhRzRkzVrztt6E2JRIMP25x24='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1407,17 +1407,35 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   }
 
   /* ---------------- The scan on archive.org ---------------- */
-  // The BookReader at a page (position in the file, from 0). The file part
-  // picks the book inside an item that holds several.
-  function scanLink(source, index) {
-    const id = source && source.id;
-    if (!id || !id.startsWith('archive:') || source.type !== 'djvu-txt') return null;
+  const itemOf = (id) => {
     const rest = id.slice('archive:'.length);
     const slash = rest.indexOf('/');
-    const item = slash < 0 ? rest : rest.slice(0, slash);
-    const sub = slash < 0 ? '' : rest.slice(slash + 1).replace(/_djvu\.txt$/i, '');
+    return { item: slash < 0 ? rest : rest.slice(0, slash), file: slash < 0 ? '' : rest.slice(slash + 1) };
+  };
+
+  // How many books of the source's archive.org item the catalog lists
+  // (indexed or not).
+  function itemBooks(catalog, source) {
+    if (!source || !source.id || !source.id.startsWith('archive:')) return 0;
+    const { item } = itemOf(source.id);
+    const ids = new Set([...catalog.sources.map((s) => s.id), ...(catalog.unindexed || []).map((u) => u.id)]);
+    let n = 0;
+    for (const id of ids) if (id.startsWith('archive:') && itemOf(id).item === item) n++;
+    return n;
+  }
+
+  // The BookReader at a page (position in the file, from 0; checked on a
+  // real book: position 45 = /page/n45 in single-page mode). The book's
+  // name goes in the address only for an item holding several books: it
+  // picks the book there, but stops a single-book item from opening the
+  // page (Seif's check, 2026-10-16). books: itemBooks() for the source.
+  function scanLink(source, index, books) {
+    const id = source && source.id;
+    if (!id || !id.startsWith('archive:') || source.type !== 'djvu-txt') return null;
+    const { item, file } = itemOf(id);
+    const sub = file.replace(/_djvu\.txt$/i, '');
     const parts = ['https://archive.org/details', encodeURIComponent(item)];
-    if (sub) parts.push(encodeURIComponent(sub));
+    if (sub && books > 1) parts.push(encodeURIComponent(sub));
     return `${parts.join('/')}/page/n${Math.max(0, index | 0)}/mode/1up`;
   }
 
@@ -1445,10 +1463,10 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
         if (onProgress) onProgress(done, chunks.length);
       }
     }));
-    return { source, text: toBookText(chunks.flat()) };
+    return { source, books: itemBooks(catalog, source), text: toBookText(chunks.flat()) };
   }
 
-  return { LIB, archiveId, findSource, isLibBook, fetchableUrl, toBookText, scanLink, open };
+  return { LIB, archiveId, findSource, isLibBook, fetchableUrl, toBookText, itemBooks, scanLink, open };
 }));
 </script>
 
@@ -1651,6 +1669,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     numerals: 'western',    // 'western' 123 | 'eastern' ١٢٣ — display only, saved on this device
     theme: 'system',
     libSource: null,        // the catalog entry when the book is our copy from the lib site
+    libBooks: 0,            // how many books its archive.org item holds (for the scan link)
     textScale: 1,
     bookKey: null,          // identifies the open book (saved position, bookmarks)
     panelTab: 'contents'
@@ -2343,7 +2362,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      Our copy of a book (from the lib site): its scan on archive.org
      ================================================================ */
   function updateScanButton() {
-    const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0));
+    const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0, state.libBooks));
     if (btnScan.hidden === !show) return;
     btnScan.hidden = !show;
     queueFitToolbar();
@@ -2351,7 +2370,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   // Pages of our copy are the scan's pages, in order: position n is scan page n.
   btnScan.addEventListener('click', () => {
-    const url = LibCopy.scanLink(state.libSource, Math.max(0, state.currentIdx));
+    const url = LibCopy.scanLink(state.libSource, Math.max(0, state.currentIdx), state.libBooks);
     if (url) window.open(url, '_blank', 'noopener');
   });
 
@@ -3492,6 +3511,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
         if (copy) {
           renderEmpty([]);
           state.libSource = copy.source;
+          state.libBooks = copy.books;
           renderDocument(copy.text, null, key);
           return;
         }

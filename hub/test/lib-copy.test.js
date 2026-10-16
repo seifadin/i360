@@ -31,10 +31,15 @@ test('a link is found in the catalog however it is written', () => {
   assert.equal(LibCopy.fetchableUrl('https://ar.wikipedia.org/wiki/x'), 'https://ar.wikipedia.org/wiki/x');
 });
 
-test('scan links: the BookReader at a position, the book inside a multi-book item', () => {
-  assert.equal(LibCopy.scanLink(catalog.sources[2], 12),
+test('scan links: the BookReader at a position; the book named only in a multi-book item', () => {
+  const multi = { sources: [...catalog.sources], unindexed: [{ id: 'archive:IslamicKB/عقيدة-أخرى_djvu.txt' }] };
+  assert.equal(LibCopy.itemBooks(multi, catalog.sources[2]), 2, 'an unindexed book of the item counts');
+  assert.equal(LibCopy.scanLink(catalog.sources[2], 12, LibCopy.itemBooks(multi, catalog.sources[2])),
     `https://archive.org/details/IslamicKB/${encodeURIComponent('عقيدة-المسلم')}/page/n12/mode/1up`);
-  assert.equal(LibCopy.scanLink(catalog.sources[1], 0), null, 'not archive.org');
+  // Seif's check on the real book: Reader position 46 (#n=46) = /page/n45, with no book name.
+  assert.equal(LibCopy.itemBooks(catalog, catalog.sources[0]), 1);
+  assert.equal(LibCopy.scanLink(catalog.sources[0], 45, 1), 'https://archive.org/details/QuranIntermediateExegesis/page/n45/mode/1up');
+  assert.equal(LibCopy.scanLink(catalog.sources[1], 0, 0), null, 'not archive.org');
 });
 
 // Rendered HTML → its text, as a reader sees it.
@@ -89,6 +94,7 @@ test('open(): reads the catalog and the chunks from lib, or says the link is not
   const progress = [];
   const got = await LibCopy.open(STREAM, fetchFn, (d, t) => progress.push(`${d}/${t}`));
   assert.equal(got.source.key, 'k1');
+  assert.equal(got.books, 1);
   assert.deepEqual(BookFormat.parseBook(got.text).pages.map((p) => p.label), ['1', '2', '3']);
   assert.deepEqual(progress, ['0/2', '1/2', '2/2']);
   assert.equal(await LibCopy.open('https://example.com/book.md', fetchFn), null);

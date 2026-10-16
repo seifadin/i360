@@ -1082,6 +1082,7 @@
     numerals: 'western',    // 'western' 123 | 'eastern' ١٢٣ — display only, saved on this device
     theme: 'system',
     libSource: null,        // the catalog entry when the book is our copy from the lib site
+    libBooks: 0,            // how many books its archive.org item holds (for the scan link)
     textScale: 1,
     bookKey: null,          // identifies the open book (saved position, bookmarks)
     panelTab: 'contents'
@@ -1774,7 +1775,7 @@
      Our copy of a book (from the lib site): its scan on archive.org
      ================================================================ */
   function updateScanButton() {
-    const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0));
+    const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0, state.libBooks));
     if (btnScan.hidden === !show) return;
     btnScan.hidden = !show;
     queueFitToolbar();
@@ -1782,7 +1783,7 @@
 
   // Pages of our copy are the scan's pages, in order: position n is scan page n.
   btnScan.addEventListener('click', () => {
-    const url = LibCopy.scanLink(state.libSource, Math.max(0, state.currentIdx));
+    const url = LibCopy.scanLink(state.libSource, Math.max(0, state.currentIdx), state.libBooks);
     if (url) window.open(url, '_blank', 'noopener');
   });
 
@@ -2923,6 +2924,7 @@
         if (copy) {
           renderEmpty([]);
           state.libSource = copy.source;
+          state.libBooks = copy.books;
           renderDocument(copy.text, null, key);
           return;
         }

@@ -108,17 +108,35 @@
   }
 
   /* ---------------- The scan on archive.org ---------------- */
-  // The BookReader at a page (position in the file, from 0). The file part
-  // picks the book inside an item that holds several.
-  function scanLink(source, index) {
-    const id = source && source.id;
-    if (!id || !id.startsWith('archive:') || source.type !== 'djvu-txt') return null;
+  const itemOf = (id) => {
     const rest = id.slice('archive:'.length);
     const slash = rest.indexOf('/');
-    const item = slash < 0 ? rest : rest.slice(0, slash);
-    const sub = slash < 0 ? '' : rest.slice(slash + 1).replace(/_djvu\.txt$/i, '');
+    return { item: slash < 0 ? rest : rest.slice(0, slash), file: slash < 0 ? '' : rest.slice(slash + 1) };
+  };
+
+  // How many books of the source's archive.org item the catalog lists
+  // (indexed or not).
+  function itemBooks(catalog, source) {
+    if (!source || !source.id || !source.id.startsWith('archive:')) return 0;
+    const { item } = itemOf(source.id);
+    const ids = new Set([...catalog.sources.map((s) => s.id), ...(catalog.unindexed || []).map((u) => u.id)]);
+    let n = 0;
+    for (const id of ids) if (id.startsWith('archive:') && itemOf(id).item === item) n++;
+    return n;
+  }
+
+  // The BookReader at a page (position in the file, from 0; checked on a
+  // real book: position 45 = /page/n45 in single-page mode). The book's
+  // name goes in the address only for an item holding several books: it
+  // picks the book there, but stops a single-book item from opening the
+  // page (Seif's check, 2026-10-16). books: itemBooks() for the source.
+  function scanLink(source, index, books) {
+    const id = source && source.id;
+    if (!id || !id.startsWith('archive:') || source.type !== 'djvu-txt') return null;
+    const { item, file } = itemOf(id);
+    const sub = file.replace(/_djvu\.txt$/i, '');
     const parts = ['https://archive.org/details', encodeURIComponent(item)];
-    if (sub) parts.push(encodeURIComponent(sub));
+    if (sub && books > 1) parts.push(encodeURIComponent(sub));
     return `${parts.join('/')}/page/n${Math.max(0, index | 0)}/mode/1up`;
   }
 
@@ -146,8 +164,8 @@
         if (onProgress) onProgress(done, chunks.length);
       }
     }));
-    return { source, text: toBookText(chunks.flat()) };
+    return { source, books: itemBooks(catalog, source), text: toBookText(chunks.flat()) };
   }
 
-  return { LIB, archiveId, findSource, isLibBook, fetchableUrl, toBookText, scanLink, open };
+  return { LIB, archiveId, findSource, isLibBook, fetchableUrl, toBookText, itemBooks, scanLink, open };
 }));
