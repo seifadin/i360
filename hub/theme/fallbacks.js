@@ -124,7 +124,10 @@ function check(css) {
   const results = [];
   let fixed = css;
   for (const rule of derivedRules(css)) {
-    const block = blocks.find(b => b.selector === rule.selector);
+    // The derived rule names its theme the same way as the theme block (data-theme="…"); no
+    // data-theme at all means light, the default.
+    const themeOf = (sel) => (/data-theme="(\w+)"/.exec(sel) || [null, 'light'])[1];
+    const block = blocks.find(b => themeOf(b.selector) === themeOf(rule.selector));
     if (!block) throw new Error(`No theme block "${rule.selector}" for ${rule.name}`);
     const base = block.vars[rule.from];
     if (!base) throw new Error(`${rule.name}: ${rule.from} is not set in "${rule.selector}"`);

@@ -34,6 +34,15 @@ test('theme.css: light, sepia and dark set the same colours', () => {
   for (const b of blocks) for (const k of Object.keys(b.vars)) assert.match(k, /^--i360-/);
 });
 
+test('a derived colour is set for its own theme only (never for every theme through a bare :root)', () => {
+  const supports = /@supports[^{]*\{([\s\S]*?\})\s*\}/.exec(css)[1];
+  for (const r of supports.matchAll(/([^{}]+)\{/g)) {
+    for (const sel of r[1].split(',').map(x => x.trim())) {
+      assert.ok(/data-theme/.test(sel), `"${sel}" matches every theme: it would replace sepia's and dark's own values`);
+    }
+  }
+});
+
 test('the fallback is variables only, with plain colours', () => {
   const fb = fallbackCss(css);
   assert.doesNotMatch(fb, /color-mix|@font-face|@supports|url\(/);

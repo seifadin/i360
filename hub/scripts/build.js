@@ -2,7 +2,7 @@
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
-//   public-hub/day/index.html  Glance, the daily reflection (src/day.html, copied as is)
+//   public-hub/day/index.html  Glance, the daily reflection (src/day.html; only the shared theme is filled in)
 //
 //   npm run build
 //
@@ -137,7 +137,16 @@ buildPage({
 // The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
-// Glance (the daily reflection) has no build placeholders: it is copied as is.
-mkdirSync(join(root, 'public-hub/day'), { recursive: true });
-writeFileSync(join(root, 'public-hub/day/index.html'), read(join(root, 'src/day.html')));
-console.log('public-hub/day/index.html: copied from src/day.html');
+// Glance (the daily reflection) loads Tailwind and FontAwesome from their own
+// sites, so it has no hash-based CSP: only the shared theme is filled in.
+{
+  let html = read(join(root, 'src/day.html'));
+  html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
+  html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
+  html = fill(html, '/*@@THEME_EARLY@@*/', inlineScript(theme.early.code, theme.early.name));
+  html = fill(html, '/*@@THEME_LOADER@@*/', inlineScript(theme.loader.code, theme.loader.name));
+  if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error('src/day.html: Google Fonts left in the page: fonts come from the theme site');
+  mkdirSync(join(root, 'public-hub/day'), { recursive: true });
+  writeFileSync(join(root, 'public-hub/day/index.html'), html);
+  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme filled in (no CSP)`);
+}

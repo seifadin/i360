@@ -4,6 +4,289 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Reflection</title>
+    <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
+         scripts/build.js: built-in colours, the saved theme before anything is drawn, the
+         loader (window.i360Theme). Tailwind's dark: styles follow the "dark" class, set
+         here from the shared theme (sepia uses the light ones on sepia colours). -->
+    <style id="i360-fallback">:root, [data-theme="light"] {
+  color-scheme: light;
+  --i360-bg: #FAF7F2;
+  --i360-frame: #EAE7E2;
+  --i360-surface: #FAF7F2;
+  --i360-toolbar: #FAF7F2;
+  --i360-border: #CBD5E1;
+  --i360-rule: #CBD5E1;
+  --i360-text: #0010CF;
+  --i360-heading: #0010CF;
+  --i360-muted: #5A62C9;
+  --i360-icon: #0010CF;
+  --i360-icon-hover: #0010CF;
+  --i360-hover: #EEF2FF;
+  --i360-active: #EEF2FF;
+  --i360-link: #2E8B57;
+  --i360-quran: #2E8B57;
+  --i360-note: #2A35C4;
+  --i360-code: #F1ECE2;
+  --i360-quote: #F4F0E8;
+  --i360-input: #FAF7F2;
+  --i360-focus: #0010CF;
+  --i360-accent: #0010CF;
+  --i360-on-accent: #FAF7F2;
+  --i360-banner-bg: #fef2f2;
+  --i360-banner-border: #fecaca;
+  --i360-banner-text: #991b1b;
+  --i360-highlight: #fef08a;
+  --i360-highlight-active: #fb923c;
+  --i360-ribbon: #dc2626;
+  --i360-page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
+  --i360-font: 'Amiri', 'Traditional Arabic', serif;
+  --i360-font-quran: 'Amiri Quran', 'Amiri', serif;
+}
+[data-theme="sepia"] {
+  color-scheme: light;
+  --i360-bg: #f8f1e1;
+  --i360-frame: #e6dcc6;
+  --i360-surface: #fbf5e8;
+  --i360-toolbar: #f6efdf;
+  --i360-border: #d6c7a6;
+  --i360-rule: #d6c7a6;
+  --i360-text: #3b2f1e;
+  --i360-heading: #2a2014;
+  --i360-muted: #7a6a50;
+  --i360-icon: #6b5a40;
+  --i360-icon-hover: #2a2014;
+  --i360-hover: #ebe0c6;
+  --i360-active: #eadbb8;
+  --i360-link: #8a4b0f;
+  --i360-quran: #2f5a1e;
+  --i360-note: #4a3c27;
+  --i360-code: #efe5cf;
+  --i360-quote: #f1e7d1;
+  --i360-input: #fffaf0;
+  --i360-focus: #a16207;
+  --i360-accent: #a16207;
+  --i360-on-accent: #fffaf0;
+  --i360-banner-bg: #f8e3d6;
+  --i360-banner-border: #e8c0a8;
+  --i360-banner-text: #7f2d12;
+  --i360-highlight: #f5d76e;
+  --i360-highlight-active: #e8913a;
+  --i360-ribbon: #b91c1c;
+  --i360-page-shadow: 0 4px 6px -1px rgba(60, 40, 10, 0.12), 0 2px 4px -1px rgba(60, 40, 10, 0.07);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --i360-bg: #1a2233;
+  --i360-frame: #0b1220;
+  --i360-surface: #111827;
+  --i360-toolbar: #111827;
+  --i360-border: #334155;
+  --i360-rule: #334155;
+  --i360-text: #e2e8f0;
+  --i360-heading: #f8fafc;
+  --i360-muted: #94a3b8;
+  --i360-icon: #cbd5e1;
+  --i360-icon-hover: #ffffff;
+  --i360-hover: #1f2937;
+  --i360-active: #1e3a5f;
+  --i360-link: #7dd3fc;
+  --i360-quran: #86efac;
+  --i360-note: #cbd5e1;
+  --i360-code: #0f172a;
+  --i360-quote: #111827;
+  --i360-input: #0f172a;
+  --i360-focus: #38bdf8;
+  --i360-accent: #38bdf8;
+  --i360-on-accent: #0b1220;
+  --i360-banner-bg: #3b0d0d;
+  --i360-banner-border: #7f1d1d;
+  --i360-banner-text: #fecaca;
+  --i360-highlight: #854d0e;
+  --i360-highlight-active: #c2410c;
+  --i360-ribbon: #f87171;
+  --i360-page-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}</style>
+    <script>// i360 theme, early part: inlined in each app's <head> (not served), after the
+// app's fallback colours and before anything is drawn. It shows the saved
+// theme and the saved copy of theme.css at once, so a repeat visit has no
+// flash of the wrong colours. theme-loader.js does the rest.
+// Plain ES5 on purpose: it must run in any browser that can show the page.
+// Keep in step with CHOICE_KEY, CACHE_KEY and THEMES in site/theme-loader.js.
+(function () {
+  var root = document.documentElement, themes = ['system', 'light', 'sepia', 'dark'];
+  var c = root.getAttribute('data-i360-lock');
+  if (themes.indexOf(c) < 0) {
+    try { c = localStorage.getItem('i360.theme'); } catch (e) { c = null; }
+  }
+  if (themes.indexOf(c) < 0) c = 'system';
+  if (c === 'system') {
+    c = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  root.setAttribute('data-theme', c);
+  try {
+    var k = JSON.parse(localStorage.getItem('i360.theme.css'));
+    if (k && typeof k.css === 'string') {
+      var s = document.createElement('style');
+      s.id = 'i360-theme';
+      s.textContent = k.css;
+      document.head.appendChild(s);
+    }
+  } catch (e) { /* no copy yet: the page's own colours */ }
+})();
+</script>
+    <script>(function () {
+'use strict';
+// i360 shared theme loader — https://theme.i36o.workers.dev/theme-loader.js
+//
+// One module for every i360 app. In the page, in this order:
+//   1. the app's built-in fallback colours (node theme/fallbacks.js --css),
+//   2. theme/early.js inlined (applies the saved theme and the saved copy of
+//      theme.css before anything is drawn),
+//   3. this loader: either built into the page (the hub's pages: scripts/build.js
+//      turns it into a plain script, window.i360Theme, so it also works offline),
+//      or imported from the theme site in a module script:
+//        import * as theme from 'https://theme.i36o.workers.dev/theme-loader.js';
+//        theme.init();
+//
+// init() applies the saved choice, fetches theme.css fresh (no-cache), and
+// keeps a copy on the device for the next visit and for offline use. Without
+// the site and without a copy, the app's fallback stays. A page whose <html>
+// has data-i360-lock="light" (the i360إ app) always shows that theme.
+//
+// The choice is shared by every app on the same site (hub: the Reader, the
+// CSE and Glance) and follows changes made in another tab.
+
+const THEMES = ['system', 'light', 'sepia', 'dark'];   // the cycle order
+const CHOICE_KEY = 'i360.theme';
+const CACHE_KEY = 'i360.theme.css';
+const CSS_URL = new URL('theme.css', "https://theme.i36o.workers.dev/theme-loader.js").href;
+const STYLE_ID = 'i360-theme';
+const MAX_CSS = 256 * 1024;
+
+const root = document.documentElement;
+const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+const listeners = new Set();
+let started = false;
+
+function read(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function write(key, value) {
+  try { localStorage.setItem(key, value); return true; } catch { return false; }   // private browsing, full storage
+}
+
+function lockedTheme() {
+  const t = root.getAttribute('data-i360-lock');
+  return THEMES.includes(t) ? t : null;
+}
+
+/** The saved choice: system, light, sepia or dark. */
+function getChoice() {
+  const lock = lockedTheme();
+  if (lock) return lock;
+  const c = read(CHOICE_KEY);
+  return THEMES.includes(c) ? c : 'system';
+}
+
+/** The palette shown now: light, sepia or dark. */
+function getTheme(choice = getChoice()) {
+  if (choice !== 'system') return choice;
+  return darkQuery && darkQuery.matches ? 'dark' : 'light';
+}
+
+function apply() {
+  const choice = getChoice();
+  const theme = getTheme(choice);
+  const changed = root.getAttribute('data-theme') !== theme;
+  root.setAttribute('data-theme', theme);
+  for (const fn of listeners) {
+    try { fn({ choice, theme, changed }); } catch (e) { console.error(e); }
+  }
+  return { choice, theme };
+}
+
+/** Save a choice and show it. Ignored when the page is locked. */
+function setChoice(choice) {
+  if (!THEMES.includes(choice)) throw new Error(`Unknown theme: ${choice}`);
+  if (!lockedTheme()) write(CHOICE_KEY, choice);
+  return apply();
+}
+
+/** Next choice in THEMES order (for a theme button). */
+function cycle() {
+  const c = getChoice();
+  return setChoice(THEMES[(THEMES.indexOf(c) + 1) % THEMES.length]);
+}
+
+/** Called with { choice, theme, changed } whenever the theme is applied. Returns a function that stops it. */
+function onChange(fn) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+// Relative font addresses in theme.css point at this site, not at the page.
+function absolutize(css) {
+  return css.replace(/url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
+    (m, q, u) => `url(${q}${new URL(u, CSS_URL).href}${q})`);
+}
+
+function styleElement() {
+  let el = document.getElementById(STYLE_ID);
+  if (!el) {
+    el = document.createElement('style');
+    el.id = STYLE_ID;
+    document.head.appendChild(el);   // after the app's fallback, so it wins
+  }
+  return el;
+}
+
+function cached() {
+  try {
+    const c = JSON.parse(read(CACHE_KEY));
+    return c && c.url === CSS_URL && typeof c.css === 'string' ? c.css : null;
+  } catch { return null; }
+}
+
+/**
+ * Start: apply the theme, follow device and other-tab changes, refresh theme.css.
+ * Resolves to { choice, theme, source } — source is "network", "cache" or "fallback".
+ */
+async function init() {
+  const state = apply();
+  if (!started) {
+    started = true;
+    if (darkQuery) darkQuery.addEventListener('change', () => { if (getChoice() === 'system') apply(); });
+    window.addEventListener('storage', e => { if (e.key === CHOICE_KEY) apply(); });
+  }
+
+  const copy = cached();
+  const existing = document.getElementById(STYLE_ID);
+  if (copy && (!existing || existing.textContent !== copy)) styleElement().textContent = copy;
+  let source = copy ? 'cache' : 'fallback';
+
+  try {
+    const res = await fetch(CSS_URL, { cache: 'no-cache', mode: 'cors', credentials: 'omit' });
+    if (!res.ok) throw new Error(`theme.css: HTTP ${res.status}`);
+    const text = await res.text();
+    if (text.length > MAX_CSS || !text.includes('--i360-bg')) throw new Error('theme.css: unexpected content');
+    const css = absolutize(text);
+    const el = styleElement();
+    if (el.textContent !== css) el.textContent = css;
+    if (css !== copy) write(CACHE_KEY, JSON.stringify({ url: CSS_URL, css }));
+    source = 'network';
+  } catch (e) {
+    console.warn('i360 theme: using the', source === 'cache' ? 'saved copy' : "page's own colours", '—', e.message);
+  }
+  return { ...state, source };
+}
+
+window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, init });
+})();</script>
+    <script>
+        document.documentElement.classList.toggle('dark', document.documentElement.getAttribute('data-theme') === 'dark');
+        i360Theme.onChange(function (s) { document.documentElement.classList.toggle('dark', s.theme === 'dark'); });
+    </script>
+    <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         /* Tailwind's CDN follows the OS dark setting by default; 'class' makes every dark: utility follow the toggle. */
@@ -12,16 +295,25 @@
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;700&display=swap');
-        :root { --bg-primary: #f8fafc; --card-bg: #ffffff; --text-primary: #1e293b; --text-secondary: #475569; --accent: #10b981; --bg-inset: #f1f5f9; --border-inset: #e2e8f0; }
-        .dark { --bg-primary: #0f172a; --card-bg: #1e293b; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --accent: #34d399; --bg-inset: #0f172a; --border-inset: transparent; }
-        body { font-family: 'Noto Sans Arabic', 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: all 0.3s ease; margin: 0; padding: 0; overflow-x: hidden; }
-        .arabic-script, .hadith-text-style { font-family: 'Amiri', serif; line-height: 2.0 !important; }
+        /* Colours from the shared i360 theme; the names are Glance's own. Behind the cards:
+           the frame colour (as behind the Reader's pages); cards: the page colour. */
+        :root {
+            --bg-primary: var(--i360-frame); --card-bg: var(--i360-bg); --text-primary: var(--i360-text); --text-secondary: var(--i360-muted);
+            --accent: var(--i360-accent); --on-accent: var(--i360-on-accent); --bg-inset: var(--i360-quote); --border-inset: var(--i360-rule);
+        }
+        /* Fonts from the shared theme: Amiri for every language, Amiri Quran for the verse. */
+        body { font-family: var(--i360-font); background-color: var(--bg-primary); color: var(--text-primary); transition: all 0.3s ease; margin: 0; padding: 0; overflow-x: hidden; }
+        .arabic-script, .hadith-text-style { font-family: var(--i360-font); line-height: 2.0 !important; }
+        .arabic-script.quran-verse { font-family: var(--i360-font-quran); }
+        .text-quran { color: var(--i360-quran); }
+        .bg-quran-soft { background-color: var(--i360-hover); }
+        @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
+        .text-accent { color: var(--i360-accent); }
+        .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
         .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
-        .active-btn { background-color: var(--accent); color: white !important; }
-        .next-prayer-highlight { border: 2px solid #2563eb !important; background-color: rgba(37, 99, 235, 0.08); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.15); border-radius: 1rem; }
-        .dark .next-prayer-highlight { border-color: #60a5fa !important; background-color: rgba(96, 165, 250, 0.1); }
+        .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
+        .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
         [dir="ltr"] .arabic-script { direction: rtl; }
         .text-custom-secondary { color: var(--text-secondary); }
         .lang-btn { min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; }
@@ -34,15 +326,11 @@
             <div class="text-center md:text-start flex flex-col gap-1">
                 <h1 data-i18n="title" class="text-3xl font-bold tracking-tight">Daily Reflection</h1>
                 <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
-                <p class="text-emerald-600 dark:text-emerald-400 text-xs md:text-sm font-bold" data-target="hijri-date"></p>
+                <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
                 <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
             </div>
-            <!-- dir="ltr" keeps the icons in a fixed order -->
-            <div class="flex glass-card p-1 rounded-xl" dir="ltr" role="group" aria-label="Theme">
-                <button onclick="App.setTheme('light')" id="theme-light" aria-label="Light theme" class="px-3 py-2 rounded-lg text-xs font-medium text-custom-secondary"><i class="fas fa-sun" aria-hidden="true"></i></button>
-                <button onclick="App.setTheme('dark')" id="theme-dark" aria-label="Dark theme" class="px-3 py-2 rounded-lg text-xs font-medium text-custom-secondary"><i class="fas fa-moon" aria-hidden="true"></i></button>
-                <button onclick="App.setTheme('system')" id="theme-system" aria-label="System theme" class="px-3 py-2 rounded-lg text-xs font-medium text-custom-secondary"><i class="fas fa-desktop" aria-hidden="true"></i></button>
-            </div>
+            <!-- The shared theme: one button cycles system → light → sepia → dark (as in the Reader and the CSE) -->
+            <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
         </div>
 
         <!-- dir="rtl" keeps the language grid in a fixed order -->
@@ -58,13 +346,13 @@
     <main class="layout-stable space-y-8">
         <section id="quran-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg"><i class="fas fa-quran text-xl" aria-hidden="true"></i></span>
-                <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Quranic Verse</h2>
+                <span class="bg-quran-soft text-quran p-2 rounded-lg"><i class="fas fa-quran text-xl" aria-hidden="true"></i></span>
+                <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-quran">Quranic Verse</h2>
             </div>
             <div class="space-y-6">
-                <p data-target="quran-arabic" class="arabic-script text-xl md:text-2xl font-bold text-justify mb-4"></p>
+                <p data-target="quran-arabic" class="arabic-script quran-verse text-xl md:text-2xl font-bold text-justify mb-4"></p>
                 <p data-target="quran-translation" class="text-base md:text-lg font-light italic text-custom-secondary text-justify"></p>
-                <p data-target="quran-ref" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 border-t border-slate-100 dark:border-slate-700/50 pt-4"></p>
+                <p data-target="quran-ref" class="text-sm font-semibold text-quran border-t border-slate-100 dark:border-slate-700/50 pt-4"></p>
             </div>
             <div data-status="quran" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
         </section>
@@ -516,6 +804,22 @@
         };
         Object.keys(EXTRA).forEach(l => Object.assign(LOCALES[l], EXTRA[l]));
 
+        /* The theme button (shared with the Reader and the CSE): its icons and tooltips. */
+        const THEME_ICON = {
+            system: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>',
+            light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+            sepia: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+            dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'
+        };
+        const THEME_TITLES = {
+            ar: { themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
+            en: { themeSystem: 'Theme: follows this device (click for light)', themeLight: 'Theme: light (click for sepia)', themeSepia: 'Theme: sepia (click for dark)', themeDark: 'Theme: dark (click to follow this device)' },
+            tr: { themeSystem: 'Tema: cihaza göre (açık için tıklayın)', themeLight: 'Tema: açık (sepya için tıklayın)', themeSepia: 'Tema: sepya (koyu için tıklayın)', themeDark: 'Tema: koyu (cihaza göre için tıklayın)' },
+            id: { themeSystem: 'Tema: mengikuti perangkat (klik untuk terang)', themeLight: 'Tema: terang (klik untuk sepia)', themeSepia: 'Tema: sepia (klik untuk gelap)', themeDark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
+            ur: { themeSystem: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', themeLight: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', themeSepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', themeDark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' }
+        };
+        Object.keys(THEME_TITLES).forEach(l => { if (LOCALES[l]) Object.assign(LOCALES[l], THEME_TITLES[l]); });
+
         const SCHOOL_PARAM = [0, 1];   // AlAdhan: 0 = Shafi/standard, 1 = Hanafi
 
         /* ---------- App controller ---------- */
@@ -524,9 +828,7 @@
             tokens: {},
             day: null,
             get lang() { const l = DataStore.get(CONFIG.S.L, 'ar'); return LOCALES[l] ? l : 'ar'; },
-            get theme() { return DataStore.get(CONFIG.S.T, 'system'); },
             get school() { return DataStore.get(CONFIG.S.M, 0) === 1 ? 1 : 0; },
-            setTheme(m) { DataStore.set(CONFIG.S.T, m); UI.theme(); },
             setLang(l) {
                 DataStore.set(CONFIG.S.L, l);
                 this.state.quran = null; this.state.hadith = null; this.state.err.quran = null; this.state.err.hadith = null;
@@ -603,16 +905,20 @@
                 document.querySelectorAll('[data-status]').forEach(el => {
                     el.querySelector('[data-retry]').addEventListener('click', () => App.retry(el.dataset.status));
                 });
+                document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
+                i360Theme.onChange(() => this.theme());
                 this.theme();
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (App.theme === 'system') this.theme(); });
+                i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
                 App.load();
                 setInterval(() => App.tick(), 30000);
                 document.addEventListener('visibilitychange', () => { if (!document.hidden) App.tick(); });
             },
-            theme() {
-                const isD = App.theme === 'dark' || (App.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                document.documentElement.classList.toggle('dark', isD);
-                document.querySelectorAll('[id^="theme-"]').forEach(el => { const on = el.id === `theme-${App.theme}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+            theme() {   // the theme button: icon and tooltip for the shared choice, in the page's language
+                const c = i360Theme.getChoice(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-theme');
+                const T = { system: L.themeSystem, light: L.themeLight, sepia: L.themeSepia, dark: L.themeDark };
+                btn.innerHTML = THEME_ICON[c];
+                btn.title = T[c] || THEME_TITLES.en[{ system: 'themeSystem', light: 'themeLight', sepia: 'themeSepia', dark: 'themeDark' }[c]];
+                btn.setAttribute('aria-label', btn.title);
             },
             set(t, v) { if (this.targets[t]) this.targets[t].textContent = v; },
             status(name, kind) {
@@ -634,6 +940,7 @@
                 document.documentElement.lang = lang; document.documentElement.dir = L.dir;
                 document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || LOCALES.en[el.dataset.i18n]; });
                 document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                this.theme();   // its tooltip is in the page's language
                 this.renderSchool();
                 this.renderHijri();
                 ['quran', 'hadith', 'prayer', 'geo'].forEach(n => this.renderPart(n));
