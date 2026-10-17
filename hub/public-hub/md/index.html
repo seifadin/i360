@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LK0Esye2Lj4w5A1k4BfD7tLTNEML1U/QC3pC1i7YAwA=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-gaO2ojwvYh+J85iBOYJhRzRkzVrztt6E2JRIMP25x24='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LK0Esye2Lj4w5A1k4BfD7tLTNEML1U/QC3pC1i7YAwA=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-gKS6lQjjhfE71dX2Dm6W/xJy2URSFkEly6JDgsLj5fA='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -3493,7 +3493,12 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     setZoom(1, false);
     applyLocalization();
 
-    const fileUrl = new URLSearchParams(window.location.search).get('file');
+    let fileUrl = new URLSearchParams(window.location.search).get('file');
+    // A link that passed through a forwarding address can arrive encoded twice
+    // ("https%3A%2F%2F…" after the normal decoding): decode it once more.
+    if (fileUrl && /^https?%3A/i.test(fileUrl)) {
+      try { fileUrl = decodeURIComponent(fileUrl); } catch { /* keep as is */ }
+    }
     if (fileUrl) {
       try {
         const link = new URL(fileUrl, window.location.href).href;

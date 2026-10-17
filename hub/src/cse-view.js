@@ -10,7 +10,7 @@
   'use strict';
 
   const LIB_HOST = 'lib.i36o.workers.dev';
-  const READER = 'https://i360-md.web.app/';
+  const READER = 'https://i360-hub.web.app/md/';
   const RESULTS_PER_STEP = 20;
 
   /* ---------------- Sources ---------------- */

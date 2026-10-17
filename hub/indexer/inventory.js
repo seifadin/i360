@@ -220,7 +220,7 @@ async function fetchFollow(fetchFn, step, url, opts) {
 
 // Headers only. Some servers refuse HEAD: fall back to fetching one byte.
 async function probeHeaders(fetchFn, step, url) {
-  const origin = { Origin: 'https://i360-cse.web.app' };
+  const origin = { Origin: 'https://i360-hub.web.app' };
   let { res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'HEAD', headers: origin });
   if (res.status === 405 || res.status === 501) {
     ({ res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'GET', headers: { ...origin, Range: 'bytes=0-0' } }));

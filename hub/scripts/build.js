@@ -1,6 +1,8 @@
 // Builds the two self-contained pages:
-//   public/index.html      the Reader    (from src/reader.src.html)
-//   public-cse/index.html  the i360 CSE  (from src/cse.src.html)
+//   public-hub/index.html      the hub's landing page (from src/hub.src.html)
+//   public-hub/md/index.html   the Reader    (from src/reader.src.html)
+//   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
+//   public-hub/day/index.html  Glance, the daily reflection (src/day.html, copied as is)
 //
 //   npm run build
 //
@@ -49,7 +51,7 @@ function buildPage({ src, out, scripts, connectSrc }) {
   }
   const csp = [
     "default-src 'none'",
-    `script-src ${hashes.join(' ')}`,
+    `script-src ${hashes.join(' ') || "'none'"}`,
     "style-src 'unsafe-inline' https://fonts.googleapis.com",
     'font-src https://fonts.gstatic.com',
     `connect-src ${connectSrc}`,
@@ -75,7 +77,7 @@ const marked = {
 // The Reader: ?file= may fetch from anywhere.
 buildPage({
   src: 'src/reader.src.html',
-  out: 'public/index.html',
+  out: 'public-hub/md/index.html',
   scripts: [
     ['/*@@MARKED@@*/', marked],
     ['/*@@BOOK_FORMAT@@*/', file('src/book-format.js')],
@@ -89,7 +91,7 @@ buildPage({
 // a local copy of the build: ?data=http://localhost:…).
 buildPage({
   src: 'src/cse.src.html',
-  out: 'public-cse/index.html',
+  out: 'public-hub/cse/index.html',
   scripts: [
     ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')],
     ['/*@@CSE_INDEX@@*/', file('src/cse-index.js')],
@@ -97,3 +99,11 @@ buildPage({
   ],
   connectSrc: 'https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*'
 });
+
+// The hub's landing page: links to the three apps, no scripts.
+buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
+
+// Glance (the daily reflection) has no build placeholders: it is copied as is.
+mkdirSync(join(root, 'public-hub/day'), { recursive: true });
+writeFileSync(join(root, 'public-hub/day/index.html'), read(join(root, 'src/day.html')));
+console.log('public-hub/day/index.html: copied from src/day.html');

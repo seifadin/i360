@@ -1,7 +1,7 @@
 {
-  "name": "i360-md",
+  "name": "i360-hub",
   "private": true,
-  "description": "i360 Markdown Reader and i360 CSE",
+  "description": "i360 hub: Markdown Reader, i360 CSE and Glance",
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test test/*.test.js",

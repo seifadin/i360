@@ -41,22 +41,22 @@ test('page labels: printed, volume, position, one-page source', () => {
 
 test('result links', () => {
   assert.equal(CseView.resultLink({ source: S('a'), local: 12, label: '' }, 'قواعد الفقه'),
-    `https://i360-md.web.app/?file=${encodeURIComponent(S('a').url)}#n=13`, 'archive.org books open our copy in the Reader');
+    `https://i360-hub.web.app/md/?file=${encodeURIComponent(S('a').url)}#n=13`, 'archive.org books open our copy in the Reader');
   assert.equal(CseView.resultLink({ source: S('a'), local: 12, label: '96' }, 'x'),
-    `https://i360-md.web.app/?file=${encodeURIComponent(S('a').url)}#p=96`);
+    `https://i360-hub.web.app/md/?file=${encodeURIComponent(S('a').url)}#p=96`);
   assert.equal(CseView.resultLink({ source: S('d'), local: 0, label: '' }, 'x', 'وزن-الدرهم, الشرعي'),
     `https://ar.wikipedia.org/wiki/مقادير_شرعية#:~:text=${encodeURIComponent('وزن')}%2D${encodeURIComponent('الدرهم')}%2C${encodeURIComponent(' الشرعي')}`);
   assert.equal(CseView.resultLink({ source: S('e'), local: 4, label: '17', vol: '2' }, 'x'),
-    `https://i360-md.web.app/?file=${encodeURIComponent(S('e').url)}#p=2%3A17`);
+    `https://i360-hub.web.app/md/?file=${encodeURIComponent(S('e').url)}#p=2%3A17`);
   assert.equal(CseView.resultLink({ source: S('e'), local: 4, label: '' }, 'x'),
-    `https://i360-md.web.app/?file=${encodeURIComponent(S('e').url)}#n=5`);
+    `https://i360-hub.web.app/md/?file=${encodeURIComponent(S('e').url)}#n=5`);
   assert.equal(CseView.resultLink({ source: { ...S('d'), type: 'pdf', url: 'https://x.org/a.pdf' }, local: 6, label: '' }, 'x'), 'https://x.org/a.pdf#page=7');
 });
 
 test('address: shared search, ?data only on this computer', () => {
   const data = encodeURIComponent('http://localhost:8788');
   assert.deepEqual(CseView.readAddress(`?q=abc&exact=1&data=${data}`, 'localhost'), { q: 'abc', exact: true, word: false, data: 'http://localhost:8788/' });
-  assert.equal(CseView.readAddress(`?q=abc&data=${data}`, 'i360-cse.web.app').data, null);
+  assert.equal(CseView.readAddress(`?q=abc&data=${data}`, 'i360-hub.web.app').data, null);
   assert.equal(CseView.readAddress('?data=javascript:alert(1)', 'localhost').data, null);
   assert.equal(CseView.writeAddress({ q: 'ab c', exact: true, word: true }), '?q=ab+c&exact=1&word=1');
   assert.equal(CseView.writeAddress({ q: '', exact: true, word: true }), '');

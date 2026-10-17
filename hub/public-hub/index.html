@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
+  <meta name="description" content="أدوات الموسوعة الإسلامية i360إ: قارئ الكتب، والبحث في الكتب، والتأمل اليومي.">
+  <!-- Font: Amiri, the i360إ app's font (only 400 and 700 exist) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #FAF7F2; --text: #0010CF; --hover: #EEF2FF; --rule: #CBD5E1; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: 'Amiri', 'Traditional Arabic', serif;
+      min-height: 100dvh; box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 1.5rem; text-align: center; }
+    nav { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 22rem; }
+    a {
+      display: block; padding: 0.9rem 1rem; border: 1px solid var(--rule); border-radius: 0.75rem;
+      color: var(--text); text-decoration: none; font-size: 1.2rem; font-weight: 700; text-align: center;
+    }
+    a:hover, a:focus-visible { background: var(--hover); }
+    a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <!-- "i360إ" stays in this order in Arabic text: a left-to-right isolate keeps the إ after "i360". -->
+  <h1>الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></h1>
+  <nav aria-label="أدوات الموسوعة">
+    <a href="md/">قارئ الكتب</a>
+    <a href="cse/">البحث في الكتب</a>
+    <a href="day/">التأمل اليومي</a>
+  </nav>
+</body>
+</html>

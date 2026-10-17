@@ -2906,7 +2906,12 @@
     setZoom(1, false);
     applyLocalization();
 
-    const fileUrl = new URLSearchParams(window.location.search).get('file');
+    let fileUrl = new URLSearchParams(window.location.search).get('file');
+    // A link that passed through a forwarding address can arrive encoded twice
+    // ("https%3A%2F%2F…" after the normal decoding): decode it once more.
+    if (fileUrl && /^https?%3A/i.test(fileUrl)) {
+      try { fileUrl = decodeURIComponent(fileUrl); } catch { /* keep as is */ }
+    }
     if (fileUrl) {
       try {
         const link = new URL(fileUrl, window.location.href).href;
