@@ -6,6 +6,29 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 ---
 
+## [Unreleased] — live on the web and over the air (still version 0.13.2)
+
+Changes released after 0.13.2 without a version bump: over the air to the installed apps and on the web app. They move under the next version number at its release.
+
+### Changed
+- The app's colours and its Amiri typeface now come from the shared i360 theme, the same single source used by the Daily Reflection, the Markdown Reader and the i360 CSE — the app looks exactly as before, and keeps the same colours even if the theme can't be reached (2026-10-17)
+- Fonts are now served from i360's own copy instead of Google Fonts, removing a dependency on an outside service (2026-10-17)
+- Resource links have one consistent way of opening: if the in-app browser can't open a page, it opens in a new tab instead, rather than silently doing nothing (2026-10-03)
+- Only one resource opens at a time, with a short "checking" indicator while a site's availability is confirmed; if the device blocks the page from opening, the app offers to try again (2026-10-03)
+- Translation requests now give up after 10 seconds instead of waiting indefinitely on a slow connection (2026-10-03)
+- New app icons for browsers and home screens: a sharper browser-tab icon, a dedicated icon for Android's shaped (round/squircle) launchers, and an opaque iPhone home-screen icon (2026-10-03)
+
+### Fixed
+- Searching again for the same term after closing its results works again; only accidental double-taps are ignored (2026-10-16)
+- A failed data load could mark the app's content as up to date, so the next successful start skipped the download it actually needed; the app now records that only after the download succeeds (2026-10-03)
+- Problem reports keep the actual reason a data load failed across automatic retries, and a report is now copied before anything else happens, as iPhone's browser requires (2026-10-03)
+
+### Security
+- Pages opened in a new tab can no longer reach back into the app's own page (2026-10-03)
+- The web app now sends standard browser security headers (no content-type guessing, no embedding in other sites' frames, limited referrer information) (2026-10-03, live 2026-10-18)
+
+---
+
 ## [0.13.2] — 2026-09-07
 
 ### Added
@@ -113,4 +136,4 @@ This release replaces the original low-code SAP Build Apps (AppGyver) implementa
 
 ## [0.12.4] and earlier
 
-Original implementation, built on SAP Build Apps (AppGyver). Its release history is kept in [README.md](README.md) (collapsed entries).
+Original implementation, built on SAP Build Apps (AppGyver). See prior release history for details.
