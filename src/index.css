@@ -21,8 +21,8 @@
     @apply text-brand-blue;
   }
 
-  /* No :root --color-* variables here — a set once existed but was
-     consumed by nothing (tailwind.config.ts's brand tokens are the single
-     source of truth for colors, per the locked §8 convention); removed as
-     a second, dead declaration of the same decision (§12 rule 12). */
+  /* No colour variables are declared here: tailwind.config.ts's brand tokens
+     are the single source of colours in the app (§7), and they read the
+     shared i360 theme's --i360-* variables (index.html's theme.css link),
+     each with its own value built in as the fallback. */
 }
