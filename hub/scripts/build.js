@@ -2,7 +2,7 @@
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
-//   public-hub/day/index.html  Glance, the daily reflection (src/day.html; only the shared theme is filled in)
+//   public-hub/day/index.html  Daily Reflection (src/day.html; only the shared theme is filled in)
 //
 //   npm run build
 //
@@ -137,7 +137,7 @@ buildPage({
 // The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
-// Glance (the daily reflection) loads Tailwind and FontAwesome from their own
+// Daily Reflection («التأمل اليومي», at /day/) loads Tailwind and FontAwesome from their own
 // sites, so it has no hash-based CSP: only the shared theme is filled in.
 {
   let html = read(join(root, 'src/day.html'));

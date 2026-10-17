@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-XLUzMpb6od3zkWhYVuGUkFrr5pMqNH7B+Tr/tZn1Fao=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-G9MPo/2i2yx8B+K6ST+YlvZ/gOHoGEDZhdtvgJyuJ08='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-7mI8iMipvIYom/Mv40k/YSNJ1jjFzpvPrcJx6orwcdY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -156,10 +156,13 @@
 // the site and without a copy, the app's fallback stays. A page whose <html>
 // has data-i360-lock="light" (the i360إ app) always shows that theme.
 //
-// The choice is shared by every app on the same site (hub: the Reader, the
-// CSE and Glance) and follows changes made in another tab.
+// The choices (theme, and numerals: 0123 · ٠١٢٣ · ۰۱۲۳) are shared by every app
+// on the same site (hub: the landing page, Daily Reflection, the Reader, the
+// CSE) and follow changes made in another tab.
 
 const THEMES = ['system', 'light', 'sepia', 'dark'];   // the cycle order
+const NUMERALS = ['western', 'arabic', 'persian'];      // 0123 · ٠١٢٣ · ۰۱۲۳ (the cycle order)
+const NUMERALS_KEY = 'i360.numerals';
 const CHOICE_KEY = 'i360.theme';
 const CACHE_KEY = 'i360.theme.css';
 const CSS_URL = new URL('theme.css', "https://theme.i36o.workers.dev/theme-loader.js").href;
@@ -169,6 +172,7 @@ const MAX_CSS = 256 * 1024;
 const root = document.documentElement;
 const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 const listeners = new Set();
+const numeralListeners = new Set();
 let started = false;
 
 function read(key) {
@@ -227,6 +231,53 @@ function onChange(fn) {
   return () => listeners.delete(fn);
 }
 
+/* ---------- Numerals: the second shared choice (display only) ---------- */
+
+const DIGIT_ZERO = { western: 0x30, arabic: 0x0660, persian: 0x06F0 };
+
+/** The saved numerals: western (0123), arabic (٠١٢٣) or persian (۰۱۲۳, also Urdu). */
+function getNumerals() {
+  const n = read(NUMERALS_KEY);
+  return NUMERALS.includes(n) ? n : 'western';
+}
+
+/** Every digit in text (Western, Arabic-Indic or Persian) written in the given numerals. */
+function toNumerals(text, numerals = getNumerals()) {
+  const zero = DIGIT_ZERO[numerals] || DIGIT_ZERO.western;
+  return String(text).replace(/[0-9\u0660-\u0669\u06F0-\u06F9]/g, (d) => {
+    const c = d.charCodeAt(0);
+    const v = c >= 0x06F0 ? c - 0x06F0 : c >= 0x0660 ? c - 0x0660 : c - 0x30;
+    return String.fromCharCode(zero + v);
+  });
+}
+
+function applyNumerals() {
+  const numerals = getNumerals();
+  for (const fn of numeralListeners) {
+    try { fn({ numerals }); } catch (e) { console.error(e); }
+  }
+  return { numerals };
+}
+
+/** Save the numerals choice and tell the page. */
+function setNumerals(numerals) {
+  if (!NUMERALS.includes(numerals)) throw new Error(`Unknown numerals: ${numerals}`);
+  write(NUMERALS_KEY, numerals);
+  return applyNumerals();
+}
+
+/** Next numerals in NUMERALS order (for a numerals button). */
+function cycleNumerals() {
+  const n = getNumerals();
+  return setNumerals(NUMERALS[(NUMERALS.indexOf(n) + 1) % NUMERALS.length]);
+}
+
+/** Called with { numerals } whenever the choice changes (here or in another tab). Returns a function that stops it. */
+function onNumeralsChange(fn) {
+  numeralListeners.add(fn);
+  return () => numeralListeners.delete(fn);
+}
+
 // Relative font addresses in theme.css point at this site, not at the page.
 function absolutize(css) {
   return css.replace(/url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
@@ -259,7 +310,10 @@ async function init() {
   if (!started) {
     started = true;
     if (darkQuery) darkQuery.addEventListener('change', () => { if (getChoice() === 'system') apply(); });
-    window.addEventListener('storage', e => { if (e.key === CHOICE_KEY) apply(); });
+    window.addEventListener('storage', e => {
+      if (e.key === CHOICE_KEY) apply();
+      if (e.key === NUMERALS_KEY) applyNumerals();
+    });
   }
 
   const copy = cached();
@@ -283,7 +337,7 @@ async function init() {
   return { ...state, source };
 }
 
-window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, init });
+window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, getNumerals, toNumerals, setNumerals, cycleNumerals, onNumeralsChange, init });
 })();</script>
   <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
 
@@ -1749,8 +1803,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       readError: 'تعذّر قراءة الملف.',
       emptyHint: 'لا يوجد ملف مفتوح. اضغط «فتح ملف» لاختيار كتاب.',
       noResults: '0 من 0',
-      numeralsWestern: 'الأرقام: غربية 123 (انقر للتبديل إلى ١٢٣)',
-      numeralsEastern: 'الأرقام: مشرقية ١٢٣ (انقر للتبديل إلى 123)'
+      numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
+      numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
+      numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)'
     },
     en: {
       appTitle: 'Markdown Reader',
@@ -1815,8 +1870,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       readError: 'Could not read the file.',
       emptyHint: 'No file open. Press “Open file” to choose a book.',
       noResults: '0 of 0',
-      numeralsWestern: 'Numerals: Western 123 (click for ١٢٣)',
-      numeralsEastern: 'Numerals: Eastern Arabic ١٢٣ (click for 123)'
+      numeralsWestern: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)',
+      numeralsArabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)',
+      numeralsPersian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)'
     }
   };
 
@@ -1862,7 +1918,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     multiVolume: false,
     notices: [],
     currentIdx: 0,
-    numerals: 'western',    // 'western' 123 | 'eastern' ١٢٣ — display only, saved on this device
+    numerals: 'western',    // the shared i360 choice: 'western' 0123 | 'arabic' ٠١٢٣ | 'persian' ۰۱۲۳ — display only
     theme: 'system',
     libSource: null,        // the catalog entry when the book is our copy from the lib site
     libBooks: 0,            // how many books its archive.org item holds (for the scan link)
@@ -1957,11 +2013,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   }
 
   // Digits as the reader shows them; the file itself is never changed.
-  function toEastern(s) {
-    return toWestern(s).replace(/[0-9]/g, (d) => String.fromCharCode(0x0660 + Number(d)));
-  }
   function fmtNum(s) {
-    return state.numerals === 'eastern' ? toEastern(String(s)) : toWestern(String(s));
+    return i360Theme.toNumerals(String(s), state.numerals);
   }
 
   function hashText(s) {
@@ -2158,7 +2211,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   // Show the book's digits in the chosen numerals. Code and real links keep theirs.
   function applyNumerals(root) {
-    const conv = state.numerals === 'eastern' ? toEastern : toWestern;
+    const conv = (v) => i360Theme.toNumerals(v, state.numerals);
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: (n) => (n.parentElement && n.parentElement.closest('pre, code, a:not(.fn-ref):not(.fn-back)'))
         ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
@@ -2622,8 +2675,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     setTitle(btnNavRight, isRtl ? tr.prevPage('→') : tr.nextPage('→'));
     setTitle(btnDirToggle, isRtl ? tr.dirRTL : tr.dirLTR);
     btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
-    btnNumerals.textContent = state.numerals === 'eastern' ? '١٢٣' : '123';
-    setTitle(btnNumerals, state.numerals === 'eastern' ? tr.numeralsEastern : tr.numeralsWestern);
+    btnNumerals.textContent = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' }[state.numerals];   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
+    setTitle(btnNumerals, { western: tr.numeralsWestern, arabic: tr.numeralsArabic, persian: tr.numeralsPersian }[state.numerals]);
     btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
     setTitle(btnTheme, { system: tr.themeSystem, light: tr.themeLight, sepia: tr.themeSepia, dark: tr.themeDark }[state.theme]);
     setTitle(btnScan, tr.scan);
@@ -2685,9 +2738,12 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   /* ================================================================
      Numerals, theme, text size — saved on this device
      ================================================================ */
-  btnNumerals.addEventListener('click', () => {
-    state.numerals = state.numerals === 'eastern' ? 'western' : 'eastern';
-    storeSet('numerals', state.numerals);
+  // Numerals: the shared i360 choice (0123 · ٠١٢٣ · ۰۱۲۳), also followed when
+  // another i360 app or tab changes it.
+  btnNumerals.addEventListener('click', () => { i360Theme.cycleNumerals(); });
+  i360Theme.onNumeralsChange(({ numerals }) => {
+    if (numerals === state.numerals) return;
+    state.numerals = numerals;
     for (const sheet of state.sheets) applyNumerals(sheet);
     search.indexes = {};        // snippets come from the page text, which just changed
     applyLocalization();
@@ -3665,7 +3721,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const isLocal = window.location.protocol === 'file:';
     statusIcon.innerHTML = isLocal ? ICON.globeX : ICON.globeCheck;
 
-    state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
+    state.numerals = i360Theme.getNumerals();
     state.theme = i360Theme.getChoice();
     i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
     const scale = Number(storeGet('textScale', 1));

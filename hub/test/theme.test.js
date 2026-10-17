@@ -102,3 +102,23 @@ test('a changed background makes its fallback stale, and --write fixes only that
   assert.equal(fixed, edited.replace('--i360-frame: #EAE7E2;', `--i360-frame: ${results[0].expected};`));
   assert.ok(check(fixed).results.every(r => r.ok));
 });
+
+test('numerals: any digits to 0123, ٠١٢٣ or ۰۱۲۳; the cycle order; the built-in loader offers it', async () => {
+  const store = {};
+  globalThis.document = { documentElement: { getAttribute: () => null } };
+  globalThis.window = { matchMedia: null };
+  globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+  const m = await import(path.join(SITE, 'theme-loader.js'));
+  assert.equal(m.toNumerals('ص 12، ٣٤، ۵۶ — 7:89', 'western'), 'ص 12، 34، 56 — 7:89');
+  assert.equal(m.toNumerals('ص 12، ٣٤، ۵۶', 'arabic'), 'ص ١٢، ٣٤، ٥٦');
+  assert.equal(m.toNumerals('ص 12، ٣٤، ۵۶', 'persian'), 'ص ۱۲، ۳۴، ۵۶');
+  assert.deepEqual(m.NUMERALS, ['western', 'arabic', 'persian']);
+  assert.equal(m.getNumerals(), 'western');
+  const seen = [];
+  m.onNumeralsChange(({ numerals }) => seen.push(numerals));
+  m.cycleNumerals(); m.cycleNumerals(); m.cycleNumerals();
+  assert.deepEqual(seen, ['arabic', 'persian', 'western']);
+  assert.equal(store['i360.numerals'], 'western');
+  const built = fs.readFileSync(path.join(__dirname, '..', 'public-hub', 'md', 'index.html'), 'utf8');
+  for (const k of ['getNumerals', 'setNumerals', 'cycleNumerals', 'onNumeralsChange', 'toNumerals']) assert.ok(built.includes(k), k);
+});

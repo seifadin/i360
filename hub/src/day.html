@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Reflection</title>
+    <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
          scripts/build.js: built-in colours, the saved theme before anything is drawn, the
          loader (window.i360Theme). Tailwind's dark: styles follow the "dark" class, set
@@ -24,7 +24,7 @@
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Colours from the shared i360 theme; the names are Glance's own. Behind the cards:
+        /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
            the frame colour (as behind the Reader's pages); cards: the page colour. */
         :root {
             --bg-primary: var(--i360-frame); --card-bg: var(--i360-bg); --text-primary: var(--i360-text); --text-secondary: var(--i360-muted);
@@ -38,6 +38,7 @@
         .bg-quran-soft { background-color: var(--i360-hover); }
         @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
         .text-accent { color: var(--i360-accent); }
+        .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
         .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
         .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
@@ -58,8 +59,12 @@
                 <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
                 <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
             </div>
-            <!-- The shared theme: one button cycles system → light → sepia → dark (as in the Reader and the CSE) -->
-            <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
+            <!-- The shared numerals and theme, in the same order as in the Reader and the CSE:
+                 numerals (0123 → ٠١٢٣ → ۰۱۲۳), then theme (system → light → sepia → dark) -->
+            <div class="flex gap-2">
+                <button id="btn-numerals" type="button" class="numerals-btn glass-card px-2 py-2 rounded-xl text-custom-secondary text-xs font-bold flex items-center justify-center"></button>
+                <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
+            </div>
         </div>
 
         <!-- dir="rtl" keeps the language grid in a fixed order -->
@@ -533,7 +538,8 @@
         };
         Object.keys(EXTRA).forEach(l => Object.assign(LOCALES[l], EXTRA[l]));
 
-        /* The theme button (shared with the Reader and the CSE): its icons and tooltips. */
+        /* The theme and numerals buttons (shared with the Reader and the CSE): icons, labels and tooltips. */
+        const NUMERALS_LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
         const THEME_ICON = {
             system: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>',
             light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
@@ -541,15 +547,47 @@
             dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'
         };
         const THEME_TITLES = {
-            ar: { themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
-            en: { themeSystem: 'Theme: follows this device (click for light)', themeLight: 'Theme: light (click for sepia)', themeSepia: 'Theme: sepia (click for dark)', themeDark: 'Theme: dark (click to follow this device)' },
-            tr: { themeSystem: 'Tema: cihaza göre (açık için tıklayın)', themeLight: 'Tema: açık (sepya için tıklayın)', themeSepia: 'Tema: sepya (koyu için tıklayın)', themeDark: 'Tema: koyu (cihaza göre için tıklayın)' },
-            id: { themeSystem: 'Tema: mengikuti perangkat (klik untuk terang)', themeLight: 'Tema: terang (klik untuk sepia)', themeSepia: 'Tema: sepia (klik untuk gelap)', themeDark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
-            ur: { themeSystem: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', themeLight: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', themeSepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', themeDark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' }
+            ar: { numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)', numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)', numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
+                  themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
+            en: { numeralsWestern: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)', numeralsArabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)', numeralsPersian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)',
+                  themeSystem: 'Theme: follows this device (click for light)', themeLight: 'Theme: light (click for sepia)', themeSepia: 'Theme: sepia (click for dark)', themeDark: 'Theme: dark (click to follow this device)' },
+            tr: { numeralsWestern: 'Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)', numeralsArabic: 'Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)', numeralsPersian: 'Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)',
+                  themeSystem: 'Tema: cihaza göre (açık için tıklayın)', themeLight: 'Tema: açık (sepya için tıklayın)', themeSepia: 'Tema: sepya (koyu için tıklayın)', themeDark: 'Tema: koyu (cihaza göre için tıklayın)' },
+            id: { numeralsWestern: 'Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)', numeralsArabic: 'Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)', numeralsPersian: 'Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)',
+                  themeSystem: 'Tema: mengikuti perangkat (klik untuk terang)', themeLight: 'Tema: terang (klik untuk sepia)', themeSepia: 'Tema: sepia (klik untuk gelap)', themeDark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
+            ur: { numeralsWestern: 'اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)', numeralsArabic: 'اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)', numeralsPersian: 'اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)',
+                  themeSystem: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', themeLight: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', themeSepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', themeDark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' }
         };
         Object.keys(THEME_TITLES).forEach(l => { if (LOCALES[l]) Object.assign(LOCALES[l], THEME_TITLES[l]); });
 
         const SCHOOL_PARAM = [0, 1];   // AlAdhan: 0 = Shafi/standard, 1 = Hanafi
+
+        /* ---------- Numerals: every number on the page in the shared choice (display only) ---------- */
+        const Numerals = {
+            fix(node) {
+                const v = node.nodeValue;
+                if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) return;
+                const nv = i360Theme.toNumerals(v);
+                if (nv !== v) node.nodeValue = nv;
+            },
+            walk(root) {
+                if (root.nodeType === 3) { this.fix(root); return; }
+                if (root.nodeType !== 1 || root.closest('script, style, #btn-numerals')) return;
+                const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest('script, style, #btn-numerals')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+                for (let n = w.nextNode(); n; n = w.nextNode()) this.fix(n);
+            },
+            all() { this.walk(document.body); },
+            // Text the page draws later (prayer times, countdowns, dates…) is converted as it appears.
+            watch() {
+                new MutationObserver((list) => {
+                    for (const m of list) {
+                        if (m.type === 'characterData') this.fix(m.target);
+                        else m.addedNodes.forEach((n) => this.walk(n));
+                    }
+                }).observe(document.body, { childList: true, characterData: true, subtree: true });
+                this.all();
+            }
+        };
 
         /* ---------- App controller ---------- */
         const App = {
@@ -636,11 +674,21 @@
                 });
                 document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
                 i360Theme.onChange(() => this.theme());
+                document.getElementById('btn-numerals').addEventListener('click', () => i360Theme.cycleNumerals());
+                i360Theme.onNumeralsChange(() => { this.numeralsButton(); Numerals.all(); });
+                Numerals.watch();
                 this.theme();
                 i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
                 App.load();
                 setInterval(() => App.tick(), 30000);
                 document.addEventListener('visibilitychange', () => { if (!document.hidden) App.tick(); });
+            },
+            numeralsButton() {   // label and tooltip for the shared numerals choice, in the page's language
+                const n = i360Theme.getNumerals(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-numerals');
+                const key = { western: 'numeralsWestern', arabic: 'numeralsArabic', persian: 'numeralsPersian' }[n];
+                btn.textContent = NUMERALS_LABEL[n];
+                btn.title = L[key] || THEME_TITLES.en[key];
+                btn.setAttribute('aria-label', btn.title);
             },
             theme() {   // the theme button: icon and tooltip for the shared choice, in the page's language
                 const c = i360Theme.getChoice(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-theme');
@@ -669,7 +717,9 @@
                 document.documentElement.lang = lang; document.documentElement.dir = L.dir;
                 document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || LOCALES.en[el.dataset.i18n]; });
                 document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
-                this.theme();   // its tooltip is in the page's language
+                this.theme();            // their tooltips are in the page's language
+                this.numeralsButton();
+                document.title = L.title;   // the tab name follows the language too
                 this.renderSchool();
                 this.renderHijri();
                 ['quran', 'hadith', 'prayer', 'geo'].forEach(n => this.renderPart(n));

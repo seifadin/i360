@@ -33,10 +33,13 @@
     nav a:hover, nav a:focus-visible { background: var(--i360-hover); }
     nav a:focus-visible { outline: 2px solid var(--i360-focus); outline-offset: 2px; }
 
-    /* The theme button: same look as in the Reader and the CSE; top corner on the
-       left in Arabic (the end of the line). */
-    .theme-btn {
+    /* The numerals and theme buttons: same look and order as in the Reader and the
+       CSE (numerals, then theme); top corner on the left in Arabic (the end of the line). */
+    .corner {
       position: fixed; top: max(0.5rem, env(safe-area-inset-top)); inset-inline-end: 0.5rem;
+      display: flex; gap: 0.25rem;
+    }
+    .theme-btn {
       background: transparent; border: none; color: var(--i360-icon);
       height: 2rem; min-width: 2rem; padding: 0 0.4rem; border-radius: 0.25rem;
       display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -44,6 +47,7 @@
     }
     .theme-btn:hover { background-color: var(--i360-hover); color: var(--i360-icon-hover); }
     .theme-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
+    .numerals-btn { font-family: inherit; font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
     .theme-btn svg {
       width: 1.15rem; height: 1.15rem;
       stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
@@ -51,9 +55,12 @@
   </style>
 </head>
 <body>
-  <button class="theme-btn" id="btn-theme" type="button"></button>
+  <div class="corner">
+    <button class="theme-btn numerals-btn" id="btn-numerals" type="button"></button>
+    <button class="theme-btn" id="btn-theme" type="button"></button>
+  </div>
   <!-- "i360إ" stays in this order in Arabic text: a left-to-right isolate keeps the إ after "i360". -->
-  <h1>الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></h1>
+  <h1>الموسوعة الإسلامية <bdi dir="ltr" id="name">i360&lrm;إ</bdi></h1>
   <nav aria-label="أدوات الموسوعة">
     <a href="day/">التأمل اليومي</a>
     <a href="md/">قارئ الكتب</a>
@@ -83,6 +90,25 @@
       i360Theme.onChange(function (s) { show(s.choice); });
       btn.addEventListener('click', function () { i360Theme.cycle(); });
       show(i360Theme.getChoice());
+
+      // The numerals button: the shared choice (0123 · ٠١٢٣ · ۰۱۲۳); here it only
+      // changes the digits of the name.
+      var nbtn = document.getElementById('btn-numerals'), name = document.getElementById('name');
+      var LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
+      var NTITLE = {
+        western: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
+        arabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
+        persian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)'
+      };
+      function showNumerals(n) {
+        nbtn.textContent = LABEL[n];
+        nbtn.title = NTITLE[n];
+        nbtn.setAttribute('aria-label', NTITLE[n]);
+        name.textContent = i360Theme.toNumerals(name.textContent, n);
+      }
+      i360Theme.onNumeralsChange(function (s) { showNumerals(s.numerals); });
+      nbtn.addEventListener('click', function () { i360Theme.cycleNumerals(); });
+      showNumerals(i360Theme.getNumerals());
       i360Theme.init();
     })();
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-XLUzMpb6od3zkWhYVuGUkFrr5pMqNH7B+Tr/tZn1Fao=' 'sha256-W5/lXeaa2/sYix8K04AaNkJMVRhXPPf+13Tb671dU1M='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-WfnpFwzbVu5DX9iIGH6u/SzuioBH67+Y9nbPVMspo1Q='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="أدوات الموسوعة الإسلامية i360إ: التأمل اليومي، وقارئ الكتب، والبحث في الكتب.">
 
@@ -156,10 +156,13 @@
 // the site and without a copy, the app's fallback stays. A page whose <html>
 // has data-i360-lock="light" (the i360إ app) always shows that theme.
 //
-// The choice is shared by every app on the same site (hub: the Reader, the
-// CSE and Glance) and follows changes made in another tab.
+// The choices (theme, and numerals: 0123 · ٠١٢٣ · ۰۱۲۳) are shared by every app
+// on the same site (hub: the landing page, Daily Reflection, the Reader, the
+// CSE) and follow changes made in another tab.
 
 const THEMES = ['system', 'light', 'sepia', 'dark'];   // the cycle order
+const NUMERALS = ['western', 'arabic', 'persian'];      // 0123 · ٠١٢٣ · ۰۱۲۳ (the cycle order)
+const NUMERALS_KEY = 'i360.numerals';
 const CHOICE_KEY = 'i360.theme';
 const CACHE_KEY = 'i360.theme.css';
 const CSS_URL = new URL('theme.css', "https://theme.i36o.workers.dev/theme-loader.js").href;
@@ -169,6 +172,7 @@ const MAX_CSS = 256 * 1024;
 const root = document.documentElement;
 const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 const listeners = new Set();
+const numeralListeners = new Set();
 let started = false;
 
 function read(key) {
@@ -227,6 +231,53 @@ function onChange(fn) {
   return () => listeners.delete(fn);
 }
 
+/* ---------- Numerals: the second shared choice (display only) ---------- */
+
+const DIGIT_ZERO = { western: 0x30, arabic: 0x0660, persian: 0x06F0 };
+
+/** The saved numerals: western (0123), arabic (٠١٢٣) or persian (۰۱۲۳, also Urdu). */
+function getNumerals() {
+  const n = read(NUMERALS_KEY);
+  return NUMERALS.includes(n) ? n : 'western';
+}
+
+/** Every digit in text (Western, Arabic-Indic or Persian) written in the given numerals. */
+function toNumerals(text, numerals = getNumerals()) {
+  const zero = DIGIT_ZERO[numerals] || DIGIT_ZERO.western;
+  return String(text).replace(/[0-9\u0660-\u0669\u06F0-\u06F9]/g, (d) => {
+    const c = d.charCodeAt(0);
+    const v = c >= 0x06F0 ? c - 0x06F0 : c >= 0x0660 ? c - 0x0660 : c - 0x30;
+    return String.fromCharCode(zero + v);
+  });
+}
+
+function applyNumerals() {
+  const numerals = getNumerals();
+  for (const fn of numeralListeners) {
+    try { fn({ numerals }); } catch (e) { console.error(e); }
+  }
+  return { numerals };
+}
+
+/** Save the numerals choice and tell the page. */
+function setNumerals(numerals) {
+  if (!NUMERALS.includes(numerals)) throw new Error(`Unknown numerals: ${numerals}`);
+  write(NUMERALS_KEY, numerals);
+  return applyNumerals();
+}
+
+/** Next numerals in NUMERALS order (for a numerals button). */
+function cycleNumerals() {
+  const n = getNumerals();
+  return setNumerals(NUMERALS[(NUMERALS.indexOf(n) + 1) % NUMERALS.length]);
+}
+
+/** Called with { numerals } whenever the choice changes (here or in another tab). Returns a function that stops it. */
+function onNumeralsChange(fn) {
+  numeralListeners.add(fn);
+  return () => numeralListeners.delete(fn);
+}
+
 // Relative font addresses in theme.css point at this site, not at the page.
 function absolutize(css) {
   return css.replace(/url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
@@ -259,7 +310,10 @@ async function init() {
   if (!started) {
     started = true;
     if (darkQuery) darkQuery.addEventListener('change', () => { if (getChoice() === 'system') apply(); });
-    window.addEventListener('storage', e => { if (e.key === CHOICE_KEY) apply(); });
+    window.addEventListener('storage', e => {
+      if (e.key === CHOICE_KEY) apply();
+      if (e.key === NUMERALS_KEY) applyNumerals();
+    });
   }
 
   const copy = cached();
@@ -283,7 +337,7 @@ async function init() {
   return { ...state, source };
 }
 
-window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, init });
+window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, getNumerals, toNumerals, setNumerals, cycleNumerals, onNumeralsChange, init });
 })();</script>
   <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
 
@@ -304,10 +358,13 @@ window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getCh
     nav a:hover, nav a:focus-visible { background: var(--i360-hover); }
     nav a:focus-visible { outline: 2px solid var(--i360-focus); outline-offset: 2px; }
 
-    /* The theme button: same look as in the Reader and the CSE; top corner on the
-       left in Arabic (the end of the line). */
-    .theme-btn {
+    /* The numerals and theme buttons: same look and order as in the Reader and the
+       CSE (numerals, then theme); top corner on the left in Arabic (the end of the line). */
+    .corner {
       position: fixed; top: max(0.5rem, env(safe-area-inset-top)); inset-inline-end: 0.5rem;
+      display: flex; gap: 0.25rem;
+    }
+    .theme-btn {
       background: transparent; border: none; color: var(--i360-icon);
       height: 2rem; min-width: 2rem; padding: 0 0.4rem; border-radius: 0.25rem;
       display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -315,6 +372,7 @@ window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getCh
     }
     .theme-btn:hover { background-color: var(--i360-hover); color: var(--i360-icon-hover); }
     .theme-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
+    .numerals-btn { font-family: inherit; font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
     .theme-btn svg {
       width: 1.15rem; height: 1.15rem;
       stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
@@ -322,9 +380,12 @@ window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getCh
   </style>
 </head>
 <body>
-  <button class="theme-btn" id="btn-theme" type="button"></button>
+  <div class="corner">
+    <button class="theme-btn numerals-btn" id="btn-numerals" type="button"></button>
+    <button class="theme-btn" id="btn-theme" type="button"></button>
+  </div>
   <!-- "i360إ" stays in this order in Arabic text: a left-to-right isolate keeps the إ after "i360". -->
-  <h1>الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></h1>
+  <h1>الموسوعة الإسلامية <bdi dir="ltr" id="name">i360&lrm;إ</bdi></h1>
   <nav aria-label="أدوات الموسوعة">
     <a href="day/">التأمل اليومي</a>
     <a href="md/">قارئ الكتب</a>
@@ -354,6 +415,25 @@ window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getCh
       i360Theme.onChange(function (s) { show(s.choice); });
       btn.addEventListener('click', function () { i360Theme.cycle(); });
       show(i360Theme.getChoice());
+
+      // The numerals button: the shared choice (0123 · ٠١٢٣ · ۰۱۲۳); here it only
+      // changes the digits of the name.
+      var nbtn = document.getElementById('btn-numerals'), name = document.getElementById('name');
+      var LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
+      var NTITLE = {
+        western: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
+        arabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
+        persian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)'
+      };
+      function showNumerals(n) {
+        nbtn.textContent = LABEL[n];
+        nbtn.title = NTITLE[n];
+        nbtn.setAttribute('aria-label', NTITLE[n]);
+        name.textContent = i360Theme.toNumerals(name.textContent, n);
+      }
+      i360Theme.onNumeralsChange(function (s) { showNumerals(s.numerals); });
+      nbtn.addEventListener('click', function () { i360Theme.cycleNumerals(); });
+      showNumerals(i360Theme.getNumerals());
       i360Theme.init();
     })();
   </script>

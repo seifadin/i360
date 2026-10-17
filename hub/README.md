@@ -11,7 +11,7 @@ Firebase project ID **`i360-md`** (display name `i360-hub`), separate from the i
 | `cse` | https://i360-cse.web.app/ | forwards to `/cse/` |
 | `day` | https://i360-day.web.app/ | forwards to `/day/` |
 
-The three apps share one site so they share saved settings (e.g. the theme).
+The apps share one site so they share saved settings: the theme and the numerals (0123 · ٠١٢٣ · ۰۱۲۳).
 
 ## Layout
 ```
@@ -19,7 +19,7 @@ public-hub/index.html      landing page          (built from src/hub.src.html)
 public-hub/md/index.html   the Reader            (built from src/reader.src.html)
 public-hub/md/books/*.md   books exported by the i360 OCR Engine
 public-hub/cse/index.html  the i360 CSE          (built from src/cse.src.html)
-public-hub/day/index.html  Glance, daily reflection (built from src/day.html)
+public-hub/day/index.html  Daily Reflection «التأمل اليومي» (built from src/day.html)
 public-hub/robots.txt
 forward/404.html           fallback for the forwarding sites
 ```
@@ -36,7 +36,7 @@ Always name the target(s).
 
 Never edit the built pages in `public-hub/` by hand: edit `src/`, then build. The pages'
 security policy allows only the exact scripts they were built with, so a hand edit makes
-the browser block them. (Glance loads Tailwind and FontAwesome from their sites, so it has
+the browser block them. (Daily Reflection loads Tailwind and FontAwesome from their sites, so it has
 no hash-based policy; the build only fills in the shared theme. Edit `src/day.html`.)
 
 ## Shared theme (theme.i36o.workers.dev)
@@ -51,7 +51,7 @@ theme/fallbacks.js           plain colours for color-mix values; each page's bui
 theme/fonts.js, woff2.js     font check and update (from the @fontsource npm packages)
 theme/wrangler.jsonc         the theme Worker (files only)
 ```
-- **The hub's pages** (landing page, Glance, Reader, CSE) build in the built-in colours, `early.js`
+- **The hub's pages** (landing page, Daily Reflection, Reader, CSE) build in the built-in colours, `early.js`
   and the loader (`window.i360Theme`), so the theme button also works offline. New colours
   and fonts on the theme site reach them without a rebuild; a change to the loader needs one.
   One theme choice is shared by all of them.
