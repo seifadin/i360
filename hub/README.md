@@ -38,5 +38,22 @@ Never edit the built pages in `public-hub/` by hand: edit `src/`, then build. Th
 security policy allows only the exact scripts they were built with, so a hand edit makes
 the browser block them. (Glance has no build placeholders; edit `src/day.html`.)
 
+## Shared theme (theme.i36o.workers.dev)
+The colours and fonts of every i360 app, from one place (`theme/`):
+```
+theme/site/theme.css         variables (--i360-…) for light, sepia, dark + @font-face
+theme/site/theme-loader.js   the one module: applies the shared choice, refreshes theme.css
+theme/site/fonts/            Amiri, Amiri Quran (OFL 1.1, licences beside them)
+theme/site/_headers          CORS everywhere; theme files no-cache; fonts immutable
+theme/early.js               inlined in each app's <head> (no flash on a repeat visit)
+theme/fallbacks.js           plain colours for color-mix values; each app's built-in fallback
+theme/wrangler.jsonc         the theme Worker (files only)
+```
+Published by `.github/workflows/theme-publish.yml` on every push to `main` that
+changes `theme/` (or by hand: Actions → Theme publish, or `npm run publish-theme`).
+After changing a colour that a `color-mix` is made from: `node theme/fallbacks.js --write`
+(`npm test` and the workflow stop while a fallback is out of date).
+Font files are cached for a year: a new font version goes in a new folder.
+
 ## Book file names
 Use plain Latin letters, digits and hyphens (e.g. `fatawa-v5.md`): they appear in links.

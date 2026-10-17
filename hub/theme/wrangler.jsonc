@@ -1,0 +1,15 @@
+// The theme site (theme.i36o.workers.dev): an assets-only Worker serving the
+// shared theme — theme.css, theme-loader.js and the fonts. No Worker code.
+// Published by .github/workflows/theme-publish.yml when theme/site/ changes
+// (or by hand: npm run publish-theme, which needs CLOUDFLARE_API_TOKEN and
+// CLOUDFLARE_ACCOUNT_ID). Headers (CORS, caching) come from site/_headers.
+{
+  "name": "theme",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "none"
+  },
+  "workers_dev": true,
+  "preview_urls": false
+}
