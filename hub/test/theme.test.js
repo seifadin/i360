@@ -66,6 +66,10 @@ test('fonts: every file theme.css names is there, in a versioned folder, with it
     assert.match(fs.readFileSync(path.join(SITE, d, 'OFL.txt'), 'utf8'), /SIL Open Font License, Version 1\.1/);
   }
   assert.doesNotMatch(css, /KFGQPC/);
+  // block, not swap: no reflow when Amiri arrives (i360-instructions.md §14g)
+  const faces = css.match(/@font-face \{[^}]*\}/g);
+  assert.equal(faces.length, 8);
+  for (const f of faces) assert.match(f, /font-display: block;/);
 });
 
 test('_headers: CORS everywhere, theme files never cached stale, fonts immutable', () => {
