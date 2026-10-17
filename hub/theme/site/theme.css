@@ -27,7 +27,7 @@
 :root, [data-theme="light"] {
   color-scheme: light;
   --i360-bg: #FAF7F2;            /* the main background: book pages, the CSE, the app */
-  --i360-frame: #EAE7E2;         /* @derived: behind the pages, a shade darker (see below) */
+  --i360-frame: #F2EFEA;         /* @derived: behind the pages, a shade darker (see below) */
   --i360-surface: #FAF7F2;       /* panels, cards */
   --i360-toolbar: #FAF7F2;
   --i360-border: #CBD5E1;        /* toolbar and panel edges */
@@ -130,7 +130,7 @@
    would replace their own frame colours. */
 @supports (color: color-mix(in oklab, red, red)) {
   :root:not([data-theme]), [data-theme="light"] {
-    --i360-frame: color-mix(in oklab, var(--i360-bg), black 5%);
+    --i360-frame: color-mix(in oklab, var(--i360-bg), black 2.5%);
   }
 }
 

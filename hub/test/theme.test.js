@@ -9,7 +9,8 @@ const SITE = path.join(__dirname, '..', 'theme', 'site');
 const css = fs.readFileSync(THEME_CSS, 'utf8');
 
 test('OKLab mixing matches CSS color-mix', () => {
-  assert.equal(mixOklab('#FAF7F2', 'black', 5), '#EAE7E2');   // the Reader's frame (agreed value)
+  assert.equal(mixOklab('#FAF7F2', 'black', 5), '#EAE7E2');   // the first frame value (2026-10-17)
+  assert.equal(mixOklab('#FAF7F2', 'black', 2.5), '#F2EFEA');  // the frame now (Seif, 2026-10-17)
   assert.equal(mixOklab('#ffffff', 'black', 0), '#FFFFFF');
   assert.equal(mixOklab('#123456', '#123456', 50), '#123456');
   assert.equal(mixOklab('#000', 'white', 100), '#FFFFFF');
@@ -46,7 +47,7 @@ test('a derived colour is set for its own theme only (never for every theme thro
 test('the fallback is variables only, with plain colours', () => {
   const fb = fallbackCss(css);
   assert.doesNotMatch(fb, /color-mix|@font-face|@supports|url\(/);
-  assert.match(fb, /--i360-frame: #EAE7E2;/);
+  assert.match(fb, /--i360-frame: #F2EFEA;/);
   assert.match(fb, /\[data-theme="dark"\] \{\n  color-scheme: dark;/);
 });
 
@@ -97,9 +98,9 @@ test('a changed background makes its fallback stale, and --write fixes only that
   const edited = css.replace('--i360-bg: #FAF7F2;', '--i360-bg: #FFFFFF;');
   const { results, fixed } = check(edited);
   assert.equal(results[0].ok, false);
-  assert.equal(results[0].expected, mixOklab('#FFFFFF', 'black', 5));
+  assert.equal(results[0].expected, mixOklab('#FFFFFF', 'black', 2.5));
   assert.equal(fixed.length, edited.length);
-  assert.equal(fixed, edited.replace('--i360-frame: #EAE7E2;', `--i360-frame: ${results[0].expected};`));
+  assert.equal(fixed, edited.replace('--i360-frame: #F2EFEA;', `--i360-frame: ${results[0].expected};`));
   assert.ok(check(fixed).results.every(r => r.ok));
 });
 

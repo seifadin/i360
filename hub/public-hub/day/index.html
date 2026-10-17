@@ -11,7 +11,7 @@
     <style id="i360-fallback">:root, [data-theme="light"] {
   color-scheme: light;
   --i360-bg: #FAF7F2;
-  --i360-frame: #EAE7E2;
+  --i360-frame: #F2EFEA;
   --i360-surface: #FAF7F2;
   --i360-toolbar: #FAF7F2;
   --i360-border: #CBD5E1;
@@ -363,6 +363,13 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         .bg-quran-soft { background-color: var(--i360-hover); }
         @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
         .text-accent { color: var(--i360-accent); }
+        /* Amiri is a book face with short letters: the smallest text sizes go one step up
+           (10 → 12 px, 12 → 14 px, 8 → 11 px); headings and body text stay as they are. */
+        .text-\[8px\] { font-size: 0.6875rem !important; }
+        .text-\[10px\] { font-size: 0.75rem !important; }
+        .text-xs { font-size: 0.875rem !important; line-height: 1.35rem !important; }
+        @media (min-width: 640px) { .sm\:text-xs { font-size: 0.875rem !important; line-height: 1.35rem !important; } }
+        @media (min-width: 768px) { .md\:text-xs { font-size: 0.875rem !important; line-height: 1.35rem !important; } }
         .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
         .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
@@ -1112,9 +1119,9 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                     const isNext = k === next, m = /(\d{1,2}):(\d{2})/.exec(t[k] || '');
                     const box = mk('div', `flex flex-col items-center p-3 transition-all ${isNext ? 'next-prayer-highlight' : 'inset-item'}`);
                     box.append(
-                        mk('span', `text-[10px] md:text-xs font-bold ${isNext ? 'text-slate-900 dark:text-blue-400' : 'text-custom-secondary'}`, L.prayers[i]),
-                        mk('span', `text-sm md:text-lg font-bold mt-1 ${isNext ? 'text-slate-900 dark:text-blue-300' : 'text-custom-secondary'}`, m ? m[0] : '—'));
-                    if (isNext) box.append(mk('span', 'text-[8px] mt-1 font-black text-blue-500 animate-pulse', L.next));
+                        mk('span', `text-[10px] md:text-xs font-bold ${isNext ? 'text-accent' : 'text-custom-secondary'}`, L.prayers[i]),
+                        mk('span', `text-base md:text-xl font-bold mt-1 ${isNext ? 'text-accent' : 'text-custom-secondary'}`, m ? m[0] : '—'));
+                    if (isNext) box.append(mk('span', 'text-[8px] mt-1 font-black text-accent animate-pulse', L.next));
                     return box;
                 }));
                 const mid = meta.method && meta.method.id;
