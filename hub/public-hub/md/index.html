@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-7mI8iMipvIYom/Mv40k/YSNJ1jjFzpvPrcJx6orwcdY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-WcoiMdTUv1kwBcxWzIDrBP9iothBgN+tI8bjs43t08Y=' 'sha256-3a4xAGuI5o4qkovoVlFVFRp9h0/HVnVEBsuRi4EQ2/c='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src *; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -2660,6 +2660,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     searchPopup.dir = state.dir;
     missingPagesBanner.dir = state.dir;
     moreMenu.dir = 'ltr';
+    // The view group (numerals, theme, bookmark…) keeps the toolbar's own order inside the
+    // menu too, so numerals stays right of theme in Arabic, as in every i360 app.
+    $('group-view').dir = state.dir;
 
     setTitle(btnPanel, tr.panel);
     setTitle(btnZoomIn, tr.zoomIn);

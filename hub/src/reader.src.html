@@ -1748,6 +1748,9 @@
     searchPopup.dir = state.dir;
     missingPagesBanner.dir = state.dir;
     moreMenu.dir = 'ltr';
+    // The view group (numerals, theme, bookmark…) keeps the toolbar's own order inside the
+    // menu too, so numerals stays right of theme in Arabic, as in every i360 app.
+    $('group-view').dir = state.dir;
 
     setTitle(btnPanel, tr.panel);
     setTitle(btnZoomIn, tr.zoomIn);
