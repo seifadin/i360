@@ -1,4 +1,4 @@
-// Builds the two self-contained pages:
+// Builds the self-contained pages:
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
@@ -14,6 +14,13 @@
 //   /*@@CSE_INDEX@@*/    src/cse-index.js, the index format shared with the indexer
 //   /*@@CSE_VIEW@@*/     src/cse-view.js, what the CSE page shows for a result
 //   /*@@LIB_COPY@@*/     src/lib-copy.js, our copies of indexed books on the lib site (Reader)
+//   /*@@THEME_FALLBACK@@*/  the shared theme's colours, plain (theme/fallbacks.js),
+//                        used until theme.css arrives and whenever it can't
+//   /*@@THEME_EARLY@@*/  theme/early.js: the saved theme before anything is drawn
+//   /*@@THEME_LOADER@@*/ theme/site/theme-loader.js turned into a plain script
+//                        (window.i360Theme), built in so the theme button works offline
+//   /*@@THEME_ORIGIN@@*/ the theme site's address (I360_THEME_ORIGIN to test
+//                        against another one)
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
 //                        after everything else is in place
@@ -25,6 +32,27 @@ const { join, dirname } = require('node:path');
 
 const root = join(__dirname, '..');
 const read = (p) => readFileSync(p, 'utf8');
+const { fallbackCss } = require('../theme/fallbacks.js');
+
+// The shared theme site: theme.css, the fonts (and the hosted copy of the loader).
+const THEME_ORIGIN = process.env.I360_THEME_ORIGIN || 'https://theme.i36o.workers.dev';
+if (!/^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(THEME_ORIGIN)) throw new Error(`I360_THEME_ORIGIN must be a bare origin, got "${THEME_ORIGIN}"`);
+
+// theme-loader.js is an ES module (it is also served as one). Built in, it
+// becomes a plain script: its exports are gathered on window.i360Theme and its
+// own address is the theme site's, so theme.css and the fonts come from there.
+function themeLoaderScript() {
+  const src = read(join(root, 'theme/site/theme-loader.js'));
+  const names = [...src.matchAll(/^export (?:async\s+)?(?:function|const)\s+(\w+)/gm)].map((m) => m[1]);
+  const code = src.replace(/^export /gm, '').replace(/import\.meta\.url/g, JSON.stringify(`${THEME_ORIGIN}/theme-loader.js`));
+  if (/^\s*(import|export)\b/m.test(code)) throw new Error('theme-loader.js: an import/export the build cannot turn into a plain script');
+  return `(function () {\n'use strict';\n${code}\nwindow.i360Theme = Object.freeze({ ${names.join(', ')} });\n})();`;
+}
+const theme = {
+  fallback: fallbackCss(read(join(root, 'theme/site/theme.css'))),
+  early: { code: read(join(root, 'theme/early.js')), name: 'theme/early.js' },
+  loader: { code: themeLoaderScript(), name: 'theme-loader.js (built in)' }
+};
 
 function inlineScript(code, name) {
   if (/<\/script/i.test(code)) throw new Error(`${name} contains "</script": it can't be inlined`);
@@ -40,10 +68,16 @@ function fill(html, placeholder, value) {
 }
 
 // Only the page's own inline scripts may run; no external scripts, plugins
-// or images; fonts from Google; fetches only where connectSrc allows.
+// or images; fonts from the theme site; fetches only where connectSrc allows
+// (plus theme.css from the theme site).
 function buildPage({ src, out, scripts, connectSrc }) {
   let html = read(join(root, src));
+  html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
+  html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
+  scripts = [['/*@@THEME_EARLY@@*/', theme.early], ['/*@@THEME_LOADER@@*/', theme.loader], ...scripts];
   for (const [placeholder, file] of scripts) html = fill(html, placeholder, inlineScript(file.code, file.name));
+  if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error(`${src}: Google Fonts left in the page: fonts come from the theme site`);
+  if (connectSrc !== '*') connectSrc = connectSrc === "'none'" ? THEME_ORIGIN : `${THEME_ORIGIN} ${connectSrc}`;
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((m) => `'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
   if (/<script\b[^>]*\bsrc=/i.test(html.replace(/<script>[\s\S]*?<\/script>/g, ''))) {
@@ -52,8 +86,8 @@ function buildPage({ src, out, scripts, connectSrc }) {
   const csp = [
     "default-src 'none'",
     `script-src ${hashes.join(' ') || "'none'"}`,
-    "style-src 'unsafe-inline' https://fonts.googleapis.com",
-    'font-src https://fonts.gstatic.com',
+    "style-src 'unsafe-inline'",
+    `font-src ${THEME_ORIGIN}`,
     `connect-src ${connectSrc}`,
     "img-src 'none'",
     "base-uri 'none'",
@@ -100,7 +134,7 @@ buildPage({
   connectSrc: 'https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*'
 });
 
-// The hub's landing page: links to the three apps, no scripts.
+// The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
 // Glance (the daily reflection) has no build placeholders: it is copied as is.

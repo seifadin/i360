@@ -41,15 +41,19 @@ test('the fallback is variables only, with plain colours', () => {
   assert.match(fb, /\[data-theme="dark"\] \{\n  color-scheme: dark;/);
 });
 
-test('fonts: every file theme.css names is there, with its licence', () => {
+test('fonts: every file theme.css names is there, in a versioned folder, with its licence', () => {
   const urls = [...css.matchAll(/url\(([^)]+)\)/g)].map(m => m[1].replace(/['"]/g, ''));
   assert.equal(urls.length, 8);
+  const folders = new Set();
   for (const u of urls) {
-    assert.match(u, /^fonts\/\d+\.\d+\.\d+\//, 'fonts sit in a versioned folder (cached for a year)');
+    const m = /^fonts\/(amiri|amiri-quran)\/(\d+\.\d+\.\d+)\/[\w-]+\.woff2$/.exec(u);
+    assert.ok(m, `${u}: fonts/<font>/<version>/ (cached for a year, so a new version needs a new folder)`);
     assert.ok(fs.existsSync(path.join(SITE, u)), u);
+    folders.add(`fonts/${m[1]}/${m[2]}`);
   }
-  for (const f of ['OFL-Amiri.txt', 'OFL-Amiri-Quran.txt']) {
-    assert.match(fs.readFileSync(path.join(SITE, 'fonts', f), 'utf8'), /SIL Open Font License, Version 1\.1/);
+  assert.equal(folders.size, 2);
+  for (const d of folders) {
+    assert.match(fs.readFileSync(path.join(SITE, d, 'OFL.txt'), 'utf8'), /SIL Open Font License, Version 1\.1/);
   }
   assert.doesNotMatch(css, /KFGQPC/);
 });

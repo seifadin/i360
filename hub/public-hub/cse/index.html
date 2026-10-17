@@ -3,104 +3,319 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Zoa/Fn5tOuNV+t2X7a3tE/l+Be8RTapyD0OUlGqlNDA=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-Y0slIZG1iXoWOSGZ3oWNfYm0dQft0PMg32KTzjVyAE0=' 'sha256-Bd/aqQ1DKU38kSBsxpTUYSile9MJiATJJIMuwqB9Q/M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-XLUzMpb6od3zkWhYVuGUkFrr5pMqNH7B+Tr/tZn1Fao=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-Y0slIZG1iXoWOSGZ3oWNfYm0dQft0PMg32KTzjVyAE0=' 'sha256-ARHRGuiEAvzQb0Bl3jnL7/GkJI9YxZZ6zQX3sTNqr+g='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
 
-  <!-- The saved theme, applied before anything is drawn (no flash) -->
-  <script>
-    (function () {
-      var t = 'system';
-      try { t = JSON.parse(localStorage.getItem('i360cse.theme')) || 'system'; } catch (e) { /* default */ }
-      if (t === 'system' || ['light', 'sepia', 'dark'].indexOf(t) < 0) {
-        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+  <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev):
+       1. built-in colours, used until theme.css arrives and when it can't;
+       2. the saved theme and the saved copy of theme.css, before anything is drawn;
+       3. the loader (built in, so the theme button also works offline). -->
+  <style id="i360-fallback">:root, [data-theme="light"] {
+  color-scheme: light;
+  --i360-bg: #FAF7F2;
+  --i360-frame: #EAE7E2;
+  --i360-surface: #FAF7F2;
+  --i360-toolbar: #FAF7F2;
+  --i360-border: #CBD5E1;
+  --i360-rule: #CBD5E1;
+  --i360-text: #0010CF;
+  --i360-heading: #0010CF;
+  --i360-muted: #5A62C9;
+  --i360-icon: #0010CF;
+  --i360-icon-hover: #0010CF;
+  --i360-hover: #EEF2FF;
+  --i360-active: #EEF2FF;
+  --i360-link: #2E8B57;
+  --i360-quran: #2E8B57;
+  --i360-note: #2A35C4;
+  --i360-code: #F1ECE2;
+  --i360-quote: #F4F0E8;
+  --i360-input: #FAF7F2;
+  --i360-focus: #0010CF;
+  --i360-accent: #0010CF;
+  --i360-on-accent: #FAF7F2;
+  --i360-banner-bg: #fef2f2;
+  --i360-banner-border: #fecaca;
+  --i360-banner-text: #991b1b;
+  --i360-highlight: #fef08a;
+  --i360-highlight-active: #fb923c;
+  --i360-ribbon: #dc2626;
+  --i360-page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
+  --i360-font: 'Amiri', 'Traditional Arabic', serif;
+  --i360-font-quran: 'Amiri Quran', 'Amiri', serif;
+}
+[data-theme="sepia"] {
+  color-scheme: light;
+  --i360-bg: #f8f1e1;
+  --i360-frame: #e6dcc6;
+  --i360-surface: #fbf5e8;
+  --i360-toolbar: #f6efdf;
+  --i360-border: #d6c7a6;
+  --i360-rule: #d6c7a6;
+  --i360-text: #3b2f1e;
+  --i360-heading: #2a2014;
+  --i360-muted: #7a6a50;
+  --i360-icon: #6b5a40;
+  --i360-icon-hover: #2a2014;
+  --i360-hover: #ebe0c6;
+  --i360-active: #eadbb8;
+  --i360-link: #8a4b0f;
+  --i360-quran: #2f5a1e;
+  --i360-note: #4a3c27;
+  --i360-code: #efe5cf;
+  --i360-quote: #f1e7d1;
+  --i360-input: #fffaf0;
+  --i360-focus: #a16207;
+  --i360-accent: #a16207;
+  --i360-on-accent: #fffaf0;
+  --i360-banner-bg: #f8e3d6;
+  --i360-banner-border: #e8c0a8;
+  --i360-banner-text: #7f2d12;
+  --i360-highlight: #f5d76e;
+  --i360-highlight-active: #e8913a;
+  --i360-ribbon: #b91c1c;
+  --i360-page-shadow: 0 4px 6px -1px rgba(60, 40, 10, 0.12), 0 2px 4px -1px rgba(60, 40, 10, 0.07);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --i360-bg: #1a2233;
+  --i360-frame: #0b1220;
+  --i360-surface: #111827;
+  --i360-toolbar: #111827;
+  --i360-border: #334155;
+  --i360-rule: #334155;
+  --i360-text: #e2e8f0;
+  --i360-heading: #f8fafc;
+  --i360-muted: #94a3b8;
+  --i360-icon: #cbd5e1;
+  --i360-icon-hover: #ffffff;
+  --i360-hover: #1f2937;
+  --i360-active: #1e3a5f;
+  --i360-link: #7dd3fc;
+  --i360-quran: #86efac;
+  --i360-note: #cbd5e1;
+  --i360-code: #0f172a;
+  --i360-quote: #111827;
+  --i360-input: #0f172a;
+  --i360-focus: #38bdf8;
+  --i360-accent: #38bdf8;
+  --i360-on-accent: #0b1220;
+  --i360-banner-bg: #3b0d0d;
+  --i360-banner-border: #7f1d1d;
+  --i360-banner-text: #fecaca;
+  --i360-highlight: #854d0e;
+  --i360-highlight-active: #c2410c;
+  --i360-ribbon: #f87171;
+  --i360-page-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}</style>
+  <script>// i360 theme, early part: inlined in each app's <head> (not served), after the
+// app's fallback colours and before anything is drawn. It shows the saved
+// theme and the saved copy of theme.css at once, so a repeat visit has no
+// flash of the wrong colours. theme-loader.js does the rest.
+// Plain ES5 on purpose: it must run in any browser that can show the page.
+// Keep in step with CHOICE_KEY, CACHE_KEY and THEMES in site/theme-loader.js.
+(function () {
+  var root = document.documentElement, themes = ['system', 'light', 'sepia', 'dark'];
+  var c = root.getAttribute('data-i360-lock');
+  if (themes.indexOf(c) < 0) {
+    try { c = localStorage.getItem('i360.theme'); } catch (e) { c = null; }
+  }
+  if (themes.indexOf(c) < 0) c = 'system';
+  if (c === 'system') {
+    c = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  root.setAttribute('data-theme', c);
+  try {
+    var k = JSON.parse(localStorage.getItem('i360.theme.css'));
+    if (k && typeof k.css === 'string') {
+      var s = document.createElement('style');
+      s.id = 'i360-theme';
+      s.textContent = k.css;
+      document.head.appendChild(s);
+    }
+  } catch (e) { /* no copy yet: the page's own colours */ }
+})();
+</script>
+  <script>(function () {
+'use strict';
+// i360 shared theme loader — https://theme.i36o.workers.dev/theme-loader.js
+//
+// One module for every i360 app. In the page, in this order:
+//   1. the app's built-in fallback colours (node theme/fallbacks.js --css),
+//   2. theme/early.js inlined (applies the saved theme and the saved copy of
+//      theme.css before anything is drawn),
+//   3. this loader: either built into the page (the hub's pages: scripts/build.js
+//      turns it into a plain script, window.i360Theme, so it also works offline),
+//      or imported from the theme site in a module script:
+//        import * as theme from 'https://theme.i36o.workers.dev/theme-loader.js';
+//        theme.init();
+//
+// init() applies the saved choice, fetches theme.css fresh (no-cache), and
+// keeps a copy on the device for the next visit and for offline use. Without
+// the site and without a copy, the app's fallback stays. A page whose <html>
+// has data-i360-lock="light" (the i360إ app) always shows that theme.
+//
+// The choice is shared by every app on the same site (hub: the Reader, the
+// CSE and Glance) and follows changes made in another tab.
 
-  <!-- Font: Amiri, the i360إ app's font (only 400 and 700 exist) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+const THEMES = ['system', 'light', 'sepia', 'dark'];   // the cycle order
+const CHOICE_KEY = 'i360.theme';
+const CACHE_KEY = 'i360.theme.css';
+const CSS_URL = new URL('theme.css', "https://theme.i36o.workers.dev/theme-loader.js").href;
+const STYLE_ID = 'i360-theme';
+const MAX_CSS = 256 * 1024;
+
+const root = document.documentElement;
+const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+const listeners = new Set();
+let started = false;
+
+function read(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function write(key, value) {
+  try { localStorage.setItem(key, value); return true; } catch { return false; }   // private browsing, full storage
+}
+
+function lockedTheme() {
+  const t = root.getAttribute('data-i360-lock');
+  return THEMES.includes(t) ? t : null;
+}
+
+/** The saved choice: system, light, sepia or dark. */
+function getChoice() {
+  const lock = lockedTheme();
+  if (lock) return lock;
+  const c = read(CHOICE_KEY);
+  return THEMES.includes(c) ? c : 'system';
+}
+
+/** The palette shown now: light, sepia or dark. */
+function getTheme(choice = getChoice()) {
+  if (choice !== 'system') return choice;
+  return darkQuery && darkQuery.matches ? 'dark' : 'light';
+}
+
+function apply() {
+  const choice = getChoice();
+  const theme = getTheme(choice);
+  const changed = root.getAttribute('data-theme') !== theme;
+  root.setAttribute('data-theme', theme);
+  for (const fn of listeners) {
+    try { fn({ choice, theme, changed }); } catch (e) { console.error(e); }
+  }
+  return { choice, theme };
+}
+
+/** Save a choice and show it. Ignored when the page is locked. */
+function setChoice(choice) {
+  if (!THEMES.includes(choice)) throw new Error(`Unknown theme: ${choice}`);
+  if (!lockedTheme()) write(CHOICE_KEY, choice);
+  return apply();
+}
+
+/** Next choice in THEMES order (for a theme button). */
+function cycle() {
+  const c = getChoice();
+  return setChoice(THEMES[(THEMES.indexOf(c) + 1) % THEMES.length]);
+}
+
+/** Called with { choice, theme, changed } whenever the theme is applied. Returns a function that stops it. */
+function onChange(fn) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+// Relative font addresses in theme.css point at this site, not at the page.
+function absolutize(css) {
+  return css.replace(/url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
+    (m, q, u) => `url(${q}${new URL(u, CSS_URL).href}${q})`);
+}
+
+function styleElement() {
+  let el = document.getElementById(STYLE_ID);
+  if (!el) {
+    el = document.createElement('style');
+    el.id = STYLE_ID;
+    document.head.appendChild(el);   // after the app's fallback, so it wins
+  }
+  return el;
+}
+
+function cached() {
+  try {
+    const c = JSON.parse(read(CACHE_KEY));
+    return c && c.url === CSS_URL && typeof c.css === 'string' ? c.css : null;
+  } catch { return null; }
+}
+
+/**
+ * Start: apply the theme, follow device and other-tab changes, refresh theme.css.
+ * Resolves to { choice, theme, source } — source is "network", "cache" or "fallback".
+ */
+async function init() {
+  const state = apply();
+  if (!started) {
+    started = true;
+    if (darkQuery) darkQuery.addEventListener('change', () => { if (getChoice() === 'system') apply(); });
+    window.addEventListener('storage', e => { if (e.key === CHOICE_KEY) apply(); });
+  }
+
+  const copy = cached();
+  const existing = document.getElementById(STYLE_ID);
+  if (copy && (!existing || existing.textContent !== copy)) styleElement().textContent = copy;
+  let source = copy ? 'cache' : 'fallback';
+
+  try {
+    const res = await fetch(CSS_URL, { cache: 'no-cache', mode: 'cors', credentials: 'omit' });
+    if (!res.ok) throw new Error(`theme.css: HTTP ${res.status}`);
+    const text = await res.text();
+    if (text.length > MAX_CSS || !text.includes('--i360-bg')) throw new Error('theme.css: unexpected content');
+    const css = absolutize(text);
+    const el = styleElement();
+    if (el.textContent !== css) el.textContent = css;
+    if (css !== copy) write(CACHE_KEY, JSON.stringify({ url: CSS_URL, css }));
+    source = 'network';
+  } catch (e) {
+    console.warn('i360 theme: using the', source === 'cache' ? 'saved copy' : "page's own colours", '—', e.message);
+  }
+  return { ...state, source };
+}
+
+window.i360Theme = Object.freeze({ THEMES, CHOICE_KEY, CACHE_KEY, CSS_URL, getChoice, getTheme, setChoice, cycle, onChange, init });
+})();</script>
+  <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
 
   <style>
-    /* ---------- Themes ----------
-       Light: the i360إ app's colours (i360-instructions.md §7): blue text,
-       ivory surfaces, #EEF2FF hover, green accent, #CBD5E1 lines.
-       Sepia and dark: the Reader's. */
-    :root, [data-theme="light"] {
-      color-scheme: light;
-      --bg-color: #FAF7F2;
-      --toolbar-bg: #FAF7F2;
-      --toolbar-border: #CBD5E1;
-      --panel-bg: #FAF7F2;
-      --text-color: #0010CF;
-      --heading: #0010CF;
-      --muted: #5A62C9;
-      --icon-color: #0010CF;
-      --icon-hover: #0010CF;
-      --hover-bg: #EEF2FF;
-      --active-bg: #EEF2FF;
-      --link: #2E8B57;
-      --rule: #CBD5E1;
-      --input-bg: #FAF7F2;
-      --focus: #0010CF;
-      --btn-bg: #0010CF;
-      --btn-text: #FAF7F2;
-      --banner-bg: #fef2f2;
-      --banner-border: #fecaca;
-      --banner-text: #991b1b;
-      --highlight-bg: #fef08a;
-    }
-    [data-theme="sepia"] {
-      color-scheme: light;
-      --bg-color: #e6dcc6;
-      --toolbar-bg: #f6efdf;
-      --toolbar-border: #d6c7a6;
-      --panel-bg: #fbf5e8;
-      --text-color: #3b2f1e;
-      --heading: #2a2014;
-      --muted: #7a6a50;
-      --icon-color: #6b5a40;
-      --icon-hover: #2a2014;
-      --hover-bg: #ebe0c6;
-      --active-bg: #eadbb8;
-      --link: #8a4b0f;
-      --rule: #d6c7a6;
-      --input-bg: #fffaf0;
-      --focus: #a16207;
-      --btn-bg: #a16207;
-      --btn-text: #fffaf0;
-      --banner-bg: #f8e3d6;
-      --banner-border: #e8c0a8;
-      --banner-text: #7f2d12;
-      --highlight-bg: #f5d76e;
-    }
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #0b1220;
-      --toolbar-bg: #111827;
-      --toolbar-border: #334155;
-      --panel-bg: #111827;
-      --text-color: #e2e8f0;
-      --heading: #f8fafc;
-      --muted: #94a3b8;
-      --icon-color: #cbd5e1;
-      --icon-hover: #ffffff;
-      --hover-bg: #1f2937;
-      --active-bg: #1e3a5f;
-      --link: #7dd3fc;
-      --rule: #334155;
-      --input-bg: #0f172a;
-      --focus: #38bdf8;
-      --btn-bg: #38bdf8;
-      --btn-text: #0b1220;
-      --banner-bg: #3b0d0d;
-      --banner-border: #7f1d1d;
-      --banner-text: #fecaca;
-      --highlight-bg: #854d0e;
+    /* ---------- Colours ----------
+       From the shared i360 theme (light = the i360إ app's look; sepia and
+       dark = the Reader's); the theme is <html data-theme="…">. The names
+       below are the page's own, kept so the rest of this file is unchanged.
+       The background is the page colour in every theme. */
+    :root {
+      --bg-color: var(--i360-bg);
+      --toolbar-bg: var(--i360-toolbar);
+      --toolbar-border: var(--i360-border);
+      --panel-bg: var(--i360-surface);
+      --text-color: var(--i360-text);
+      --heading: var(--i360-heading);
+      --muted: var(--i360-muted);
+      --icon-color: var(--i360-icon);
+      --icon-hover: var(--i360-icon-hover);
+      --hover-bg: var(--i360-hover);
+      --active-bg: var(--i360-active);
+      --link: var(--i360-link);
+      --rule: var(--i360-rule);
+      --input-bg: var(--i360-input);
+      --focus: var(--i360-focus);
+      --btn-bg: var(--i360-accent);
+      --btn-text: var(--i360-on-accent);
+      --banner-bg: var(--i360-banner-bg);
+      --banner-border: var(--i360-banner-border);
+      --banner-text: var(--i360-banner-text);
+      --highlight-bg: var(--i360-highlight);
     }
 
     :root { --page-w: 50rem; --gap: clamp(0.75rem, 2vw, 1.5rem); }
@@ -109,7 +324,7 @@
     [hidden] { display: none !important; }
 
     body {
-      font-family: 'Amiri', 'Traditional Arabic', serif;
+      font-family: var(--i360-font);   /* Amiri, from the shared theme */
       font-size: 1.05rem;
       background-color: var(--bg-color);
       color: var(--text-color);
@@ -946,7 +1161,6 @@
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
     const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
     const STORE_PREFIX = 'i360cse.';
-    const THEMES = ['system', 'light', 'sepia', 'dark'];
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
 
     const $ = (id) => document.getElementById(id);
@@ -1036,18 +1250,18 @@
     }
 
     /* ---------------- Theme ---------------- */
-    const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-    function applyTheme() {
-      const shown = state.theme === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.theme;
-      document.documentElement.dataset.theme = shown;
+    // Theme: the shared i360 choice, kept by the built-in theme loader
+    // (i360Theme), followed live when it changes in another app or tab.
+    function applyTheme() {   // the button shows the choice
       btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
       btnTheme.title = { system: T.themeSystem, light: T.themeLight, sepia: T.themeSepia, dark: T.themeDark }[state.theme];
       btnTheme.setAttribute('aria-label', btnTheme.title);
     }
-    if (darkQuery) {
-      const follow = () => { if (state.theme === 'system') applyTheme(); };
-      if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else darkQuery.addListener(follow);
-    }
+    i360Theme.onChange(({ choice }) => {
+      if (choice === state.theme) return;
+      state.theme = choice;
+      applyTheme();
+    });
 
     /* ---------------- Status line ---------------- */
     function setStatus(text, { error = false, retry = null } = {}) {
@@ -1416,9 +1630,7 @@
       applyNumerals();
     });
     btnTheme.addEventListener('click', () => {
-      state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
-      storeSet('theme', state.theme);
-      applyTheme();
+      i360Theme.cycle();
     });
     // Opening a group loads its first step of results, as a tap does.
     $('btn-expand').addEventListener('click', () => {
@@ -1445,8 +1657,8 @@
     });
 
     function init() {
-      const theme = storeGet('theme', 'system');
-      state.theme = THEMES.includes(theme) ? theme : 'system';
+      state.theme = i360Theme.getChoice();
+      i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
       state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
       applyTheme();
       applyNumerals();

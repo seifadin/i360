@@ -41,19 +41,35 @@ the browser block them. (Glance has no build placeholders; edit `src/day.html`.)
 ## Shared theme (theme.i36o.workers.dev)
 The colours and fonts of every i360 app, from one place (`theme/`):
 ```
-theme/site/theme.css         variables (--i360-…) for light, sepia, dark + @font-face
-theme/site/theme-loader.js   the one module: applies the shared choice, refreshes theme.css
-theme/site/fonts/            Amiri, Amiri Quran (OFL 1.1, licences beside them)
+theme/site/theme.css         variables (--i360-…) for light, sepia, dark; @font-face (written by fonts.js)
+theme/site/theme-loader.js   the loader: applies the shared choice, refreshes theme.css
+theme/site/fonts/<font>/<version>/   Amiri, Amiri Quran (.woff2) and their licence (OFL.txt)
 theme/site/_headers          CORS everywhere; theme files no-cache; fonts immutable
-theme/early.js               inlined in each app's <head> (no flash on a repeat visit)
-theme/fallbacks.js           plain colours for color-mix values; each app's built-in fallback
+theme/early.js               built into each page's <head> (no flash on a repeat visit)
+theme/fallbacks.js           plain colours for color-mix values; each page's built-in colours
+theme/fonts.js, woff2.js     font check and update (from the @fontsource npm packages)
 theme/wrangler.jsonc         the theme Worker (files only)
 ```
-Published by `.github/workflows/theme-publish.yml` on every push to `main` that
-changes `theme/` (or by hand: Actions → Theme publish, or `npm run publish-theme`).
-After changing a colour that a `color-mix` is made from: `node theme/fallbacks.js --write`
-(`npm test` and the workflow stop while a fallback is out of date).
-Font files are cached for a year: a new font version goes in a new folder.
+- **The hub's pages** (landing page, Reader, CSE) build in the built-in colours, `early.js`
+  and the loader (`window.i360Theme`), so the theme button also works offline. New colours
+  and fonts on the theme site reach them without a rebuild; a change to the loader needs one.
+  One theme choice is shared by all of them.
+- **Publishing:** `.github/workflows/theme-publish.yml`, on every push to `main` that
+  changes `theme/` (or by hand: Actions → Theme publish, or `npm run publish-theme`).
+- **Colours:** after changing a colour that a `color-mix` is made from,
+  `node theme/fallbacks.js --write` (`npm test` and the workflow stop while one is stale).
+
+## Pushing: `npm run push`
+Use it instead of `git push` (arguments pass through: `npm run push -- origin main`):
+1. asks npm whether Amiri or Amiri Quran has a newer version;
+2. if so: downloads it into a new version folder, checks that every character of the
+   current font is still there (every Quranic mark), rewrites the Fonts section of
+   `theme.css`, runs `npm test` and commits it on its own ("Fonts: …");
+3. pushes — always. Anything that went wrong in 1–2 is shown as a warning with its
+   cause, and a half-done font update is undone first.
+
+`npm run fonts-check` only reports. `.github/workflows/fonts-check.yml` runs the check on
+the 1st of each month and fails on purpose when a newer font exists (GitHub emails you).
 
 ## Book file names
 Use plain Latin letters, digits and hyphens (e.g. `fatawa-v5.md`): they appear in links.

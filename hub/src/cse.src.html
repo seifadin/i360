@@ -8,99 +8,43 @@
   <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
 
-  <!-- The saved theme, applied before anything is drawn (no flash) -->
-  <script>
-    (function () {
-      var t = 'system';
-      try { t = JSON.parse(localStorage.getItem('i360cse.theme')) || 'system'; } catch (e) { /* default */ }
-      if (t === 'system' || ['light', 'sepia', 'dark'].indexOf(t) < 0) {
-        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-
-  <!-- Font: Amiri, the i360إ app's font (only 400 and 700 exist) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev):
+       1. built-in colours, used until theme.css arrives and when it can't;
+       2. the saved theme and the saved copy of theme.css, before anything is drawn;
+       3. the loader (built in, so the theme button also works offline). -->
+  <style id="i360-fallback">/*@@THEME_FALLBACK@@*/</style>
+  <script>/*@@THEME_EARLY@@*/</script>
+  <script>/*@@THEME_LOADER@@*/</script>
+  <link rel="preconnect" href="/*@@THEME_ORIGIN@@*/" crossorigin>
 
   <style>
-    /* ---------- Themes ----------
-       Light: the i360إ app's colours (i360-instructions.md §7): blue text,
-       ivory surfaces, #EEF2FF hover, green accent, #CBD5E1 lines.
-       Sepia and dark: the Reader's. */
-    :root, [data-theme="light"] {
-      color-scheme: light;
-      --bg-color: #FAF7F2;
-      --toolbar-bg: #FAF7F2;
-      --toolbar-border: #CBD5E1;
-      --panel-bg: #FAF7F2;
-      --text-color: #0010CF;
-      --heading: #0010CF;
-      --muted: #5A62C9;
-      --icon-color: #0010CF;
-      --icon-hover: #0010CF;
-      --hover-bg: #EEF2FF;
-      --active-bg: #EEF2FF;
-      --link: #2E8B57;
-      --rule: #CBD5E1;
-      --input-bg: #FAF7F2;
-      --focus: #0010CF;
-      --btn-bg: #0010CF;
-      --btn-text: #FAF7F2;
-      --banner-bg: #fef2f2;
-      --banner-border: #fecaca;
-      --banner-text: #991b1b;
-      --highlight-bg: #fef08a;
-    }
-    [data-theme="sepia"] {
-      color-scheme: light;
-      --bg-color: #e6dcc6;
-      --toolbar-bg: #f6efdf;
-      --toolbar-border: #d6c7a6;
-      --panel-bg: #fbf5e8;
-      --text-color: #3b2f1e;
-      --heading: #2a2014;
-      --muted: #7a6a50;
-      --icon-color: #6b5a40;
-      --icon-hover: #2a2014;
-      --hover-bg: #ebe0c6;
-      --active-bg: #eadbb8;
-      --link: #8a4b0f;
-      --rule: #d6c7a6;
-      --input-bg: #fffaf0;
-      --focus: #a16207;
-      --btn-bg: #a16207;
-      --btn-text: #fffaf0;
-      --banner-bg: #f8e3d6;
-      --banner-border: #e8c0a8;
-      --banner-text: #7f2d12;
-      --highlight-bg: #f5d76e;
-    }
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #0b1220;
-      --toolbar-bg: #111827;
-      --toolbar-border: #334155;
-      --panel-bg: #111827;
-      --text-color: #e2e8f0;
-      --heading: #f8fafc;
-      --muted: #94a3b8;
-      --icon-color: #cbd5e1;
-      --icon-hover: #ffffff;
-      --hover-bg: #1f2937;
-      --active-bg: #1e3a5f;
-      --link: #7dd3fc;
-      --rule: #334155;
-      --input-bg: #0f172a;
-      --focus: #38bdf8;
-      --btn-bg: #38bdf8;
-      --btn-text: #0b1220;
-      --banner-bg: #3b0d0d;
-      --banner-border: #7f1d1d;
-      --banner-text: #fecaca;
-      --highlight-bg: #854d0e;
+    /* ---------- Colours ----------
+       From the shared i360 theme (light = the i360إ app's look; sepia and
+       dark = the Reader's); the theme is <html data-theme="…">. The names
+       below are the page's own, kept so the rest of this file is unchanged.
+       The background is the page colour in every theme. */
+    :root {
+      --bg-color: var(--i360-bg);
+      --toolbar-bg: var(--i360-toolbar);
+      --toolbar-border: var(--i360-border);
+      --panel-bg: var(--i360-surface);
+      --text-color: var(--i360-text);
+      --heading: var(--i360-heading);
+      --muted: var(--i360-muted);
+      --icon-color: var(--i360-icon);
+      --icon-hover: var(--i360-icon-hover);
+      --hover-bg: var(--i360-hover);
+      --active-bg: var(--i360-active);
+      --link: var(--i360-link);
+      --rule: var(--i360-rule);
+      --input-bg: var(--i360-input);
+      --focus: var(--i360-focus);
+      --btn-bg: var(--i360-accent);
+      --btn-text: var(--i360-on-accent);
+      --banner-bg: var(--i360-banner-bg);
+      --banner-border: var(--i360-banner-border);
+      --banner-text: var(--i360-banner-text);
+      --highlight-bg: var(--i360-highlight);
     }
 
     :root { --page-w: 50rem; --gap: clamp(0.75rem, 2vw, 1.5rem); }
@@ -109,7 +53,7 @@
     [hidden] { display: none !important; }
 
     body {
-      font-family: 'Amiri', 'Traditional Arabic', serif;
+      font-family: var(--i360-font);   /* Amiri, from the shared theme */
       font-size: 1.05rem;
       background-color: var(--bg-color);
       color: var(--text-color);
@@ -337,7 +281,6 @@
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
     const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
     const STORE_PREFIX = 'i360cse.';
-    const THEMES = ['system', 'light', 'sepia', 'dark'];
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
 
     const $ = (id) => document.getElementById(id);
@@ -427,18 +370,18 @@
     }
 
     /* ---------------- Theme ---------------- */
-    const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-    function applyTheme() {
-      const shown = state.theme === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.theme;
-      document.documentElement.dataset.theme = shown;
+    // Theme: the shared i360 choice, kept by the built-in theme loader
+    // (i360Theme), followed live when it changes in another app or tab.
+    function applyTheme() {   // the button shows the choice
       btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
       btnTheme.title = { system: T.themeSystem, light: T.themeLight, sepia: T.themeSepia, dark: T.themeDark }[state.theme];
       btnTheme.setAttribute('aria-label', btnTheme.title);
     }
-    if (darkQuery) {
-      const follow = () => { if (state.theme === 'system') applyTheme(); };
-      if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else darkQuery.addListener(follow);
-    }
+    i360Theme.onChange(({ choice }) => {
+      if (choice === state.theme) return;
+      state.theme = choice;
+      applyTheme();
+    });
 
     /* ---------------- Status line ---------------- */
     function setStatus(text, { error = false, retry = null } = {}) {
@@ -807,9 +750,7 @@
       applyNumerals();
     });
     btnTheme.addEventListener('click', () => {
-      state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
-      storeSet('theme', state.theme);
-      applyTheme();
+      i360Theme.cycle();
     });
     // Opening a group loads its first step of results, as a tap does.
     $('btn-expand').addEventListener('click', () => {
@@ -836,8 +777,8 @@
     });
 
     function init() {
-      const theme = storeGet('theme', 'system');
-      state.theme = THEMES.includes(theme) ? theme : 'system';
+      state.theme = i360Theme.getChoice();
+      i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
       state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
       applyTheme();
       applyNumerals();

@@ -7,122 +7,52 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
-  <!-- The saved theme, applied before anything is drawn (no flash). "system"
-       (the default) follows the device's light/dark setting. -->
-  <script>
-    (function () {
-      var t = 'system';
-      try { t = JSON.parse(localStorage.getItem('i360reader.theme')) || 'system'; } catch (e) { /* default */ }
-      if (t === 'system' || ['light', 'sepia', 'dark'].indexOf(t) < 0) {
-        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-
-  <!-- Fonts: Amiri (the i360إ app's font, for everything but Quran quotations; only 400 and 700 exist), Amiri Quran (Quran quotations) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&display=swap" rel="stylesheet">
+  <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev):
+       1. built-in colours, used until theme.css arrives and when it can't;
+       2. the saved theme and the saved copy of theme.css, before anything is drawn;
+       3. the loader (built in, so the theme button also works offline). -->
+  <style id="i360-fallback">/*@@THEME_FALLBACK@@*/</style>
+  <script>/*@@THEME_EARLY@@*/</script>
+  <script>/*@@THEME_LOADER@@*/</script>
+  <link rel="preconnect" href="/*@@THEME_ORIGIN@@*/" crossorigin>
 
   <!-- marked (pinned, inlined so the reader works offline and can't change under us) -->
   <script>/*@@MARKED@@*/</script>
 
   <style>
-    /* ---------- Themes ----------
-       Light: the i360إ app's colours (i360-instructions.md §7): blue text,
-       ivory surfaces, #EEF2FF hover, green accent, #CBD5E1 lines; the
-       desk behind the pages a shade darker so a page stands out.
-       Sepia and dark: the Reader's own. */
-    :root, [data-theme="light"] {
-      color-scheme: light;
-      --bg-color: #ECE7DD;
-      --toolbar-bg: #FAF7F2;
-      --toolbar-border: #CBD5E1;
-      --panel-bg: #FAF7F2;
-      --text-color: #0010CF;
-      --heading: #0010CF;
-      --muted: #5A62C9;
-      --icon-color: #0010CF;
-      --icon-hover: #0010CF;
-      --hover-bg: #EEF2FF;
-      --active-bg: #EEF2FF;
-      --link: #2E8B57;
-      --page-bg: #FAF7F2;
-      --page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
-      --rule: #CBD5E1;
-      --note-text: #2A35C4;
-      --quran: #2E8B57;
-      --code-bg: #F1ECE2;
-      --quote-bg: #F4F0E8;
-      --input-bg: #FAF7F2;
-      --focus: #0010CF;
-      --banner-bg: #fef2f2;
-      --banner-border: #fecaca;
-      --banner-text: #991b1b;
-      --highlight-bg: #fef08a;
-      --active-highlight-bg: #fb923c;
-      --ribbon: #dc2626;
-    }
-    [data-theme="sepia"] {
-      color-scheme: light;
-      --bg-color: #e6dcc6;
-      --toolbar-bg: #f6efdf;
-      --toolbar-border: #d6c7a6;
-      --panel-bg: #fbf5e8;
-      --text-color: #3b2f1e;
-      --heading: #2a2014;
-      --muted: #7a6a50;
-      --icon-color: #6b5a40;
-      --icon-hover: #2a2014;
-      --hover-bg: #ebe0c6;
-      --active-bg: #eadbb8;
-      --link: #8a4b0f;
-      --page-bg: #f8f1e1;
-      --page-shadow: 0 4px 6px -1px rgba(60, 40, 10, 0.12), 0 2px 4px -1px rgba(60, 40, 10, 0.07);
-      --rule: #d6c7a6;
-      --note-text: #4a3c27;
-      --quran: #2f5a1e;
-      --code-bg: #efe5cf;
-      --quote-bg: #f1e7d1;
-      --input-bg: #fffaf0;
-      --focus: #a16207;
-      --banner-bg: #f8e3d6;
-      --banner-border: #e8c0a8;
-      --banner-text: #7f2d12;
-      --highlight-bg: #f5d76e;
-      --active-highlight-bg: #e8913a;
-      --ribbon: #b91c1c;
-    }
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #0b1220;
-      --toolbar-bg: #111827;
-      --toolbar-border: #334155;
-      --panel-bg: #111827;
-      --text-color: #e2e8f0;
-      --heading: #f8fafc;
-      --muted: #94a3b8;
-      --icon-color: #cbd5e1;
-      --icon-hover: #ffffff;
-      --hover-bg: #1f2937;
-      --active-bg: #1e3a5f;
-      --link: #7dd3fc;
-      --page-bg: #1a2233;
-      --page-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      --rule: #334155;
-      --note-text: #cbd5e1;
-      --quran: #86efac;
-      --code-bg: #0f172a;
-      --quote-bg: #111827;
-      --input-bg: #0f172a;
-      --focus: #38bdf8;
-      --banner-bg: #3b0d0d;
-      --banner-border: #7f1d1d;
-      --banner-text: #fecaca;
-      --highlight-bg: #854d0e;
-      --active-highlight-bg: #c2410c;
-      --ribbon: #f87171;
+    /* ---------- Colours ----------
+       From the shared i360 theme (light = the i360إ app's look; sepia and
+       dark = the Reader's own); the theme is <html data-theme="…">. The names
+       below are the Reader's own, kept so the rest of this file is unchanged.
+       The desk behind the pages is the theme's frame colour. */
+    :root {
+      --bg-color: var(--i360-frame);
+      --toolbar-bg: var(--i360-toolbar);
+      --toolbar-border: var(--i360-border);
+      --panel-bg: var(--i360-surface);
+      --text-color: var(--i360-text);
+      --heading: var(--i360-heading);
+      --muted: var(--i360-muted);
+      --icon-color: var(--i360-icon);
+      --icon-hover: var(--i360-icon-hover);
+      --hover-bg: var(--i360-hover);
+      --active-bg: var(--i360-active);
+      --link: var(--i360-link);
+      --page-bg: var(--i360-bg);
+      --page-shadow: var(--i360-page-shadow);
+      --rule: var(--i360-rule);
+      --note-text: var(--i360-note);
+      --quran: var(--i360-quran);
+      --code-bg: var(--i360-code);
+      --quote-bg: var(--i360-quote);
+      --input-bg: var(--i360-input);
+      --focus: var(--i360-focus);
+      --banner-bg: var(--i360-banner-bg);
+      --banner-border: var(--i360-banner-border);
+      --banner-text: var(--i360-banner-text);
+      --highlight-bg: var(--i360-highlight);
+      --active-highlight-bg: var(--i360-highlight-active);
+      --ribbon: var(--i360-ribbon);
     }
 
     :root {
@@ -138,7 +68,7 @@
     [hidden] { display: none !important; }
 
     body {
-      font-family: 'Amiri', 'Traditional Arabic', serif;
+      font-family: var(--i360-font);   /* Amiri, from the shared theme */
       background-color: var(--bg-color);
       color: var(--text-color);
       height: 100vh;
@@ -470,13 +400,9 @@
     .page-sheet hr { border: 0; height: 1px; background: var(--rule); margin: 1.5em 0; }
     .page-sheet a { color: var(--link); }
 
-    /* Quran quotations: the King Fahd Complex font (Madinah Mushaf style) when the
-       reader has installed it on their device, otherwise Amiri Quran. Its licence
-       doesn't allow us to host or redistribute it, so it is never downloaded:
-       only a copy already on the device is used. Both family names below are
-       ones its versions have used. */
+    /* Quran quotations: Amiri Quran, from the shared theme. */
     .quran {
-      font-family: 'KFGQPC HAFS Uthmanic Script', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Amiri', serif;
+      font-family: var(--i360-font-quran);
       font-size: 1.05em;
       color: var(--quran);
     }
@@ -1045,7 +971,6 @@
   const ZOOM_MAX = 2.5;
   const ZOOM_STEP = 0.1;
   const TEXT_SCALES = [0.85, 0.92, 1, 1.1, 1.2, 1.32, 1.45, 1.6];
-  const THEMES = ['system', 'light', 'sepia', 'dark'];   // "system" follows the device's light/dark setting
   // No fixed screen widths: the toolbar layout is chosen by measuring whether it
   // fits (labels, language, digits and fonts all change its width), and the
   // side panel closes after a jump when it covers most of the page.
@@ -1914,24 +1839,17 @@
     if (search.query) { const q = searchInput.value; search.query = ''; performSearch(q); }
   });
 
-  const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-  const shownTheme = () => (state.theme === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.theme);
-
-  function applyTheme() {
-    document.documentElement.dataset.theme = shownTheme();
+  // Theme: the shared i360 choice, kept by the built-in theme loader
+  // (i360Theme): saved once for every app on this site, followed live when it
+  // changes in another app or tab, and "system" follows the device. Only the
+  // button's icon and tooltip are the Reader's to update.
+  i360Theme.onChange(({ choice }) => {
+    if (choice === state.theme) return;
+    state.theme = choice;
     applyLocalization();
-  }
-  // "system" follows the device as it changes (at sunset, say).
-  if (darkQuery) {
-    const follow = () => { if (state.theme === 'system') applyTheme(); };
-    if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else darkQuery.addListener(follow);
-  }
-
-  btnTheme.addEventListener('click', () => {
-    state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % THEMES.length];
-    storeSet('theme', state.theme);
-    applyTheme();
   });
+
+  btnTheme.addEventListener('click', () => { i360Theme.cycle(); });
 
   function setTextScale(v) {
     const anchor = captureAnchor();
@@ -2890,9 +2808,8 @@
     statusIcon.innerHTML = isLocal ? ICON.globeX : ICON.globeCheck;
 
     state.numerals = storeGet('numerals', 'western') === 'eastern' ? 'eastern' : 'western';
-    const theme = storeGet('theme', 'system');
-    state.theme = THEMES.includes(theme) ? theme : 'system';
-    document.documentElement.dataset.theme = shownTheme();
+    state.theme = i360Theme.getChoice();
+    i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
     const scale = Number(storeGet('textScale', 1));
     search.exact = storeGet('searchExact', false) === true;
     search.word = storeGet('searchWord', false) === true;
