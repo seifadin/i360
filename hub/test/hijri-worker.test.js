@@ -51,14 +51,11 @@ test('?date= refuses what it does not answer', async () => {
   assert.equal((await get(env, '?date=bad')).status, 400);
 });
 
-test('no ?date=: the old answer for the day page and the release script', async () => {
+test('no ?date=: refused with how to ask', async () => {
   darDown();
-  const ok = await get({ HIJRI: fakeKV(midMonth()) }, '');
-  assert.equal(ok.status, 200);
-  assert.deepEqual(ok.body, { hijri: '10 جمادى الأولى 1448', cairo: today(), via: 'kv' });
-  assert.equal(ok.headers.get('Cache-Control'), 'no-store');
-  const none = await get({ HIJRI: fakeKV() }, '');
-  assert.equal(none.status, 502);                               // so they fall back as they do today
+  const r = await get({ HIJRI: fakeKV(midMonth()) }, '');
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /\?date=/);
 });
 
 test('?debug=1 shows the rules, the state and a live reading', async () => {

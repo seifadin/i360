@@ -6,9 +6,7 @@
 //                          200 { date, h: {y, m, d}, source: 'dar'|'calc', provisional, v }
 //                          400 { error } for a date it doesn't answer
 //                          (the contract read by hijri/client.js)
-//   GET /                  the old answer, kept while the day page and the i360 release
-//                          script still ask for it: 200 { hijri: "8 جمادى الأولى 1448",
-//                          cairo: "YYYY-MM-DD" } when Dar al-Ifta's date is known, else 502
+//   GET /calc.js, /client.js  the two shared files as they are (static assets, see wrangler.jsonc)
 //   GET /?debug=1          state, rules and a live reading of Dar al-Ifta
 //   GET /?check=1          run the scheduled check now (it asks Dar al-Ifta only when the
 //                          rules say so; useful right after a deploy)
@@ -68,11 +66,7 @@ export default {
       return json({ ...a, v: calc.VERSION }, 200, maxAge(a));
     }
 
-    // The old answer (no ?date=): Cairo's date, only when it comes from Dar al-Ifta.
-    const cairo = calc.todayIn(S.CAIRO, now);
-    const a = await src.answer(cairo, now);
-    if (a.source !== calc.SOURCES.DAR) return json({ error: 'Dar al-Ifta date not known yet', attempts: [] }, 502);
-    return json({ hijri: `${a.h.d} ${S.MONTHS_AR[a.h.m - 1]} ${a.h.y}`, cairo, via: 'kv' });
+    return json({ error: 'ask with ?date=YYYY-MM-DD' }, 400);
   },
 
   async scheduled(event, env, ctx) {

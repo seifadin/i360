@@ -206,4 +206,4 @@ function createSource({ calc, fetch, kv }) {
 
 const why = (e) => (e && e.name === 'AbortError') ? 'timeout' : ((e && e.message) || 'failed');
 
-module.exports = { createSource, parseSite, parseApi, hijriMonthNumber, MONTHS_AR, CAIRO, STATE_KEY, CHECK_FROM_HOUR, FIRST_READ_HOUR, MAX_OFFSET, SITE, API };
+module.exports = { createSource, parseSite, parseApi, hijriMonthNumber, CAIRO, STATE_KEY, CHECK_FROM_HOUR, FIRST_READ_HOUR, MAX_OFFSET, SITE, API };
