@@ -17,8 +17,9 @@ test('icons: every page icon is tagged and drawn exactly as the pinned Lucide dr
   }
 });
 
-test('icons: the pinned Lucide version is the one package.json names', () => {
-  assert.equal(require('../package.json').devDependencies['lucide-static'], icons.version());
+test('icons: the installed Lucide is the version package-lock.json pins', () => {
+  // package.json names a range (^1.21.0, as the i360 app does); the lock file fixes the version the drawings follow.
+  assert.equal(require('../package-lock.json').packages['node_modules/lucide-static'].version, icons.version());
 });
 
 test('icons: an untagged, unknown or changed icon and Font Awesome are each reported', () => {

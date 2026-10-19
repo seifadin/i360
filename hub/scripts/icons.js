@@ -1,6 +1,6 @@
 'use strict';
 // i360 icons: Lucide (lucide.dev, ISC licence), from the lucide-static npm
-// package pinned in package.json. The pages carry each icon as inline SVG,
+// package (version fixed by package-lock.json). The pages carry each icon as inline SVG,
 // tagged with its Lucide name:
 //
 //   <svg data-lucide="search" viewBox="0 0 24 24">…drawing…</svg>
@@ -9,7 +9,7 @@
 // CSS); the drawing inside is exactly Lucide's.
 //
 //   node scripts/icons.js           check (exit 1, listing what is wrong)
-//   node scripts/icons.js --write   redraw every tagged icon from the pinned
+//   node scripts/icons.js --write   redraw every tagged icon from the installed
 //                                   Lucide (after raising its version)
 //
 // Wrong: an <svg> with no data-lucide, a name Lucide doesn't have, a drawing

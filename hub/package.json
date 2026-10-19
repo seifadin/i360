@@ -16,7 +16,7 @@
     "search": "node indexer/search.js"
   },
   "devDependencies": {
-    "lucide-static": "1.59.0",
+    "lucide-static": "^1.21.0",
     "marked": "18.1.0",
     "tailwindcss": "3.4.19"
   },
