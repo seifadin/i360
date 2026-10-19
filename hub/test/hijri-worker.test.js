@@ -88,3 +88,13 @@ test('OPTIONS and other methods', async () => {
   const post = await worker.fetch(new Request('https://x/', { method: 'POST' }), { HIJRI: fakeKV() });
   assert.equal(post.status, 405);
 });
+
+test('the Worker serves the real shared files: hijri/site/ links to them', () => {
+  const { realpathSync, lstatSync } = require('node:fs');
+  const { join } = require('node:path');
+  for (const name of ['calc.js', 'client.js']) {
+    const link = join(__dirname, '../hijri/site', name);
+    assert.ok(lstatSync(link).isSymbolicLink(), `hijri/site/${name} must be a symlink, not a copy`);
+    assert.equal(realpathSync(link), realpathSync(join(__dirname, '../hijri', name)));
+  }
+});

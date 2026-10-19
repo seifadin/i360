@@ -5,3 +5,4 @@ indexer/out/
 indexer/work/
 indexer/dist/
 indexer/dist-report.json
+.wrangler/
