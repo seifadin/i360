@@ -560,6 +560,8 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
     }
     .more-btn:hover { background: var(--hover-bg); }
     .more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+    .more-btn.icon-btn { display: inline-flex; align-items: center; padding: 0.2rem 0.45rem; }
+    .icon-btn svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
   </style>
 </head>
 <body>
@@ -588,8 +590,8 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
     <div class="results-bar">
       <div class="status" id="status" role="status" aria-live="polite"></div>
       <div class="bar-btns" id="bar-btns" hidden>
-        <button class="more-btn" id="btn-expand" type="button">توسيع الكل</button>
-        <button class="more-btn" id="btn-collapse" type="button">طي الكل</button>
+        <button class="more-btn icon-btn" id="btn-expand" type="button" aria-label="توسيع الكل" title="توسيع الكل"><svg data-lucide="list-chevrons-up-down" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h8"></path><path d="M3 12h8"></path><path d="M3 19h8"></path><path d="m15 8 3-3 3 3"></path><path d="m15 16 3 3 3-3"></path></svg></button>
+        <button class="more-btn icon-btn" id="btn-collapse" type="button" aria-label="طي الكل" title="طي الكل"><svg data-lucide="list-chevrons-down-up" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h8"></path><path d="M3 12h8"></path><path d="M3 19h8"></path><path d="m15 5 3 3 3-3"></path><path d="m15 19 3-3 3 3"></path></svg></button>
       </div>
     </div>
     <div id="results"></div>
