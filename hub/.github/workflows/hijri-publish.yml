@@ -1,0 +1,43 @@
+# i360 Hijri date: publishes the dar-hijri Worker (hijri/) to dar-hijri.i36o.workers.dev.
+#
+# - On a push to main that changes hijri/ (or this file).
+# - By hand: Actions → Hijri publish → Run workflow.
+#
+# The Hijri tests run first; a failing test stops the publish.
+# Uses the same repo secrets as the theme and CSE workflows.
+name: Hijri publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hijri/**'
+      - '.github/workflows/hijri-publish.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: hijri-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Hijri tests
+        run: node --test test/hijri-*.test.js
+
+      - name: Publish to dar-hijri.i36o.workers.dev
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.145.0 deploy --config hijri/wrangler.jsonc
