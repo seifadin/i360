@@ -20,14 +20,16 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const VERSION = 1;
+  const VERSION = 2;                 // 2: the 'provisional' label (2026-10-19)
   const CALENDAR = 'islamic';
   const SOURCES = Object.freeze({ DAR: 'dar', CALC: 'calc' });
 
-  // Shown next to the date: where it came from. Keys are the day page's languages.
+  // Shown next to the date: where it came from (or that it may still change). Keys are the day page's languages.
   const LABELS = Object.freeze({
     dar: Object.freeze({ ar: 'حسب دار الإفتاء المصرية', en: "Per Egypt's Dar al-Ifta", tr: "Mısır Dar el-İfta'ya göre", id: 'Menurut Dar al-Ifta Mesir', ur: 'مصری دارالافتاء کے مطابق' }),
-    calc: Object.freeze({ ar: 'تقويم حسابي تقريبي', en: 'Calculated (approximate)', tr: 'Hesaplanmış (yaklaşık)', id: 'Hitungan (perkiraan)', ur: 'حسابی (تخمینی)' })
+    calc: Object.freeze({ ar: 'تقويم حسابي تقريبي', en: 'Calculated (approximate)', tr: 'Hesaplanmış (yaklaşık)', id: 'Hitungan (perkiraan)', ur: 'حسابی (تخمینی)' }),
+    // A calculated date Dar al-Ifta hasn't settled yet (the day after a 29th): it may still change.
+    provisional: Object.freeze({ ar: 'بانتظار إعلان دار الإفتاء', en: "Awaiting Dar al-Ifta's announcement", tr: "Dar el-İfta'nın duyurusu bekleniyor", id: 'Menunggu pengumuman Dar al-Ifta', ur: 'دارالافتاء کے اعلان کا انتظار' })
   });
 
   const YMD = /^(\d{4})-(\d{2})-(\d{2})$/;

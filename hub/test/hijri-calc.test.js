@@ -69,8 +69,8 @@ test('isHijri accepts only plausible dates', () => {
   }
 });
 
-test('labels: every source in every language, Arabic as the fallback', () => {
-  for (const source of Object.values(HC.SOURCES)) {
+test('labels: every source and provisional in every language, Arabic as the fallback', () => {
+  for (const source of [...Object.values(HC.SOURCES), 'provisional']) {
     for (const lang of ['ar', 'en', 'tr', 'id', 'ur']) assert.ok(HC.label(source, lang).length > 0, `${source}/${lang}`);
     assert.equal(HC.label(source, 'xx'), HC.LABELS[source].ar);
   }

@@ -9,6 +9,7 @@
    - date: the civil date wanted, 'YYYY-MM-DD' (default: today where the caller is)
    - source 'calc': the date was calculated, by the Worker or here
    - provisional: Dar al-Ifta hasn't settled this date yet (30th or 1st); ask again later
+   - label: where the date came from, or that it is provisional, in `lang`
    - outdated: this copy of calc.js is older or newer than the Worker's; update the copy
    - error: why the Worker wasn't used (only when it wasn't)
 
@@ -25,7 +26,7 @@
   'use strict';
   if (!Calc) throw new Error('HijriClient: load hijri/calc.js first');
 
-  const VERSION = 1;
+  const VERSION = 2;                 // 2: the label says when a date is provisional
   const WORKER = 'https://dar-hijri.i36o.workers.dev';
   const TIMEOUT_MS = 8000;
 
@@ -70,7 +71,7 @@
     if (fetchImpl) {
       try {
         const a = await ask(o.url || WORKER, date, o.timeoutMs || TIMEOUT_MS, fetchImpl);
-        return { date, h: a.h, source: a.source, provisional: a.provisional, label: Calc.label(a.source, lang), outdated: a.v !== Calc.VERSION, error: null };
+        return { date, h: a.h, source: a.source, provisional: a.provisional, label: Calc.label(a.provisional ? 'provisional' : a.source, lang), outdated: a.v !== Calc.VERSION, error: null };
       } catch (e) {
         return fallback(date, lang, (e && e.name === 'AbortError') ? 'timeout' : ((e && e.message) || 'failed'));
       }

@@ -39,8 +39,9 @@ test("the Worker's date is used, with its label", async () => {
 });
 
 test('provisional and calculated answers from the Worker pass through', async () => {
-  const p = await Client.get({ date: DATE, fetch: fakeFetch(answer({ provisional: true })) });
+  const p = await Client.get({ date: DATE, lang: 'en', fetch: fakeFetch(answer({ source: 'calc', provisional: true })) });
   assert.equal(p.provisional, true);
+  assert.equal(p.label, HC.label('provisional', 'en'));
   const c = await Client.get({ date: DATE, lang: 'en', fetch: fakeFetch(answer({ source: 'calc' })) });
   assert.equal(c.source, 'calc');
   assert.equal(c.label, HC.label('calc', 'en'));

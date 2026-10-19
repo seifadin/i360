@@ -21,6 +21,8 @@
 //                        (window.i360Theme), built in so the theme button works offline
 //   /*@@THEME_ORIGIN@@*/ the theme site's address (I360_THEME_ORIGIN to test
 //                        against another one)
+//   /*@@HIJRI_CALC@@*/   hijri/calc.js, the shared Hijri calculator (Daily Reflection)
+//   /*@@HIJRI_CLIENT@@*/ hijri/client.js, the dar-hijri Worker's client (Daily Reflection)
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
 //                        after everything else is in place
@@ -138,15 +140,17 @@ buildPage({
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
 // Daily Reflection («التأمل اليومي», at /day/) loads Tailwind and FontAwesome from their own
-// sites, so it has no hash-based CSP: only the shared theme is filled in.
+// sites, so it has no hash-based CSP: only the shared theme and the shared Hijri files are filled in.
 {
   let html = read(join(root, 'src/day.html'));
   html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
   html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
   html = fill(html, '/*@@THEME_EARLY@@*/', inlineScript(theme.early.code, theme.early.name));
   html = fill(html, '/*@@THEME_LOADER@@*/', inlineScript(theme.loader.code, theme.loader.name));
+  html = fill(html, '/*@@HIJRI_CALC@@*/', inlineScript(read(join(root, 'hijri/calc.js')), 'hijri/calc.js'));
+  html = fill(html, '/*@@HIJRI_CLIENT@@*/', inlineScript(read(join(root, 'hijri/client.js')), 'hijri/client.js'));
   if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error('src/day.html: Google Fonts left in the page: fonts come from the theme site');
   mkdirSync(join(root, 'public-hub/day'), { recursive: true });
   writeFileSync(join(root, 'public-hub/day/index.html'), html);
-  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme filled in (no CSP)`);
+  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme and Hijri files filled in (no CSP)`);
 }
