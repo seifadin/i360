@@ -561,7 +561,6 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         window.tailwind = window.tailwind || {};
         window.tailwind.config = { darkMode: 'class' };
     </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
            the frame colour (as behind the Reader's pages); cards: the page colour. */
@@ -592,6 +591,10 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         .font-medium, .font-semibold { font-weight: 700 !important; }
         [dir="rtl"] .tracking-widest { letter-spacing: normal !important; }
         .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+        /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
+        svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
+        svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
+        svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
         .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
         .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
@@ -633,7 +636,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
     <main class="layout-stable space-y-8">
         <section id="quran-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-quran-soft text-quran p-2 rounded-lg"><i class="fas fa-quran text-xl" aria-hidden="true"></i></span>
+                <span class="bg-quran-soft text-quran p-2 rounded-lg"><svg data-lucide="moon-star" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5h4"></path><path d="M20 3v4"></path><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg></span>
                 <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-quran">Quranic Verse</h2>
             </div>
             <div class="space-y-6">
@@ -646,7 +649,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 
         <section id="hadith-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg"><i class="fas fa-book-open text-xl" aria-hidden="true"></i></span>
+                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg"><svg data-lucide="book-open" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg></span>
                 <h2 data-i18n="hadithLabel" class="text-sm font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Hadith</h2>
             </div>
             <div class="space-y-6">
@@ -669,7 +672,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 
         <section id="prayer-card" class="glass-card rounded-3xl p-6 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><i class="fas fa-clock text-xl" aria-hidden="true"></i></span>
+                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><svg data-lucide="clock" class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
                 <h2 data-i18n="prayerLabel" class="text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Prayer Times</h2>
             </div>
             <div data-target="prayer-grid" class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6"></div>
@@ -691,7 +694,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 
         <section id="events-card" class="glass-card rounded-3xl p-6 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><i class="fas fa-calendar-check text-xl" aria-hidden="true"></i></span>
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><svg data-lucide="calendar-check" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="m9 15 2 2 4-4"></path></svg></span>
                 <h2 data-i18n="eventsLabel" class="text-sm font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Upcoming Events</h2>
             </div>
             <div data-target="events-list" class="space-y-4"></div>
@@ -758,6 +761,13 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
             if (cls) el.className = cls;
             if (text !== undefined) el.textContent = text;
             return el;
+        }
+        // Lucide icons shown from script (the hourglass beside a provisional Hijri date).
+        const HOURGLASS = '<svg data-lucide="hourglass" class="icon-inline me-1" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>';
+        function svgIcon(markup) {
+            const t = document.createElement('template');
+            t.innerHTML = markup;
+            return t.content.firstChild;
         }
 
         const DataStore = {
@@ -1030,10 +1040,10 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         /* The theme and numerals buttons (shared with the Reader and the CSE): icons, labels and tooltips. */
         const NUMERALS_LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
         const THEME_ICON = {
-            system: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>',
-            light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-            sepia: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
-            dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>'
+            system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+            light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+            sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+            dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
         };
         const THEME_TITLES = {
             ar: { numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)', numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)', numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
@@ -1224,7 +1234,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 this.set('hijri-date', `${h.today.d} ${L.months[h.today.m - 1]} ${h.today.y}`);
                 const src = this.targets['hijri-source'];
                 if (src) {
-                    const icon = h.provisional ? [Object.assign(mk('i', 'fa-solid fa-hourglass-half me-1'), { ariaHidden: 'true' })] : [];
+                    const icon = h.provisional ? [svgIcon(HOURGLASS)] : [];
                     src.replaceChildren(...icon, document.createTextNode(Hijri.label(h, App.lang)));
                 }
             },

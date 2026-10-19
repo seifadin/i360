@@ -11,10 +11,12 @@
     "publish-theme": "npx --yes wrangler@4.145.0 deploy --config theme/wrangler.jsonc",
     "publish-hijri": "npx --yes wrangler@4.145.0 deploy --config hijri/wrangler.jsonc",
     "fonts-check": "node theme/fonts.js",
+    "icons": "node scripts/icons.js",
     "push": "node scripts/push.js",
     "search": "node indexer/search.js"
   },
   "devDependencies": {
+    "lucide-static": "1.59.0",
     "marked": "18.1.0"
   },
   "engines": {
