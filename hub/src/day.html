@@ -20,12 +20,6 @@
     <script>/*@@HIJRI_CALC@@*/</script>
     <script>/*@@HIJRI_CLIENT@@*/</script>
     <link rel="preconnect" href="/*@@THEME_ORIGIN@@*/" crossorigin>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        /* Tailwind's CDN follows the OS dark setting by default; 'class' makes every dark: utility follow the toggle. */
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { darkMode: 'class' };
-    </script>
     <style>
         /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
            the frame colour (as behind the Reader's pages); cards: the page colour. */
@@ -70,6 +64,7 @@
         .lang-btn { min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; }
         .layout-stable { width: 100%; max-width: 42rem; margin: 0 auto; transition: transform 0.3s ease; }
     </style>
+    <style id="tailwind">/*@@TAILWIND@@*/</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
     <header class="layout-stable flex flex-col gap-6 mb-12">

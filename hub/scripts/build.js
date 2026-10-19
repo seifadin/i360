@@ -30,6 +30,7 @@
 'use strict';
 const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
 const { createHash } = require('node:crypto');
+const { execFileSync } = require('node:child_process');
 const { join, dirname } = require('node:path');
 
 const root = join(__dirname, '..');
@@ -139,10 +140,16 @@ buildPage({
 // The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
-// Daily Reflection («التأمل اليومي», at /day/) loads Tailwind and FontAwesome from their own
-// sites, so it has no hash-based CSP: only the shared theme and the shared Hijri files are filled in.
+// Daily Reflection («التأمل اليومي», at /day/): the shared theme, the shared Hijri files and its
+// Tailwind CSS (built here from src/day.tailwind.js: only the classes the page uses) are filled in.
+// It calls several outside services, so it has no hash-based CSP.
 {
   let html = read(join(root, 'src/day.html'));
+  const tailwind = execFileSync(process.execPath, [require.resolve('tailwindcss/lib/cli.js'), '-c', join(root, 'src/day.tailwind.js'), '--minify'],
+    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  if (!/\.dark\b/.test(tailwind) || tailwind.length < 5000) throw new Error('src/day.html: the Tailwind build looks wrong (no dark: rules, or too small)');
+  if (/<\/style/i.test(tailwind)) throw new Error('src/day.html: the Tailwind CSS contains </style');
+  html = fill(html, '/*@@TAILWIND@@*/', tailwind.trim());
   html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
   html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
   html = fill(html, '/*@@THEME_EARLY@@*/', inlineScript(theme.early.code, theme.early.name));
@@ -150,7 +157,8 @@ buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], 
   html = fill(html, '/*@@HIJRI_CALC@@*/', inlineScript(read(join(root, 'hijri/calc.js')), 'hijri/calc.js'));
   html = fill(html, '/*@@HIJRI_CLIENT@@*/', inlineScript(read(join(root, 'hijri/client.js')), 'hijri/client.js'));
   if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error('src/day.html: Google Fonts left in the page: fonts come from the theme site');
+  if (/<script[^>]+src=/i.test(html)) throw new Error('src/day.html: a <script src> from another site is back: the page builds in what it needs');
   mkdirSync(join(root, 'public-hub/day'), { recursive: true });
   writeFileSync(join(root, 'public-hub/day/index.html'), html);
-  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme and Hijri files filled in (no CSP)`);
+  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme, Hijri files and Tailwind (${Math.round(tailwind.length / 1024)} KB) filled in (no CSP)`);
 }
