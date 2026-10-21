@@ -2,7 +2,7 @@
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
-//   public-hub/day/index.html  Daily Reflection (src/day.html; only the shared theme is filled in)
+//   public-hub/day/index.html  Daily Reflection (from src/day.html)
 //
 //   npm run build
 //
@@ -23,6 +23,10 @@
 //                        against another one)
 //   /*@@HIJRI_CALC@@*/   hijri/calc.js, the shared Hijri calculator (Daily Reflection)
 //   /*@@HIJRI_CLIENT@@*/ hijri/client.js, the dar-hijri Worker's client (Daily Reflection)
+//   /*@@ADHAN@@*/        adhan-js (pinned in package.json), prayer times on the device (Daily Reflection)
+//   /*@@DAY_CITIES@@*/   src/day-cities.json, every time zone's main city (Daily Reflection;
+//                        made by scripts/day-cities.js)
+//   /*@@TAILWIND@@*/     Daily Reflection's Tailwind CSS (src/day.tailwind.js)
 //   <!--@@CSP@@-->       a Content-Security-Policy allowing only the page's
 //                        own inline scripts (by hash), so it must be made
 //                        after everything else is in place
@@ -73,8 +77,9 @@ function fill(html, placeholder, value) {
 // Only the page's own inline scripts may run; no external scripts, plugins
 // or images; fonts from the theme site; fetches only where connectSrc allows
 // (plus theme.css from the theme site).
-function buildPage({ src, out, scripts, connectSrc }) {
+function buildPage({ src, out, scripts, connectSrc, fills = [] }) {
   let html = read(join(root, src));
+  for (const [placeholder, value] of fills) html = fill(html, placeholder, value);
   html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
   html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
   scripts = [['/*@@THEME_EARLY@@*/', theme.early], ['/*@@THEME_LOADER@@*/', theme.loader], ...scripts];
@@ -140,25 +145,35 @@ buildPage({
 // The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
-// Daily Reflection («التأمل اليومي», at /day/): the shared theme, the shared Hijri files and its
-// Tailwind CSS (built here from src/day.tailwind.js: only the classes the page uses) are filled in.
-// It calls several outside services, so it has no hash-based CSP.
+// Daily Reflection («التأمل اليومي», at /day/): its Tailwind CSS (built here from src/day.tailwind.js:
+// only the classes the page uses), the shared Hijri files, Adhan (prayer times on the device) and the
+// default-city table are filled in. Its outside services are a fixed list, so it gets the same
+// hash-based policy as the other pages (2026-10-22, i360-hub.md §10).
 {
-  let html = read(join(root, 'src/day.html'));
   const tailwind = execFileSync(process.execPath, [require.resolve('tailwindcss/lib/cli.js'), '-c', join(root, 'src/day.tailwind.js'), '--minify'],
     { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   if (!/\.dark\b/.test(tailwind) || tailwind.length < 5000) throw new Error('src/day.html: the Tailwind build looks wrong (no dark: rules, or too small)');
   if (/<\/style/i.test(tailwind)) throw new Error('src/day.html: the Tailwind CSS contains </style');
-  html = fill(html, '/*@@TAILWIND@@*/', tailwind.trim());
-  html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
-  html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
-  html = fill(html, '/*@@THEME_EARLY@@*/', inlineScript(theme.early.code, theme.early.name));
-  html = fill(html, '/*@@THEME_LOADER@@*/', inlineScript(theme.loader.code, theme.loader.name));
-  html = fill(html, '/*@@HIJRI_CALC@@*/', inlineScript(read(join(root, 'hijri/calc.js')), 'hijri/calc.js'));
-  html = fill(html, '/*@@HIJRI_CLIENT@@*/', inlineScript(read(join(root, 'hijri/client.js')), 'hijri/client.js'));
-  if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error('src/day.html: Google Fonts left in the page: fonts come from the theme site');
-  if (/<script[^>]+src=/i.test(html)) throw new Error('src/day.html: a <script src> from another site is back: the page builds in what it needs');
-  mkdirSync(join(root, 'public-hub/day'), { recursive: true });
-  writeFileSync(join(root, 'public-hub/day/index.html'), html);
-  console.log(`public-hub/day/index.html: ${html.length} chars, shared theme, Hijri files and Tailwind (${Math.round(tailwind.length / 1024)} KB) filled in (no CSP)`);
+  // adhan's package exports don't list its bundles, so it's read by path (like marked).
+  const adhanPkg = JSON.parse(read(join(root, 'node_modules/adhan/package.json')));
+  const adhan = {
+    code: `/*! adhan-js ${adhanPkg.version} | MIT License | Copyright (c) Batoul Apps | https://github.com/batoulapps/adhan-js */\n`
+      + read(join(root, 'node_modules/adhan/lib/bundles/adhan.umd.min.js')).replace(/\/\/# sourceMappingURL=\S+/, '').trim(),
+    name: 'adhan'
+  };
+  const table = JSON.parse(read(join(root, 'src/day-cities.json')));
+  const zones = Object.fromEntries(Object.entries(table.zones).map(([tz, z]) => [tz, { cc: z.cc, lat: z.lat, lng: z.lng, n: z.n }]));
+  const cities = { code: `window.DAY_CITIES = ${JSON.stringify({ zones, aliases: table.aliases })};`, name: 'src/day-cities.json' };
+  buildPage({
+    src: 'src/day.html',
+    out: 'public-hub/day/index.html',
+    fills: [['/*@@TAILWIND@@*/', tailwind.trim()]],
+    scripts: [
+      ['/*@@HIJRI_CALC@@*/', file('hijri/calc.js')],
+      ['/*@@HIJRI_CLIENT@@*/', file('hijri/client.js')],
+      ['/*@@ADHAN@@*/', adhan],
+      ['/*@@DAY_CITIES@@*/', cities]
+    ],
+    connectSrc: 'https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev'
+  });
 }

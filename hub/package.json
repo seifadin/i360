@@ -16,6 +16,7 @@
     "search": "node indexer/search.js"
   },
   "devDependencies": {
+    "adhan": "4.4.6",
     "autoprefixer": "10.5.0",
     "lucide-static": "^1.21.0",
     "marked": "18.1.0",
