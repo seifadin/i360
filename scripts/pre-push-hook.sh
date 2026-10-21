@@ -317,7 +317,9 @@ fi
 # changes hub/theme/ or hub/hijri/, that Worker is checked and published
 # from hub/, before any deploy (every page loads theme.css live, so the
 # theme goes first). Each check uses Node alone — no npm ci needed — and
-# wrangler is the pinned version, via npx.
+# the publish is hub/package.json's own publish-* script, so the pinned
+# wrangler version is written in exactly one place (it runs through npx:
+# still no npm ci needed).
 #   - A failing CHECK stops the push (exit 1): nothing is pushed or
 #     published, so the repo and the live Worker can't disagree over a
 #     broken change. Fix, commit, push again.
@@ -327,9 +329,9 @@ fi
 # in a subshell (never VITE_-prefixed). Without them wrangler would try an
 # interactive browser login inside the hook, so a missing token skips the
 # publish with a warning instead.
-publish_hub_worker() {   # <name> <wrangler config, in hub/> <check command, run in hub/>
-  local name="$1" config="$2" check="$3"
-  local manual="cd hub && set -a && source ../.env && set +a && npx --yes wrangler@4.145.0 deploy --config $config"
+publish_hub_worker() {   # <name> <hub/package.json publish script> <check command, run in hub/>
+  local name="$1" script="$2" check="$3"
+  local manual="cd hub && set -a && source ../.env && set +a && npm run $script"
   echo "→ $name changed — checking it before publishing..."
   if ! (cd hub && bash -c "$check"); then
     echo "✗ $name check failed — push stopped: nothing was pushed or published."
@@ -343,7 +345,7 @@ publish_hub_worker() {   # <name> <wrangler config, in hub/> <check command, run
     return 0
   fi
   echo "→ Publishing $name..."
-  if (set -a; [ ! -f .env ] || source .env; set +a; cd hub && npx --yes wrangler@4.145.0 deploy --config "$config"); then
+  if (set -a; [ ! -f .env ] || source .env; set +a; cd hub && npm run "$script"); then
     echo "✓ $name published."
   else
     echo "⚠ $name NOT published (the push continues). Publish by hand:"
@@ -358,10 +360,10 @@ if [ "$DIFF_UNKNOWN" = true ]; then
   echo "    cd hub && node --test test/hijri-*.test.js && set -a && source ../.env && set +a && npm run publish-hijri"
 else
   if printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/theme/'; then
-    publish_hub_worker "Theme (theme.i36o.workers.dev)" "theme/wrangler.jsonc" "node theme/fallbacks.js"
+    publish_hub_worker "Theme (theme.i36o.workers.dev)" "publish-theme" "node theme/fallbacks.js"
   fi
   if printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/hijri/'; then
-    publish_hub_worker "Hijri Worker (dar-hijri.i36o.workers.dev)" "hijri/wrangler.jsonc" "node --test test/hijri-*.test.js"
+    publish_hub_worker "Hijri Worker (dar-hijri.i36o.workers.dev)" "publish-hijri" "node --test test/hijri-*.test.js"
   fi
 fi
 
