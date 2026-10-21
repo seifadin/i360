@@ -55,10 +55,11 @@ theme/wrangler.jsonc         the theme Worker (files only)
   and the loader (`window.i360Theme`), so the theme button also works offline. New colours
   and fonts on the theme site reach them without a rebuild; a change to the loader needs one.
   One theme choice is shared by all of them.
-- **Publishing:** `.github/workflows/theme-publish.yml`, on every push to `main` that
-  changes `theme/` (or by hand: Actions → Theme publish, or `npm run publish-theme`).
+- **Publishing:** the i360 pre-push hook, on every push to `vite` that changes `hub/theme/`
+  (colour check first; or by hand: `npm run publish-theme` with the Cloudflare values from
+  `.env`). The Hijri Worker (`hub/hijri/`) is published the same way.
 - **Colours:** after changing a colour that a `color-mix` is made from,
-  `node theme/fallbacks.js --write` (`npm test` and the workflow stop while one is stale).
+  `node theme/fallbacks.js --write` (`npm test` and the hook's colour check stop while one is stale).
 
 ## Pushing: `npm run push`
 Use it instead of `git push` (arguments pass through: `npm run push -- origin main`):

@@ -1,7 +1,7 @@
 /* i360 Hijri client — asks the dar-hijri Worker for a date and, when it can't
    (offline, timeout, bad answer), falls back to the shared calculator
    (hijri/calc.js). Shared by the hub pages (built in) and the i360 release
-   script (copied by `npm run sync-hijri`). No calendar logic here.
+   script (scripts/get-hijri-date.js requires this file). No calendar logic here.
 
    Never rejects: the answer is always a date, marked with where it came from.
      get({ date, lang })  ->  { date, h: {y, m, d}, source: 'dar'|'calc',

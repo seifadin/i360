@@ -3,9 +3,15 @@
 # fresh-Codespace checklist for the one-time setup command). Fires
 # automatically on every `git push`, no separate command needed.
 #
-#   Firebase Hosting (every push, matching branch):
-#     vite -> preview channel (pwa-test, 30d expiry)
-#     main -> production (live site)
+#   Only vite does anything (the one permanent branch since 2026-10-20;
+#   main became MS5, the AppGyver archive). Other branches push untouched.
+#   Hub Workers (when this push changes them, before anything else):
+#     hub/theme/ -> colour check, then publish theme.i36o.workers.dev
+#     hub/hijri/ -> Hijri tests, then publish dar-hijri.i36o.workers.dev
+#     a failing check stops the push; a failing publish only warns
+#   Firebase Hosting (hosting-relevant changes):
+#     preview channel (pwa-test, 30d expiry), then a prompt
+#     "Deploy … to production too? (y/N)" for the live site
 #   Mobile release routing:
 #     web-only changes  -> OTA push (OtaKit), automatic, retries once,
 #                           falls back to a store-submission prompt if
@@ -150,7 +156,7 @@ fi
 # guarantees OTA_CHANNEL can't leak in from the calling shell no matter
 # what it has exported. dist/ is guaranteed fresh here — the shared
 # `npm run build` above already ran (this function is only reachable on
-# vite/main, the same branches that build).
+# vite, the branch that builds).
 #
 # Why the grep guard anyway: verify, don't trust the command alone —
 # the same principle as §12.16c's post-sync `cat | grep` check, just
@@ -298,62 +304,112 @@ if [ "$DIFF_UNKNOWN" = true ] || any_file_outside "$HOSTING_UNAFFECTED_PATTERN" 
   DEPLOY_NEEDED=true
 fi
 
+# --- Only vite goes further (the one permanent branch; main became MS5,
+# the AppGyver archive, 2026-10-20). A push to any other branch is left
+# alone: nothing is published, built, deployed or released. ---
+if [ "$BRANCH" != "vite" ]; then
+  echo
+  exit 0
+fi
+
+# --- Hub Workers (merge sprint 2, 2026-10-21; claude/i360-hub.md §2) —
+# replaces the hub's two publish workflows (§12.17). When this push
+# changes hub/theme/ or hub/hijri/, that Worker is checked and published
+# from hub/, before any deploy (every page loads theme.css live, so the
+# theme goes first). Each check uses Node alone — no npm ci needed — and
+# wrangler is the pinned version, via npx.
+#   - A failing CHECK stops the push (exit 1): nothing is pushed or
+#     published, so the repo and the live Worker can't disagree over a
+#     broken change. Fix, commit, push again.
+#   - A failing PUBLISH (network, token) only warns, with the manual
+#     command: the change itself is fine, only its publication waits.
+# Credentials: CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID in .env, read
+# in a subshell (never VITE_-prefixed). Without them wrangler would try an
+# interactive browser login inside the hook, so a missing token skips the
+# publish with a warning instead.
+publish_hub_worker() {   # <name> <wrangler config, in hub/> <check command, run in hub/>
+  local name="$1" config="$2" check="$3"
+  local manual="cd hub && set -a && source ../.env && set +a && npx --yes wrangler@4.145.0 deploy --config $config"
+  echo "→ $name changed — checking it before publishing..."
+  if ! (cd hub && bash -c "$check"); then
+    echo "✗ $name check failed — push stopped: nothing was pushed or published."
+    echo "  Fix it, commit, and push again."
+    exit 1
+  fi
+  if ! (set -a; [ ! -f .env ] || source .env; set +a; [ -n "${CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]); then
+    echo "⚠ $name NOT published: CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID"
+    echo "  missing from .env (the push continues). Add them, then publish by hand:"
+    echo "    $manual"
+    return 0
+  fi
+  echo "→ Publishing $name..."
+  if (set -a; [ ! -f .env ] || source .env; set +a; cd hub && npx --yes wrangler@4.145.0 deploy --config "$config"); then
+    echo "✓ $name published."
+  else
+    echo "⚠ $name NOT published (the push continues). Publish by hand:"
+    echo "    $manual"
+  fi
+}
+
+if [ "$DIFF_UNKNOWN" = true ]; then
+  echo "→ Changed files unknown — the theme and Hijri Workers were not checked"
+  echo "  or published. If this push changes hub/theme/ or hub/hijri/, run:"
+  echo "    cd hub && node theme/fallbacks.js && set -a && source ../.env && set +a && npm run publish-theme"
+  echo "    cd hub && node --test test/hijri-*.test.js && set -a && source ../.env && set +a && npm run publish-hijri"
+else
+  if printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/theme/'; then
+    publish_hub_worker "Theme (theme.i36o.workers.dev)" "theme/wrangler.jsonc" "node theme/fallbacks.js"
+  fi
+  if printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/hijri/'; then
+    publish_hub_worker "Hijri Worker (dar-hijri.i36o.workers.dev)" "hijri/wrangler.jsonc" "node --test test/hijri-*.test.js"
+  fi
+fi
+
 # Build once, shared by Firebase deploy below and OTA further down —
 # avoids building dist/ twice for the same push.
 #
-# Gated (2026-10-03). This used to build and deploy on EVERY push to
-# vite/main, "matching the two retired workflows' own behavior exactly" —
-# a deliberate parity choice during the GitHub Actions migration, not a
-# requirement. A scripts/-only push still uploaded all 1,753 files for a
-# dist/ that was byte-identical. Now:
-#   - main ALWAYS builds and deploys. A production push is a rare,
-#     deliberate release, and an unconditional deploy there guarantees
-#     production matches what was just pushed — worth more than the
-#     saved minute, given the stale-dist/ incident in §15b.
-#   - vite builds when DEPLOY_NEEDED, or when IS_NATIVE (the native path's
-#     submit_to_stores relies on this build having run, even if the
-#     preview deploy itself is skipped).
-#   - A skipped build leaves local dist/ untouched. That is safe because
-#     nothing below uses it in that case (OTA_RELEVANT implies
-#     DEPLOY_NEEDED), but §15b's rule still holds for MANUAL deploys:
-#     always `npm run build` first, never trust whatever dist/ holds.
+# Gated (2026-10-03): it builds when DEPLOY_NEEDED, or when IS_NATIVE
+# (the native path's submit_to_stores relies on this build having run,
+# even if the preview deploy itself is skipped). A skipped build leaves
+# local dist/ untouched. That is safe because nothing below uses it in
+# that case (OTA_RELEVANT implies DEPLOY_NEEDED), but §15b's rule still
+# holds for MANUAL deploys: always `npm run build` first, never trust
+# whatever dist/ holds.
 BUILT=false
-if [ "$BRANCH" = "vite" ] || [ "$BRANCH" = "main" ]; then
-  if [ "$BRANCH" = "main" ] || [ "$DEPLOY_NEEDED" = true ] || [ "$IS_NATIVE" = true ]; then
-    npm run build
-    BUILT=true
-  else
-    echo "→ No hosting-relevant files changed — skipping build and deploy."
-  fi
+if [ "$DEPLOY_NEEDED" = true ] || [ "$IS_NATIVE" = true ]; then
+  npm run build
+  BUILT=true
+else
+  echo "→ No hosting-relevant files changed — skipping build and deploy."
 fi
 
-# --- Firebase Hosting. Preview (vite) is gated on DEPLOY_NEEDED; production
-# (main) is not — see the build comment above. The preview channel is
-# created with --expires 30d (Firebase's maximum) and every deploy renews
-# it, so with this gate it can now lapse after 30 days with no hosting-
-# relevant push. Deliberately not engineered around: the next relevant
-# push recreates it (a deploy to a missing channel creates it, though the
-# URL's random suffix will change), and a manual refresh is one line:
+# --- Firebase Hosting, gated on DEPLOY_NEEDED. The preview channel first;
+# then a prompt deploys the SAME fresh build to production (2026-10-21,
+# replacing the retired main-branch path: asked, never silent — like the
+# store and OTA prompts — and always right after a build, so §15b's rule
+# holds). The preview channel is created with --expires 30d (Firebase's
+# maximum) and every deploy renews it, so with this gate it can lapse
+# after 30 days with no hosting-relevant push. Deliberately not
+# engineered around: the next relevant push recreates it (a deploy to a
+# missing channel creates it, though the URL's random suffix will change),
+# and a manual refresh is one line:
 #   npm run build && firebase hosting:channel:deploy pwa-test --expires 30d
-if [ "$BRANCH" = "vite" ]; then
-  if [ "$DEPLOY_NEEDED" = true ]; then
-    echo "→ Deploying preview channel (pwa-test)..."
-    firebase hosting:channel:deploy pwa-test --expires 30d
-    echo "✓ Preview channel updated."
-  elif [ "$IS_NATIVE" = true ]; then
-    echo "→ No hosting-relevant files changed — skipping preview deploy (the build above still ran, for the native path)."
-  fi
-elif [ "$BRANCH" = "main" ]; then
-  echo "→ Deploying to production..."
-  firebase deploy --only hosting
-  echo "✓ Production site updated."
-fi
-
-# --- Mobile release routing — only meaningful on vite/main; a push to
-# any other branch skips this entirely. ---
-if [ "$BRANCH" != "vite" ] && [ "$BRANCH" != "main" ]; then
+if [ "$DEPLOY_NEEDED" = true ]; then
+  echo "→ Deploying preview channel (pwa-test)..."
+  firebase hosting:channel:deploy pwa-test --expires 30d
+  echo "✓ Preview channel updated."
+  read -p "  Deploy this build to production (i360-e.web.app) too? (y/N) " -n 1 -r < /dev/tty
   echo
-  exit 0
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "→ Deploying to production..."
+    firebase deploy --only hosting
+    echo "✓ Production site updated."
+  else
+    echo "  Skipped — production unchanged. Deploy it later with:"
+    echo "    npm run build && firebase deploy --only hosting"
+  fi
+elif [ "$IS_NATIVE" = true ]; then
+  echo "→ No hosting-relevant files changed — skipping preview deploy (the build above still ran, for the native path)."
 fi
 
 # Strip PWA-store-only assets (2026-09-12) — screenshots exist solely

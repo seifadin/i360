@@ -1,6 +1,7 @@
 /* i360 Hijri calculator — the one offline Hijri calculation, shared by the
    dar-hijri Worker, the hub pages (built in) and the i360 release script
-   (copied by `npm run sync-hijri`), so every place computes the same date.
+   (scripts/get-hijri-date.js, which requires this file), so every place
+   computes the same date.
 
    Pure: no network, no storage, no clock of its own (callers pass the date).
    Dates are civil dates as 'YYYY-MM-DD' strings; a Hijri date is {y, m, d}
