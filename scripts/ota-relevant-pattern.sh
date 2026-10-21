@@ -48,7 +48,11 @@
 # Root-level anchoring is deliberate: `[^/]+\.md$` excludes root docs
 # (README.md, CHANGELOG.md) but NOT public/*.md, which would ship in dist/.
 # eslint.config.js (2026-10-03): lint config only, never read by the build.
-_UNAFFECTED_COMMON='scripts/|android/|ios/|[^/]+\.md$|\.gitignore$|\.env\.example$|eslint\.config\.js$'
+# hub/ (2026-10-21): the hub's own sources, Workers and indexer — built,
+# tested and published from hub/, never read by `npm run build` (the pages
+# reach the app as built files in public/, which stay relevant).
+# .github/: GitHub Actions workflows, never read by the build.
+_UNAFFECTED_COMMON='scripts/|android/|ios/|hub/|\.github/|[^/]+\.md$|\.gitignore$|\.env\.example$|eslint\.config\.js$'
 HOSTING_UNAFFECTED_PATTERN="^(${_UNAFFECTED_COMMON})"
 OTA_UNAFFECTED_PATTERN="^(${_UNAFFECTED_COMMON}|firebase\.json\$|\.firebaserc\$|tsconfig[^/]*\.json\$|package\.json\$|package-lock\.json\$|capacitor\.config\.ts\$)"
 
