@@ -34,6 +34,10 @@ concurrency:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: hub
+
 jobs:
   index:
     runs-on: ubuntu-latest
@@ -45,6 +49,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: hub/package-lock.json
 
       - run: npm ci
 
@@ -73,6 +78,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: dist-report
-          path: indexer/dist-report.json
+          path: hub/indexer/dist-report.json
           if-no-files-found: ignore
           retention-days: 14

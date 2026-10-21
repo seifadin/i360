@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: hub
+
 jobs:
   check:
     runs-on: ubuntu-latest

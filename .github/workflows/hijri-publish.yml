@@ -1,6 +1,6 @@
-# i360 Hijri date: publishes the dar-hijri Worker (hijri/) to dar-hijri.i36o.workers.dev.
+# i360 Hijri date: publishes the dar-hijri Worker (hub/hijri/) to dar-hijri.i36o.workers.dev.
 #
-# - On a push to main that changes hijri/ (or this file).
+# - On a push to vite that changes hub/hijri/ (or this file).
 # - By hand: Actions → Hijri publish → Run workflow.
 #
 # The Hijri tests run first; a failing test stops the publish.
@@ -9,9 +9,9 @@ name: Hijri publish
 
 on:
   push:
-    branches: [main]
+    branches: [vite]
     paths:
-      - 'hijri/**'
+      - 'hub/hijri/**'
       - '.github/workflows/hijri-publish.yml'
   workflow_dispatch:
 
@@ -21,6 +21,10 @@ concurrency:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: hub
 
 jobs:
   publish:

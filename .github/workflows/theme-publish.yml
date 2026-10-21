@@ -1,6 +1,6 @@
-# i360 theme: publishes theme/site/ to theme.i36o.workers.dev.
+# i360 theme: publishes hub/theme/site/ to theme.i36o.workers.dev.
 #
-# - On a push to main that changes the theme (theme/**).
+# - On a push to vite that changes the theme (hub/theme/**).
 # - By hand: Actions → Theme publish → Run workflow.
 #
 # Uses the same repo secrets as the CSE workflow.
@@ -8,9 +8,9 @@ name: Theme publish
 
 on:
   push:
-    branches: [main]
+    branches: [vite]
     paths:
-      - 'theme/**'
+      - 'hub/theme/**'
       - '.github/workflows/theme-publish.yml'
   workflow_dispatch:
 
@@ -20,6 +20,10 @@ concurrency:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: hub
 
 jobs:
   publish:
