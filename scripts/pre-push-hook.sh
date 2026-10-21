@@ -9,13 +9,16 @@
 #     hub/theme/ -> colour check, then publish theme.i36o.workers.dev
 #     hub/hijri/ -> Hijri tests, then publish dar-hijri.i36o.workers.dev
 #     a failing check stops the push; a failing publish only warns
+#   Release rule: automatic for what nobody sees, asked for what users
+#   see; checks stop the push, releases only warn.
 #   Firebase Hosting (hosting-relevant changes):
-#     preview channel (pwa-test, 30d expiry), then a prompt
-#     "Deploy … to production too? (y/N)" for the live site
+#     preview channel (pwa-test, 30d expiry) — a check — then ONE prompt
+#     "Release this build to users — web … and phones (OTA)? (y/N)"
+#     (the web only, when the bundle didn't change or the change is native)
 #   Mobile release routing:
-#     web-only changes  -> OTA push (OtaKit), automatic, retries once,
-#                           falls back to a store-submission prompt if
-#                           it's still failing
+#     web-only changes  -> OTA release (OtaKit) on that same "y", retries
+#                           once, falls back to a store-submission prompt
+#                           if it's still failing
 #     native changes    -> prompts "Submit to stores? (y/n)" right here
 #                           in the terminal — a plain push never silently
 #                           triggers an actual store submission
@@ -385,30 +388,62 @@ else
   echo "→ No hosting-relevant files changed — skipping build and deploy."
 fi
 
-# --- Firebase Hosting, gated on DEPLOY_NEEDED. The preview channel first;
-# then a prompt deploys the SAME fresh build to production (2026-10-21,
-# replacing the retired main-branch path: asked, never silent — like the
-# store and OTA prompts — and always right after a build, so §15b's rule
-# holds). The preview channel is created with --expires 30d (Firebase's
-# maximum) and every deploy renews it, so with this gate it can lapse
-# after 30 days with no hosting-relevant push. Deliberately not
-# engineered around: the next relevant push recreates it (a deploy to a
-# missing channel creates it, though the URL's random suffix will change),
-# and a manual refresh is one line:
+# --- Releasing to users (2026-10-21, §15r): automatic for what nobody sees,
+# asked for what users see — the same rule for the web and for phones.
+#   - The preview is a CHECK: it deploys automatically, and a failure stops
+#     the push — nothing is released yet, and the question below
+#     would otherwise ask about a build that couldn't be looked at.
+#   - Then ONE question releases this same fresh build (§15b) everywhere it
+#     applies: the web, plus phones by OTA when this is a web-only change
+#     that affects the bundle (OTA-relevant implies hosting-relevant, so a
+#     phones-only form never occurs). One answer for both, so the website
+#     and the app can never silently drift apart.
+#   - A release only WARNS when it fails (the push continues, its manual
+#     command is printed); each release is attempted on its own.
+#   - Native changes keep their own store and OTA prompts further down (a
+#     native change can't reach phones by OTA alone): for them this
+#     question covers the web only.
+# The preview channel is created with --expires 30d (Firebase's maximum)
+# and every deploy renews it, so it can lapse after 30 days with no
+# hosting-relevant push. Deliberately not engineered around: the next
+# relevant push recreates it (the URL's random suffix will change), and a
+# manual refresh is one line:
 #   npm run build && firebase hosting:channel:deploy pwa-test --expires 30d
+OTA_WITH_RELEASE=false
+if [ "$IS_NATIVE" = false ] && [ "$OTA_RELEVANT" = true ]; then
+  OTA_WITH_RELEASE=true
+fi
+RELEASE_TO_USERS=false
 if [ "$DEPLOY_NEEDED" = true ]; then
   echo "→ Deploying preview channel (pwa-test)..."
-  firebase hosting:channel:deploy pwa-test --expires 30d
+  if ! firebase hosting:channel:deploy pwa-test --expires 30d; then
+    echo "✗ Preview deploy failed — push stopped: nothing was pushed or released."
+    echo "  Usually Firebase sign-in or the network; fix it and push again."
+    exit 1
+  fi
   echo "✓ Preview channel updated."
-  read -p "  Deploy this build to production (i360-e.web.app) too? (y/N) " -n 1 -r < /dev/tty
+  if [ "$OTA_WITH_RELEASE" = true ]; then
+    RELEASE_TARGETS="web (i360-e.web.app) and phones (OTA)"
+  else
+    RELEASE_TARGETS="web (i360-e.web.app)"
+  fi
+  read -p "  Release this build to users — $RELEASE_TARGETS? (y/N) " -n 1 -r < /dev/tty
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "→ Deploying to production..."
-    firebase deploy --only hosting
-    echo "✓ Production site updated."
+    RELEASE_TO_USERS=true
+    echo "→ Releasing to the web (i360-e.web.app)..."
+    if firebase deploy --only hosting; then
+      echo "✓ Web released."
+    else
+      echo "⚠ Web NOT released (the push continues). Release it by hand:"
+      echo "    npm run build && firebase deploy --only hosting"
+    fi
   else
-    echo "  Skipped — production unchanged. Deploy it later with:"
-    echo "    npm run build && firebase deploy --only hosting"
+    echo "  Skipped — users are unchanged. Release later by hand:"
+    echo "    web:    npm run build && firebase deploy --only hosting"
+    if [ "$OTA_WITH_RELEASE" = true ]; then
+      echo "    phones: npm run build && rm -rf dist/assets/screenshots && set -a && source .env && set +a && bash scripts/release-to-otakit.sh"
+    fi
   fi
 elif [ "$IS_NATIVE" = true ]; then
   echo "→ No hosting-relevant files changed — skipping preview deploy (the build above still ran, for the native path)."
@@ -486,24 +521,29 @@ if [ "$IS_NATIVE" = false ]; then
     else
       echo "→ No web-bundle-relevant files changed — skipping OTA release."
     fi
+  elif [ "$RELEASE_TO_USERS" != true ]; then
+    # The one release question above was answered "n": phones stay as they
+    # are, exactly like the web (its manual commands were printed there).
+    echo "→ Web-only change — not released to phones (declined above)."
   else
-    echo "→ Web-only change detected — pushing OTA update..."
+    echo "→ Releasing to phones (OTA)..."
 
     # scripts/release-to-otakit.sh's own non-zero exit (genuine failure
-    # after its internal retry) must not kill this script under set -e —
-    # this specific call site has its own further fallback (offering store
-    # submission) that no other caller of the shared script needs, since
-    # here nothing has explicitly confirmed a manual release is even
-    # wanted; a persistently-failing OTA server means mobile users need
-    # another way to receive this update at all.
+    # after its internal retry) must not kill this script under set -e: a
+    # failed release only warns, like the web's. This call site also keeps
+    # one fallback the web has no equivalent of — phones have a second
+    # delivery route for the same bundle (a store binary), so a
+    # persistently-failing OTA server can still be worked around.
     if ! I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh; then
+      echo "⚠ Phones NOT released by OTA (the push continues)."
       read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         submit_to_stores
       else
-        echo "  Skipped. This push will proceed, but mobile users won't"
-        echo "  receive this update until OTA or a store submission succeeds."
+        echo "  Skipped. Mobile users won't receive this update until OTA or a"
+        echo "  store submission succeeds. Release by OTA later by hand:"
+        echo "    npm run build && rm -rf dist/assets/screenshots && set -a && source .env && set +a && bash scripts/release-to-otakit.sh"
       fi
     fi
   fi
