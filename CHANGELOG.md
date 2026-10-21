@@ -11,10 +11,12 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 Changes released after 0.13.2 without a version bump: over the air to the installed apps and on the web app. They move under the next version number at its release.
 
 ### Added
+- The Daily Reflection («التأمل اليومي») now opens inside the app instead of the browser, with a close button back to the encyclopedia (2026-10-22)
 - A theme choice in the bottom bar — follow the device, light, sepia or dark — shared with the Daily Reflection, the Markdown Reader and the i360 CSE; the chosen theme appears instantly at start, with no flash of the light one (2026-10-21)
 - A numerals choice beside it — Western 456, Arabic-Indic ٤٥٦ or Persian/Urdu ۴۵۶ — applied to every number the app shows, including version numbers, which use the Arabic separator «٫» so the eastern zero isn't mistaken for a dot (2026-10-21)
 
 ### Changed
+- Daily Reflection calculates prayer times on the device: your location is no longer sent anywhere. The city comes from the device's time zone, or can be picked by name; only a typed city name goes to the place search (2026-10-22)
 - The search box recognises a chapter.verse typed in any of the three digit sets, with "." or «٫» (2026-10-21)
 - The dividers in the science list now follow the chosen theme and are lightly visible (2026-10-21)
 - The app's colours and its Amiri typeface now come from the shared i360 theme, the same single source used by the Daily Reflection, the Markdown Reader and the i360 CSE — the app looks exactly as before, and keeps the same colours even if the theme can't be reached (2026-10-17)
