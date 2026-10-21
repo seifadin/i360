@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-hujQCY3FOW3nFM/Bs1wgqM5WCMZgfupUOLZ4RpJ4dHE='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-kA02poLqHwME5FSUPCejRA6636abL57/UiwbWkZjWik='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
@@ -621,6 +621,8 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
             <!-- The shared numerals and theme, in the same order as in the Reader and the CSE:
                  numerals (0123 → ٠١٢٣ → ۰۱۲۳), then theme (system → light → sepia → dark) -->
             <div class="flex gap-2">
+                <!-- Inside the installed i360إ app only: back to its home (sprint 4b). -->
+                <button id="btn-close" type="button" class="hidden glass-card p-2 rounded-xl text-custom-secondary items-center justify-center theme-btn"><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
                 <button id="btn-numerals" type="button" class="numerals-btn glass-card px-2 py-2 rounded-xl text-custom-secondary text-xs font-bold flex items-center justify-center"></button>
                 <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
             </div>
@@ -1046,31 +1048,31 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         const EXTRA = {
             ar: { refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
                   schoolStd: 'الجمهور', schoolHanafi: 'الحنفي',
-                  cityChange: 'تغيير', citySearch: 'ابحث عن مدينة…', deviceTz: 'المنطقة الزمنية للجهاز',
+                  close: 'إغلاق والعودة إلى الموسوعة', cityChange: 'تغيير', citySearch: 'ابحث عن مدينة…', deviceTz: 'المنطقة الزمنية للجهاز',
                   cityNone: 'لم يُعثر على المدينة — جرّب كتابة اسمها بالإنجليزية.',
                   creditCities: 'بيانات المدن', creditPrayer: 'حساب مواقيت الصلاة',
                   privacy: 'تُحسَب مواقيت الصلاة على جهازك. لا يُرسَل إلى Open-Meteo إلا اسم المدينة الذي تكتبه في البحث.' },
             en: { refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
                   schoolStd: 'Standard', schoolHanafi: 'Hanafi',
-                  cityChange: 'Change', citySearch: 'Search for a city…', deviceTz: 'Device time zone',
+                  close: 'Close and return to the encyclopedia', cityChange: 'Change', citySearch: 'Search for a city…', deviceTz: 'Device time zone',
                   cityNone: 'No city found — check the spelling.',
                   creditCities: 'City data', creditPrayer: 'Prayer-time calculation',
                   privacy: 'Prayer times are calculated on your device. Only a city name you type in the search is sent to Open-Meteo.' },
             tr: { refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
                   schoolStd: 'Standart', schoolHanafi: 'Hanefi',
-                  cityChange: 'Değiştir', citySearch: 'Şehir ara…', deviceTz: 'Cihaz saat dilimi',
+                  close: 'Kapat ve ansiklopediye dön', cityChange: 'Değiştir', citySearch: 'Şehir ara…', deviceTz: 'Cihaz saat dilimi',
                   cityNone: 'Şehir bulunamadı — adını İngilizce yazmayı deneyin.',
                   creditCities: 'Şehir verileri', creditPrayer: 'Namaz vakti hesaplaması',
                   privacy: "Namaz vakitleri cihazınızda hesaplanır. Yalnızca aramaya yazdığınız şehir adı Open-Meteo'ya gönderilir." },
             id: { refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
                   schoolStd: 'Standar', schoolHanafi: 'Hanafi',
-                  cityChange: 'Ubah', citySearch: 'Cari kota…', deviceTz: 'Zona waktu perangkat',
+                  close: 'Tutup dan kembali ke ensiklopedia', cityChange: 'Ubah', citySearch: 'Cari kota…', deviceTz: 'Zona waktu perangkat',
                   cityNone: 'Kota tidak ditemukan — coba ketik namanya dalam bahasa Inggris.',
                   creditCities: 'Data kota', creditPrayer: 'Perhitungan waktu shalat',
                   privacy: 'Waktu shalat dihitung di perangkat Anda. Hanya nama kota yang Anda ketik di pencarian yang dikirim ke Open-Meteo.' },
             ur: { refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
                   schoolStd: 'معیاری', schoolHanafi: 'حنفی',
-                  cityChange: 'تبدیل کریں', citySearch: 'شہر تلاش کریں…', deviceTz: 'ڈیوائس کا ٹائم زون',
+                  close: 'بند کریں اور انسائیکلوپیڈیا پر واپس جائیں', cityChange: 'تبدیل کریں', citySearch: 'شہر تلاش کریں…', deviceTz: 'ڈیوائس کا ٹائم زون',
                   cityNone: 'شہر نہیں ملا — اس کا نام انگریزی میں لکھ کر دیکھیں۔',
                   creditCities: 'شہروں کا ڈیٹا', creditPrayer: 'نماز کے اوقات کا حساب',
                   privacy: 'نماز کے اوقات آپ کے آلے پر ہی نکالے جاتے ہیں۔ صرف وہ شہر کا نام جو آپ تلاش میں لکھیں، Open-Meteo کو بھیجا جاتا ہے۔' }
@@ -1317,6 +1319,12 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => App.setLang(b.dataset.lang)));
                 document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
                 Picker.init();
+                // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
+                if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
+                    const x = document.getElementById('btn-close');
+                    x.classList.remove('hidden'); x.classList.add('flex');
+                    x.addEventListener('click', () => { window.location.assign('/index.html'); });
+                }
                 document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
                 i360Theme.onChange(() => this.theme());
                 document.getElementById('btn-numerals').addEventListener('click', () => i360Theme.cycleNumerals());
@@ -1364,6 +1372,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
                 this.theme();            // their tooltips are in the page's language
                 this.numeralsButton();
+                const x = document.getElementById('btn-close'); x.title = L.close; x.setAttribute('aria-label', L.close);
                 document.title = L.title;   // the tab name follows the language too
                 this.renderSchool();
                 this.renderHijri();

@@ -7,7 +7,7 @@ import { Science } from '@/api/dataSource'
 import { computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { groupSciences } from '@/lib/groupSciences'
 import { checkPageReachable } from '@/lib/reachability'
-import { openResource } from '@/lib/openResource'
+import { openResource, ownPagePath } from '@/lib/openResource'
 import { loadIcon } from '@/lib/iconLoader'
 import { REPORT_SUBJECTS } from '@/lib/feedbackReport'
 import Dialog from '@/components/Dialog'
@@ -205,7 +205,8 @@ export default function ScienceGrid() {
     if (!url || busyRef.current) return
     busyRef.current = true
     try {
-      if (globalResource?.WebsiteStatus) {
+      // The app's own pages ship with it: nothing to check.
+      if (globalResource?.WebsiteStatus && !ownPagePath(url)) {
         setChecking(true)
         const reachable = await checkPageReachable(url)
         setChecking(false)

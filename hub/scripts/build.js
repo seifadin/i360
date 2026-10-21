@@ -2,7 +2,7 @@
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
-//   public-hub/day/index.html  Daily Reflection (from src/day.html)
+//   public-hub/day/index.html  Daily Reflection (from src/day.html; also ../public/day/ for the app)
 //
 //   npm run build
 //
@@ -176,4 +176,10 @@ buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], 
     ],
     connectSrc: 'https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev'
   });
+  // The same page inside the i360إ app (sprint 4b, i360-hub.md §10): public/day/ of the app, so the
+  // app, i360-e.web.app/day/ and the hub serve one build. Until the hub becomes a forwarder (sprint 7).
+  const appCopy = join(root, '..', 'public', 'day', 'index.html');
+  mkdirSync(dirname(appCopy), { recursive: true });
+  writeFileSync(appCopy, read(join(root, 'public-hub/day/index.html')));
+  console.log('public/day/index.html (the app): the same page');
 }

@@ -1,4 +1,5 @@
 import { Browser } from '@capacitor/browser'
+import { Capacitor } from '@capacitor/core'
 import { resolveOpenMethod, matchesWebList } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 
@@ -17,7 +18,30 @@ export interface OpenContext {
 // Resolves true if something opened. Both openers are called before any await,
 // so they stay inside the user's tap. If the in-app browser fails, falls back
 // to a new tab and reports that result — never an unhandled rejection.
+// The app's own pages (hub/, built into public/ — i360-hub.md §10). In the installed app,
+// a link to one opens the app's own copy in the app's view, not the browser overlay:
+// today's hub address (Seif 2026-10-22), the future i360-e.web.app one and the old
+// forwarder. Always as /<page>/index.html: Capacitor's built-in server answers a
+// path without a file extension with the app's own index.html (i360-hub.md §10).
+const OWN_PAGES = ['day']
+const OWN_HOSTS = ['i360-hub.web.app', 'i360-e.web.app']
+const FORWARDERS: Record<string, string> = { 'i360-day.web.app': 'day' }
+
+export function ownPagePath(url: string): string | null {
+  if (!Capacitor.isNativePlatform()) return null
+  let u: URL
+  try { u = new URL(url) } catch { return null }
+  if (u.protocol !== 'https:') return null
+  const page = FORWARDERS[u.hostname] ?? (OWN_HOSTS.includes(u.hostname) ? u.pathname.split('/')[1] ?? '' : '')
+  return OWN_PAGES.includes(page) ? `/${page}/index.html${u.search}${u.hash}` : null
+}
+
 export async function openResource(url: string, ctx: OpenContext, kind: 'default' | 'bot' = 'default'): Promise<boolean> {
+  const own = ownPagePath(url)
+  if (own) {
+    window.location.assign(own)
+    return true
+  }
   const inApp = kind === 'bot'
     ? ctx.useWeb && !matchesWebList(url, ctx.uriSchemes, ctx.inWebList)
     : ctx.useWeb && resolveOpenMethod(url, ctx.uriSchemes, ctx.inWebList) === 'in_app'
