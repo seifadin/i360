@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التأمل اليومي</title>
+    <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
+         scripts/build.js: built-in colours, the saved theme before anything is drawn, the
+         loader (window.i360Theme). Tailwind's dark: styles follow the "dark" class, set
+         here from the shared theme (sepia uses the light ones on sepia colours). -->
+    <style id="i360-fallback">/*@@THEME_FALLBACK@@*/</style>
+    <script>/*@@THEME_EARLY@@*/</script>
+    <script>/*@@THEME_LOADER@@*/</script>
+    <script>
+        document.documentElement.classList.toggle('dark', document.documentElement.getAttribute('data-theme') === 'dark');
+        i360Theme.onChange(function (s) { document.documentElement.classList.toggle('dark', s.theme === 'dark'); });
+    </script>
+    <!-- The shared Hijri date (hijri/ in this repo, i360-hub.md §8), filled in by scripts/build.js:
+         the calculator (window.HijriCalc) and the dar-hijri Worker's client (window.HijriClient). -->
+    <script>/*@@HIJRI_CALC@@*/</script>
+    <script>/*@@HIJRI_CLIENT@@*/</script>
+    <link rel="preconnect" href="/*@@THEME_ORIGIN@@*/" crossorigin>
+    <style>
+        /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
+           the frame colour (as behind the Reader's pages); cards: the page colour. */
+        :root {
+            --bg-primary: var(--i360-frame); --card-bg: var(--i360-bg); --text-primary: var(--i360-text); --text-secondary: var(--i360-muted);
+            --accent: var(--i360-accent); --on-accent: var(--i360-on-accent); --bg-inset: var(--i360-quote); --border-inset: var(--i360-rule);
+        }
+        /* Fonts from the shared theme: Amiri for every language, Amiri Quran for the verse. */
+        body { font-family: var(--i360-font); background-color: var(--bg-primary); color: var(--text-primary); transition: all 0.3s ease; margin: 0; padding: 0; overflow-x: hidden; }
+        .arabic-script, .hadith-text-style { font-family: var(--i360-font); line-height: 2.0 !important; }
+        .arabic-script.quran-verse { font-family: var(--i360-font-quran); }
+        .text-quran { color: var(--i360-quran); }
+        .bg-quran-soft { background-color: var(--i360-hover); }
+        @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
+        .text-accent { color: var(--i360-accent); }
+        /* Readability with Amiri, a book face with short letters (Seif, 2026-10-17):
+           - small sizes go up: 8 → 12 px, 10 → 14 px, 12 → 15 px, 14 → 16 px (headings and body text
+             stay as they are);
+           - Amiri has only regular (400) and bold (700): "medium" and "semibold" (500/600) would fall
+             back to regular, so they are drawn bold;
+           - no extra letter spacing in Arabic script (it pulls joined letters apart). */
+        .text-\[8px\] { font-size: 0.75rem !important; }
+        .text-\[10px\] { font-size: 0.875rem !important; line-height: 1.4rem !important; }
+        .text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; }
+        .text-sm { font-size: 1rem !important; line-height: 1.6rem !important; }
+        @media (min-width: 640px) { .sm\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } }
+        @media (min-width: 768px) { .md\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } .md\:text-sm { font-size: 1rem !important; line-height: 1.6rem !important; } }
+        .font-medium, .font-semibold { font-weight: 700 !important; }
+        [dir="rtl"] .tracking-widest { letter-spacing: normal !important; }
+        .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+        /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
+        svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
+        svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
+        svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
+        .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
+        .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
+        .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
+        [dir="ltr"] .arabic-script { direction: rtl; }
+        .text-custom-secondary { color: var(--text-secondary); }
+        .lang-btn { min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; }
+        .layout-stable { width: 100%; max-width: 42rem; margin: 0 auto; transition: transform 0.3s ease; }
+    </style>
+    <style id="tailwind">/*@@TAILWIND@@*/</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+    <header class="layout-stable flex flex-col gap-6 mb-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-start flex flex-col gap-1">
+                <h1 data-i18n="title" class="text-3xl font-bold tracking-tight">Daily Reflection</h1>
+                <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
+                <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
+                <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+            </div>
+            <!-- The shared numerals and theme, in the same order as in the Reader and the CSE:
+                 numerals (0123 → ٠١٢٣ → ۰۱۲۳), then theme (system → light → sepia → dark) -->
+            <div class="flex gap-2">
+                <button id="btn-numerals" type="button" class="numerals-btn glass-card px-2 py-2 rounded-xl text-custom-secondary text-xs font-bold flex items-center justify-center"></button>
+                <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
+            </div>
+        </div>
+
+        <!-- dir="rtl" keeps the language grid in a fixed order -->
+        <div class="grid grid-cols-5 gap-1 glass-card p-2 rounded-2xl w-full" dir="rtl" role="group" aria-label="Language">
+            <button onclick="App.setLang('ar')" id="lang-ar" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">العربية</button>
+            <button onclick="App.setLang('ur')" id="lang-ur" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">اردو</button>
+            <button onclick="App.setLang('id')" id="lang-id" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Indo</button>
+            <button onclick="App.setLang('tr')" id="lang-tr" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Türkçe</button>
+            <button onclick="App.setLang('en')" id="lang-en" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">English</button>
+        </div>
+    </header>
+
+    <main class="layout-stable space-y-8">
+        <section id="quran-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="bg-quran-soft text-quran p-2 rounded-lg"><svg data-lucide="moon-star" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5h4"></path><path d="M20 3v4"></path><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg></span>
+                <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-quran">Quranic Verse</h2>
+            </div>
+            <div class="space-y-6">
+                <p data-target="quran-arabic" class="arabic-script quran-verse text-xl md:text-2xl font-bold text-justify mb-4"></p>
+                <p data-target="quran-translation" class="text-base md:text-lg font-light italic text-custom-secondary text-justify"></p>
+                <p data-target="quran-ref" class="text-sm font-semibold text-quran border-t border-slate-100 dark:border-slate-700/50 pt-4"></p>
+            </div>
+            <div data-status="quran" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+        </section>
+
+        <section id="hadith-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg"><svg data-lucide="book-open" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg></span>
+                <h2 data-i18n="hadithLabel" class="text-sm font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Hadith</h2>
+            </div>
+            <div class="space-y-6">
+                <p data-target="hadith-title" class="text-sm font-bold text-custom-secondary"></p>
+                <div class="space-y-2">
+                    <p data-target="hadith-narrator" class="hidden hadith-text-style text-base md:text-lg text-amber-700 dark:text-amber-500 font-bold"></p>
+                    <p data-target="hadith-text" class="hadith-text-style text-lg md:text-xl text-custom-secondary font-medium text-justify"></p>
+                </div>
+                <div class="border-t border-slate-100 dark:border-slate-700/50 pt-4 space-y-1 text-sm font-bold text-amber-600 dark:text-amber-500">
+                    <p data-target="hadith-grade"></p>
+                    <details id="hadith-refs" class="hidden font-medium text-xs">
+                        <summary data-i18n="refsLabel" class="cursor-pointer font-bold text-sm">References</summary>
+                        <p data-target="hadith-ref" class="mt-2 font-medium whitespace-pre-line"></p>
+                    </details>
+                    <p class="font-medium text-xs"><span data-i18n="sourceLabel">Source</span>: <a data-target="hadith-link" href="https://hadeethenc.com/" target="_blank" rel="noopener noreferrer" class="underline">HadeethEnc.com</a></p>
+                </div>
+            </div>
+            <div data-status="hadith" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+        </section>
+
+        <section id="prayer-card" class="glass-card rounded-3xl p-6 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><svg data-lucide="clock" class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
+                <h2 data-i18n="prayerLabel" class="text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Prayer Times</h2>
+            </div>
+            <div data-target="prayer-grid" class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6"></div>
+            <div data-status="prayer" class="hidden items-center gap-3 text-xs text-custom-secondary mb-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] md:text-xs text-custom-secondary inset-item p-4">
+                <div class="flex flex-col gap-1">
+                    <p><span class="font-bold" data-i18n="methodLabel">Method:</span> <span data-target="meta-method">...</span></p>
+                    <p class="flex flex-wrap items-center gap-1"><span class="font-bold" data-i18n="madhabLabel">Madhab:</span>
+                        <button type="button" id="school-0" onclick="App.setSchool(0)" data-i18n="schoolStd" class="px-2 py-0.5 rounded-lg font-medium"></button>
+                        <button type="button" id="school-1" onclick="App.setSchool(1)" data-i18n="schoolHanafi" class="px-2 py-0.5 rounded-lg font-medium"></button>
+                    </p>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <p><span class="font-bold" data-i18n="locLabel">Location:</span> <span data-target="meta-location">...</span></p>
+                    <p><span class="font-bold" data-i18n="tzLabel">Timezone:</span> <span data-target="meta-timezone">...</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="events-card" class="glass-card rounded-3xl p-6 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><svg data-lucide="calendar-check" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="m9 15 2 2 4-4"></path></svg></span>
+                <h2 data-i18n="eventsLabel" class="text-sm font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Upcoming Events</h2>
+            </div>
+            <div data-target="events-list" class="space-y-4"></div>
+        </section>
+    </main>
+    <footer class="mt-16 text-center text-custom-secondary text-xs pb-10">
+        <p data-i18n="footer">Updated daily.</p>
+        <p data-i18n="privacy" class="mt-2 max-w-md mx-auto"></p>
+    </footer>
+
+    <script>
+        'use strict';
+
+        /* ---------- Config ---------- */
+        const CONFIG = {
+            S: { T: 'th-v8', L: 'ln-v8', C: 'sc-v8', M: 'sm-v8', Q: 'qd-v8', H: 'hd-v8' },
+            API: {
+                Q: 'https://api.alquran.cloud/v1/ayah',
+                P: 'https://api.aladhan.com/v1/timings',
+                G: 'https://api.bigdatacloud.net/data/reverse-geocode-client',
+                HE: 'https://hadeethenc.com/api/v1'
+            },
+            // HadeethEnc root categories left out of the daily pick (2 = "The Hadith and Hadith Sciences", technical, 10 items).
+            HADEETH_EXCLUDE_ROOTS: ['2'],
+            EDITIONS: { quran: { ar: 'ar.jalalayn', en: 'en.sahih', tr: 'tr.ates', id: 'id.indonesian', ur: 'ur.ahmedali' } },
+            P_KEYS: ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'],
+            P_NEXT_KEYS: ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'],   // Sunrise is shown but is not a prayer
+            EV: [
+                {id:'h_new',d:1,m:0},{id:'tasua',d:9,m:0},{id:'ashura',d:10,m:0},
+                {id:'mig_mecca',d:27,m:1},
+                {id:'mawlid',d:12,m:2},
+                {id:'isra',d:27,m:6},
+                {id:'baraah',d:15,m:7},{id:'cres',d:29,m:7},
+                {id:'ram_start',d:1,m:8},{id:'badr',d:17,m:8},{id:'fath',d:20,m:8},{id:'qadr',d:27,m:8},
+                {id:'f1',d:1,m:9},{id:'f2',d:2,m:9},{id:'f3',d:3,m:9},
+                {id:'sq',d:1,m:10},
+                {id:'sh',d:1,m:11},{id:'tar',d:8,m:11},{id:'ara',d:9,m:11},{id:'a1',d:10,m:11},{id:'a2',d:11,m:11},{id:'a3',d:12,m:11},{id:'a4',d:13,m:11}
+            ]
+        };
+
+        /* Arabic names of AlAdhan calculation methods (other languages show AlAdhan's own English institution name). */
+        const METHOD_AR = {
+            0: 'الشيعة الاثنا عشرية، معهد ليفا، قم', 1: 'جامعة العلوم الإسلامية بكراتشي', 2: 'الجمعية الإسلامية لأمريكا الشمالية (ISNA)',
+            3: 'رابطة العالم الإسلامي', 4: 'جامعة أم القرى، مكة المكرمة', 5: 'الهيئة المصرية العامة للمساحة', 7: 'معهد الجيوفيزياء، جامعة طهران',
+            8: 'منطقة الخليج', 9: 'الكويت', 10: 'قطر', 11: 'مجلس الشؤون الإسلامية بسنغافورة', 12: 'اتحاد المنظمات الإسلامية في فرنسا',
+            13: 'رئاسة الشؤون الدينية التركية (ديانت)', 14: 'الإدارة الروحية لمسلمي روسيا', 15: 'لجنة رؤية الهلال العالمية',
+            16: 'دبي', 17: 'إدارة التقدم الإسلامي بماليزيا (جاكيم)', 18: 'تونس', 19: 'الجزائر', 20: 'وزارة الشؤون الدينية الإندونيسية',
+            21: 'المغرب', 22: 'الجالية الإسلامية في لشبونة', 23: 'وزارة الأوقاف والشؤون والمقدسات الإسلامية، الأردن', 99: 'مخصص'
+        };
+
+        /* ---------- Small helpers ---------- */
+        const pad = n => String(n).padStart(2, '0');
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const ymdKey = o => `${o.y}-${pad(o.m)}-${pad(o.d)}`;
+        const localYMD = (d = new Date()) => ({ y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() });
+        function minutesNowIn(tz) {
+            try {
+                const p = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+                return parseInt(p.find(x => x.type === 'hour').value, 10) * 60 + parseInt(p.find(x => x.type === 'minute').value, 10);
+            } catch (e) { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
+        }
+        function mk(tag, cls, text) {
+            const el = document.createElement(tag);
+            if (cls) el.className = cls;
+            if (text !== undefined) el.textContent = text;
+            return el;
+        }
+        // Lucide icons shown from script (the hourglass beside a provisional Hijri date).
+        const HOURGLASS = '<svg data-lucide="hourglass" class="icon-inline me-1" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>';
+        function svgIcon(markup) {
+            const t = document.createElement('template');
+            t.innerHTML = markup;
+            return t.content.firstChild;
+        }
+
+        const DataStore = {
+            get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+            set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode / quota: ignore */ } }
+        };
+
+        /* ---------- Network: timeout, no retry on 4xx, bounded retries on network/5xx ---------- */
+        const Net = {
+            async fetch(url, { timeout = 6000, retries = 1, backoff = 800, ...opts } = {}) {
+                for (let attempt = 0; ; attempt++) {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), timeout);
+                    try {
+                        const r = await fetch(url, { ...opts, signal: ctrl.signal });
+                        if (!r.ok) { const e = new Error('HTTP ' + r.status); e.status = r.status; throw e; }
+                        return await r.json();
+                    } catch (e) {
+                        const permanent = e.status && e.status >= 400 && e.status < 500 && e.status !== 429;
+                        if (permanent || attempt >= retries) throw e;
+                        await sleep(backoff * 2 ** attempt);
+                    } finally { clearTimeout(timer); }
+                }
+            }
+        };
+
+        /* ---------- Hijri date: the shared files (hijri/calc.js, hijri/client.js; i360-hub.md §8) ----------
+           The date comes from the dar-hijri Worker (Dar al-Ifta's), or is calculated here when the Worker
+           can't be reached; the label says which. The browser keeps the Worker's answer (its cache headers),
+           so the page saves nothing itself. k = the day shift between the calculator and that date, used
+           to project the events. */
+        try { localStorage.removeItem('hj-v9'); } catch (e) { /* the page's own saved copy until 2026-10; no longer used */ }
+        const Hijri = {
+            today: () => HijriCalc.todayIn(Intl.DateTimeFormat().resolvedOptions().timeZone),
+            make(date, h, source, provisional) {
+                const k = HijriCalc.offsetFor(date, h, 3);
+                return { date, today: h, source, provisional, k: k === null ? 0 : k };
+            },
+            sync() { const date = this.today(); return this.make(date, HijriCalc.fromCivil(date), HijriCalc.SOURCES.CALC, false); },
+            async resolve() {
+                const r = await HijriClient.get({ date: this.today() });
+                if (r.error) console.warn('[hijri] calculated here:', r.error);
+                if (r.outdated) console.warn('[hijri] this page\'s calc.js differs from the Worker\'s: rebuild and redeploy the page');
+                return this.make(r.date, r.h, r.source, r.provisional);
+            },
+            label(h, lang) { return HijriCalc.label(h.provisional ? 'provisional' : h.source, lang); },
+            /* Next occurrence of every event, by walking forward day by day (no drifting arithmetic). */
+            events(h) {
+                const out = [], seen = new Set();
+                for (let i = 0; i <= 385 && seen.size < CONFIG.EV.length; i++) {
+                    const x = HijriCalc.addDays(h.date, i), hh = HijriCalc.fromCivil(x, h.k);
+                    for (const e of CONFIG.EV) {
+                        if (!seen.has(e.id) && e.m + 1 === hh.m && e.d === hh.d) { seen.add(e.id); out.push({ id: e.id, d: e.d, m: e.m, year: hh.y, date: HijriCalc.parseYMD(x), isT: i === 0 }); }
+                    }
+                }
+                return out.slice(0, 10);
+            }
+        };
+
+        /* ---------- HadeethEnc (IslamHouse / Saudi Ministry of Islamic Affairs) ---------- */
+        const HE = {
+            per: 20,
+            async list(lang, cat, page) {
+                const r = await Net.fetch(`${CONFIG.API.HE}/hadeeths/list/?language=${lang}&category_id=${cat}&page=${page}&per_page=${this.per}`);
+                const m = r.meta || {};
+                return { items: Array.isArray(r) ? r : (r.data || []), total: Number(m.total_items ?? m.total ?? m.count) || 0, lastPage: Number(m.last_page) || 0 };
+            },
+            async pickId(lang) {
+                const r = await Net.fetch(`${CONFIG.API.HE}/categories/roots/?language=${lang}`);
+                const roots = (Array.isArray(r) ? r : (r.data || [])).filter(c => !CONFIG.HADEETH_EXCLUDE_ROOTS.includes(String(c.id)));
+                if (!roots.length) throw new Error('HadeethEnc: no root categories');
+                const counts = roots.map(c => Number(c.hadeeths_count) || 0), total = counts.reduce((a, b) => a + b, 0);
+                let root, idx = null;
+                if (total > 0) {                           // uniform over all hadiths in the allowed roots
+                    let n = Math.floor(Math.random() * total);
+                    for (let i = 0; i < roots.length; i++) { if (n < counts[i]) { root = roots[i]; idx = n; break; } n -= counts[i]; }
+                } else root = roots[Math.floor(Math.random() * roots.length)];
+                let res;
+                try { res = await this.list(lang, root.id, idx === null ? 1 : Math.floor(idx / this.per) + 1); }
+                catch (e) { if (e.status && e.status < 500) { idx = null; res = await this.list(lang, root.id, 1); } else throw e; }
+                if (idx === null) {                        // sizes unknown: learn them from meta, then jump to a random page
+                    const last = res.lastPage || (res.total ? Math.ceil(res.total / this.per) : 1);
+                    const p = 1 + Math.floor(Math.random() * last);
+                    if (p !== 1) res = await this.list(lang, root.id, p);
+                    idx = Math.floor(Math.random() * Math.max(res.items.length, 1));
+                }
+                if (!res.items.length) throw new Error('HadeethEnc: empty page');
+                return String(res.items[Math.min(idx % this.per, res.items.length - 1)].id);
+            },
+            one(lang, id, opts) { return Net.fetch(`${CONFIG.API.HE}/hadeeths/one/?id=${id}&language=${lang}`, opts); },
+            async daily(lang) {
+                const day = ymdKey(localYMD()), c = DataStore.get(CONFIG.S.H);
+                let id = (c && c.day === day && c.lang === lang) ? c.id : null;
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    if (!id) { id = await this.pickId(lang); DataStore.set(CONFIG.S.H, { day, lang, id }); }
+                    try {
+                        const rec = await this.one(lang, id);
+                        // HadeethEnc returns the bibliography (`reference`) for Arabic only. For other languages it is fetched from the
+                        // Arabic record in the background, so a slow or failed extra request never delays or blocks the hadith itself.
+                        if (lang !== 'ar' && !rec.reference) {
+                            this.one('ar', id, { retries: 0, timeout: 4000 }).then(ar => {
+                                if (ar && ar.reference) { rec.reference = ar.reference; if (App.state.hadith === rec) UI.renderHadith(); }
+                            }).catch(() => { /* bibliography is optional */ });
+                        }
+                        return rec;
+                    }
+                    catch (e) { if (attempt === 0 && e.status && e.status < 500) { id = null; continue; } throw e; }   // stale/missing id: pick again once
+                }
+            }
+        };
+
+
+        const LOCALES = {
+            ar: { 
+                dir:"rtl",title:"التأمل اليومي",quranLabel:"الآية القرآنية",hadithLabel:"الحديث الشريف",prayerLabel:"مواقيت الصلاة",eventsLabel:"المناسبات القادمة",methodLabel:"الطريقة",madhabLabel:"المذهب",locLabel:"الموقع",tzLabel:"المنطقة الزمنية",expected:"متوقع",next:"القادم",todayLabel:"اليوم",months:["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"],
+                events: {
+                    h_new: "1 محرم: رأس السنة الهجرية (أحد الأشهر الحُرم)",
+                    tasua: "9 محرم: يوم تاسوعاء",
+                    ashura: "10 محرم: يوم عاشوراء، يوم نجى الله فيه موسى عليه السلام و أغرق آل فرعون",
+                    mig_mecca: "27 صفر: ذكرى هجرة الرسول ﷺ من مكة إلى المدينة (على ما ذُكر في بعض كتب السيرة)",
+                    mawlid: "12 ربيع الأول: المولد النبوي ووصول الرسول ﷺ إلى المدينة مهاجرًا",
+                    isra: "27 رجب: ليلة الإسراء والمعراج على المشهور، وفي تحديدها خلاف بين أهل العلم (أحد الأشهر الحُرم)",
+                    baraah: "15 شعبان: ليلة النصف من شعبان (وفي فضلها خلاف بين أهل العلم)",
+                    cres: "29 شعبان: الليلة ترائي هلال رمضان",
+                    ram_start: "1 رمضان: أول أيام الصوم",
+                    badr: "17 رمضان: غزوة بدر الكبرى (2 هـ)",
+                    fath: "20 رمضان: فتح مكة (8 هـ)",
+                    qadr: "27 رمضان: ليلة القدر (قد تكون أي ليلة فردية من العشر الأواخر)",
+                    f1: "1 شوال: أوَّل أيَّام عيد الفطر", f2: "2 شوال: ثاني أيَّام عيد الفطر", f3: "3 شوال: ثالث أيَّام عيد الفطر",
+                    sq: "ذو القعدة: أحد الأشهر الحُرم",
+                    sh: "ذو الحجة: أحد الأشهر الحُرم",
+                    tar: "8 ذو الحجة: يوم التروية",
+                    ara: "9 ذو الحجة: يوم عرفة",
+                    a1: "10 ذو الحجة: أوَّل أيَّام عيد الأضحى (يوم النحر)",
+                    a2: "11 ذو الحجة: ثاني أيام عيد الأضحى (أول أيام التشريق وثاني أيام النحر)",
+                    a3: "12 ذو الحجة: ثالث أيام عيد الأضحى (ثاني أيام التشريق وثالث أيام النحر)",
+                    a4: "13 ذو الحجة: رابع أيام عيد الأضحى (ثالث أيام التشريق ورابع أيام النحر)"
+                },
+                footer:"يتم التحديث يومياً.",prayers:["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"]
+            },
+            en: { 
+                dir:"ltr",title:"Daily Reflection",quranLabel:"Quranic Verse",hadithLabel:"Hadith",prayerLabel:"Prayer Times",eventsLabel:"Upcoming Events",methodLabel:"Method",madhabLabel:"Madhab",locLabel:"Location",tzLabel:"Timezone",expected:"Expected",next:"NEXT",todayLabel:"TODAY",months:["Muharram","Safar","Rabi' al-Awwal","Rabi' al-Thani","Jumada al-Ula","Jumada al-Akhira","Rajab","Sha'ban","Ramadan","Shawwal","Dhu al-Qi'dah","Dhu al-Hijjah"],
+                events: {
+                    h_new: "1 Muharram: Hijri New Year (Sacred Month)",
+                    tasua: "9 Muharram: Day of Tasua",
+                    ashura: "10 Muharram: Day of Ashura (Allah saved Moses & drowned Pharaoh)",
+                    mig_mecca: "27 Safar: Prophet's ﷺ Migration from Mecca to Medina, as reported in some biographies",
+                    mawlid: "12 Rabi' al-Awwal: Mawlid al-Nabi & Arrival in Medina",
+                    isra: "27 Rajab: Isra and Mi'raj, per the popular view; scholars differ on its date (Sacred Month)",
+                    baraah: "15 Sha'ban: Mid-Sha'ban night (scholars differ on its virtue)",
+                    cres: "29 Sha'ban: Night of Ramadan moon sighting",
+                    ram_start: "1 Ramadan: First day of Ramadan Fasting",
+                    badr: "17 Ramadan: Great Battle of Badr (2 AH)",
+                    fath: "20 Ramadan: Conquest of Mecca (8 AH)",
+                    qadr: "27 Ramadan: Laylat al-Qadr (Potential night of power)",
+                    f1: "1 Shawwal: 1st Day of Eid al-Fitr", f2: "2 Shawwal: 2nd Day of Eid al-Fitr", f3: "3 Shawwal: 3rd Day of Eid al-Fitr",
+                    sq: "Dhu al-Qi'dah: Sacred Month",
+                    sh: "Dhu al-Hijjah: Sacred Month",
+                    tar: "8 Dhu al-Hijjah: Day of Tarwiyah",
+                    ara: "9 Dhu al-Hijjah: Day of Arafah",
+                    a1: "10 Dhu al-Hijjah: 1st Day of Eid al-Adha (Day of Sacrifice)",
+                    a2: "11 Dhu al-Hijjah: 2nd Day of Eid (1st Day of Tashreeq)",
+                    a3: "12 Dhu al-Hijjah: 3rd Day of Eid (2nd Day of Tashreeq)",
+                    a4: "13 Dhu al-Hijjah: 4th Day of Eid (3rd Day of Tashreeq)"
+                },
+                footer:"Updated daily.",prayers:["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"] 
+            },
+            tr: { 
+                dir:"ltr",title:"Günlük Tefekkür",quranLabel:"Kur'an Ayeti",hadithLabel:"Hadis",prayerLabel:"Namaz Vakitleri",eventsLabel:"Etkinlikler",methodLabel:"Yöntem",madhabLabel:"Mezhep",locLabel:"Konum",tzLabel:"Saat Dilimi",expected:"Beklenen",next:"SONRAKİ",todayLabel:"BUGÜN",months:["Muharrem","Safer","Rebiülevvel","Rebiülahir","Cemaziyelevvel","Cemaziyelahir","Recep","Şaban","Ramazan","Şevval","Zilkade","Zilhicce"],
+                events: {
+                    h_new: "1 Muharrem: Hicri Yılbaşı (Haram Ay)",
+                    tasua: "9 Muharrem: Tasua Günü",
+                    ashura: "10 Muharrem: Aşure Günü (Hz. Musa'nın kurtuluşu)",
+                    mig_mecca: "27 Safer: Peygamberimizin Mekke'den Medine'ye hicreti (bazı siyer kaynaklarına göre)",
+                    mawlid: "12 Rebiülevvel: Mevlid Kandili ve Medine'ye varış",
+                    isra: "27 Recep: Miraç Kandili, yaygın görüşe göre; tarihi konusunda âlimler ihtilaf etmiştir (Haram Ay)",
+                    baraah: "15 Şaban: Berat Kandili (faziletinde âlimler ihtilaf etmiştir)",
+                    cres: "29 Şaban: Ramazan hilali gözlem gecesi",
+                    ram_start: "1 Ramazan: Orucun ilk günü",
+                    badr: "17 Ramazan: Bedir Gazvesi (Hicri 2)",
+                    fath: "20 Ramazan: Mekke'nin Fethi (Hicri 8)",
+                    qadr: "27 Ramazan: Kadir Gecesi",
+                    f1: "1 Şevval: Ramazan Bayramı 1. Gün", f2: "2 Şevval: Ramazan Bayramı 2. Gün", f3: "3 Şevval: Ramazan Bayramı 3. Gün",
+                    sq: "Zilkade: Haram Ay",
+                    sh: "Zilhicce: Haram Ay",
+                    tar: "8 Zilhicce: Terviye Günü",
+                    ara: "9 Zilhicce: Arefe Günü",
+                    a1: "10 Zilhicce: Kurban Bayramı 1. Gün",
+                    a2: "11 Zilhicce: 2. Gün (Teşrik 1)",
+                    a3: "12 Zilhicce: 3. Gün (Teşrik 2)",
+                    a4: "13 Zilhicce: 4. Gün (Teşrik 3)"
+                },
+                footer:"Günlük güncellenir.",prayers:["İmsak","Güneş","Öğle","İkindi","Akşam","Yatsı"] 
+            },
+            id: { 
+                dir:"ltr",title:"Refleksi Harian",quranLabel:"Ayat Al-Qur'an",hadithLabel:"Hadist",prayerLabel:"Waktu Shalat",eventsLabel:"Acara Mendatang",methodLabel:"Metode",madhabLabel:"Madzhab",locLabel:"Lokasi",tzLabel:"Zona Waktu",expected:"Perkiraan",next:"LANJUT",todayLabel:"HARI INI",months:["Muharram","Safar","Rabi'ul Awwal","Rabi'ul Akhir","Jumadil Ula","Jumadil Akhira","Rajab","Sya'ban","Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"],
+                events: {
+                    h_new: "1 Muharram: Tahun Baru Hijriah (Bulan Haram)",
+                    tasua: "9 Muharram: Hari Tasua",
+                    ashura: "10 Muharram: Hari Asyura (Allah menyelamatkan Musa)",
+                    mig_mecca: "27 Safar: Hijrah Nabi ﷺ dari Mekah ke Madinah (menurut sebagian kitab sirah)",
+                    mawlid: "12 Rabi'ul Awwal: Maulid Nabi & Kedatangan di Madinah",
+                    isra: "27 Rajab: Isra Mi'raj menurut pendapat yang masyhur; ulama berbeda pendapat tentang tanggalnya (Bulan Haram)",
+                    baraah: "15 Sya'ban: Malam Nisfu Sya'ban (keutamaannya diperselisihkan ulama)",
+                    cres: "29 Sya'ban: Malam pemantauan hilal Ramadhan",
+                    ram_start: "1 Ramadhan: Hari pertama Puasa",
+                    badr: "17 Ramadhan: Perang Badar (2 H)",
+                    fath: "20 Ramadhan: Pembebasan Mekah (8 H)",
+                    qadr: "27 Ramadhan: Lailatul Qadr",
+                    f1: "1 Syawal: Idul Fitri Hari ke-1", f2: "2 Syawal: Idul Fitri Hari ke-2", f3: "3 Syawal: Idul Fitri Hari ke-3",
+                    sq: "Dzulqa'dah: Bulan Haram",
+                    sh: "Dzulhijjah: Bulan Haram",
+                    tar: "8 Dzulhijjah: Hari Tarwiyah",
+                    ara: "9 Dzulhijjah: Hari Arafah",
+                    a1: "10 Dzulhijjah: Idul Adha (Hari Kurban)",
+                    a2: "11 Dzulhijjah: Hari Tasyrik 1",
+                    a3: "12 Dzulhijjah: Hari Tasyrik 2",
+                    a4: "13 Dzulhijjah: Hari Tasyrik 3"
+                },
+                footer:"Referensi terpercaya. Diperbarui setiap hari.",prayers:["Subuh", "Terbit", "Dzuhur", "Ashar", "Maghrib", "Isya"] 
+            },
+            ur: { 
+                dir:"rtl",title:"روزانہ کی عکاسی",quranLabel:"قرآني آیت",hadithLabel:"حدیث",prayerLabel:"نماز کے اوقات",eventsLabel:"آنے والے واقعات",methodLabel:"طریقہ",madhabLabel:"مذہب",locLabel:"مقام",tzLabel:"ٹائم زون",expected:"متوقع",next:"اگلی",todayLabel:"آج",months:["محرم","صفر","ربیع الاول","ربیع الثانی","جمادی الاول","جمادی الثانی","رجب","شعبان","رمضان","شوال","ذوالقعدہ","ذوالحجہ"],
+                events: {
+                    h_new: "1 محرم: اسلامی نیا سال (حرمت والا مہینہ)",
+                    tasua: "9 محرم: یوم تاسوعاء",
+                    ashura: "10 محرم: یوم عاشوراء (اللہ نے موسیٰؑ کو نجات دی اور فرعون کو غرق کیا)",
+                    mig_mecca: "27 صفر: ہجرتِ نبوی ﷺ مکہ سے مدینہ (بعض کتبِ سیرت کے مطابق)",
+                    mawlid: "12 ربیع الاول: میلاد النبیؐ اور مدینہ آمد",
+                    isra: "27 رجب: اسراء و معراج، مشہور قول کے مطابق؛ تاریخ میں اہلِ علم کا اختلاف ہے (حرمت والا مہینہ)",
+                    baraah: "15 شعبان: شبِ برأت (اس کی فضیلت میں اہلِ علم کا اختلاف ہے)",
+                    cres: "29 شعبان: رمضان کا چاند دیکھنے کی رات",
+                    ram_start: "1 رمضان: روزوں کا آغاز",
+                    badr: "17 رمضان: غزوہ بدر (2 ھ)",
+                    fath: "20 رمضان: فتح مکہ (8 ھ)",
+                    qadr: "27 رمضان: لیلة القدر (آخری عشرے کی طاق راتیں)",
+                    f1: "1 شوال: عید الفطر پہلا دن", f2: "2 شوال: عید الفطر دوسرا دن", f3: "3 شوال: عید الفطر تیسرا دن",
+                    sq: "ذوالقعدہ: حرمت والا مہینہ",
+                    sh: "ذوالحجہ: حرمت والا مہینہ",
+                    tar: "8 ذوالحجہ: یوم الترویہ",
+                    ara: "9 ذوالحجہ: یوم عرفہ",
+                    a1: "10 ذوالحجہ: عید الاضحی (یوم النحر)",
+                    a2: "11 ذوالحجہ: ایام تشریق پہلا دن",
+                    a3: "12 ذوالحجہ: ایام تشریق دوسرا دن",
+                    a4: "13 ذوالحجہ: ایام تشریق تیسرا دن"
+                },
+                footer:"روزانہ اپ ڈیٹ کیا جاتا ہے۔",prayers:["الفجر","طلوع آفتاب","ظهر","عصر","مغرب","عشاء"] 
+            }
+        };
+
+        const EXTRA = {
+            ar: { refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
+                  schoolStd: 'الجمهور', schoolHanafi: 'الحنفي',
+                  privacy: 'يُرسَل موقعك التقريبي إلى خدمتي AlAdhan وBigDataCloud لحساب مواقيت الصلاة وعرض اسم المدينة فقط.' },
+            en: { refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
+                  schoolStd: 'Standard', schoolHanafi: 'Hanafi',
+                  privacy: 'Your approximate location is sent to AlAdhan and BigDataCloud only to compute prayer times and show your city.' },
+            tr: { refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
+                  schoolStd: 'Standart', schoolHanafi: 'Hanefi',
+                  privacy: "Yaklaşık konumunuz yalnızca namaz vakitlerini hesaplamak ve şehrinizi göstermek için AlAdhan ve BigDataCloud'a gönderilir." },
+            id: { refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
+                  schoolStd: 'Standar', schoolHanafi: 'Hanafi',
+                  privacy: 'Perkiraan lokasi Anda dikirim ke AlAdhan dan BigDataCloud hanya untuk menghitung waktu shalat dan menampilkan nama kota.' },
+            ur: { refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
+                  schoolStd: 'معیاری', schoolHanafi: 'حنفی',
+                  privacy: 'آپ کا تخمینی مقام صرف نماز کے اوقات نکالنے اور شہر کا نام دکھانے کے لیے AlAdhan اور BigDataCloud کو بھیجا جاتا ہے۔' }
+        };
+        Object.keys(EXTRA).forEach(l => Object.assign(LOCALES[l], EXTRA[l]));
+
+        /* The theme and numerals buttons (shared with the Reader and the CSE): icons, labels and tooltips. */
+        const NUMERALS_LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
+        const THEME_ICON = {
+            system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+            light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+            sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+            dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
+        };
+        const THEME_TITLES = {
+            ar: { numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)', numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)', numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
+                  themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
+            en: { numeralsWestern: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)', numeralsArabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)', numeralsPersian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)',
+                  themeSystem: 'Theme: follows this device (click for light)', themeLight: 'Theme: light (click for sepia)', themeSepia: 'Theme: sepia (click for dark)', themeDark: 'Theme: dark (click to follow this device)' },
+            tr: { numeralsWestern: 'Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)', numeralsArabic: 'Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)', numeralsPersian: 'Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)',
+                  themeSystem: 'Tema: cihaza göre (açık için tıklayın)', themeLight: 'Tema: açık (sepya için tıklayın)', themeSepia: 'Tema: sepya (koyu için tıklayın)', themeDark: 'Tema: koyu (cihaza göre için tıklayın)' },
+            id: { numeralsWestern: 'Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)', numeralsArabic: 'Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)', numeralsPersian: 'Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)',
+                  themeSystem: 'Tema: mengikuti perangkat (klik untuk terang)', themeLight: 'Tema: terang (klik untuk sepia)', themeSepia: 'Tema: sepia (klik untuk gelap)', themeDark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
+            ur: { numeralsWestern: 'اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)', numeralsArabic: 'اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)', numeralsPersian: 'اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)',
+                  themeSystem: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', themeLight: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', themeSepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', themeDark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' }
+        };
+        Object.keys(THEME_TITLES).forEach(l => { if (LOCALES[l]) Object.assign(LOCALES[l], THEME_TITLES[l]); });
+
+        const SCHOOL_PARAM = [0, 1];   // AlAdhan: 0 = Shafi/standard, 1 = Hanafi
+
+        /* ---------- Numerals: every number on the page in the shared choice (display only) ---------- */
+        const Numerals = {
+            fix(node) {
+                const v = node.nodeValue;
+                if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) return;
+                const nv = i360Theme.toNumerals(v);
+                if (nv !== v) node.nodeValue = nv;
+            },
+            walk(root) {
+                if (root.nodeType === 3) { this.fix(root); return; }
+                if (root.nodeType !== 1 || root.closest('script, style, #btn-numerals')) return;
+                const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest('script, style, #btn-numerals')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+                for (let n = w.nextNode(); n; n = w.nextNode()) this.fix(n);
+            },
+            all() { this.walk(document.body); },
+            // Text the page draws later (prayer times, countdowns, dates…) is converted as it appears.
+            watch() {
+                new MutationObserver((list) => {
+                    for (const m of list) {
+                        if (m.type === 'characterData') this.fix(m.target);
+                        else m.addedNodes.forEach((n) => this.walk(n));
+                    }
+                }).observe(document.body, { childList: true, characterData: true, subtree: true });
+                this.all();
+            }
+        };
+
+        /* ---------- App controller ---------- */
+        const App = {
+            state: { quran: null, hadith: null, prayer: null, geo: null, hijri: null, err: {} },
+            tokens: {},
+            day: null,
+            get lang() { const l = DataStore.get(CONFIG.S.L, 'ar'); return LOCALES[l] ? l : 'ar'; },
+            get school() { return DataStore.get(CONFIG.S.M, 0) === 1 ? 1 : 0; },
+            setLang(l) {
+                DataStore.set(CONFIG.S.L, l);
+                this.state.quran = null; this.state.hadith = null; this.state.err.quran = null; this.state.err.hadith = null;
+                UI.render();                                        // labels, dates and methods re-render from state
+                ['quran', 'hadith', 'geo'].forEach(n => this.run(n)); // only the language-dependent requests are repeated
+            },
+            setSchool(s) { DataStore.set(CONFIG.S.M, s); UI.renderSchool(); this.run('prayer'); },
+            getPosition() {
+                if (this._pos) return this._pos;
+                const DAY_MS = 864e5, c = DataStore.get(CONFIG.S.C);
+                const fresh = c && c.ts && Date.now() - c.ts < DAY_MS;
+                this._pos = new Promise(res => {
+                    if (fresh || !navigator.geolocation) return res(c ? { lat: c.lat, lng: c.lng } : { lat: 30.01, lng: 31.20 });
+                    navigator.geolocation.getCurrentPosition(
+                        p => { const pos = { lat: p.coords.latitude, lng: p.coords.longitude }; DataStore.set(CONFIG.S.C, { ...pos, ts: Date.now() }); res(pos); },
+                        () => res(c ? { lat: c.lat, lng: c.lng } : { lat: 30.01, lng: 31.20 }),   // stale cache beats the Giza default
+                        { timeout: 5000, maximumAge: 3600e3 });
+                });
+                return this._pos;
+            },
+            loaders: {
+                async quran(lang) {
+                    const day = ymdKey(localYMD());
+                    let rec = DataStore.get(CONFIG.S.Q);
+                    if (!rec || rec.day !== day) { rec = { day, id: Math.floor(Math.random() * 6236) + 1 }; DataStore.set(CONFIG.S.Q, rec); }
+                    return Net.fetch(`${CONFIG.API.Q}/${rec.id}/editions/quran-uthmani,${CONFIG.EDITIONS.quran[lang]}`);
+                },
+                hadith: lang => HE.daily(lang),
+                async prayer() {
+                    const pos = await App.getPosition(), n = localYMD();
+                    const r = await Net.fetch(`${CONFIG.API.P}/${pad(n.d)}-${pad(n.m)}-${n.y}?latitude=${pos.lat}&longitude=${pos.lng}&school=${SCHOOL_PARAM[App.school]}`);
+                    if (!r.data || !r.data.timings) throw new Error('AlAdhan: unexpected response');
+                    return r;
+                },
+                async geo(lang) {
+                    const pos = await App.getPosition();
+                    return Net.fetch(`${CONFIG.API.G}?latitude=${pos.lat}&longitude=${pos.lng}&localityLanguage=${lang}`);
+                }
+            },
+            async run(name) {
+                const id = this.tokens[name] = (this.tokens[name] || 0) + 1;     // drop answers that arrive after a newer request
+                if (name !== 'geo') UI.status(name, 'loading');
+                try {
+                    const data = await this.loaders[name](this.lang);
+                    if (this.tokens[name] !== id) return;
+                    this.state[name] = data; this.state.err[name] = null;
+                } catch (e) {
+                    if (this.tokens[name] !== id) return;
+                    console.error(`[${name}]`, e);
+                    this.state[name] = (name === 'prayer') ? this.state[name] : null;   // keep old prayer times if a refresh fails
+                    this.state.err[name] = e;
+                }
+                UI.renderPart(name);
+            },
+            load() {
+                this.day = ymdKey(localYMD());
+                this.state.hijri = Hijri.sync();                       // instant offline answer...
+                UI.render();
+                Hijri.resolve().then(h => { this.state.hijri = h; UI.renderHijri(); UI.renderEvents(); }).catch(e => console.error('[hijri]', e));   // ...upgraded to Dar al-Ifta when it answers
+                ['quran', 'hadith', 'prayer', 'geo'].forEach(n => this.run(n));
+            },
+            retry(name) { this.run(name); },
+            tick() {                                                    // every 30s: new local day -> reload; otherwise refresh the NEXT highlight
+                if (ymdKey(localYMD()) !== this.day) { this._pos = null; this.load(); } else UI.renderPrayers();
+            }
+        };
+
+        /* ---------- UI ---------- */
+        const UI = {
+            targets: {}, shown: false,
+            get L() { return LOCALES[App.lang] || LOCALES.ar; },
+            init() {
+                document.querySelectorAll('[data-target]').forEach(el => this.targets[el.dataset.target] = el);
+                document.querySelectorAll('[data-status]').forEach(el => {
+                    el.querySelector('[data-retry]').addEventListener('click', () => App.retry(el.dataset.status));
+                });
+                document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
+                i360Theme.onChange(() => this.theme());
+                document.getElementById('btn-numerals').addEventListener('click', () => i360Theme.cycleNumerals());
+                i360Theme.onNumeralsChange(() => { this.numeralsButton(); Numerals.all(); });
+                Numerals.watch();
+                this.theme();
+                i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
+                App.load();
+                setInterval(() => App.tick(), 30000);
+                document.addEventListener('visibilitychange', () => { if (!document.hidden) App.tick(); });
+            },
+            numeralsButton() {   // label and tooltip for the shared numerals choice, in the page's language
+                const n = i360Theme.getNumerals(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-numerals');
+                const key = { western: 'numeralsWestern', arabic: 'numeralsArabic', persian: 'numeralsPersian' }[n];
+                btn.textContent = NUMERALS_LABEL[n];
+                btn.title = L[key] || THEME_TITLES.en[key];
+                btn.setAttribute('aria-label', btn.title);
+            },
+            theme() {   // the theme button: icon and tooltip for the shared choice, in the page's language
+                const c = i360Theme.getChoice(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-theme');
+                const T = { system: L.themeSystem, light: L.themeLight, sepia: L.themeSepia, dark: L.themeDark };
+                btn.innerHTML = THEME_ICON[c];
+                btn.title = T[c] || THEME_TITLES.en[{ system: 'themeSystem', light: 'themeLight', sepia: 'themeSepia', dark: 'themeDark' }[c]];
+                btn.setAttribute('aria-label', btn.title);
+            },
+            set(t, v) { if (this.targets[t]) this.targets[t].textContent = v; },
+            status(name, kind) {
+                const box = document.querySelector(`[data-status="${name}"]`); if (!box) return;
+                const L = this.L, btn = box.querySelector('[data-retry]'), txt = box.querySelector('[data-status-text]');
+                if (!kind) { box.classList.add('hidden'); box.classList.remove('flex'); return; }
+                box.classList.remove('hidden'); box.classList.add('flex');
+                txt.textContent = kind === 'loading' ? L.loading : L.loadError;
+                btn.textContent = L.retry; btn.classList.toggle('hidden', kind === 'loading');
+            },
+            reveal() {
+                if (this.shown) return; this.shown = true;
+                ['quran-card', 'hadith-card', 'prayer-card', 'events-card'].forEach((id, i) => setTimeout(() => {
+                    const e = document.getElementById(id); if (e) { e.style.opacity = 1; e.style.transform = 'translateY(0)'; }
+                }, i * 120));
+            },
+            render() {
+                const L = this.L, lang = App.lang;
+                document.documentElement.lang = lang; document.documentElement.dir = L.dir;
+                document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || LOCALES.en[el.dataset.i18n]; });
+                document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                this.theme();            // their tooltips are in the page's language
+                this.numeralsButton();
+                document.title = L.title;   // the tab name follows the language too
+                this.renderSchool();
+                this.renderHijri();
+                ['quran', 'hadith', 'prayer', 'geo'].forEach(n => this.renderPart(n));
+                this.renderEvents();
+                this.reveal();
+            },
+            renderSchool() {
+                [0, 1].forEach(s => { const b = document.getElementById(`school-${s}`); if (!b) return; const on = App.school === s; b.classList.toggle('active-btn', on); b.setAttribute('aria-pressed', on); });
+            },
+            renderHijri() {
+                const L = this.L, h = App.state.hijri; if (!h) return;
+                this.set('current-date', new Date().toLocaleDateString(App.lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+                this.set('hijri-date', `${h.today.d} ${L.months[h.today.m - 1]} ${h.today.y}`);
+                const src = this.targets['hijri-source'];
+                if (src) {
+                    const icon = h.provisional ? [svgIcon(HOURGLASS)] : [];
+                    src.replaceChildren(...icon, document.createTextNode(Hijri.label(h, App.lang)));
+                }
+            },
+            renderPart(name) {
+                const fn = { quran: 'renderQuran', hadith: 'renderHadith', prayer: 'renderPrayers', geo: 'renderPrayers' }[name];
+                this[fn]();
+                if (name !== 'geo') this.status(name, App.state.err[name] ? 'error' : (App.state[name] ? null : (App.tokens[name] ? 'loading' : null)));
+            },
+            renderQuran() {
+                const q = App.state.quran, lang = App.lang;
+                if (!q) { ['quran-arabic', 'quran-translation', 'quran-ref'].forEach(t => this.set(t, '')); return; }
+                this.set('quran-arabic', q.data[0].text);
+                this.set('quran-translation', q.data[1].text);
+                this.set('quran-ref', `${(lang === 'ar' || lang === 'ur') ? q.data[0].surah.name : q.data[0].surah.englishName} (${q.data[0].surah.number}:${q.data[0].numberInSurah})`);
+            },
+            renderHadith() {
+                const h = App.state.hadith, L = this.L, lang = App.lang;
+                const hide = (el, on) => { if (el) el.classList.toggle('hidden', on); };
+                if (!h) {
+                    ['hadith-title', 'hadith-narrator', 'hadith-text', 'hadith-grade', 'hadith-ref'].forEach(t => this.set(t, ''));
+                    hide(this.targets['hadith-narrator'], true); hide(document.getElementById('hadith-refs'), true); return;
+                }
+                this.set('hadith-title', h.title || '');
+                /* HadeethEnc returns the opening line naming the Companion (the highest narrator) as `hadeeth_intro`.
+                   It is shown on its own line; every character of the text is still displayed (its terms forbid deleting any).
+                   If the field is missing, or the text doesn't begin with it, the whole text is shown as one block. */
+                const full = h.hadeeth || '', intro = (h.hadeeth_intro || '').trim();
+                let narrator = '', body = full;
+                if (intro && full.trimStart().startsWith(intro)) {
+                    const rest = full.trimStart().slice(intro.length).trim();
+                    if (rest) { narrator = intro; body = rest; }
+                }
+                this.set('hadith-narrator', narrator); hide(this.targets['hadith-narrator'], !narrator);
+                this.set('hadith-text', body);
+                this.set('hadith-grade', [h.grade ? `${L.gradeLabel}: ${h.grade}` : '', h.attribution || ''].filter(Boolean).join(' · '));
+                /* `reference` is HadeethEnc's bibliography (editions used), Arabic only. Kept in full, collapsed by default. */
+                const refs = (h.reference || '').trim();
+                this.set('hadith-ref', refs); hide(document.getElementById('hadith-refs'), !refs);
+                const a = this.targets['hadith-link']; if (a) a.href = `https://hadeethenc.com/${lang}/browse/hadith/${encodeURIComponent(h.id)}`;
+            },
+            renderPrayers() {
+                const L = this.L, p = App.state.prayer, g = App.state.geo, lang = App.lang;
+                const loc = g ? [g.city || g.locality, g.countryName].filter(Boolean).join(', ') : '';
+                this.set('meta-location', loc || '—');
+                const grid = this.targets['prayer-grid'];
+                if (!p) { grid.replaceChildren(); this.set('meta-method', '—'); this.set('meta-timezone', '—'); return; }
+                const t = p.data.timings, meta = p.data.meta || {}, tz = meta.timezone;
+                const toMin = k => { const m = /(\d{1,2}):(\d{2})/.exec(t[k] || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+                const now = minutesNowIn(tz);
+                let next = CONFIG.P_NEXT_KEYS.find(k => toMin(k) !== null && toMin(k) > now);
+                if (!next) next = 'Fajr';                                 // after Isha the next prayer is tomorrow's Fajr
+                grid.replaceChildren(...CONFIG.P_KEYS.map((k, i) => {
+                    const isNext = k === next, m = /(\d{1,2}):(\d{2})/.exec(t[k] || '');
+                    const box = mk('div', `flex flex-col items-center p-3 transition-all ${isNext ? 'next-prayer-highlight' : 'inset-item'}`);
+                    box.append(
+                        mk('span', `text-[10px] md:text-xs font-bold ${isNext ? 'text-accent' : 'text-custom-secondary'}`, L.prayers[i]),
+                        mk('span', `text-base md:text-xl font-bold mt-1 ${isNext ? 'text-accent' : 'text-custom-secondary'}`, m ? m[0] : '—'));
+                    if (isNext) box.append(mk('span', 'text-[8px] mt-1 font-black text-accent animate-pulse', L.next));
+                    return box;
+                }));
+                const mid = meta.method && meta.method.id;
+                this.set('meta-method', (lang === 'ar' && METHOD_AR[mid]) || (meta.method && meta.method.name) || '—');
+                let tzText = tz || '—';
+                try { const n = new Intl.DateTimeFormat(lang, { timeZone: tz, timeZoneName: 'long' }).formatToParts(new Date()).find(x => x.type === 'timeZoneName'); if (n) tzText = n.value; } catch (e) { /* localized name only; the raw IANA id stays as the fallback */ }
+                this.set('meta-timezone', tzText);
+            },
+            renderEvents() {
+                const L = this.L, lang = App.lang, h = App.state.hijri, list = this.targets['events-list'];
+                if (!h || !list) return;
+                list.replaceChildren(...Hijri.events(h).map(e => {
+                    const row = mk('div', `flex justify-between items-center p-4 transition-all ${e.isT ? 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/10 rounded-2xl' : 'inset-item'}`);
+                    const left = mk('div', 'flex-1'), title = mk('div', 'flex items-center gap-2');
+                    title.append(mk('span', 'text-sm font-bold text-custom-secondary', L.events[e.id]));
+                    if (e.isT) title.append(mk('span', 'bg-purple-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full', L.todayLabel));
+                    left.append(title, mk('span', 'text-xs text-custom-secondary font-medium', `${e.d} ${L.months[e.m]} ${e.year}`));
+                    const right = mk('div', 'text-start md:text-end ms-4');
+                    right.append(
+                        mk('span', 'text-[10px] uppercase font-bold text-purple-600 block', L.expected),
+                        mk('span', 'text-xs font-medium text-custom-secondary', e.date.toLocaleDateString(lang, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })));
+                    row.append(left, right);
+                    return row;
+                }));
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => { UI.init(); });
+
+    </script>
+</body>
+</html>

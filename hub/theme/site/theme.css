@@ -1,0 +1,208 @@
+/* i360 shared theme — https://theme.i36o.workers.dev/theme.css
+ *
+ * The one source of the colours and fonts of the i360 apps (the Reader, the
+ * CSE, Daily Reflection, the i360إ app). Variables and fonts only: no layout, no
+ * selectors other than the themes. Each app decides which variable colours
+ * what.
+ *
+ * Themes: light (the i360إ app's look), sepia and dark (the Reader's own).
+ * "system" is not a palette: theme-loader.js turns it into light or dark from
+ * the device's setting. The theme is chosen with <html data-theme="…">; with
+ * no attribute, light applies.
+ *
+ * Derived colours: a line marked @derived holds a plain colour, worked out
+ * from the color-mix(…) in the "Derived colours" block below, for browsers
+ * without color-mix. (Both can't sit in one rule: a variable isn't checked
+ * when the page is read, so the color-mix line would always win and leave
+ * older browsers with no colour at all.) After changing a colour a mix is
+ * made from, run `node theme/fallbacks.js --write`; npm test fails while a
+ * plain colour is out of date.
+ *
+ * Fonts: Amiri 400/700 and Amiri Quran (SIL Open Font License 1.1), from the
+ * @fontsource packages (Google Fonts' own files). The Fonts section at the end
+ * is written by theme/fonts.js: each version has its own folder, because the
+ * files are cached for a year.
+ */
+
+:root, [data-theme="light"] {
+  color-scheme: light;
+  --i360-bg: #FAF7F2;            /* the main background: book pages, the CSE, the app */
+  --i360-frame: #F2EFEA;         /* @derived: behind the pages, a shade darker (see below) */
+  --i360-surface: #FAF7F2;       /* panels, cards */
+  --i360-toolbar: #FAF7F2;
+  --i360-border: #CBD5E1;        /* toolbar and panel edges */
+  --i360-rule: #CBD5E1;          /* lines inside the content */
+  --i360-text: #0010CF;
+  --i360-heading: #0010CF;
+  --i360-muted: #5A62C9;
+  --i360-icon: #0010CF;
+  --i360-icon-hover: #0010CF;
+  --i360-hover: #EEF2FF;
+  --i360-active: #EEF2FF;
+  --i360-link: #2E8B57;
+  --i360-quran: #2E8B57;
+  --i360-note: #2A35C4;          /* footnotes */
+  --i360-code: #F1ECE2;
+  --i360-quote: #F4F0E8;
+  --i360-input: #FAF7F2;
+  --i360-focus: #0010CF;
+  --i360-accent: #0010CF;        /* filled buttons, the main accent */
+  --i360-on-accent: #FAF7F2;     /* text on the accent */
+  --i360-banner-bg: #fef2f2;
+  --i360-banner-border: #fecaca;
+  --i360-banner-text: #991b1b;
+  --i360-highlight: #fef08a;
+  --i360-highlight-active: #fb923c;
+  --i360-ribbon: #dc2626;        /* bookmark ribbon */
+  --i360-page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
+  --i360-font: 'Amiri', 'Traditional Arabic', serif;
+  --i360-font-quran: 'Amiri Quran', 'Amiri', serif;
+}
+
+[data-theme="sepia"] {
+  color-scheme: light;
+  --i360-bg: #f8f1e1;
+  --i360-frame: #e6dcc6;
+  --i360-surface: #fbf5e8;
+  --i360-toolbar: #f6efdf;
+  --i360-border: #d6c7a6;
+  --i360-rule: #d6c7a6;
+  --i360-text: #3b2f1e;
+  --i360-heading: #2a2014;
+  --i360-muted: #7a6a50;
+  --i360-icon: #6b5a40;
+  --i360-icon-hover: #2a2014;
+  --i360-hover: #ebe0c6;
+  --i360-active: #eadbb8;
+  --i360-link: #8a4b0f;
+  --i360-quran: #2f5a1e;
+  --i360-note: #4a3c27;
+  --i360-code: #efe5cf;
+  --i360-quote: #f1e7d1;
+  --i360-input: #fffaf0;
+  --i360-focus: #a16207;
+  --i360-accent: #a16207;
+  --i360-on-accent: #fffaf0;
+  --i360-banner-bg: #f8e3d6;
+  --i360-banner-border: #e8c0a8;
+  --i360-banner-text: #7f2d12;
+  --i360-highlight: #f5d76e;
+  --i360-highlight-active: #e8913a;
+  --i360-ribbon: #b91c1c;
+  --i360-page-shadow: 0 4px 6px -1px rgba(60, 40, 10, 0.12), 0 2px 4px -1px rgba(60, 40, 10, 0.07);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --i360-bg: #1a2233;
+  --i360-frame: #0b1220;
+  --i360-surface: #111827;
+  --i360-toolbar: #111827;
+  --i360-border: #334155;
+  --i360-rule: #334155;
+  --i360-text: #e2e8f0;
+  --i360-heading: #f8fafc;
+  --i360-muted: #94a3b8;
+  --i360-icon: #cbd5e1;
+  --i360-icon-hover: #ffffff;
+  --i360-hover: #1f2937;
+  --i360-active: #1e3a5f;
+  --i360-link: #7dd3fc;
+  --i360-quran: #86efac;
+  --i360-note: #cbd5e1;
+  --i360-code: #0f172a;
+  --i360-quote: #111827;
+  --i360-input: #0f172a;
+  --i360-focus: #38bdf8;
+  --i360-accent: #38bdf8;
+  --i360-on-accent: #0b1220;
+  --i360-banner-bg: #3b0d0d;
+  --i360-banner-border: #7f1d1d;
+  --i360-banner-text: #fecaca;
+  --i360-highlight: #854d0e;
+  --i360-highlight-active: #c2410c;
+  --i360-ribbon: #f87171;
+  --i360-page-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Derived colours ---------- */
+/* Light only: ":root" alone would also match sepia and dark, and coming later it
+   would replace their own frame colours. */
+@supports (color: color-mix(in oklab, red, red)) {
+  :root:not([data-theme]), [data-theme="light"] {
+    --i360-frame: color-mix(in oklab, var(--i360-bg), black 2.5%);
+  }
+}
+
+/* ---------- Fonts ---------- */
+/* Generated by theme/fonts.js — do not edit by hand. Each font is split by
+   script (unicode-range), so a page downloads only the parts it uses.
+   font-display: block — text waits for Amiri (about 3 s at most, first visit only)
+   instead of drawing a fallback font and then reflowing (i360-instructions.md §14g).
+   Amiri: @fontsource/amiri 5.3.0 (font 1.002), licence fonts/amiri/5.3.0/OFL.txt
+   Amiri Quran: @fontsource/amiri-quran 5.3.0 (font 1.003), licence fonts/amiri-quran/5.3.0/OFL.txt
+*/
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-arabic-400-normal.woff2) format('woff2');
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-latin-ext-400-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-arabic-700-normal.woff2) format('woff2');
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-latin-ext-700-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url(fonts/amiri/5.3.0/amiri-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Amiri Quran';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/amiri-quran/5.3.0/amiri-quran-arabic-400-normal.woff2) format('woff2');
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: 'Amiri Quran';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/amiri-quran/5.3.0/amiri-quran-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}

@@ -1,0 +1,24 @@
+{
+  "projects": {
+    "default": "i360-md"
+  },
+  "targets": {
+    "i360-md": {
+      "hosting": {
+        "md": [
+          "i360-md"
+        ],
+        "cse": [
+          "i360-cse"
+        ],
+        "hub": [
+          "i360-hub"
+        ],
+        "day": [
+          "i360-day"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

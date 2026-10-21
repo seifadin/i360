@@ -1,0 +1,24 @@
+// The Hijri date Worker (dar-hijri.i36o.workers.dev): Dar al-Ifta's date with the
+// shared calculator as fallback. Code: worker/index.js (entry), worker/source.js
+// (retrieval rules), calc.js (the shared calculator, bundled in). calc.js and client.js
+// are also served as files at /calc.js and /client.js (see "assets").
+// Published by .github/workflows/hijri-publish.yml when hijri/ changes (or by hand:
+// npm run publish-hijri, which needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID).
+// Same name as the Worker first made in the dashboard, so its address doesn't change.
+{
+  "name": "dar-hijri",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  // The confirmed date (one key, "state"). Namespace "hijri", made in the dashboard 2026-10-19.
+  "kv_namespaces": [
+    { "binding": "HIJRI", "id": "050a8db72610477f9908ab7ce02b64a2" }
+  ],
+  // The scheduled check; the rules in worker/source.js decide whether Dar al-Ifta is asked.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  // The two shared files, served as they are so other repos can copy them (the i360 app's
+  // npm run sync-hijri): /calc.js and /client.js. site/ holds symlinks to ../calc.js and
+  // ../client.js, so there is still one copy of each. Anything else goes to the Worker.
+  "assets": { "directory": "./site", "not_found_handling": "none" },
+  "workers_dev": true,
+  "preview_urls": false
+}

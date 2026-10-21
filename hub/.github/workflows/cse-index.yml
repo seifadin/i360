@@ -1,0 +1,78 @@
+# i360 CSE: keeps the index on lib.i36o.workers.dev up to date.
+#
+# - Daily, 01:00 UTC (04:00 Cairo in summer time, 03:00 in winter):
+#   "links" check — new or removed links and group changes in Baserow.
+# - Fridays, same hour: "full" check — also asks every source whether it changed.
+# - By hand (Actions → CSE index → Run workflow): choose the check, and
+#   optionally one link (or "all") to download again.
+#
+# Unchanged text is read from the live build itself; a build is written and
+# published only when something changed.
+name: CSE index
+
+on:
+  schedule:
+    - cron: '0 1 * * 0-4,6'   # daily except Friday: links check
+    - cron: '0 1 * * 5'       # Friday: full check
+  workflow_dispatch:
+    inputs:
+      check:
+        description: 'links = only Baserow changes; full = also ask every source'
+        type: choice
+        options: [full, links]
+        default: full
+      refresh:
+        description: 'Download again: one link exactly as in Baserow, or "all" (optional)'
+        type: string
+        required: false
+
+# One run at a time; a scheduled run waits for a manual one and vice versa.
+concurrency:
+  group: cse-index
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Build the index
+        id: index
+        env:
+          BASEROW_KEY: ${{ secrets.BASEROW_KEY }}
+          CHECK: ${{ github.event_name == 'workflow_dispatch' && inputs.check || (github.event.schedule == '0 1 * * 5' && 'full' || 'links') }}
+          REFRESH: ${{ inputs.refresh }}
+        run: |
+          set -- --check "$CHECK"
+          if [ -n "$REFRESH" ]; then set -- "$@" --refresh "$REFRESH"; fi
+          node indexer/build-index.js "$@"
+
+      - name: Publish to lib.i36o.workers.dev
+        if: steps.index.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run publish-lib
+
+      - name: Keep the run report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: dist-report
+          path: indexer/dist-report.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,28 @@
+# i360 theme: monthly reminder for newer Amiri / Amiri Quran fonts.
+#
+# npm run push updates the fonts whenever you push; this catches months
+# without a push. The run fails on purpose when a newer version exists (or the
+# check itself fails), so GitHub emails you. It never changes the repo.
+name: Fonts check
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'   # the 1st of each month, 06:00 UTC (08:00/09:00 Cairo)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Newer font? (fails if so, to send the reminder)
+        run: node theme/fonts.js --strict

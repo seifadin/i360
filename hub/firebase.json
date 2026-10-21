@@ -1,0 +1,112 @@
+{
+  "hosting": [
+    {
+      "target": "hub",
+      "public": "public-hub",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            }
+          ]
+        },
+        {
+          "source": "**/*.md",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "text/markdown; charset=utf-8"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "md",
+      "public": "forward",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "/",
+          "destination": "https://i360-hub.web.app/md/",
+          "type": 301
+        },
+        {
+          "regex": "^/(.+)$",
+          "destination": "https://i360-hub.web.app/md/:1",
+          "type": 301
+        }
+      ]
+    },
+    {
+      "target": "cse",
+      "public": "forward",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "/",
+          "destination": "https://i360-hub.web.app/cse/",
+          "type": 301
+        },
+        {
+          "regex": "^/(.+)$",
+          "destination": "https://i360-hub.web.app/cse/:1",
+          "type": 301
+        }
+      ]
+    },
+    {
+      "target": "day",
+      "public": "forward",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "/",
+          "destination": "https://i360-hub.web.app/day/",
+          "type": 301
+        },
+        {
+          "regex": "^/(.+)$",
+          "destination": "https://i360-hub.web.app/day/:1",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+node_modules/
+.firebase/
+.env
+indexer/out/
+indexer/work/
+indexer/dist/
+indexer/dist-report.json
+.wrangler/
