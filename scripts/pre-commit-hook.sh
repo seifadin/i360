@@ -35,6 +35,12 @@
 
 set -e
 
+# One-key y/N answers (2026-10-21, §15r): "y" or "Y", or "غ" — the same key on
+# an Arabic keyboard, so a release isn't skipped just because the keyboard was
+# left on Arabic. Each such read runs with LC_ALL=C.UTF-8, so "غ" is read as one
+# character whatever the Codespace's own locale is.
+is_yes() { [[ $1 == [Yy] || $1 == 'غ' ]]; }
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
@@ -171,9 +177,9 @@ while true; do
   else
     LINE_COUNT=$(printf '%s\n' "$WHATS_NEW" | wc -l)
   fi
-  read -p "  Captured $LINE_COUNT line(s). Use this? (y/N) " -n 1 -r CONFIRM < /dev/tty
+  LC_ALL=C.UTF-8 read -p "  Captured $LINE_COUNT line(s). Use this? (y/N) " -n 1 -r CONFIRM < /dev/tty
   echo
-  if [[ $CONFIRM =~ ^[Yy]$ ]]; then
+  if is_yes "$CONFIRM"; then
     break
   fi
   echo "  Let's try again."

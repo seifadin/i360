@@ -37,6 +37,12 @@
 
 set -e
 
+# One-key y/N answers (2026-10-21, §15r): "y" or "Y", or "غ" — the same key on
+# an Arabic keyboard, so a release isn't skipped just because the keyboard was
+# left on Arabic. Each such read runs with LC_ALL=C.UTF-8, so "غ" is read as one
+# character whatever the Codespace's own locale is.
+is_yes() { [[ $1 == [Yy] || $1 == 'غ' ]]; }
+
 # pre-push receives pushed ref info on stdin: one line per ref, formatted
 # as "<local ref> <local sha> <remote ref> <remote sha>". We only care
 # about the full commit range being pushed, to catch every changed file
@@ -427,9 +433,9 @@ if [ "$DEPLOY_NEEDED" = true ]; then
   else
     RELEASE_TARGETS="web (i360-e.web.app)"
   fi
-  read -p "  Release this build to users — $RELEASE_TARGETS? (y/N) " -n 1 -r < /dev/tty
+  LC_ALL=C.UTF-8 read -p "  Release this build to users — $RELEASE_TARGETS? (y/N) " -n 1 -r < /dev/tty
   echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+  if is_yes "$REPLY"; then
     RELEASE_TO_USERS=true
     echo "→ Releasing to the web (i360-e.web.app)..."
     if firebase deploy --only hosting; then
@@ -524,7 +530,7 @@ if [ "$IS_NATIVE" = false ]; then
   elif [ "$RELEASE_TO_USERS" != true ]; then
     # The one release question above was answered "n": phones stay as they
     # are, exactly like the web (its manual commands were printed there).
-    echo "→ Web-only change — not released to phones (declined above)."
+    echo "→ Web and phones not released (declined above)."
   else
     echo "→ Releasing to phones (OTA)..."
 
@@ -536,9 +542,9 @@ if [ "$IS_NATIVE" = false ]; then
     # persistently-failing OTA server can still be worked around.
     if ! I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh; then
       echo "⚠ Phones NOT released by OTA (the push continues)."
-      read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
+      LC_ALL=C.UTF-8 read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
       echo
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
+      if is_yes "$REPLY"; then
         submit_to_stores
       else
         echo "  Skipped. Mobile users won't receive this update until OTA or a"
@@ -582,10 +588,10 @@ else
   # `read` here would hit EOF immediately and fail under set -e, silently
   # blocking the push. This was a real bug caught in actual use, not
   # something the earlier file-detection tests could have revealed.
-  read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
+  LC_ALL=C.UTF-8 read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
   echo
   STORE_SUBMISSION_DECLINED=false
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+  if is_yes "$REPLY"; then
     submit_to_stores
     if [ "$HAS_VALID_STATE" = true ]; then
       update_baserow_version
@@ -639,9 +645,9 @@ else
       echo "    real devices yet, releasing this bundle via OTA now could"
       echo "    break the app for anyone still on the older native binary."
     fi
-    read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
+    LC_ALL=C.UTF-8 read -p "  Release current bundle to OtaKit? (y/N) " -n 1 -r < /dev/tty
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if is_yes "$REPLY"; then
       echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
       # This script has set -e active — the shared script's own non-zero
       # exit (on genuine failure after its internal retry) must not be

@@ -10,7 +10,13 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 Changes released after 0.13.2 without a version bump: over the air to the installed apps and on the web app. They move under the next version number at its release.
 
+### Added
+- A theme choice in the bottom bar — follow the device, light, sepia or dark — shared with the Daily Reflection, the Markdown Reader and the i360 CSE; the chosen theme appears instantly at start, with no flash of the light one (2026-10-21)
+- A numerals choice beside it — Western 456, Arabic-Indic ٤٥٦ or Persian/Urdu ۴۵۶ — applied to every number the app shows, including version numbers, which use the Arabic separator «٫» so the eastern zero isn't mistaken for a dot (2026-10-21)
+
 ### Changed
+- The search box recognises a chapter.verse typed in any of the three digit sets, with "." or «٫» (2026-10-21)
+- The dividers in the science list now follow the chosen theme and are lightly visible (2026-10-21)
 - The app's colours and its Amiri typeface now come from the shared i360 theme, the same single source used by the Daily Reflection, the Markdown Reader and the i360 CSE — the app looks exactly as before, and keeps the same colours even if the theme can't be reached (2026-10-17)
 - Fonts are now served from i360's own copy instead of Google Fonts, removing a dependency on an outside service (2026-10-17)
 - Resource links have one consistent way of opening: if the in-app browser can't open a page, it opens in a new tab instead, rather than silently doing nothing (2026-10-03)
@@ -26,6 +32,7 @@ Changes released after 0.13.2 without a version bump: over the air to the instal
 ### Security
 - Pages opened in a new tab can no longer reach back into the app's own page (2026-10-03)
 - The web app now sends standard browser security headers (no content-type guessing, no embedding in other sites' frames, limited referrer information) (2026-10-03, live 2026-10-18)
+- Only the app's own scripts can run on its page, on the web and in the installed apps alike (a Content Security Policy) (2026-10-21)
 
 ---
 
