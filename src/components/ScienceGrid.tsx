@@ -62,7 +62,7 @@ const BUTTON = {
   major: 'flex w-full items-center justify-between px-4 py-2 text-right text-lg font-bold text-brand-blue hover:bg-brand-highlight focus:outline-none',
   intermediate: 'flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none',
 }
-const PANEL = { major: 'divide-y divide-gray-50 bg-brand-ivory', intermediate: 'divide-y divide-gray-100 bg-brand-ivory' }
+const PANEL = { major: 'divide-y divide-brand-border bg-brand-ivory', intermediate: 'divide-y divide-brand-border bg-brand-ivory' }
 const SIZE = { major: { chevron: 16, icon: 17 }, intermediate: { chevron: 14, icon: 14 } }
 
 // One expandable row of the science accordion (major or intermediate level).
@@ -149,7 +149,7 @@ function StatusPill({ busy, text }: { busy?: boolean; text: string }) {
   return (
     <div
       role="status"
-      className={`fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+7rem)] z-50 mx-auto flex w-fit items-center gap-2 rounded-full ${busy ? 'bg-brand-blue' : 'bg-brand-green'} px-4 py-2 text-sm font-bold text-white shadow-lg`}
+      className={`fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+7rem)] z-50 mx-auto flex w-fit items-center gap-2 rounded-full ${busy ? 'bg-brand-blue' : 'bg-brand-green'} px-4 py-2 text-sm font-bold text-brand-on-accent shadow-lg`}
     >
       {busy ? <LoaderCircle size={16} className="animate-spin" /> : <CircleCheck size={16} />}
       <span>{text}</span>
@@ -233,7 +233,7 @@ export default function ScienceGrid() {
     // unchanged from the original behavior. Nothing to report yet, so
     // this deliberately isn't a button at all.
     return (
-      <div className="flex items-center justify-center gap-2 p-4 text-base text-gray-500">
+      <div className="flex items-center justify-center gap-2 p-4 text-base text-brand-muted">
         <LoaderCircle size={20} className="animate-spin" />
         <span>جارٍ التحميل...</span>
       </div>
@@ -256,8 +256,8 @@ export default function ScienceGrid() {
           onClick={() => setErrorDialogOpen(true)}
           className="flex w-full items-center justify-center gap-2 p-4 text-center text-base"
         >
-          {loading && <LoaderCircle size={20} className="animate-spin text-gray-500" />}
-          <span className={loading ? 'text-gray-500' : 'text-red-500 underline'}>
+          {loading && <LoaderCircle size={20} className="animate-spin text-brand-muted" />}
+          <span className={loading ? 'text-brand-muted' : 'text-red-500 underline'}>
             {loading ? (isRetrying ? 'يُعاد المحاولة...' : 'جارٍ التحميل...') : lastFailure.message}
           </span>
         </button>
@@ -310,7 +310,7 @@ export default function ScienceGrid() {
           },
         }}
       />
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-brand-border">
       {groups.map(group => (
         <DisclosureRow
           key={group.majorId}

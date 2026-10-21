@@ -16,9 +16,12 @@ import { createHash } from 'node:crypto'
 // The tag goes right after <head>: on Android, Capacitor inserts its bridge
 // script at that exact spot while serving the page, so the bridge stays ahead
 // of the policy (a <meta> policy only governs what follows it).
+// style-src 'unsafe-inline' (2026-10-21, §15t): the shared theme keeps its saved
+// offline copy of theme.css as an inline <style> (early.js, theme-loader.js) —
+// the hub pages allow the same. Scripts stay locked: that is where the risk is.
 const CSP_SOURCES: Record<string, string> = {
   'default-src': "'self'",
-  'style-src': "'self' https://theme.i36o.workers.dev",
+  'style-src': "'self' 'unsafe-inline' https://theme.i36o.workers.dev",
   'font-src': "'self' https://theme.i36o.workers.dev",
   'img-src': "'self' data:",
   'connect-src': "'self' https:",
@@ -26,6 +29,35 @@ const CSP_SOURCES: Record<string, string> = {
   'frame-src': "'none'",
   'base-uri': "'self'",
   'form-action': "'self'",
+}
+
+// The shared i360 theme (2026-10-21, §15t), used from where it lives — hub/theme/,
+// the one copy every i360 page uses (claude/i360-hub.md §3):
+//   - theme-loader.js is bundled into the app through the '@i360/theme-loader'
+//     alias; it finds theme.css next to itself (import.meta.url), so — exactly as
+//     the hub's own build does — that address is pointed at the theme site.
+//   - early.js (the saved theme and saved theme.css copy, applied before anything
+//     is drawn: no flash) is built into index.html's <head> as an inline script,
+//     after the theme.css link so the saved copy wins; the policy above hashes it.
+const THEME_DIR = fileURLToPath(new URL('./hub/theme/', import.meta.url))
+const THEME_LOADER = `${THEME_DIR}site/theme-loader.js`
+const THEME_SITE_LOADER = 'https://theme.i36o.workers.dev/theme-loader.js'
+
+function sharedTheme(): Plugin {
+  return {
+    name: 'i360-shared-theme',
+    transform(code, id) {
+      if (id.split('?')[0] !== THEME_LOADER) return null
+      return code.replace(/import\.meta\.url/g, JSON.stringify(THEME_SITE_LOADER))
+    },
+    transformIndexHtml(html) {
+      const early = readFileSync(`${THEME_DIR}early.js`, 'utf-8').trim()
+      // The LAST </head>: the real one, even if a comment above ever mentions the tag.
+      const end = html.lastIndexOf('</head>')
+      if (end === -1) throw new Error('index.html: no </head> to put the theme script before (see §15t)')
+      return `${html.slice(0, end)}  <script>${early}</script>\n  ${html.slice(end)}`
+    },
+  }
 }
 
 function contentSecurityPolicy(): Plugin {
@@ -63,10 +95,11 @@ const pkg = JSON.parse(
 )
 
 export default defineConfig({
-  plugins: [react(), contentSecurityPolicy()],
+  plugins: [react(), sharedTheme(), contentSecurityPolicy()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@i360/theme-loader': THEME_LOADER,
     },
   },
   define: {

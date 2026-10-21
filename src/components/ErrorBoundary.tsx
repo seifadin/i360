@@ -81,7 +81,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-full bg-brand-blue px-4 py-2 text-base text-white"
+            className="rounded-full bg-brand-blue px-4 py-2 text-base text-brand-on-accent"
           >
             إعادة التحميل
           </button>

@@ -1,6 +1,8 @@
-import { useCallback, useState, CSSProperties } from 'react'
-import { EllipsisVertical, Globe } from 'lucide-react'
+import { useCallback, useEffect, useState, CSSProperties } from 'react'
+import { Coffee, EllipsisVertical, Globe, Monitor, Moon, Sun } from 'lucide-react'
+import type { Numerals, ThemeChoice } from '@i360/theme-loader'
 import { getOtaBuild } from '@/lib/feedbackReport'
+import { i360Theme } from '@/lib/theme'
 import { useAppState } from '@/store/appState'
 import { useDataCache } from '@/store/dataCache'
 import { detectOS, isDesktop, resolveEffectiveOS } from '@/hooks/usePlatform'
@@ -15,10 +17,43 @@ const TOOLTIP_MS = 1500 // how long a toggle's tooltip stays up
 const AppVersionFallback = 'إصدار -'
 const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 
-// Layout order: OS_WebToggle (leftmost) → MobileServicesToggle → VersionMenu (rightmost)
+// Layout order: OS_WebToggle (leftmost) → MobileServicesToggle → [ThemeButton,
+// NumeralsButton, VersionMenu] (rightmost group)
 // RTL rule used throughout this project: first item in HTML = rightmost visually,
 // last item in HTML = leftmost visually. So HTML order here is:
-// VersionMenu, MobileServicesToggle, OS_WebToggle.
+// VersionMenu, NumeralsButton, ThemeButton, MobileServicesToggle, OS_WebToggle.
+// The theme/numerals pair keeps the hub pages' order (theme to the left of
+// numerals, claude/i360-hub.md §3) and their Arabic labels and icons.
+
+// The shared theme's two buttons (2026-10-21, §15t) — the same choices, labels
+// and icons as the hub pages (claude/i360-hub.md §3), stored per site, so the
+// app and its merged pages share them.
+const THEME_ICON: Record<ThemeChoice, typeof Monitor> = { system: Monitor, light: Sun, sepia: Coffee, dark: Moon }
+const THEME_LABEL: Record<ThemeChoice, string> = {
+  system: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
+  light: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
+  sepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
+  dark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
+}
+// 1–3 look the same in the two eastern sets, so the labels use 456.
+const NUMERALS_TEXT: Record<Numerals, string> = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' }
+const NUMERALS_LABEL: Record<Numerals, string> = {
+  western: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
+  arabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
+  persian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
+}
+
+// The current choices, kept in step with changes made here, in another tab, or by the device.
+function useSharedChoices() {
+  const [choice, setChoice] = useState<ThemeChoice>(i360Theme.getChoice)
+  const [numerals, setNumerals] = useState<Numerals>(i360Theme.getNumerals)
+  useEffect(() => {
+    const stopTheme = i360Theme.onChange((s) => setChoice(s.choice))
+    const stopNumerals = i360Theme.onNumeralsChange((s) => setNumerals(s.numerals))
+    return () => { stopTheme(); stopNumerals() }
+  }, [])
+  return { choice, numerals }
+}
 //
 // OS_WebToggle: switch + label, always visible, always interactive (all platforms).
 // MobileServicesToggle: visible only when useWeb === false.
@@ -86,7 +121,7 @@ function ToggleItem({
         aria-label={ariaLabel}
       >
         <span
-          className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
+          className="absolute top-0.5 h-4 w-4 rounded-full bg-brand-on-accent transition-all"
           style={knobStyle}
         />
       </button>
@@ -114,7 +149,7 @@ function ToggleItem({
         <span className="text-brand-blue" aria-hidden="true">
           {icon}
         </span>
-        <span aria-hidden="true" className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded border border-gray-200 bg-brand-ivory px-2 py-1 text-base text-brand-blue shadow-md transition-opacity group-hover:opacity-100 ${
+        <span aria-hidden="true" className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded border border-brand-border bg-brand-ivory px-2 py-1 text-base text-brand-blue shadow-md transition-opacity group-hover:opacity-100 ${
           tooltipAlign === 'left' ? 'left-0' : 'left-1/2 -translate-x-1/2'
         } ${
           showTooltip ? 'opacity-100' : 'opacity-0'
@@ -130,6 +165,8 @@ export default function OSRow() {
   const { state, setState } = useAppState()
   const { resource } = useDataCache()
   const [versionOpen, setVersionOpen] = useState(false)
+  const { choice, numerals } = useSharedChoices()
+  const ThemeIcon = THEME_ICON[choice]
 
   // Stable (useCallback), so Dialog's focus/keydown effect isn't rebuilt on every
   // OSRow render while the dialog is open — same as App.tsx's dialogs.
@@ -141,7 +178,11 @@ export default function OSRow() {
   // Read at render: opening the About dialog re-renders, so it's current.
   const otaVersion = getOtaBuild()
 
-  const appVersion = resource?.Version || AppVersionFallback
+  // In Arabic-Indic and Persian numerals the zero (٠ / ۰) looks like a dot, so
+  // "0.13.2" would read as "٠٠١٣٠٢": between digits, "." becomes the Arabic
+  // separator "٫" (§15t). The digits themselves are converted app-wide (lib/theme.ts).
+  const appVersion = (resource?.Version || AppVersionFallback)
+    .replace(/(\d)\.(?=\d)/g, numerals === 'western' ? '$1.' : '$1٫')
 
   // Effective OS drives the leftmost icon. Real android/ios devices:
   // unaffected by useWeb/simIOS. Desktop + !useWeb: simulated per the
@@ -185,18 +226,40 @@ export default function OSRow() {
   }
 
   return (
-    <div className={`flex items-center justify-between gap-3 px-4 py-1.5 border-b border-gray-100 ${
+    <div className={`flex items-center justify-between gap-3 px-4 py-1.5 border-b border-brand-border ${
       isSimulating ? 'bg-brand-highlight' : 'bg-brand-ivory'
     }`}>
 
-      {/* VersionMenu — rightmost (first in HTML for RTL) */}
-      <button
-        onClick={() => setVersionOpen(true)}
-        className="text-brand-blue"
-        aria-label="معلومات الإصدار"
-      >
-        <EllipsisVertical size={18} />
-      </button>
+      {/* Right group: VersionMenu — rightmost (first in HTML for RTL) — then
+          the shared theme's numerals and theme buttons (§15t). Both buttons'
+          labels show digits on purpose, so they're kept as written
+          (data-i360-digits="keep", lib/theme.ts). */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setVersionOpen(true)}
+          className="text-brand-blue"
+          aria-label="معلومات الإصدار"
+        >
+          <EllipsisVertical size={18} />
+        </button>
+        <button
+          onClick={() => { i360Theme.cycleNumerals() }}
+          className="min-w-[2.25rem] text-base font-bold leading-none text-brand-blue"
+          aria-label={NUMERALS_LABEL[numerals]}
+          title={NUMERALS_LABEL[numerals]}
+          data-i360-digits="keep"
+        >
+          {NUMERALS_TEXT[numerals]}
+        </button>
+        <button
+          onClick={() => { i360Theme.cycle() }}
+          className="text-brand-blue"
+          aria-label={THEME_LABEL[choice]}
+          title={THEME_LABEL[choice]}
+        >
+          <ThemeIcon size={18} />
+        </button>
+      </div>
 
       {/* Middle — real Android: the original binary Google/Huawei switch */}
       {showBinaryServicesToggle && (
@@ -250,7 +313,7 @@ export default function OSRow() {
                     (version, hash, timestamp) embedded in an RTL dialog;
                     explicit direction avoids relying on the bidi
                     algorithm's own default handling for mixed content. */}
-                <span dir="ltr" className="text-xs">({otaVersion})</span>
+                <span dir="ltr" className="text-xs" data-i360-digits="keep">({otaVersion})</span>
               </>
             )}
           </>

@@ -32,8 +32,12 @@
     <!-- The shared i360 theme: colours and Amiri (claude/i360-hub.md). A plain
          stylesheet in <head>, so it is in place before the first paint. Its
          fonts use font-display: block, not swap — swap made the first-launch
-         privacy dialog reflow as Amiri arrived (§14g). Light only: theme.css
-         applies light when no data-theme is set. -->
+         privacy dialog reflow as Amiri arrived (§14g). The chosen theme
+         (system / light / sepia / dark) is set before the first paint by
+         hub/theme/early.js, built in at the end of this head section by
+         vite.config.ts (§15t); the loader then keeps theme.css fresh.
+         Never write a literal head or body tag inside a comment here: Vite
+         and the build plugins place their scripts at the first such tag. -->
     <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin />
     <link href="https://theme.i36o.workers.dev/theme.css" rel="stylesheet" />
   </head>

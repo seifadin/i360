@@ -5,6 +5,7 @@ import App from './App'
 import ErrorBoundary from './components/ErrorBoundary'
 import { installStartupErrorGuard } from './lib/startupHealth'
 import { primeDiagnosticContext } from './lib/feedbackReport'
+import { startTheme } from './lib/theme'
 
 // Installed here, before anything else — genuinely as early as possible,
 // so it can catch a startup-relevant error even before ErrorBoundary/App
@@ -16,6 +17,10 @@ installStartupErrorGuard()
 // AFTER the error guard: it can't reject (fully caught), but the guard
 // should exist before anything async starts regardless.
 primeDiagnosticContext()
+
+// The shared theme and numerals (§15t) — after the error guard, like the line
+// above; the saved theme is already on screen (index.html's built-in early script).
+startTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

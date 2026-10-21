@@ -10,6 +10,7 @@ import { isArabic, translateToArabic } from '@/api/translator'
 import { computeUseHuawei } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 import { openResource } from '@/lib/openResource'
+import { i360Theme } from '@/lib/theme'
 
 // Icon mapping confirmation:
 // Search   → search icon inside input LEFT side
@@ -68,7 +69,12 @@ export default function SearchBar() {
   const [searchPhase, setSearchPhase] = useState<SearchPhase>(null)
 
   const trimmed = EntityQueryTerm.trim()
-  const isExegesisMatch = EXEGESIS_PATTERN.test(trimmed)
+  // chapter.verse may be typed in any of the three digit sets (Arabic
+  // keyboards often give ٠١٢٣ by default), and with the Arabic decimal
+  // separator ٫ — read as Western digits and a dot (2026-10-21, §15t).
+  // Only the exegesis check uses this; a search sends what was typed.
+  const exegesisTerm = i360Theme.toNumerals(trimmed, 'western').replace(/٫/g, '.')
+  const isExegesisMatch = EXEGESIS_PATTERN.test(exegesisTerm)
 
   function handleSearchIconTap() {
     setOverrideArmed(prev => !prev)
@@ -105,7 +111,7 @@ export default function SearchBar() {
 
     try {
       if (routeToExegesis) {
-        await handleExegesisSubmit(trimmed)
+        await handleExegesisSubmit(exegesisTerm)
       } else {
         await handleSearch()
       }
@@ -222,7 +228,7 @@ export default function SearchBar() {
   )
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-brand-ivory border-b border-gray-200">
+    <div className="flex items-center gap-2 px-3 py-2 bg-brand-ivory border-b border-brand-border">
       {/* Visually hidden, announces the transient states above regardless
           of which element currently has focus. role="status" + explicit
           aria-live="polite" together for the broadest, most reliable
@@ -230,7 +236,7 @@ export default function SearchBar() {
       <span className="sr-only" role="status" aria-live="polite">{liveMessage}</span>
 
       {/* Search input with SearchIcon (right) + Search-execute icon (left) */}
-      <div className="flex flex-1 min-w-0 items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 gap-2">
+      <div className="flex flex-1 min-w-0 items-center rounded-full border border-brand-border bg-brand-input px-3 py-1 gap-2">
         {/* SearchIcon — live 3-state indicator + one-shot override control.
             PencilSparkles: auto-detect, input doesn't match (resting/default,
             including empty input). Tapping while empty flashes CircleAlert.
@@ -270,7 +276,7 @@ export default function SearchBar() {
           // true. Only ever true for the same brief 500ms window the
           // invalid-input flash shows, then clears itself with it.
           aria-invalid={flash === 'invalid'}
-          className="min-w-0 flex-1 bg-transparent text-right text-base text-brand-blue outline-none placeholder-gray-400"
+          className="min-w-0 flex-1 bg-transparent text-right text-base text-brand-blue outline-none placeholder-brand-muted"
           dir="rtl"
         />
         {/* Search icon inside input on LEFT (last in RTL flex = leftmost) */}

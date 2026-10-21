@@ -102,7 +102,7 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
             // would be hard to see.
             className={
               emphasizeSecondary
-                ? 'mb-2 w-full rounded-full bg-brand-green py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-blue'
+                ? 'mb-2 w-full rounded-full bg-brand-green py-2 text-base font-bold text-brand-on-accent outline-none focus:ring-2 focus:ring-brand-blue'
                 : 'mb-2 w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green'
             }
           >
@@ -118,7 +118,7 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
           className={
             emphasizeSecondary
               ? 'w-full rounded-full border-2 border-brand-blue py-2 text-base font-bold text-brand-blue outline-none focus:ring-2 focus:ring-brand-green'
-              : 'w-full rounded-full bg-brand-blue py-2 text-base font-bold text-white outline-none focus:ring-2 focus:ring-brand-green'
+              : 'w-full rounded-full bg-brand-blue py-2 text-base font-bold text-brand-on-accent outline-none focus:ring-2 focus:ring-brand-green'
           }
         >
           موافق
