@@ -62,7 +62,7 @@ const BUTTON = {
   major: 'flex w-full items-center justify-between px-4 py-2 text-right text-lg font-bold text-brand-blue hover:bg-brand-highlight focus:outline-none',
   intermediate: 'flex w-full items-center justify-between px-8 py-1.5 text-right text-base font-normal text-brand-blue hover:bg-brand-highlight focus:outline-none',
 }
-const PANEL = { major: 'divide-y divide-brand-border bg-brand-ivory', intermediate: 'divide-y divide-brand-border bg-brand-ivory' }
+const PANEL = { major: 'divide-y divide-brand-divider bg-brand-ivory', intermediate: 'divide-y divide-brand-divider bg-brand-ivory' }
 const SIZE = { major: { chevron: 16, icon: 17 }, intermediate: { chevron: 14, icon: 14 } }
 
 // One expandable row of the science accordion (major or intermediate level).
@@ -310,7 +310,7 @@ export default function ScienceGrid() {
           },
         }}
       />
-      <div className="divide-y divide-brand-border">
+      <div className="divide-y divide-brand-divider">
       {groups.map(group => (
         <DisclosureRow
           key={group.majorId}

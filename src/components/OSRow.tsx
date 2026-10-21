@@ -181,8 +181,16 @@ export default function OSRow() {
   // In Arabic-Indic and Persian numerals the zero (٠ / ۰) looks like a dot, so
   // "0.13.2" would read as "٠٠١٣٠٢": between digits, "." becomes the Arabic
   // separator "٫" (§15t). The digits themselves are converted app-wide (lib/theme.ts).
-  const appVersion = (resource?.Version || AppVersionFallback)
-    .replace(/(\d)\.(?=\d)/g, numerals === 'western' ? '$1.' : '$1٫')
+  const versionDots = (text: string) => text.replace(/(\d)\.(?=\d)/g, numerals === 'western' ? '$1.' : '$1٫')
+  const appVersion = versionDots(resource?.Version || AppVersionFallback)
+
+  // The OTA build line stays a code (its commit and time stay as they are), but
+  // the app version inside it is shown like the line above: on phones it reads
+  // "0.13.2+otk.<commit>.<time>", on web just "0.13.2". Only that exact version
+  // (this build's own, __APP_VERSION__) is converted, wherever it sits; if it
+  // isn't found, the line simply shows unchanged.
+  const otaDisplay = otaVersion?.replace(__APP_VERSION__, () =>
+    i360Theme.toNumerals(versionDots(__APP_VERSION__), numerals))
 
   // Effective OS drives the leftmost icon. Real android/ios devices:
   // unaffected by useWeb/simIOS. Desktop + !useWeb: simulated per the
@@ -313,7 +321,7 @@ export default function OSRow() {
                     (version, hash, timestamp) embedded in an RTL dialog;
                     explicit direction avoids relying on the bidi
                     algorithm's own default handling for mixed content. */}
-                <span dir="ltr" className="text-xs" data-i360-digits="keep">({otaVersion})</span>
+                <span dir="ltr" className="text-xs" data-i360-digits="keep">({otaDisplay})</span>
               </>
             )}
           </>
