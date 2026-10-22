@@ -358,8 +358,8 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
     nav a:hover, nav a:focus-visible { background: var(--i360-hover); }
     nav a:focus-visible { outline: 2px solid var(--i360-focus); outline-offset: 2px; }
 
-    /* The numerals and theme buttons: same look and order as in the Reader and the
-       CSE (numerals, then theme); top corner on the left in Arabic (the end of the line). */
+    /* The theme and numerals buttons: same look and order as on every i360 page
+       (theme, then numerals — i360-hub.md §10 "Toolbars"); top corner on the left in Arabic (the end of the line). */
     .corner {
       position: fixed; top: max(0.5rem, env(safe-area-inset-top)); inset-inline-end: 0.5rem;
       display: flex; gap: 0.25rem;
@@ -382,8 +382,8 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 </head>
 <body>
   <div class="corner">
-    <button class="theme-btn numerals-btn" id="btn-numerals" type="button"></button>
     <button class="theme-btn" id="btn-theme" type="button"></button>
+    <button class="theme-btn numerals-btn" id="btn-numerals" type="button"></button>
   </div>
   <!-- "i360إ" stays in this order in Arabic text: a left-to-right isolate keeps the إ after "i360". -->
   <h1>الموسوعة الإسلامية <bdi dir="ltr" id="name">i360&lrm;إ</bdi></h1>

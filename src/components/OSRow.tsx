@@ -17,13 +17,13 @@ const TOOLTIP_MS = 1500 // how long a toggle's tooltip stays up
 const AppVersionFallback = 'إصدار -'
 const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 
-// Layout order: OS_WebToggle (leftmost) → MobileServicesToggle → [ThemeButton,
-// NumeralsButton, VersionMenu] (rightmost group)
+// Layout order: OS_WebToggle (leftmost) → MobileServicesToggle → [NumeralsButton,
+// ThemeButton, VersionMenu] (rightmost group)
 // RTL rule used throughout this project: first item in HTML = rightmost visually,
 // last item in HTML = leftmost visually. So HTML order here is:
-// VersionMenu, NumeralsButton, ThemeButton, MobileServicesToggle, OS_WebToggle.
-// The theme/numerals pair keeps the hub pages' order (theme to the left of
-// numerals, claude/i360-hub.md §3) and their Arabic labels and icons.
+// VersionMenu, ThemeButton, NumeralsButton, MobileServicesToggle, OS_WebToggle.
+// The theme/numerals pair keeps the order of every i360 page (theme to the right
+// of numerals, claude/i360-hub.md §10 "Toolbars") and the hub's Arabic labels and icons.
 
 // The shared theme's two buttons (2026-10-21, §15t) — the same choices, labels
 // and icons as the hub pages (claude/i360-hub.md §3), stored per site, so the
@@ -239,7 +239,8 @@ export default function OSRow() {
     }`}>
 
       {/* Right group: VersionMenu — rightmost (first in HTML for RTL) — then
-          the shared theme's numerals and theme buttons (§15t). Both buttons'
+          the shared theme's theme and numerals buttons, the order of every i360
+          page (§15t; i360-hub.md §10 "Toolbars"). Both buttons'
           labels show digits on purpose, so they're kept as written
           (data-i360-digits="keep", lib/theme.ts). */}
       <div className="flex items-center gap-3">
@@ -251,6 +252,14 @@ export default function OSRow() {
           <EllipsisVertical size={18} />
         </button>
         <button
+          onClick={() => { i360Theme.cycle() }}
+          className="text-brand-blue"
+          aria-label={THEME_LABEL[choice]}
+          title={THEME_LABEL[choice]}
+        >
+          <ThemeIcon size={18} />
+        </button>
+        <button
           onClick={() => { i360Theme.cycleNumerals() }}
           className="min-w-[2.25rem] text-base font-bold leading-none text-brand-blue"
           aria-label={NUMERALS_LABEL[numerals]}
@@ -258,14 +267,6 @@ export default function OSRow() {
           data-i360-digits="keep"
         >
           {NUMERALS_TEXT[numerals]}
-        </button>
-        <button
-          onClick={() => { i360Theme.cycle() }}
-          className="text-brand-blue"
-          aria-label={THEME_LABEL[choice]}
-          title={THEME_LABEL[choice]}
-        >
-          <ThemeIcon size={18} />
         </button>
       </div>
 

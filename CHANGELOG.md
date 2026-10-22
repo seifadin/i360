@@ -6,6 +6,15 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 ---
 
+## [Unreleased] — live on the web and over the air (still version 0.14.0)
+
+### Changed
+- The Daily Reflection has a bar at the top, like the other i360 pages: theme, numerals and a language button (it opens the list of the five languages), the page's name and, inside the app, the close button. On iPhone the bar stays clear of the status bar (2026-10-22)
+- The theme button now comes before the numerals button on every page, the encyclopedia's bottom bar included (2026-10-22)
+- The book search is now called «البحث في i360إ» (2026-10-22)
+
+---
+
 ## [0.14.0] — 2026-10-22
 
 First store release since 0.13.2. It also brings to the stores everything that had reached installed apps over the air since 0.13.2.

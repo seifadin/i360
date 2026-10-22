@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <!--@@CSP@@-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
          scripts/build.js: built-in colours, the saved theme before anything is drawn, the
@@ -60,46 +60,70 @@
         svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
         svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
         svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
-        .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
         .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
         .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
         .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
         [dir="ltr"] .arabic-script { direction: rtl; }
         .text-custom-secondary { color: var(--text-secondary); }
-        .lang-btn { min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; }
+        /* The top bar (i360-hub.md §10 "Toolbars"): fixed at the top, as on every i360 page; in Arabic from
+           the right: theme · numerals · language … title · ✕ (the ✕ in the installed app only); it mirrors in
+           left-to-right languages. Its background spans the screen, its contents line up with the page column.
+           iPhone: padded below the status bar and clear of the rounded corners (viewport-fit=cover). */
+        .topbar { position: sticky; top: 0; z-index: 30; width: 100%; background-color: var(--card-bg); border-bottom: 1px solid var(--border-inset);
+                  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); box-sizing: border-box; }
+        .topbar-in { max-width: 42rem; margin: 0 auto; height: 3.5rem; padding: 0 0.5rem; display: flex; align-items: center; gap: 0.125rem; }
+        .tb-btn { min-width: 2.75rem; height: 2.75rem; padding: 0 0.375rem; border: 0; border-radius: 0.75rem; background: transparent; color: var(--text-primary);
+                  display: flex; align-items: center; justify-content: center; gap: 0.125rem; flex-shrink: 0; font: 700 1.0625rem/1 var(--i360-font); cursor: pointer; }
+        .tb-btn:hover, .tb-btn[aria-expanded="true"] { background-color: var(--i360-hover); }
+        .tb-btn:focus-visible, .lang-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .tb-btn svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .tb-btn .tb-caret { width: 0.875rem; height: 0.875rem; }
+        .tb-title { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0 0.375rem; text-align: end; font-size: 1.25rem; font-weight: 700; line-height: 1.3;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lang-wrap { position: relative; flex-shrink: 0; }
+        .lang-list { position: absolute; top: calc(100% + 0.25rem); inset-inline-start: 0; z-index: 40; min-width: 11rem; padding: 0.375rem; border-radius: 1rem;
+                     background-color: var(--card-bg); border: 1px solid var(--border-inset); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.125rem; }
+        .lang-list[hidden] { display: none; }
+        .lang-item { border: 0; background: transparent; color: var(--text-primary); text-align: start; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font: 1rem/1.5 var(--i360-font); cursor: pointer; }
+        .lang-item:hover { background-color: var(--i360-hover); }
+        .lang-item.active-btn { background-color: var(--accent); }
+        .page { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+                padding: 1rem calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left)); }
+        @media (min-width: 768px) { .page { padding-top: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); } }
         .layout-stable { width: 100%; max-width: 42rem; margin: 0 auto; transition: transform 0.3s ease; }
     </style>
     <style id="tailwind">/*@@TAILWIND@@*/</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
-    <header class="layout-stable flex flex-col gap-6 mb-12">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-center md:text-start flex flex-col gap-1">
-                <h1 data-i18n="title" class="text-3xl font-bold tracking-tight">Daily Reflection</h1>
-                <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
-                <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
-                <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+<body class="min-h-screen flex flex-col items-center">
+    <header class="topbar">
+        <div class="topbar-in">
+            <!-- The shared theme and numerals (the same order on every i360 page), then the language. -->
+            <button id="btn-theme" type="button" class="tb-btn"></button>
+            <button id="btn-numerals" type="button" class="tb-btn numerals-btn"></button>
+            <div class="lang-wrap">
+                <button id="btn-lang" type="button" class="tb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-list"><span id="lang-short"></span><svg data-lucide="chevron-down" class="tb-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+                <!-- dir="rtl" keeps the list in a fixed order; each language is written in its own language. -->
+                <div id="lang-list" class="lang-list" dir="rtl" role="group" aria-labelledby="btn-lang" hidden>
+                    <button type="button" data-lang="ar" id="lang-ar" lang="ar" class="lang-item">العربية</button>
+                    <button type="button" data-lang="ur" id="lang-ur" lang="ur" class="lang-item">اردو</button>
+                    <button type="button" data-lang="id" id="lang-id" lang="id" dir="ltr" class="lang-item">Bahasa Indonesia</button>
+                    <button type="button" data-lang="tr" id="lang-tr" lang="tr" dir="ltr" class="lang-item">Türkçe</button>
+                    <button type="button" data-lang="en" id="lang-en" lang="en" dir="ltr" class="lang-item">English</button>
+                </div>
             </div>
-            <!-- The shared numerals and theme, in the same order as in the Reader and the CSE:
-                 numerals (0123 → ٠١٢٣ → ۰۱۲۳), then theme (system → light → sepia → dark) -->
-            <div class="flex gap-2">
-                <button id="btn-numerals" type="button" class="numerals-btn glass-card px-2 py-2 rounded-xl text-custom-secondary text-xs font-bold flex items-center justify-center"></button>
-                <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
-                <!-- Inside the installed i360إ app only: back to its home (sprint 4b); last, so at the far end in either direction. -->
-                <button id="btn-close" type="button" class="hidden glass-card p-2 rounded-xl text-custom-secondary items-center justify-center theme-btn"><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-            </div>
-        </div>
-
-        <!-- dir="rtl" keeps the language grid in a fixed order -->
-        <div class="grid grid-cols-5 gap-1 glass-card p-2 rounded-2xl w-full" dir="rtl" role="group" aria-label="Language">
-            <button type="button" data-lang="ar" id="lang-ar" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">العربية</button>
-            <button type="button" data-lang="ur" id="lang-ur" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">اردو</button>
-            <button type="button" data-lang="id" id="lang-id" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Indo</button>
-            <button type="button" data-lang="tr" id="lang-tr" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Türkçe</button>
-            <button type="button" data-lang="en" id="lang-en" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">English</button>
+            <h1 data-i18n="title" class="tb-title">Daily Reflection</h1>
+            <!-- Inside the installed i360إ app only: back to its home; last, so at the far end in either direction. -->
+            <button id="btn-close" type="button" class="tb-btn" hidden><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
         </div>
     </header>
+
+    <div class="page">
+    <div class="layout-stable flex flex-col gap-1 mb-8 text-center">
+        <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
+        <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
+        <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+    </div>
 
     <main class="layout-stable space-y-8">
         <section id="quran-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
@@ -175,6 +199,7 @@
             <div data-target="events-list" class="space-y-4"></div>
         </section>
     </main>
+    </div>
     <footer class="mt-16 text-center text-custom-secondary text-xs pb-10">
         <p data-i18n="footer">Updated daily.</p>
         <p data-i18n="privacy" class="mt-2 max-w-md mx-auto"></p>
@@ -509,31 +534,31 @@
         };
 
         const EXTRA = {
-            ar: { refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
+            ar: { language: 'اللغة', refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
                   schoolStd: 'الجمهور', schoolHanafi: 'الحنفي',
                   close: 'إغلاق والعودة إلى الموسوعة', cityChange: 'تغيير', citySearch: 'ابحث عن مدينة…', deviceTz: 'المنطقة الزمنية للجهاز',
                   cityNone: 'لم يُعثر على المدينة — جرّب كتابة اسمها بالإنجليزية.',
                   creditCities: 'بيانات المدن', creditPrayer: 'حساب مواقيت الصلاة',
                   privacy: 'تُحسَب مواقيت الصلاة على جهازك. لا يُرسَل إلى Open-Meteo إلا اسم المدينة الذي تكتبه في البحث.' },
-            en: { refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
+            en: { language: 'Language', refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
                   schoolStd: 'Standard', schoolHanafi: 'Hanafi',
                   close: 'Close and return to the encyclopedia', cityChange: 'Change', citySearch: 'Search for a city…', deviceTz: 'Device time zone',
                   cityNone: 'No city found — check the spelling.',
                   creditCities: 'City data', creditPrayer: 'Prayer-time calculation',
                   privacy: 'Prayer times are calculated on your device. Only a city name you type in the search is sent to Open-Meteo.' },
-            tr: { refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
+            tr: { language: 'Dil', refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
                   schoolStd: 'Standart', schoolHanafi: 'Hanefi',
                   close: 'Kapat ve ansiklopediye dön', cityChange: 'Değiştir', citySearch: 'Şehir ara…', deviceTz: 'Cihaz saat dilimi',
                   cityNone: 'Şehir bulunamadı — adını İngilizce yazmayı deneyin.',
                   creditCities: 'Şehir verileri', creditPrayer: 'Namaz vakti hesaplaması',
                   privacy: "Namaz vakitleri cihazınızda hesaplanır. Yalnızca aramaya yazdığınız şehir adı Open-Meteo'ya gönderilir." },
-            id: { refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
+            id: { language: 'Bahasa', refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
                   schoolStd: 'Standar', schoolHanafi: 'Hanafi',
                   close: 'Tutup dan kembali ke ensiklopedia', cityChange: 'Ubah', citySearch: 'Cari kota…', deviceTz: 'Zona waktu perangkat',
                   cityNone: 'Kota tidak ditemukan — coba ketik namanya dalam bahasa Inggris.',
                   creditCities: 'Data kota', creditPrayer: 'Perhitungan waktu shalat',
                   privacy: 'Waktu shalat dihitung di perangkat Anda. Hanya nama kota yang Anda ketik di pencarian yang dikirim ke Open-Meteo.' },
-            ur: { refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
+            ur: { language: 'زبان', refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
                   schoolStd: 'معیاری', schoolHanafi: 'حنفی',
                   close: 'بند کریں اور انسائیکلوپیڈیا پر واپس جائیں', cityChange: 'تبدیل کریں', citySearch: 'شہر تلاش کریں…', deviceTz: 'ڈیوائس کا ٹائم زون',
                   cityNone: 'شہر نہیں ملا — اس کا نام انگریزی میں لکھ کر دیکھیں۔',
@@ -770,6 +795,28 @@
             }
         };
 
+        /* ---------- Language menu ---------- */
+        // The bar's language button: the current language's short name; it opens the list of the five.
+        // Closes on a choice, on Escape (focus back on the button) or on a tap outside.
+        const LANG_SHORT = { ar: 'ع', ur: 'ار', id: 'ID', tr: 'TR', en: 'EN' };
+        const LangMenu = {
+            init() {
+                this.btn = document.getElementById('btn-lang'); this.list = document.getElementById('lang-list');
+                this.btn.addEventListener('click', () => (this.list.hidden ? this.open() : this.close(true)));
+                document.addEventListener('click', e => { if (!this.list.hidden && !e.target.closest('.lang-wrap')) this.close(false); });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && !this.list.hidden) this.close(true); });
+            },
+            open() {
+                this.list.hidden = false; this.btn.setAttribute('aria-expanded', 'true');
+                (this.list.querySelector('[aria-pressed="true"]') || this.list.querySelector('button')).focus();
+            },
+            close(focusButton) {
+                if (this.list.hidden) return;
+                this.list.hidden = true; this.btn.setAttribute('aria-expanded', 'false');
+                if (focusButton) this.btn.focus();
+            }
+        };
+
         /* ---------- UI ---------- */
         const UI = {
             targets: {}, shown: false,
@@ -779,13 +826,14 @@
                 document.querySelectorAll('[data-status]').forEach(el => {
                     el.querySelector('[data-retry]').addEventListener('click', () => App.retry(el.dataset.status));
                 });
-                document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => App.setLang(b.dataset.lang)));
+                document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { LangMenu.close(true); App.setLang(b.dataset.lang); }));
+                LangMenu.init();
                 document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
                 Picker.init();
                 // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
                 if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
-                    x.classList.remove('hidden'); x.classList.add('flex');
+                    x.hidden = false;
                     x.addEventListener('click', () => {
                         // Opened from the app's home (the usual way): step back, so the history stays
                         // home → this page — iOS's edge swipe and Android's back button follow it too.
@@ -839,7 +887,10 @@
                 const L = this.L, lang = App.lang;
                 document.documentElement.lang = lang; document.documentElement.dir = L.dir;
                 document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || LOCALES.en[el.dataset.i18n]; });
-                document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                document.querySelectorAll('[data-lang]').forEach(el => { const on = el.dataset.lang === lang; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                const lb = document.getElementById('btn-lang'), cur = document.getElementById(`lang-${lang}`);
+                document.getElementById('lang-short').textContent = LANG_SHORT[lang];
+                lb.title = `${L.language}: ${cur.textContent}`; lb.setAttribute('aria-label', lb.title);
                 this.theme();            // their tooltips are in the page's language
                 this.numeralsButton();
                 const x = document.getElementById('btn-close'); x.title = L.close; x.setAttribute('aria-label', L.close);

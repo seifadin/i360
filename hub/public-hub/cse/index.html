@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-Y0slIZG1iXoWOSGZ3oWNfYm0dQft0PMg32KTzjVyAE0=' 'sha256-31d+hT9OFhR4Nr2S7M4zoveoBVE1/Ttpa89BAJ+dFMQ='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-Y0slIZG1iXoWOSGZ3oWNfYm0dQft0PMg32KTzjVyAE0=' 'sha256-Elnm2ysjUr3ZiUmDXUKeRPsLRYK5688iDAU/gy2gCEk='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
+  <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
 
   <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev):
@@ -409,7 +409,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       z-index: 10;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    .brand { flex: 1; min-width: 0; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand { flex: 1; min-width: 0; text-align: end; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
     .toolbar-btn {
@@ -569,11 +569,13 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
     <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
          the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
          mark before the إ keeps it there with Eastern digits ("i٣٦٠إ"). -->
-    <div class="brand">البحث في كتب الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></div>
+    <!-- In Arabic from the right: theme · numerals … title (i360-hub.md §10 "Toolbars"; the ✕ joins at the
+         far left once the CSE is inside the app, sprint 6). -->
     <div class="tb-end">
-      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
+      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
     </div>
+    <div class="brand">البحث في <bdi dir="ltr">i360&lrm;إ</bdi></div>
   </header>
 
   <div class="scroller" id="scroller" tabindex="-1">
@@ -1395,7 +1397,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       barEl.hidden = true;
       syncAddress(q, push);
       setRobots(q);
-      document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية ${BRAND}` : `البحث في كتب الموسوعة الإسلامية ${BRAND}`;
+      document.title = q ? `${q} — البحث في ${BRAND}` : `البحث في ${BRAND}`;
       if (!q) { setStatus(''); aboutEl.hidden = false; return; }
       aboutEl.hidden = true;
       if (SearchCore.normalizeQuery(q, false).length < CseIndex.MIN_QUERY) { setStatus(T.tooShort(CseIndex.MIN_QUERY)); return; }

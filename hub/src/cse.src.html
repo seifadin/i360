@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <!--@@CSP@@-->
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>البحث في كتب الموسوعة الإسلامية &#x2066;i360إ&#x2069;</title>
+  <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
 
   <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev):
@@ -84,7 +84,7 @@
       z-index: 10;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    .brand { flex: 1; min-width: 0; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand { flex: 1; min-width: 0; text-align: end; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
     .toolbar-btn {
@@ -244,11 +244,13 @@
     <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
          the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
          mark before the إ keeps it there with Eastern digits ("i٣٦٠إ"). -->
-    <div class="brand">البحث في كتب الموسوعة الإسلامية <bdi dir="ltr">i360&lrm;إ</bdi></div>
+    <!-- In Arabic from the right: theme · numerals … title (i360-hub.md §10 "Toolbars"; the ✕ joins at the
+         far left once the CSE is inside the app, sprint 6). -->
     <div class="tb-end">
-      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
+      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
     </div>
+    <div class="brand">البحث في <bdi dir="ltr">i360&lrm;إ</bdi></div>
   </header>
 
   <div class="scroller" id="scroller" tabindex="-1">
@@ -461,7 +463,7 @@
       barEl.hidden = true;
       syncAddress(q, push);
       setRobots(q);
-      document.title = q ? `${q} — البحث في كتب الموسوعة الإسلامية ${BRAND}` : `البحث في كتب الموسوعة الإسلامية ${BRAND}`;
+      document.title = q ? `${q} — البحث في ${BRAND}` : `البحث في ${BRAND}`;
       if (!q) { setStatus(''); aboutEl.hidden = false; return; }
       aboutEl.hidden = true;
       if (SearchCore.normalizeQuery(q, false).length < CseIndex.MIN_QUERY) { setStatus(T.tooShort(CseIndex.MIN_QUERY)); return; }

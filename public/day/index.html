@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-X1siFJxVZUuJJ7uke1x+f2/1ItaI023zS0a5CbFzMpw='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-BF2ve5gmZAWGXTuL2lNyeaN+S8+wtgn/133lw30FBWk='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
          scripts/build.js: built-in colours, the saved theme before anything is drawn, the
@@ -597,46 +597,70 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
         svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
         svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
-        .theme-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
         .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
         .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
         .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
         [dir="ltr"] .arabic-script { direction: rtl; }
         .text-custom-secondary { color: var(--text-secondary); }
-        .lang-btn { min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; }
+        /* The top bar (i360-hub.md §10 "Toolbars"): fixed at the top, as on every i360 page; in Arabic from
+           the right: theme · numerals · language … title · ✕ (the ✕ in the installed app only); it mirrors in
+           left-to-right languages. Its background spans the screen, its contents line up with the page column.
+           iPhone: padded below the status bar and clear of the rounded corners (viewport-fit=cover). */
+        .topbar { position: sticky; top: 0; z-index: 30; width: 100%; background-color: var(--card-bg); border-bottom: 1px solid var(--border-inset);
+                  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); box-sizing: border-box; }
+        .topbar-in { max-width: 42rem; margin: 0 auto; height: 3.5rem; padding: 0 0.5rem; display: flex; align-items: center; gap: 0.125rem; }
+        .tb-btn { min-width: 2.75rem; height: 2.75rem; padding: 0 0.375rem; border: 0; border-radius: 0.75rem; background: transparent; color: var(--text-primary);
+                  display: flex; align-items: center; justify-content: center; gap: 0.125rem; flex-shrink: 0; font: 700 1.0625rem/1 var(--i360-font); cursor: pointer; }
+        .tb-btn:hover, .tb-btn[aria-expanded="true"] { background-color: var(--i360-hover); }
+        .tb-btn:focus-visible, .lang-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .tb-btn svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .tb-btn .tb-caret { width: 0.875rem; height: 0.875rem; }
+        .tb-title { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0 0.375rem; text-align: end; font-size: 1.25rem; font-weight: 700; line-height: 1.3;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lang-wrap { position: relative; flex-shrink: 0; }
+        .lang-list { position: absolute; top: calc(100% + 0.25rem); inset-inline-start: 0; z-index: 40; min-width: 11rem; padding: 0.375rem; border-radius: 1rem;
+                     background-color: var(--card-bg); border: 1px solid var(--border-inset); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.125rem; }
+        .lang-list[hidden] { display: none; }
+        .lang-item { border: 0; background: transparent; color: var(--text-primary); text-align: start; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font: 1rem/1.5 var(--i360-font); cursor: pointer; }
+        .lang-item:hover { background-color: var(--i360-hover); }
+        .lang-item.active-btn { background-color: var(--accent); }
+        .page { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+                padding: 1rem calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left)); }
+        @media (min-width: 768px) { .page { padding-top: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); } }
         .layout-stable { width: 100%; max-width: 42rem; margin: 0 auto; transition: transform 0.3s ease; }
     </style>
-    <style id="tailwind">*,::backdrop,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#3b82f680;--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:initial}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:initial;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:initial}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.mx-auto{margin-left:auto;margin-right:auto}.mb-12{margin-bottom:3rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.me-1{margin-inline-end:.25rem}.ms-2{margin-inline-start:.5rem}.ms-4{margin-inline-start:1rem}.mt-1{margin-top:.25rem}.mt-16{margin-top:4rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.translate-y-4{--tw-translate-y:1rem}.transform,.translate-y-4{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.whitespace-pre-line{white-space:pre-line}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-t{border-top-width:1px}.border-current{border-color:currentColor}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255/var(--tw-bg-opacity,1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255/var(--tw-bg-opacity,1))}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.bg-transparent{background-color:initial}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.pb-10{padding-bottom:2.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-justify{text-align:justify}.text-start{text-align:start}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[8px\]{font-size:8px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tracking-tight{letter-spacing:-.025em}.tracking-widest{letter-spacing:.1em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.opacity-0{opacity:0}.sepia{--tw-sepia:sepia(100%)}.filter,.sepia{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-500{transition-duration:.5s}.dark\:border-slate-700\/50:is(.dark *){border-color:#33415580}.dark\:bg-amber-900\/30:is(.dark *){background-color:#78350f4d}.dark\:bg-blue-900\/30:is(.dark *){background-color:#1e3a8a4d}.dark\:bg-purple-900\/10:is(.dark *){background-color:#581c871a}.dark\:bg-purple-900\/30:is(.dark *){background-color:#581c874d}.dark\:text-amber-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.dark\:text-amber-500:is(.dark *){--tw-text-opacity:1;color:rgb(245 158 11/var(--tw-text-opacity,1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250/var(--tw-text-opacity,1))}.dark\:text-purple-400:is(.dark *){--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}@media (min-width:640px){.sm\:text-xs{font-size:.75rem;line-height:1rem}}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.md\:flex-row{flex-direction:row}.md\:p-10{padding:2.5rem}.md\:p-8{padding:2rem}.md\:text-start{text-align:start}.md\:text-end{text-align:end}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:.75rem;line-height:1rem}}</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
+    <style id="tailwind">*,::backdrop,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#3b82f680;--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:initial}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:initial;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:initial}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.mx-auto{margin-left:auto;margin-right:auto}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.me-1{margin-inline-end:.25rem}.ms-2{margin-inline-start:.5rem}.ms-4{margin-inline-start:1rem}.mt-1{margin-top:.25rem}.mt-16{margin-top:4rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.translate-y-4{--tw-translate-y:1rem}.transform,.translate-y-4{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.whitespace-pre-line{white-space:pre-line}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-t{border-top-width:1px}.border-current{border-color:currentColor}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255/var(--tw-bg-opacity,1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255/var(--tw-bg-opacity,1))}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.bg-transparent{background-color:initial}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.pb-10{padding-bottom:2.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-justify{text-align:justify}.text-start{text-align:start}.text-\[10px\]{font-size:10px}.text-\[8px\]{font-size:8px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tracking-widest{letter-spacing:.1em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.opacity-0{opacity:0}.outline{outline-style:solid}.sepia{--tw-sepia:sepia(100%)}.filter,.sepia{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-500{transition-duration:.5s}.dark\:border-slate-700\/50:is(.dark *){border-color:#33415580}.dark\:bg-amber-900\/30:is(.dark *){background-color:#78350f4d}.dark\:bg-blue-900\/30:is(.dark *){background-color:#1e3a8a4d}.dark\:bg-purple-900\/10:is(.dark *){background-color:#581c871a}.dark\:bg-purple-900\/30:is(.dark *){background-color:#581c874d}.dark\:text-amber-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.dark\:text-amber-500:is(.dark *){--tw-text-opacity:1;color:rgb(245 158 11/var(--tw-text-opacity,1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250/var(--tw-text-opacity,1))}.dark\:text-purple-400:is(.dark *){--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.md\:p-10{padding:2.5rem}.md\:p-8{padding:2rem}.md\:text-end{text-align:end}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:.75rem;line-height:1rem}}</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
-    <header class="layout-stable flex flex-col gap-6 mb-12">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-center md:text-start flex flex-col gap-1">
-                <h1 data-i18n="title" class="text-3xl font-bold tracking-tight">Daily Reflection</h1>
-                <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
-                <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
-                <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+<body class="min-h-screen flex flex-col items-center">
+    <header class="topbar">
+        <div class="topbar-in">
+            <!-- The shared theme and numerals (the same order on every i360 page), then the language. -->
+            <button id="btn-theme" type="button" class="tb-btn"></button>
+            <button id="btn-numerals" type="button" class="tb-btn numerals-btn"></button>
+            <div class="lang-wrap">
+                <button id="btn-lang" type="button" class="tb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-list"><span id="lang-short"></span><svg data-lucide="chevron-down" class="tb-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+                <!-- dir="rtl" keeps the list in a fixed order; each language is written in its own language. -->
+                <div id="lang-list" class="lang-list" dir="rtl" role="group" aria-labelledby="btn-lang" hidden>
+                    <button type="button" data-lang="ar" id="lang-ar" lang="ar" class="lang-item">العربية</button>
+                    <button type="button" data-lang="ur" id="lang-ur" lang="ur" class="lang-item">اردو</button>
+                    <button type="button" data-lang="id" id="lang-id" lang="id" dir="ltr" class="lang-item">Bahasa Indonesia</button>
+                    <button type="button" data-lang="tr" id="lang-tr" lang="tr" dir="ltr" class="lang-item">Türkçe</button>
+                    <button type="button" data-lang="en" id="lang-en" lang="en" dir="ltr" class="lang-item">English</button>
+                </div>
             </div>
-            <!-- The shared numerals and theme, in the same order as in the Reader and the CSE:
-                 numerals (0123 → ٠١٢٣ → ۰۱۲۳), then theme (system → light → sepia → dark) -->
-            <div class="flex gap-2">
-                <button id="btn-numerals" type="button" class="numerals-btn glass-card px-2 py-2 rounded-xl text-custom-secondary text-xs font-bold flex items-center justify-center"></button>
-                <button id="btn-theme" type="button" class="theme-btn glass-card p-2 rounded-xl text-custom-secondary flex items-center justify-center"></button>
-                <!-- Inside the installed i360إ app only: back to its home (sprint 4b); last, so at the far end in either direction. -->
-                <button id="btn-close" type="button" class="hidden glass-card p-2 rounded-xl text-custom-secondary items-center justify-center theme-btn"><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-            </div>
-        </div>
-
-        <!-- dir="rtl" keeps the language grid in a fixed order -->
-        <div class="grid grid-cols-5 gap-1 glass-card p-2 rounded-2xl w-full" dir="rtl" role="group" aria-label="Language">
-            <button type="button" data-lang="ar" id="lang-ar" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">العربية</button>
-            <button type="button" data-lang="ur" id="lang-ur" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">اردو</button>
-            <button type="button" data-lang="id" id="lang-id" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Indo</button>
-            <button type="button" data-lang="tr" id="lang-tr" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">Türkçe</button>
-            <button type="button" data-lang="en" id="lang-en" class="lang-btn px-1 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium text-custom-secondary">English</button>
+            <h1 data-i18n="title" class="tb-title">Daily Reflection</h1>
+            <!-- Inside the installed i360إ app only: back to its home; last, so at the far end in either direction. -->
+            <button id="btn-close" type="button" class="tb-btn" hidden><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
         </div>
     </header>
+
+    <div class="page">
+    <div class="layout-stable flex flex-col gap-1 mb-8 text-center">
+        <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
+        <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
+        <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+    </div>
 
     <main class="layout-stable space-y-8">
         <section id="quran-card" class="glass-card rounded-3xl p-8 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
@@ -712,6 +736,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
             <div data-target="events-list" class="space-y-4"></div>
         </section>
     </main>
+    </div>
     <footer class="mt-16 text-center text-custom-secondary text-xs pb-10">
         <p data-i18n="footer">Updated daily.</p>
         <p data-i18n="privacy" class="mt-2 max-w-md mx-auto"></p>
@@ -1046,31 +1071,31 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         };
 
         const EXTRA = {
-            ar: { refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
+            ar: { language: 'اللغة', refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
                   schoolStd: 'الجمهور', schoolHanafi: 'الحنفي',
                   close: 'إغلاق والعودة إلى الموسوعة', cityChange: 'تغيير', citySearch: 'ابحث عن مدينة…', deviceTz: 'المنطقة الزمنية للجهاز',
                   cityNone: 'لم يُعثر على المدينة — جرّب كتابة اسمها بالإنجليزية.',
                   creditCities: 'بيانات المدن', creditPrayer: 'حساب مواقيت الصلاة',
                   privacy: 'تُحسَب مواقيت الصلاة على جهازك. لا يُرسَل إلى Open-Meteo إلا اسم المدينة الذي تكتبه في البحث.' },
-            en: { refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
+            en: { language: 'Language', refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
                   schoolStd: 'Standard', schoolHanafi: 'Hanafi',
                   close: 'Close and return to the encyclopedia', cityChange: 'Change', citySearch: 'Search for a city…', deviceTz: 'Device time zone',
                   cityNone: 'No city found — check the spelling.',
                   creditCities: 'City data', creditPrayer: 'Prayer-time calculation',
                   privacy: 'Prayer times are calculated on your device. Only a city name you type in the search is sent to Open-Meteo.' },
-            tr: { refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
+            tr: { language: 'Dil', refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
                   schoolStd: 'Standart', schoolHanafi: 'Hanefi',
                   close: 'Kapat ve ansiklopediye dön', cityChange: 'Değiştir', citySearch: 'Şehir ara…', deviceTz: 'Cihaz saat dilimi',
                   cityNone: 'Şehir bulunamadı — adını İngilizce yazmayı deneyin.',
                   creditCities: 'Şehir verileri', creditPrayer: 'Namaz vakti hesaplaması',
                   privacy: "Namaz vakitleri cihazınızda hesaplanır. Yalnızca aramaya yazdığınız şehir adı Open-Meteo'ya gönderilir." },
-            id: { refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
+            id: { language: 'Bahasa', refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
                   schoolStd: 'Standar', schoolHanafi: 'Hanafi',
                   close: 'Tutup dan kembali ke ensiklopedia', cityChange: 'Ubah', citySearch: 'Cari kota…', deviceTz: 'Zona waktu perangkat',
                   cityNone: 'Kota tidak ditemukan — coba ketik namanya dalam bahasa Inggris.',
                   creditCities: 'Data kota', creditPrayer: 'Perhitungan waktu shalat',
                   privacy: 'Waktu shalat dihitung di perangkat Anda. Hanya nama kota yang Anda ketik di pencarian yang dikirim ke Open-Meteo.' },
-            ur: { refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
+            ur: { language: 'زبان', refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
                   schoolStd: 'معیاری', schoolHanafi: 'حنفی',
                   close: 'بند کریں اور انسائیکلوپیڈیا پر واپس جائیں', cityChange: 'تبدیل کریں', citySearch: 'شہر تلاش کریں…', deviceTz: 'ڈیوائس کا ٹائم زون',
                   cityNone: 'شہر نہیں ملا — اس کا نام انگریزی میں لکھ کر دیکھیں۔',
@@ -1307,6 +1332,28 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
             }
         };
 
+        /* ---------- Language menu ---------- */
+        // The bar's language button: the current language's short name; it opens the list of the five.
+        // Closes on a choice, on Escape (focus back on the button) or on a tap outside.
+        const LANG_SHORT = { ar: 'ع', ur: 'ار', id: 'ID', tr: 'TR', en: 'EN' };
+        const LangMenu = {
+            init() {
+                this.btn = document.getElementById('btn-lang'); this.list = document.getElementById('lang-list');
+                this.btn.addEventListener('click', () => (this.list.hidden ? this.open() : this.close(true)));
+                document.addEventListener('click', e => { if (!this.list.hidden && !e.target.closest('.lang-wrap')) this.close(false); });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && !this.list.hidden) this.close(true); });
+            },
+            open() {
+                this.list.hidden = false; this.btn.setAttribute('aria-expanded', 'true');
+                (this.list.querySelector('[aria-pressed="true"]') || this.list.querySelector('button')).focus();
+            },
+            close(focusButton) {
+                if (this.list.hidden) return;
+                this.list.hidden = true; this.btn.setAttribute('aria-expanded', 'false');
+                if (focusButton) this.btn.focus();
+            }
+        };
+
         /* ---------- UI ---------- */
         const UI = {
             targets: {}, shown: false,
@@ -1316,13 +1363,14 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 document.querySelectorAll('[data-status]').forEach(el => {
                     el.querySelector('[data-retry]').addEventListener('click', () => App.retry(el.dataset.status));
                 });
-                document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => App.setLang(b.dataset.lang)));
+                document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { LangMenu.close(true); App.setLang(b.dataset.lang); }));
+                LangMenu.init();
                 document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
                 Picker.init();
                 // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
                 if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
-                    x.classList.remove('hidden'); x.classList.add('flex');
+                    x.hidden = false;
                     x.addEventListener('click', () => {
                         // Opened from the app's home (the usual way): step back, so the history stays
                         // home → this page — iOS's edge swipe and Android's back button follow it too.
@@ -1376,7 +1424,10 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 const L = this.L, lang = App.lang;
                 document.documentElement.lang = lang; document.documentElement.dir = L.dir;
                 document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || LOCALES.en[el.dataset.i18n]; });
-                document.querySelectorAll('[id^="lang-"]').forEach(el => { const on = el.id === `lang-${lang}`; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                document.querySelectorAll('[data-lang]').forEach(el => { const on = el.dataset.lang === lang; el.classList.toggle('active-btn', on); el.setAttribute('aria-pressed', on); });
+                const lb = document.getElementById('btn-lang'), cur = document.getElementById(`lang-${lang}`);
+                document.getElementById('lang-short').textContent = LANG_SHORT[lang];
+                lb.title = `${L.language}: ${cur.textContent}`; lb.setAttribute('aria-label', lb.title);
                 this.theme();            // their tooltips are in the page's language
                 this.numeralsButton();
                 const x = document.getElementById('btn-close'); x.title = L.close; x.setAttribute('aria-label', L.close);
