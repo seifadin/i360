@@ -118,6 +118,8 @@ test('open(): reads the catalog and the chunks from lib, or says the link is not
   assert.equal(got.source.key, 'k1');
   assert.equal(got.books, 1);
   assert.deepEqual(BookFormat.parseBook(got.text).pages.map((p) => p.label), ['1', '2', '3']);
+  assert.equal(got.text, LibCopy.toBookText([...files['b/b1/text/k1/0.json'].pages, ...files['b/b1/text/k1/1.json'].pages]),
+    'built chunk by chunk, the text is exactly the text of all pages at once');
   assert.deepEqual(progress, ['0/2', '1/2', '2/2']);
   assert.equal(await LibCopy.open('https://example.com/book.md', fetchFn), null);
   await assert.rejects(LibCopy.open(STREAM, async () => ({ ok: false, status: 503 })), /503/);

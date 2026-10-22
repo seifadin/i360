@@ -17,6 +17,7 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 ### Added
 - The Markdown Reader now opens inside the app instead of the browser, with a close button back to the encyclopedia (2026-10-22)
+- The Reader no longer freezes on very large books: it builds a book's pages a little at a time, with a bar under the toolbar showing the download and then the preparation, in percent; the screen, the close button and the back button keep working meanwhile, and search becomes available once the book is ready (2026-10-22)
 - The Reader's connection icon now checks the connection for real, so it also turns red on Android phones and on Wi-Fi without internet (2026-10-22)
 - The book search («البحث في i360إ») now opens inside the app, with a close button back to the encyclopedia. Its book results open in the Reader inside the app, and the Reader's close button returns to the results; articles and other outside results open in the phone's browser overlay (2026-10-22)
 

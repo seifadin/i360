@@ -176,18 +176,20 @@
     const catalog = await get(`b/${buildId}/catalog.json`);
     const source = findSource(catalog, link);
     if (!source) return null;
-    const chunks = new Array(source.chunks.length);
+    // Each chunk becomes book text as it arrives, so the work is spread over the download
+    // instead of one long step at the end (the same text as toBookText of all pages).
+    const texts = new Array(source.chunks.length);
     let next = 0, done = 0;
-    if (onProgress) onProgress(0, chunks.length);
-    await Promise.all(Array.from({ length: Math.min(PARALLEL, chunks.length) }, async () => {
-      while (next < chunks.length) {
+    if (onProgress) onProgress(0, texts.length);
+    await Promise.all(Array.from({ length: Math.min(PARALLEL, texts.length) }, async () => {
+      while (next < texts.length) {
         const c = next++;
-        chunks[c] = (await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages;
+        texts[c] = toBookText((await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages);
         done++;
-        if (onProgress) onProgress(done, chunks.length);
+        if (onProgress) onProgress(done, texts.length);
       }
     }));
-    return { source, books: itemBooks(catalog, source), text: toBookText(chunks.flat()) };
+    return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join('\n\n') };
   }
 
   return { LIB, archiveId, findSource, isLibBook, ownBook, toBookText, itemBooks, scanLink, open };

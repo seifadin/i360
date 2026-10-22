@@ -199,6 +199,32 @@
       font-weight: 700;
     }
 
+    /* Progress under the toolbar: downloading a book from lib, then building its pages.
+       Outside the book's own layout, so updating it never moves the pages. */
+    .progress {
+      position: fixed;
+      top: calc(var(--toolbar-h) + env(safe-area-inset-top));
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.2rem calc(0.75rem + env(safe-area-inset-right)) 0 calc(0.75rem + env(safe-area-inset-left));
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--toolbar-border);
+      font-size: 0.8rem;
+      color: var(--text-color);
+      z-index: 98;
+    }
+    body.reading .progress { display: none; }
+    .progress-track { display: block; width: 100%; height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; margin-bottom: 0.15rem; }
+    .progress-fill { display: block; height: 100%; width: 0; background: var(--i360-accent); transition: width 0.2s linear; }
+    .progress.indeterminate .progress-fill { width: 30%; animation: progress-slide 1.2s ease-in-out infinite; }
+    @keyframes progress-slide { from { margin-inline-start: -30%; } to { margin-inline-start: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .progress.indeterminate .progress-fill { animation: none; width: 100%; opacity: 0.4; } }
+
     /* The ⋮ menu: zoom, text size and the view buttons; on narrow screens also search,
        «فتح ملف», the connection icon and, last, the volume menu. */
     .more-menu {
@@ -768,6 +794,13 @@
     </div>
   </header>
 
+  <!-- Progress while a book downloads and while its pages are built: under the toolbar,
+       below the panels and menus, and never in the way of a tap. -->
+  <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden>
+    <span class="progress-text" id="progress-text"></span>
+    <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
+  </div>
+
   <!-- Search -->
   <div class="search-popup" id="search-popup" role="search">
     <div class="search-row">
@@ -869,7 +902,6 @@
       themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
       themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
       scan: 'الصفحة الأصلية: صورة هذه الصفحة على archive.org',
-      libLoading: (done, total) => (total ? `جارٍ تحميل الكتاب من مكتبة i360… ${done}/${total}` : 'جارٍ تحميل الكتاب من مكتبة i360…'),
       bookmarkAdd: 'إضافة علامة لهذه الصفحة',
       bookmarkRemove: 'إزالة علامة هذه الصفحة',
       bookmarkAdded: 'أُضيفت العلامة',
@@ -898,6 +930,9 @@
       wholeWord: 'كلمة كاملة',
       moreResults: (n) => `و${n} نتيجة أخرى`,
       openFile: 'فتح ملف',
+      downloading: 'جارٍ تحميل الكتاب…',
+      building: 'جارٍ عرض الكتاب…',
+      searchWait: 'يُتاح البحث بعد اكتمال عرض الكتاب',
       online: 'متصل بالإنترنت',
       offline: 'غير متصل',
       barTitle: 'القارئ',
@@ -940,7 +975,6 @@
       themeSepia: 'Theme: sepia (click for dark)',
       themeDark: 'Theme: dark (click to follow this device)',
       scan: 'Original page: the scan of this page on archive.org',
-      libLoading: (done, total) => (total ? `Loading the book from the i360 library… ${done}/${total}` : 'Loading the book from the i360 library…'),
       bookmarkAdd: 'Bookmark this page',
       bookmarkRemove: 'Remove this page’s bookmark',
       bookmarkAdded: 'Bookmark added',
@@ -969,6 +1003,9 @@
       wholeWord: 'Whole word',
       moreResults: (n) => `and ${n} more`,
       openFile: 'Open file',
+      downloading: 'Downloading the book…',
+      building: 'Preparing the book…',
+      searchWait: 'Search is available once the book is ready',
       online: 'Online',
       offline: 'Offline',
       barTitle: 'Reader',
@@ -1042,6 +1079,7 @@
     libSource: null,        // the catalog entry when the book is our copy from the lib site
     libBooks: 0,            // how many books its archive.org item holds (for the scan link)
     bookLink: null,         // the book's own address, for the public link (null for a file from the device)
+    built: 0,               // pages whose text is built so far (buildSheets)
     textScale: 1,
     bookKey: null,          // identifies the open book (saved position, bookmarks)
     panelTab: 'contents'
@@ -1104,6 +1142,9 @@
   const statusIcon = $('status-icon');
   const btnOpenFile = $('btn-open-file');
   const tbTitle = $('tb-title');
+  const progressEl = $('progress');
+  const progressText = $('progress-text');
+  const progressFill = $('progress-fill');
   const btnClose = $('btn-close');
   const fileInput = $('file-input');
   const missingPagesBanner = $('missing-pages-banner');
@@ -1270,8 +1311,6 @@
         }).join(tr.listSep));
       } else if (n.type === 'loadError') {
         line.textContent = tr.loadError(n.message);
-      } else if (n.type === 'libLoading') {
-        line.textContent = tr.libLoading(n.done, n.total);
       } else if (n.type === 'readError') {
         line.textContent = tr.readError;
       } else if (n.type === 'notInLibrary') {
@@ -1479,12 +1518,18 @@
     }
   }
 
-  function buildSheet(p, idx) {
-    const tr = t();
+  // An empty page, sized like a printed sheet until fillSheet() gives it its text.
+  function sheetShell(idx) {
     const sheet = document.createElement('article');
     sheet.className = 'page-sheet';
     sheet.id = `page-${idx}`;
     sheet.dataset.idx = String(idx);
+    sheet.dir = state.dir;
+    return sheet;
+  }
+
+  function fillSheet(sheet, p, idx) {
+    const tr = t();
     sheet.dir = state.dir;
 
     const content = document.createElement('div');
@@ -1550,6 +1595,64 @@
     }
     applyNumerals(content);
     return sheet;
+  }
+
+  /* Pages are built a slice at a time (BUILD_SLICE_MS of work, then the page gets a frame),
+     so a book of thousands of pages never blocks the screen: taps, ✕, the back button and
+     scrolling keep working while «جارٍ عرض الكتاب…» counts up. Before 2026-10-22 every
+     page was built in one go — «التفسير الوسيط» held a phone's screen for minutes. All the
+     pages exist from the start as empty sheets (state.sheets is always complete); search
+     waits until every page has its text. A newer book stops an unfinished build. */
+  const BUILD_SLICE_MS = 12;
+  let buildRun = 0;
+
+  function isBuilding() { return state.built < state.sheets.length; }
+
+  async function buildSheets(run, onReady, readyIdx) {
+    let ready = false;
+    while (run === buildRun && state.built < state.sheets.length) {
+      const start = performance.now();
+      do {
+        const i = state.built;
+        fillSheet(state.sheets[i], state.pages[i], i);
+        state.built++;
+      } while (state.built < state.sheets.length && performance.now() - start < BUILD_SLICE_MS);
+      if (!ready && state.built > readyIdx) { ready = true; onReady(); }
+      if (state.built < state.sheets.length) {
+        setProgress('building', state.built, state.sheets.length);
+        await nextFrame();
+      }
+    }
+    if (run !== buildRun) return;
+    if (!ready) onReady();
+    hideProgress();
+    setSearchReady(true);
+    applyBookmarkRibbons();
+    if (sidePanel.classList.contains('open')) renderPanel();
+    if (searchPopup.classList.contains('active') && searchInput.value) rerunSearch();
+  }
+
+  /* The progress bar: phase 'downloading' or 'building'; done/total give the percentage
+     (none known → a moving bar). hideProgress() when the book is ready or closed. */
+  let progressShown = '';
+  function setProgress(phase, done, total) {
+    const pct = total > 0 ? Math.min(100, Math.floor((done / total) * 100)) : null;
+    const key = `${phase}|${pct}|${state.numerals}|${state.dir}`;
+    if (!progressEl.hidden && key === progressShown) return;   // only when the shown value changes
+    progressShown = key;
+    progressEl.hidden = false;
+    progressEl.classList.toggle('indeterminate', pct == null);
+    progressText.textContent = fmtNum(pct == null ? t()[phase] : `${t()[phase]} ${pct}%`);
+    progressFill.style.width = pct == null ? '' : `${pct}%`;
+    if (pct == null) progressEl.removeAttribute('aria-valuenow'); else progressEl.setAttribute('aria-valuenow', String(pct));
+    progressEl.setAttribute('aria-label', t()[phase]);
+  }
+
+  function hideProgress() { progressEl.hidden = true; }
+
+  function setSearchReady(ready) {
+    btnSearchToggle.disabled = !ready;
+    setTitle(btnSearchToggle, ready ? t().search : t().searchWait);
   }
 
 
@@ -1756,12 +1859,20 @@
      Rendering a book
      ================================================================ */
   // key: identifies the book (saved position, bookmarks, links); none = not remembered.
-  function renderDocument(rawText, extraNotices, key) {
+  async function renderDocument(rawText, extraNotices, key) {
+    const run = ++buildRun;     // a newer book stops this one
     saveNow();                  // the book being closed
     clearSearch();
     search.indexes = {};
+    setSearchReady(false);
+    setProgress('building', 0, 0);
+    // The preparation is split by frames too, so even a huge book never holds the screen.
+    await nextFrame();
+    if (run !== buildRun) return;
 
     const parsed = parseBook(rawText);
+    await nextFrame();
+    if (run !== buildRun) return;
     state.format = parsed.format;
     state.pages = parsed.pages;
     state.volumes = [...new Set(parsed.pages.filter((p) => p.vol != null).map((p) => p.vol))];
@@ -1770,16 +1881,19 @@
     state.dir = state.detectedDir;
     state.bookKey = key || null;
     state.notices = (extraNotices || []).concat(state.format === 'plain' ? [] : buildNotices(auditPages(state.pages)));
+    await nextFrame();
+    if (run !== buildRun) return;
 
     applyLocalization();
 
     pagesWrapper.textContent = '';
     const frag = document.createDocumentFragment();
     state.sheets = state.pages.map((p, i) => {
-      const sheet = buildSheet(p, i);
+      const sheet = sheetShell(i);
       frag.appendChild(sheet);
       return sheet;
     });
+    state.built = 0;
     pagesWrapper.appendChild(frag);
     emptyState.classList.toggle('visible', state.sheets.length === 0);
 
@@ -1789,13 +1903,18 @@
     state.currentIdx = -1;
     applyBookmarkRibbons();
     updateCounter(true);
-    if (sidePanel.classList.contains('open')) renderPanel();
-
-    // A link to a page wins over the saved position.
-    const target = isLinkable() ? hashTargetIdx() : -1;
-    if (target >= 0) { scrollToSheet(target); updateCounter(true); }
-    else restorePosition();
     updateScanButton();
+
+    // A link to a page wins over the saved position. Either is applied once the pages up
+    // to it (and the next one) have their text, so later pages only grow below it.
+    const target = isLinkable() ? hashTargetIdx() : -1;
+    const saved = (storeGet('positions', {}) || {})[state.bookKey];
+    const readyIdx = Math.min(state.sheets.length - 1, (target >= 0 ? target : (saved && typeof saved.idx === 'number' ? saved.idx : 0)) + 1);
+    void buildSheets(run, () => {
+      if (target >= 0) { scrollToSheet(target); updateCounter(true); }
+      else void restorePosition();
+      if (sidePanel.classList.contains('open')) renderPanel();
+    }, readyIdx);
   }
 
   /* ================================================================
@@ -1815,6 +1934,10 @@
   });
 
   function renderEmpty(notices) {
+    buildRun++;                 // stops an unfinished build
+    state.built = 0;
+    hideProgress();
+    setSearchReady(true);
     saveNow();
     state.bookKey = null;
     state.libSource = null;
@@ -1875,7 +1998,7 @@
     setTitle(btnReading, tr.reading);
     setTitle(btnExitReading, tr.exitReading);
     setTitle(btnMore, tr.more);
-    setTitle(btnSearchToggle, tr.search);
+    setTitle(btnSearchToggle, btnSearchToggle.disabled ? tr.searchWait : tr.search);
     searchInput.placeholder = tr.searchInput;
     searchInput.setAttribute('aria-label', tr.search);
     setTitle(btnSearchPrev, tr.prevMatch);
@@ -2603,7 +2726,7 @@
 
     if (mod && !e.altKey) {
       const k = e.key.toLowerCase();
-      if (k === 'f' && state.sheets.length > 0) { e.preventDefault(); exitReading(); openSearch(); return; }
+      if (k === 'f' && state.sheets.length > 0 && !isBuilding()) { e.preventDefault(); exitReading(); openSearch(); return; }
       if (k === '=' || k === '+') { e.preventDefault(); setZoom(state.zoom + ZOOM_STEP); return; }
       if (k === '-' || k === '_') { e.preventDefault(); setZoom(state.zoom - ZOOM_STEP); return; }
       if (k === '0') { e.preventDefault(); setZoom(1); return; }
@@ -2713,7 +2836,7 @@
     if (q === search.query) return;
     clearSearch();
     search.query = q;
-    if (q.length < SEARCH_MIN_CHARS || state.sheets.length === 0) return;
+    if (q.length < SEARCH_MIN_CHARS || state.sheets.length === 0 || isBuilding()) return;
 
     const matches = SearchCore.findMatches(getIndex(), q, { word: search.word, max: SEARCH_MAX_MATCHES });
     search.matches = matches;
@@ -2953,6 +3076,7 @@
       const own = LibCopy.ownBook(fileUrl, window.location.href);
       if (own) {
         try {
+          setProgress('downloading', 0, 0);
           const response = await fetch(own);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const text = await response.text();
@@ -2970,7 +3094,7 @@
       // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
       let copy = null;
       try {
-        copy = await LibCopy.open(link, fetch, (done, total) => renderEmpty([{ type: 'libLoading', done, total }]));
+        copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total));
       } catch {
         renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
         void checkConnection();
