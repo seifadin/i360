@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-cV88o1wDe3Zix6mq9gIUhID2/4EMjuqp5EVdZBO3x3k=' 'sha256-Y1H8XamN26OreDUnwGNnf6wZKRVSgCWnm05H6zhfcKo='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-cV88o1wDe3Zix6mq9gIUhID2/4EMjuqp5EVdZBO3x3k=' 'sha256-sHSf9z4OUv61cOwnWrPNzyNcx8zTVUKFIz+BTd383oQ='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -2050,17 +2050,41 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
   const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
 
-  /* Connection icon: green while the device is online, red while it isn't, live. */
+  /* Connection icon: green while the lib site can be reached, red while it can't, live.
+     The browser's own online/offline signal isn't enough: Android's WebView never changes
+     it unless the app declares ACCESS_NETWORK_STATE (seen on a phone, 2026-10-22), and
+     Wi-Fi without internet reads as online. So the page also asks the lib site itself —
+     one small no-cache request for latest.json — when it opens, when it comes back to the
+     front, every 30 s while it's visible, when the browser reports a change, and when a
+     book download fails. The browser saying "offline" is believed at once. */
+  const CONNECTION_CHECK_MS = 30000;
+  const CONNECTION_TIMEOUT_MS = 8000;
+  let online = navigator.onLine !== false;
+  let connectionCheck = null;
+
+  function checkConnection() {
+    if (connectionCheck) return connectionCheck;
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = setTimeout(() => { if (ctl) ctl.abort(); }, CONNECTION_TIMEOUT_MS);
+    connectionCheck = fetch(`${LibCopy.LIB}latest.json`, { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+      .then(() => true, () => false)   // any answer means the network works
+      .then((ok) => { online = ok; })
+      .finally(() => { clearTimeout(timer); connectionCheck = null; updateConnection(); });
+    return connectionCheck;
+  }
+
+  window.addEventListener('online', () => { void checkConnection(); });
+  window.addEventListener('offline', () => { online = false; updateConnection(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) void checkConnection(); });
+  setInterval(() => { if (!document.hidden) void checkConnection(); }, CONNECTION_CHECK_MS);
+
   function updateConnection() {
-    const online = navigator.onLine !== false;
     const label = online ? t().online : t().offline;
     statusIcon.innerHTML = `${online ? ICON.globeCheck : ICON.globeX}<span class="status-text"></span>`;
     statusIcon.lastChild.textContent = label;
     statusIcon.classList.toggle('offline', !online);
     setTitle(statusIcon, label);
   }
-  window.addEventListener('online', updateConnection);
-  window.addEventListener('offline', updateConnection);
 
   /* ================================================================
      Small helpers
@@ -3824,6 +3848,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      it at a page.
      ================================================================ */
   async function initApp() {
+    void checkConnection();
     // In the app, ✕ returns to its home: a step back when opened from it (the history
     // stays home → this page, which the back button and the iOS swipe follow), else home
     // in place of this page. As in Daily Reflection.
@@ -3870,6 +3895,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
           renderDocument(text, null, `url:${own}`);
         } catch (err) {
           renderEmpty([{ type: 'loadError', message: err && err.message ? err.message : String(err) }]);
+          void checkConnection();
         }
         return;
       }
@@ -3882,6 +3908,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
         copy = await LibCopy.open(link, fetch, (done, total) => renderEmpty([{ type: 'libLoading', done, total }]));
       } catch {
         renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
+        void checkConnection();
         return;
       }
       if (!copy) { renderEmpty([{ type: 'notInLibrary' }]); return; }
