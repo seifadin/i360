@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-9DZDWqmykLn21TZNs97tpjZhoqcumHxYRCgvU4xaawY=' 'sha256-F21H5JX7ZB4o29jGvXULtRrRO45bSkTicX9oHBtE56k='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-9DZDWqmykLn21TZNs97tpjZhoqcumHxYRCgvU4xaawY=' 'sha256-+TV3o4AJcMVncPtfUQ6pK0j8hUZI+uWDCJuOTXnEUXE='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -604,27 +604,24 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       font-weight: 700;
     }
 
-    /* Progress under the toolbar: downloading a book from lib, then building its pages.
-       Outside the book's own layout, so updating it never moves the pages. */
+    /* Progress: its own row under the toolbar (the book starts below it), the label and the
+       bar on one line — downloading a book from lib, then building its pages. Two-digit
+       percentages in fixed-width digits, so the label never changes width. */
     .progress {
-      position: fixed;
-      top: calc(var(--toolbar-h) + env(safe-area-inset-top));
-      left: 0;
-      right: 0;
-      pointer-events: none;
+      flex-shrink: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.2rem;
-      padding: 0.2rem calc(0.75rem + env(safe-area-inset-right)) 0 calc(0.75rem + env(safe-area-inset-left));
+      gap: 0.6rem;
+      padding: 0.3rem calc(0.75rem + env(safe-area-inset-right)) 0.3rem calc(0.75rem + env(safe-area-inset-left));
       background: var(--toolbar-bg);
       border-bottom: 1px solid var(--toolbar-border);
       font-size: 0.8rem;
+      line-height: 1.2;
       color: var(--text-color);
-      z-index: 98;
     }
     body.reading .progress { display: none; }
-    .progress-track { display: block; width: 100%; height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; margin-bottom: 0.15rem; }
+    .progress-text { white-space: nowrap; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .progress-track { display: block; flex: 1; min-width: 3rem; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
     .progress-fill { display: block; height: 100%; width: 0; background: var(--i360-accent); transition: width 0.2s linear; }
     .progress.indeterminate .progress-fill { width: 30%; animation: progress-slide 1.2s ease-in-out infinite; }
     @keyframes progress-slide { from { margin-inline-start: -30%; } to { margin-inline-start: 100%; } }
@@ -1199,8 +1196,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     </div>
   </header>
 
-  <!-- Progress while a book downloads and while its pages are built: under the toolbar,
-       below the panels and menus, and never in the way of a tap. -->
+  <!-- Progress while a book downloads and while its pages are built: a row of its own
+       under the toolbar, so it never covers the book. -->
   <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden>
     <span class="progress-text" id="progress-text"></span>
     <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
@@ -1867,8 +1864,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       wholeWord: 'كلمة كاملة',
       moreResults: (n) => `و${n} نتيجة أخرى`,
       openFile: 'فتح ملف',
-      downloading: 'جارٍ تحميل الكتاب…',
-      building: 'جارٍ عرض الكتاب…',
+      downloading: 'جارٍ تحميل',
+      building: 'جارٍ عرض',
       searchWait: 'يُتاح البحث بعد اكتمال عرض الكتاب',
       online: 'متصل بالإنترنت',
       offline: 'غير متصل',
@@ -1940,8 +1937,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       wholeWord: 'Whole word',
       moreResults: (n) => `and ${n} more`,
       openFile: 'Open file',
-      downloading: 'Downloading the book…',
-      building: 'Preparing the book…',
+      downloading: 'Downloading',
+      building: 'Preparing',
       searchWait: 'Search is available once the book is ready',
       online: 'Online',
       offline: 'Offline',
@@ -2456,18 +2453,28 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   }
 
   // An empty page, sized like a printed sheet until fillSheet() gives it its text.
+  // Its page number shows until its text arrives.
   function sheetShell(idx) {
     const sheet = document.createElement('article');
     sheet.className = 'page-sheet';
     sheet.id = `page-${idx}`;
     sheet.dataset.idx = String(idx);
     sheet.dir = state.dir;
+    sheet.appendChild(pageFooter(state.pages[idx]));
     return sheet;
+  }
+
+  function pageFooter(p) {
+    const footer = document.createElement('footer');
+    footer.className = 'page-number-footer';
+    if (state.format !== 'plain' && p.kind !== 'front') footer.textContent = pageLabelText(p, t());
+    return footer;
   }
 
   function fillSheet(sheet, p, idx) {
     const tr = t();
     sheet.dir = state.dir;
+    sheet.textContent = '';
 
     const content = document.createElement('div');
     content.className = 'page-content';
@@ -2536,27 +2543,93 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   /* Pages are built a slice at a time (BUILD_SLICE_MS of work, then the page gets a frame),
      so a book of thousands of pages never blocks the screen: taps, ✕, the back button and
-     scrolling keep working while «جارٍ عرض الكتاب…» counts up. Before 2026-10-22 every
-     page was built in one go — «التفسير الوسيط» held a phone's screen for minutes. All the
-     pages exist from the start as empty sheets (state.sheets is always complete); search
-     waits until every page has its text. A newer book stops an unfinished build. */
+     scrolling keep working while «جارٍ عرض ٤٢٪» counts up. Before 2026-10-22 every page
+     was built in one go — «التفسير الوسيط» held a phone's screen for minutes. All the pages
+     exist from the start as empty sheets showing their page number (state.sheets is always
+     complete); the landing page is built first, then outward from it, and whatever is on
+     screen jumps the queue. Search waits until every page has its text. A newer book stops
+     an unfinished build. */
   const BUILD_SLICE_MS = 12;
   let buildRun = 0;
 
   function isBuilding() { return state.built < state.sheets.length; }
 
-  async function buildSheets(run, onReady, readyIdx) {
-    let ready = false;
-    while (run === buildRun && state.built < state.sheets.length) {
+  // Build order: the page the reader lands on first, then outward in blocks of 10 — the 10
+  // before it (nearest first) and the 10 after it, then the next 10 on each side — until the
+  // whole book is built; readers usually move a little up or down first (Seif 2026-10-22).
+  const BUILD_BLOCK = 10;
+  function buildOrder(n, c) {
+    const order = [c];
+    let up = c - 1, down = c + 1;
+    while (up >= 0 || down < n) {
+      for (let k = 0; k < BUILD_BLOCK && up >= 0; k++) order.push(up--);
+      for (let k = 0; k < BUILD_BLOCK && down < n; k++) order.push(down++);
+    }
+    return order;
+  }
+
+  // The sheet at the top of the view (binary search: sheets are in page order).
+  function sheetAtTop() {
+    const sheets = state.sheets, top = viewerContainer.getBoundingClientRect().top;
+    let lo = 0, hi = sheets.length - 1, ans = 0;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (sheets[mid].getBoundingClientRect().bottom > top) { ans = mid; hi = mid - 1; } else lo = mid + 1;
+    }
+    return ans;
+  }
+
+  function sheetAtBottom() {
+    const sheets = state.sheets, bottom = viewerContainer.getBoundingClientRect().bottom;
+    let lo = 0, hi = sheets.length - 1, ans = 0;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (sheets[mid].getBoundingClientRect().top < bottom) { ans = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    return ans;
+  }
+
+  // Pages filling in above the view change their height; the view is put back on the same
+  // spot of the same page (the browser's own scroll anchoring isn't in every WebView).
+  function viewAnchor() {
+    const idx = sheetAtTop();
+    return { idx, offset: state.sheets[idx].getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top };
+  }
+
+  function keepAnchor(a) {
+    const now = state.sheets[a.idx].getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top;
+    const delta = now - a.offset;
+    if (Math.abs(delta) > 0.5) viewerContainer.scrollTop += delta;
+  }
+
+  async function buildSheets(run, onReady, center) {
+    const n = state.sheets.length;
+    const filled = new Uint8Array(n);
+    const order = buildOrder(n, Math.max(0, Math.min(n - 1, center)));
+    const fill = (i) => {
+      if (filled[i]) return;
+      filled[i] = 1;
+      fillSheet(state.sheets[i], state.pages[i], i);
+      state.built++;
+    };
+    let k = 0, ready = false;
+    while (run === buildRun && state.built < n) {
+      const anchor = ready ? viewAnchor() : null;
       const start = performance.now();
-      do {
-        const i = state.built;
-        fillSheet(state.sheets[i], state.pages[i], i);
-        state.built++;
-      } while (state.built < state.sheets.length && performance.now() - start < BUILD_SLICE_MS);
-      if (!ready && state.built > readyIdx) { ready = true; onReady(); }
-      if (state.built < state.sheets.length) {
-        setProgress('building', state.built, state.sheets.length);
+      // What's on screen comes first: its empty pages and one either side.
+      if (ready) {
+        const from = Math.max(0, anchor.idx - 1), to = Math.min(n - 1, sheetAtBottom() + 1);
+        for (let i = from; i <= to; i++) fill(i);
+      }
+      while (state.built < n && performance.now() - start < BUILD_SLICE_MS) {
+        while (k < n && filled[order[k]]) k++;
+        if (k >= n) break;
+        fill(order[k++]);
+      }
+      if (!ready) { ready = true; onReady(); }   // the landing page has its text: go there
+      else keepAnchor(anchor);
+      if (state.built < n) {
+        setProgress('building', state.built, n);
         await nextFrame();
       }
     }
@@ -2573,13 +2646,15 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      (none known → a moving bar). hideProgress() when the book is ready or closed. */
   let progressShown = '';
   function setProgress(phase, done, total) {
-    const pct = total > 0 ? Math.min(100, Math.floor((done / total) * 100)) : null;
+    // 00–99: the row is gone at 100.
+    const pct = total > 0 ? Math.min(99, Math.floor((done / total) * 100)) : null;
     const key = `${phase}|${pct}|${state.numerals}|${state.dir}`;
     if (!progressEl.hidden && key === progressShown) return;   // only when the shown value changes
     progressShown = key;
     progressEl.hidden = false;
     progressEl.classList.toggle('indeterminate', pct == null);
-    progressText.textContent = fmtNum(pct == null ? t()[phase] : `${t()[phase]} ${pct}%`);
+    const sign = state.numerals === 'western' ? '%' : '٪';
+    progressText.textContent = fmtNum(pct == null ? t()[phase] : `${t()[phase]} ${String(pct).padStart(2, '0')}${sign}`);
     progressFill.style.width = pct == null ? '' : `${pct}%`;
     if (pct == null) progressEl.removeAttribute('aria-valuenow'); else progressEl.setAttribute('aria-valuenow', String(pct));
     progressEl.setAttribute('aria-label', t()[phase]);
@@ -2842,16 +2917,16 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     updateCounter(true);
     updateScanButton();
 
-    // A link to a page wins over the saved position. Either is applied once the pages up
-    // to it (and the next one) have their text, so later pages only grow below it.
+    // A link to a page wins over the saved position. That page is built first and gone to at
+    // once; the rest is built outward from it (buildOrder).
     const target = isLinkable() ? hashTargetIdx() : -1;
     const saved = (storeGet('positions', {}) || {})[state.bookKey];
-    const readyIdx = Math.min(state.sheets.length - 1, (target >= 0 ? target : (saved && typeof saved.idx === 'number' ? saved.idx : 0)) + 1);
+    const center = target >= 0 ? target : (saved && typeof saved.idx === 'number' && saved.idx < state.sheets.length ? saved.idx : 0);
     void buildSheets(run, () => {
       if (target >= 0) { scrollToSheet(target); updateCounter(true); }
       else void restorePosition();
       if (sidePanel.classList.contains('open')) renderPanel();
-    }, readyIdx);
+    }, center);
   }
 
   /* ================================================================
