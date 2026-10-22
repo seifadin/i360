@@ -7,15 +7,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Swipe from the screen's edge to go back (and forward) inside the app — e.g. from Daily
-        // Reflection to the home screen; iPhones have no back button (2026-10-22, release 0.14.0).
-        // Off by default in WKWebView and Capacitor; set once the storyboard's bridge view exists.
-        DispatchQueue.main.async {
-            if let bridge = self.window?.rootViewController as? CAPBridgeViewController {
-                bridge.loadViewIfNeeded()
-                bridge.webView?.allowsBackForwardNavigationGestures = true
-            }
-        }
         return true
     }
 
@@ -54,4 +45,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
+    // UIScene life cycle (required when building with Xcode 27; Capacitor 8.5, 2026-10-22):
+    // every window scene uses SceneDelegate.
+    func application(_ application: UIApplication,
+                     configurationForConnecting connectingSceneSession: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let config = UISceneConfiguration(name: "Default Configuration",
+                                          sessionRole: connectingSceneSession.role)
+        config.delegateClass = SceneDelegate.self
+        return config
+    }
 }
