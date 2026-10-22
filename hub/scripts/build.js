@@ -1,8 +1,8 @@
-// Builds the self-contained pages:
-//   public-hub/index.html      the hub's landing page (from src/hub.src.html)
-//   public-hub/md/index.html   the Reader    (from src/reader.src.html; also ../public/md/ for the app)
-//   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html; also ../public/cse/ for the app)
-//   public-hub/day/index.html  Daily Reflection (from src/day.html; also ../public/day/ for the app)
+// Builds the self-contained pages into the i360إ app (i360-hub.md §10), served by the app,
+// i360-e.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
+//   ../public/md/index.html    the Reader    (from src/reader.src.html)
+//   ../public/cse/index.html   the i360 CSE  (from src/cse.src.html)
+//   ../public/day/index.html   Daily Reflection (from src/day.html)
 //
 //   npm run build
 //
@@ -110,16 +110,6 @@ function buildPage({ src, out, scripts, connectSrc, fills = [] }) {
 
 const file = (p, name) => ({ code: read(join(root, p)), name: name || p.split('/').pop() });
 
-// A page inside the i360إ app (i360-hub.md §10): the same build in the app's public/<page>/,
-// so the app, i360-e.web.app/<page>/ and the hub serve one page. Until the hub becomes a
-// forwarder (sprint 7).
-function appCopy(page) {
-  const out = join(root, '..', 'public', page, 'index.html');
-  mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, read(join(root, `public-hub/${page}/index.html`)));
-  console.log(`public/${page}/index.html (the app): the same page`);
-}
-
 // marked's package exports don't list this file, so it's read by path.
 const marked = {
   code: read(join(root, 'node_modules/marked/lib/marked.umd.js')).replace('//# sourceMappingURL=marked.umd.js.map', '').trim(),
@@ -130,7 +120,7 @@ const marked = {
 // in the CSE's catalog (sprint 5; ?file= accepts nothing else).
 buildPage({
   src: 'src/reader.src.html',
-  out: 'public-hub/md/index.html',
+  out: '../public/md/index.html',
   scripts: [
     ['/*@@MARKED@@*/', marked],
     ['/*@@BOOK_FORMAT@@*/', file('src/book-format.js')],
@@ -139,13 +129,12 @@ buildPage({
   ],
   connectSrc: 'https://lib.i36o.workers.dev'
 });
-appCopy('md');
 
 // The CSE page: reads only the lib site (and, for testing on this computer,
 // a local copy of the build: ?data=http://localhost:…).
 buildPage({
   src: 'src/cse.src.html',
-  out: 'public-hub/cse/index.html',
+  out: '../public/cse/index.html',
   scripts: [
     ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')],
     ['/*@@CSE_INDEX@@*/', file('src/cse-index.js')],
@@ -153,10 +142,6 @@ buildPage({
   ],
   connectSrc: 'https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*'
 });
-appCopy('cse');
-
-// The hub's landing page: links to the three apps and the theme button.
-buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
 
 // Daily Reflection («التأمل اليومي», at /day/): its Tailwind CSS (built here from src/day.tailwind.js:
 // only the classes the page uses), the shared Hijri files, Adhan (prayer times on the device) and the
@@ -179,7 +164,7 @@ buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], 
   const cities = { code: `window.DAY_CITIES = ${JSON.stringify({ zones, aliases: table.aliases })};`, name: 'src/day-cities.json' };
   buildPage({
     src: 'src/day.html',
-    out: 'public-hub/day/index.html',
+    out: '../public/day/index.html',
     fills: [['/*@@TAILWIND@@*/', tailwind.trim()]],
     scripts: [
       ['/*@@HIJRI_CALC@@*/', file('hijri/calc.js')],
@@ -189,5 +174,4 @@ buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], 
     ],
     connectSrc: 'https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev'
   });
-  appCopy('day');   // inside the i360إ app since sprint 4b
 }

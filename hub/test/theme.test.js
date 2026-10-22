@@ -124,6 +124,6 @@ test('numerals: any digits to 0123, ٠١٢٣ or ۰۱۲۳; the cycle order; the b
   m.cycleNumerals(); m.cycleNumerals(); m.cycleNumerals();
   assert.deepEqual(seen, ['arabic', 'persian', 'western']);
   assert.equal(store['i360.numerals'], 'western');
-  const built = fs.readFileSync(path.join(__dirname, '..', 'public-hub', 'md', 'index.html'), 'utf8');
+  const built = fs.readFileSync(path.join(__dirname, '..', '..', 'public', 'md', 'index.html'), 'utf8');
   for (const k of ['getNumerals', 'setNumerals', 'cycleNumerals', 'onNumeralsChange', 'toNumerals']) assert.ok(built.includes(k), k);
 });

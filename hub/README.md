@@ -1,43 +1,40 @@
-# i360-hub — the i360 side tools in one site
+# hub — the i360 side tools, built into the i360إ app
 
-Firebase project ID **`i360-md`** (display name `i360-hub`), separate from the i360إ app
-(project `i360-e`), so its traffic, storage and deploys can never affect `https://i360-e.web.app/`.
+The Reader, the i360 CSE and Daily Reflection are built here into the app's `public/`
+(`../public/md/`, `../public/cse/`, `../public/day/`) and served with the app: inside it, at
+`https://i360-e.web.app/md|cse|day/` and in its OTA bundle (merge into the app, claude/i360-hub.md §10).
 
-## Sites (Hosting targets)
-| Target | Site | Role |
+## Forwarding sites (Firebase project `i360-md`, display name `i360-hub`)
+Since merge sprint 7 every site here only forwards (301, path and `?…` kept):
+| Target | Site | Forwards to |
 |---|---|---|
-| `hub` | https://i360-hub.web.app/ | the apps (folder `public-hub/`) |
-| `md`  | https://i360-md.web.app/  | forwards to `/md/` (path and `?…` kept) |
-| `cse` | https://i360-cse.web.app/ | forwards to `/cse/` |
-| `day` | https://i360-day.web.app/ | forwards to `/day/` |
+| `hub` | https://i360-hub.web.app/ | `https://i360-e.web.app/<same path>`; `/md/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+| `md`  | https://i360-md.web.app/  | `https://i360-e.web.app/md/…`; `/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+| `cse` | https://i360-cse.web.app/ | `https://i360-e.web.app/cse/…` |
+| `day` | https://i360-day.web.app/ | `https://i360-e.web.app/day/…` |
 
-The apps share one site so they share saved settings: the theme and the numerals (0123 · ٠١٢٣ · ۰۱۲۳).
+`forward/404.html` is their fallback. They rarely change: `firebase deploy --only hosting` (here, in `hub/`).
 
 ## Layout
 ```
-public-hub/index.html      landing page          (built from src/hub.src.html)
-public-hub/md/index.html   the Reader            (built from src/reader.src.html)
-public-hub/md/books/*.md   books exported by the i360 OCR Engine
-public-hub/cse/index.html  the i360 CSE          (built from src/cse.src.html)
-public-hub/day/index.html  Daily Reflection «التأمل اليومي» (built from src/day.html)
-public-hub/robots.txt
-forward/404.html           fallback for the forwarding sites
+src/reader.src.html   the Reader        → ../public/md/index.html
+src/cse.src.html      the i360 CSE      → ../public/cse/index.html
+src/day.html          Daily Reflection «التأمل اليومي» → ../public/day/index.html
+library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
+forward/404.html      fallback for the forwarding sites
 ```
-Link to a book: `https://i360-hub.web.app/md/?file=books/NAME.md`
+Link to a book: `https://i360-e.web.app/md/?file=books/NAME.md`
 Link to a page: add `#p=45` (or `#p=2:45` for volume 2, page 45).
 
-## Build and deploy
+## Build
 ```
 npm test && npm run build
-firebase deploy --only hosting:hub
 ```
-The forwarders rarely change: `firebase deploy --only hosting:md,hosting:cse,hosting:day`.
-Always name the target(s).
+Then commit the app's `public/md|cse|day/index.html`; they reach users with the app's web + OTA release.
 
-Never edit the built pages in `public-hub/` by hand: edit `src/`, then build. The pages'
+Never edit the built pages in `../public/` by hand: edit `src/`, then build. The pages'
 security policy allows only the exact scripts they were built with, so a hand edit makes
-the browser block them. (Daily Reflection loads Tailwind and FontAwesome from their sites, so it has
-no hash-based policy; the build only fills in the shared theme. Edit `src/day.html`.)
+the browser block them.
 
 ## Shared theme (theme.i36o.workers.dev)
 The colours and fonts of every i360 app, from one place (`theme/`):
@@ -51,7 +48,7 @@ theme/fallbacks.js           plain colours for color-mix values; each page's bui
 theme/fonts.js, woff2.js     font check and update (from the @fontsource npm packages)
 theme/wrangler.jsonc         the theme Worker (files only)
 ```
-- **The hub's pages** (landing page, Daily Reflection, Reader, CSE) build in the built-in colours, `early.js`
+- **The pages** (Daily Reflection, Reader, CSE) build in the built-in colours, `early.js`
   and the loader (`window.i360Theme`), so the theme button also works offline. New colours
   and fonts on the theme site reach them without a rebuild; a change to the loader needs one.
   One theme choice is shared by all of them.

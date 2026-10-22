@@ -13,3 +13,13 @@ i360إ aggregates content from a curated resource database, web search, and the 
 ## Content areas
 
 The app organizes resources across Islamic science disciplines including the Qur'an and its exegesis (Tafsir), Hadith, Aqeedah (creed), Fiqh (jurisprudence), Tazkiyah (spiritual purification), Fatawa (religious rulings), acts of worship, and language and culture resources, alongside tools such as a virtual Arabic keyboard and Qur'an chapter/verse search.
+
+## Tools inside the app
+
+- [Book search (i360 CSE)](https://i360-e.web.app/cse/): full-text search over the books and pages linked in the app's resource database, grouped by discipline; Arabic. Result pages (`/cse/?q=…`) are not meant for indexing.
+- [Markdown Reader](https://i360-e.web.app/md/): reads the i360 library's books page by page, opened from search results or from the library (`/md/?file=<book link>#p=<page>`).
+- [Daily Reflection](https://i360-e.web.app/day/): a daily Qur'an verse and hadith with the Hijri date and prayer times, in five languages.
+
+## Data
+
+- [i360 library](https://lib.i36o.workers.dev/latest.json): the search data, public static files. `latest.json` names the current build; `b/<buildId>/catalog.json` lists every indexed source (original link, type, page ranges); `b/<buildId>/text/` holds the page text; `books/` holds the library's own books (Markdown).

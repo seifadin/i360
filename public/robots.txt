@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+# The book search page is for search engines; its result pages (?q=…) are not.
+Disallow: /cse/*?
