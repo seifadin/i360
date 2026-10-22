@@ -1652,8 +1652,12 @@
     return ans;
   }
 
-  // Pages filling in above the view change their height; the view is put back on the same
-  // spot of the same page (the browser's own scroll anchoring isn't in every WebView).
+  // Pages filling in above the view change their height; the view must stay on the same spot
+  // of the same page. Chrome and Android's WebView do that themselves (scroll anchoring); in
+  // the others (Safari / iPhone) the page puts it back after each slice — which costs a full
+  // layout of the book every frame, so it is used only where needed.
+  const NATIVE_ANCHOR = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('overflow-anchor', 'auto');
+
   function viewAnchor() {
     const idx = sheetAtTop();
     return { idx, offset: state.sheets[idx].getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top };
@@ -1664,6 +1668,19 @@
     const delta = now - a.offset;
     if (Math.abs(delta) > 0.5) viewerContainer.scrollTop += delta;
   }
+
+  // Taps come first: building pauses while a finger (or mouse button) is down and for
+  // INPUT_PAUSE_MS after it lifts or a key is pressed, so a tap never waits behind it — while
+  // building, a tap on the toolbar could go unanswered on a phone (2026-10-22). Scrolling is
+  // the phone's own work and doesn't pause anything.
+  const INPUT_PAUSE_MS = 400;
+  let inputPauseUntil = 0;
+  let pointerIsDown = false;
+  const pauseForInput = () => { inputPauseUntil = performance.now() + INPUT_PAUSE_MS; };
+  for (const ev of ['pointerdown', 'touchstart']) document.addEventListener(ev, () => { pointerIsDown = true; pauseForInput(); }, { capture: true, passive: true });
+  for (const ev of ['pointerup', 'pointercancel', 'touchend', 'touchcancel']) document.addEventListener(ev, () => { pointerIsDown = false; pauseForInput(); }, { capture: true, passive: true });
+  document.addEventListener('keydown', pauseForInput, { capture: true, passive: true });
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   async function buildSheets(run, onReady, center) {
     const n = state.sheets.length;
@@ -1677,11 +1694,13 @@
     };
     let k = 0, ready = false;
     while (run === buildRun && state.built < n) {
-      const anchor = ready ? viewAnchor() : null;
+      if (ready && (pointerIsDown || performance.now() < inputPauseUntil)) { await sleep(50); continue; }
+      const top = ready ? sheetAtTop() : 0;
+      const anchor = ready && !NATIVE_ANCHOR ? viewAnchor() : null;
       const start = performance.now();
       // What's on screen comes first: its empty pages and one either side.
       if (ready) {
-        const from = Math.max(0, anchor.idx - 1), to = Math.min(n - 1, sheetAtBottom() + 1);
+        const from = Math.max(0, top - 1), to = Math.min(n - 1, sheetAtBottom() + 1);
         for (let i = from; i <= to; i++) fill(i);
       }
       while (state.built < n && performance.now() - start < BUILD_SLICE_MS) {
@@ -1690,10 +1709,11 @@
         fill(order[k++]);
       }
       if (!ready) { ready = true; onReady(); }   // the landing page has its text: go there
-      else keepAnchor(anchor);
+      else if (anchor) keepAnchor(anchor);
       if (state.built < n) {
         setProgress('building', state.built, n);
         await nextFrame();
+        await nextFrame();      // one frame left free, so input always finds a quiet moment
       }
     }
     if (run !== buildRun) return;
