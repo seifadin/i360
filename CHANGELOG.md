@@ -18,6 +18,7 @@ First store release since 0.13.2. It also brings to the stores everything that h
 - A numerals choice beside it — Western 456, Arabic-Indic ٤٥٦ or Persian/Urdu ۴۵۶ — applied to every number the app shows, including version numbers, which use the Arabic separator «٫» so the eastern zero isn't mistaken for a dot (2026-10-21)
 
 ### Changed
+- iPhone: the app now starts up the way Apple's newest iOS tools require (the scene life cycle); without it, apps built with them close at launch (2026-10-22)
 - Daily Reflection calculates prayer times on the device: your location is no longer sent anywhere. The city comes from the device's time zone, or can be picked by name; only a typed city name goes to the place search (2026-10-22)
 - The search box recognises a chapter.verse typed in any of the three digit sets, with "." or «٫» (2026-10-21)
 - The dividers in the science list now follow the chosen theme and are lightly visible (2026-10-21)
