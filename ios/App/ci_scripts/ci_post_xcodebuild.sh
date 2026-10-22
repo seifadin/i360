@@ -35,7 +35,9 @@ fi
 # environment every build, unlike the Mac VM where this was a one-time
 # npm install -g. Needed here, not in ci_post_clone.sh, since nothing
 # before this point actually uses it.
-npm install -g @otakit/cli
+# Pinned (2026-10-22) to the version the Codespace releases with — never "latest",
+# which changes under us; raise it deliberately, in both places (pre-push-hook.sh).
+npm install -g @otakit/cli@1.4.0
 
 # CWD is this script's own directory — cd to repo root, same reasoning
 # as ci_post_clone.sh. dist/ should still be exactly what ci_post_clone.sh

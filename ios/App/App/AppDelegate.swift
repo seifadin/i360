@@ -7,7 +7,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Swipe from the screen's edge to go back (and forward) inside the app — e.g. from Daily
+        // Reflection to the home screen; iPhones have no back button (2026-10-22, release 0.14.0).
+        // Off by default in WKWebView and Capacitor; set once the storyboard's bridge view exists.
+        DispatchQueue.main.async {
+            if let bridge = self.window?.rootViewController as? CAPBridgeViewController {
+                bridge.loadViewIfNeeded()
+                bridge.webView?.allowsBackForwardNavigationGestures = true
+            }
+        }
         return true
     }
 

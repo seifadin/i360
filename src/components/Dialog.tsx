@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useId, useRef } from 'react'
+import { closeOnBack } from '@/lib/backButton'
 
 interface DialogProps {
   open: boolean
@@ -69,6 +70,9 @@ export default function Dialog({ open, title, message, onClose, secondaryAction,
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [open, onClose, secondaryAction, emphasizeSecondary])
+
+  // Android's back button closes an open dialog first (lib/backButton.ts), like Escape.
+  useEffect(() => (open ? closeOnBack(onClose) : undefined), [open, onClose])
 
   if (!open) return null
 

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-kA02poLqHwME5FSUPCejRA6636abL57/UiwbWkZjWik='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-X1siFJxVZUuJJ7uke1x+f2/1ItaI023zS0a5CbFzMpw='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
@@ -1323,7 +1323,14 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
                     x.classList.remove('hidden'); x.classList.add('flex');
-                    x.addEventListener('click', () => { window.location.assign('/index.html'); });
+                    x.addEventListener('click', () => {
+                        // Opened from the app's home (the usual way): step back, so the history stays
+                        // home → this page — iOS's edge swipe and Android's back button follow it too.
+                        // Otherwise (opened directly): load home in place of this page.
+                        let fromApp = false;
+                        try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) { /* no referrer */ }
+                        if (fromApp) history.back(); else window.location.replace('/index.html');
+                    });
                 }
                 document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
                 i360Theme.onChange(() => this.theme());

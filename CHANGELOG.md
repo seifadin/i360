@@ -6,11 +6,13 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 
 ---
 
-## [Unreleased] — live on the web and over the air (still version 0.13.2)
+## [0.14.0] — 2026-10-22
 
-Changes released after 0.13.2 without a version bump: over the air to the installed apps and on the web app. They move under the next version number at its release.
+First store release since 0.13.2. It also brings to the stores everything that had reached installed apps over the air since 0.13.2.
 
 ### Added
+- Android's back button: closes an open dialog first; on the home screen it then sends the app to the background, and inside the Daily Reflection it returns to the encyclopedia (2026-10-22)
+- iPhone: swiping from the screen's edge goes back inside the app — from the Daily Reflection to the encyclopedia (2026-10-22)
 - The Daily Reflection («التأمل اليومي») now opens inside the app instead of the browser, with a close button back to the encyclopedia (2026-10-22)
 - A theme choice in the bottom bar — follow the device, light, sepia or dark — shared with the Daily Reflection, the Markdown Reader and the i360 CSE; the chosen theme appears instantly at start, with no flash of the light one (2026-10-21)
 - A numerals choice beside it — Western 456, Arabic-Indic ٤٥٦ or Persian/Urdu ۴۵۶ — applied to every number the app shows, including version numbers, which use the Arabic separator «٫» so the eastern zero isn't mistaken for a dot (2026-10-21)
@@ -27,11 +29,13 @@ Changes released after 0.13.2 without a version bump: over the air to the instal
 - New app icons for browsers and home screens: a sharper browser-tab icon, a dedicated icon for Android's shaped (round/squircle) launchers, and an opaque iPhone home-screen icon (2026-10-03)
 
 ### Fixed
+- On Android, applying or rolling back an over-the-air update no longer reloads the app twice (update component 2.3.3) (2026-10-22)
 - Searching again for the same term after closing its results works again; only accidental double-taps are ignored (2026-10-16)
 - A failed data load could mark the app's content as up to date, so the next successful start skipped the download it actually needed; the app now records that only after the download succeeds (2026-10-03)
 - Problem reports keep the actual reason a data load failed across automatic retries, and a report is now copied before anything else happens, as iPhone's browser requires (2026-10-03)
 
 ### Security
+- The app's native layer updated to Capacitor 8.5.3, which blocks remote content from being loaded at the app's own address (a critical advisory) (2026-10-22)
 - Pages opened in a new tab can no longer reach back into the app's own page (2026-10-03)
 - The web app now sends standard browser security headers (no content-type guessing, no embedding in other sites' frames, limited referrer information) (2026-10-03, live 2026-10-18)
 - Only the app's own scripts can run on its page, on the web and in the installed apps alike (a Content Security Policy) (2026-10-21)

@@ -21,7 +21,11 @@ export default tseslint.config(
     },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // The two classic hooks rules — what eslint-plugin-react-hooks 5 recommended. Version 7's
+      // recommended set adds React Compiler rules (we don't use the compiler); adopting them
+      // means code changes, so it is a separate decision (2026-10-22).
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       // The two providers also export their hooks; fast refresh falls back to
       // a full reload for those two files only, which is acceptable.
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true, allowExportNames: ['useAppState', 'useDataCache'] }],

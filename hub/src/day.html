@@ -786,7 +786,14 @@
                 if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
                     x.classList.remove('hidden'); x.classList.add('flex');
-                    x.addEventListener('click', () => { window.location.assign('/index.html'); });
+                    x.addEventListener('click', () => {
+                        // Opened from the app's home (the usual way): step back, so the history stays
+                        // home → this page — iOS's edge swipe and Android's back button follow it too.
+                        // Otherwise (opened directly): load home in place of this page.
+                        let fromApp = false;
+                        try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) { /* no referrer */ }
+                        if (fromApp) history.back(); else window.location.replace('/index.html');
+                    });
                 }
                 document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
                 i360Theme.onChange(() => this.theme());

@@ -501,7 +501,7 @@ if [ "$IS_NATIVE" = true ] || [ "$OTA_RELEVANT" = true ]; then
   fi
   if ! command -v otakit &> /dev/null; then
     echo "  (otakit CLI not found, installing...)"
-    npm install -g @otakit/cli
+    npm install -g @otakit/cli@1.4.0   # pinned (2026-10-22): the version every release so far used; change it deliberately
   fi
 fi
 
