@@ -220,7 +220,9 @@ async function fetchFollow(fetchFn, step, url, opts) {
 
 // Headers only. Some servers refuse HEAD: fall back to fetching one byte.
 async function probeHeaders(fetchFn, step, url) {
-  const origin = { Origin: 'https://i360-hub.web.app' };
+  // As a page on the app's site would ask (i360-hub.md §10). Informational: since merge
+  // sprint 5 the Reader and the CSE read only the lib site, never a source directly.
+  const origin = { Origin: 'https://i360-e.web.app' };
   let { res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'HEAD', headers: origin });
   if (res.status === 405 || res.status === 501) {
     ({ res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'GET', headers: { ...origin, Range: 'bytes=0-0' } }));

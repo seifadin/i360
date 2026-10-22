@@ -10,7 +10,10 @@
   'use strict';
 
   const LIB_HOST = 'lib.i36o.workers.dev';
-  const READER = 'https://i360-hub.web.app/md/';
+  // The Reader on the same site as this page (the hub, i360-e.web.app or the app's own copy).
+  // Always /md/index.html: inside the app, Capacitor's server answers /md/ with the app's
+  // home page (i360-hub.md §10).
+  const READER = '/md/index.html';
   const RESULTS_PER_STEP = 20;
 
   /* ---------------- Sources ---------------- */
@@ -139,10 +142,12 @@
 
   /* ---------------- Address ----------------
      ?q=…&exact=1&word=1 — a search that can be shared. ?data=… (another
-     data address) is honoured only when the page runs on this computer. */
-  function readAddress(search, hostname) {
+     data address) is honoured only when the page runs on this computer over
+     plain http (a test server) — not inside the app, whose own address is
+     https://localhost on Android. */
+  function readAddress(search, hostname, protocol) {
     const p = new URLSearchParams(search);
-    const local = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+    const local = protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]');
     let data = null;
     if (local && p.get('data')) {
       try {

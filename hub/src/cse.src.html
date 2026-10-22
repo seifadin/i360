@@ -77,7 +77,9 @@
       border-bottom: 1px solid var(--toolbar-border);
       min-height: 3rem;
       padding-top: env(safe-area-inset-top);
-      padding-inline: 0.75rem;
+      /* iPhone: clear of the rounded corners and the notch in landscape (viewport-fit=cover) */
+      padding-left: calc(0.75rem + env(safe-area-inset-left));
+      padding-right: calc(0.75rem + env(safe-area-inset-right));
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -244,13 +246,13 @@
     <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
          the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
          mark before the إ keeps it there with Eastern digits ("i٣٦٠إ"). -->
-    <!-- In Arabic from the right: theme · numerals … title (i360-hub.md §10 "Toolbars"; the ✕ joins at the
-         far left once the CSE is inside the app, sprint 6). -->
+    <!-- In Arabic from the right: theme · numerals … title · ✕ (i360-hub.md §10 "Toolbars"; ✕ only inside the app). -->
     <div class="tb-end">
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
       <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
     </div>
     <div class="brand">البحث في <bdi dir="ltr">i360&lrm;إ</bdi></div>
+    <button class="toolbar-btn" id="btn-close" type="button" aria-label="إغلاق" title="إغلاق" hidden><svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
   </header>
 
   <div class="scroller" id="scroller" tabindex="-1">
@@ -287,6 +289,9 @@
     const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
     const STORE_PREFIX = 'i360cse.';
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
+
+    // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
+    const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
 
     const $ = (id) => document.getElementById(id);
     const form = $('search-form'), input = $('q');
@@ -443,7 +448,14 @@
       const s = CseView.writeAddress({ q, exact: state.exact, word: state.word, data: state.dataBase === DEFAULT_DATA ? null : state.dataBase });
       const url = window.location.pathname + s;
       if (url === window.location.pathname + window.location.search) return;
-      if (push) history.pushState(null, '', url); else history.replaceState(null, '', url);
+      // Each entry carries how many searches deep it is in this page, so ✕ can step back
+      // past all of them at once (stepsIn()).
+      if (push) history.pushState({ i360cse: stepsIn() + 1 }, '', url); else history.replaceState(history.state, '', url);
+    }
+
+    function stepsIn() {
+      const s = history.state;
+      return s && typeof s.i360cse === 'number' && s.i360cse > 0 ? s.i360cse : 0;
     }
 
     // Result pages aren't for search engines; the home page is.
@@ -704,16 +716,36 @@
       return block;
     }
 
+    // The phone's browser overlay (Custom Tabs / Safari sheet) through the app's Browser plugin,
+    // called over Capacitor's bridge (this page doesn't bundle the plugin's JavaScript). If
+    // that fails, an ordinary navigation: Capacitor hands an outside address to the phone's
+    // browser app.
+    function openOutside(e) {
+      e.preventDefault();
+      const url = e.currentTarget.href;
+      Promise.resolve()
+        .then(() => window.Capacitor.nativePromise('Browser', 'open', { url }))
+        .catch(() => { window.location.href = url; });
+    }
+
     function addHit(ctx, g, hit) {
       g.shown++;
       const block = sourceBlock(ctx, g, hit.source);
       const sn = hit.snippets[0];
       const a = document.createElement('a');
       a.className = 'hit';
-      a.href = CseView.resultLink(hit, ctx.q, sn ? sn.hit : '');
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.title = a.href.startsWith(CseView.READER) ? T.openReader : T.openTitle;
+      const link = CseView.resultLink(hit, ctx.q, sn ? sn.hit : '');
+      const toReader = link.startsWith(CseView.READER);
+      a.href = link;
+      if (IN_APP) {
+        // Inside the app: the Reader in this same view (its ✕ and the back button return
+        // here); anything else in the phone's browser overlay, like every resource in the app.
+        if (!toReader) a.addEventListener('click', openOutside);
+      } else {
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+      a.title = toReader ? T.openReader : T.openTitle;
       const label = CseView.pageLabel(hit);
       if (label || hit.count > 1) {
         const meta = document.createElement('div');
@@ -767,7 +799,7 @@
     window.addEventListener('popstate', () => fromAddress());
 
     function fromAddress() {
-      const a = CseView.readAddress(window.location.search, window.location.hostname);
+      const a = CseView.readAddress(window.location.search, window.location.hostname, window.location.protocol);
       state.exact = a.exact; state.word = a.word;
       setOption(btnExact, a.exact); setOption(btnWord, a.word);
       input.value = a.q;
@@ -782,12 +814,25 @@
     });
 
     function init() {
+      // In the app, ✕ returns to its home: back to it when opened from it (the history stays
+      // home → this page's searches, which the back button and the iOS swipe follow), else
+      // home in place of this page. As in Daily Reflection and the Reader.
+      if (IN_APP) {
+        const x = $('btn-close');
+        x.hidden = false;
+        x.addEventListener('click', () => {
+          let fromApp = false;
+          try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* no referrer */ }
+          // Back past this page's own searches, to the page it was opened from.
+          if (fromApp) history.go(-(stepsIn() + 1)); else window.location.replace('/index.html');
+        });
+      }
       state.theme = i360Theme.getChoice();
       i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
       state.numerals = i360Theme.getNumerals();
       applyTheme();
       applyNumerals();
-      const a = CseView.readAddress(window.location.search, window.location.hostname);
+      const a = CseView.readAddress(window.location.search, window.location.hostname, window.location.protocol);
       if (a.data) state.dataBase = a.data;
       fromAddress();
       if (!a.q) {

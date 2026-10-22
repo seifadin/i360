@@ -1,7 +1,7 @@
 // Builds the self-contained pages:
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
 //   public-hub/md/index.html   the Reader    (from src/reader.src.html; also ../public/md/ for the app)
-//   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
+//   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html; also ../public/cse/ for the app)
 //   public-hub/day/index.html  Daily Reflection (from src/day.html; also ../public/day/ for the app)
 //
 //   npm run build
@@ -153,6 +153,7 @@ buildPage({
   ],
   connectSrc: 'https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*'
 });
+appCopy('cse');
 
 // The hub's landing page: links to the three apps and the theme button.
 buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], connectSrc: "'none'" });
