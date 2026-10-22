@@ -38,4 +38,7 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Lets the WebView follow connectivity, so navigator.onLine and the online/offline
+         events work (without it they never change). A "normal" permission: no prompt. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
