@@ -51,19 +51,42 @@
 
   // Our own books on the lib site are real book files: the Reader fetches them as they are.
   function isLibBook(link) {
-    try { const u = new URL(link); return u.hostname === LIB_HOST && u.pathname.startsWith('/books/'); } catch { return false; }
+    try { const u = new URL(link); return u.protocol === 'https:' && u.hostname === LIB_HOST && u.pathname.startsWith('/books/'); } catch { return false; }
   }
 
-  // An archive.org /stream/ link is a viewer page; /download/ is the file itself.
-  function fetchableUrl(link) {
-    try {
-      const u = new URL(link);
-      if (/(^|\.)archive\.org$/i.test(u.hostname) && u.pathname.startsWith('/stream/')) {
-        u.pathname = '/download/' + u.pathname.slice('/stream/'.length);
-        return u.href;
-      }
-    } catch { /* as given */ }
-    return link;
+  /* ---------------- Which books the Reader opens ----------------
+     Only our own books and the books in the CSE's catalog (i360-hub.md §10,
+     sprint 5). ownBook() recognises our own books wherever a link names
+     them — on the lib site, and at the addresses they had before (the hub's
+     /md/books/, the old i360-md.web.app/books/, and "books/<name>" next to
+     the Reader page) — and returns the lib site's address for it, or null.
+     Everything else is opened only through open(), i.e. only when the
+     catalog lists it. */
+  const OLD_BOOK_PATHS = { 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
+
+  function bookName(path, prefix) {
+    if (!path.startsWith(prefix)) return null;
+    const name = safeDecode(path.slice(prefix.length));
+    return name && !/[\/\\]/.test(name) && name !== '.' && name !== '..' ? name : null;
+  }
+
+  function ownBook(value, pageHref) {
+    const text = String(value == null ? '' : value).trim();
+    let name = null;
+    if (!/^[a-z][a-z0-9+.-]*:|^\/\//i.test(text)) {
+      // Relative: "books/<name>" beside the page, or "/md/books/<name>" on the page's own site.
+      const rel = text.replace(/^\.\//, '');
+      name = rel.startsWith('/') ? bookName(rel, '/md/books/') : bookName(rel, 'books/');
+    } else {
+      let u;
+      try { u = new URL(text); } catch { return null; }
+      let page = null;
+      try { page = new URL(pageHref); } catch { /* no page address */ }
+      if (u.protocol === 'https:' && u.hostname === LIB_HOST) name = bookName(u.pathname, '/books/');
+      else if (u.protocol === 'https:' && OLD_BOOK_PATHS[u.hostname]) name = bookName(u.pathname, OLD_BOOK_PATHS[u.hostname]);
+      else if (page && /^https?:$/.test(page.protocol) && u.origin === page.origin) name = bookName(u.pathname, '/md/books/');
+    }
+    return name ? `${LIB}books/${encodeURIComponent(name)}` : null;
   }
 
   /* ---------------- Our copy → the Reader's book format ----------------
@@ -167,5 +190,5 @@
     return { source, books: itemBooks(catalog, source), text: toBookText(chunks.flat()) };
   }
 
-  return { LIB, archiveId, findSource, isLibBook, fetchableUrl, toBookText, itemBooks, scanLink, open };
+  return { LIB, archiveId, findSource, isLibBook, ownBook, toBookText, itemBooks, scanLink, open };
 }));

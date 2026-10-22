@@ -49,6 +49,9 @@ export interface Resource {
   Revision: string
   inWebList: string
   URIschemes: string
+  // The Reader's public address, a prefix ending in "?file=" (i360-hub.md §1). Not used by
+  // the app itself: saved on the device for the Reader's "copy link" (dataCache.tsx).
+  MdReader: string
   // i360dbqEOF exists in the Baserow table but is deliberately NOT typed
   // here — its app-state consumer was removed as written-but-never-read
   // long ago (§5), and an interface field with zero readers only implies

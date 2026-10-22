@@ -27,8 +27,30 @@ test('a link is found in the catalog however it is written', () => {
   assert.equal(LibCopy.findSource(catalog, 'https://archive.org/stream/Other/x_djvu.txt'), null);
   assert.equal(LibCopy.isLibBook('https://lib.i36o.workers.dev/books/a_ocr.md'), true);
   assert.equal(LibCopy.isLibBook(STREAM), false);
-  assert.equal(LibCopy.fetchableUrl(STREAM), encodeURI(STREAM.replace('/stream/', '/download/')));
-  assert.equal(LibCopy.fetchableUrl('https://ar.wikipedia.org/wiki/x'), 'https://ar.wikipedia.org/wiki/x');
+  assert.equal(LibCopy.isLibBook('http://lib.i36o.workers.dev/books/a_ocr.md'), false, 'https only');
+});
+
+test('our own books: recognised wherever a link names them, and always read from the lib site', () => {
+  const LIB_BOOK = (name) => `https://lib.i36o.workers.dev/books/${encodeURIComponent(name)}`;
+  const pages = ['https://i360-e.web.app/md/index.html?file=x', 'https://i360-hub.web.app/md/', 'https://localhost/md/index.html', 'capacitor://localhost/md/index.html', 'file:///home/seif/reader.html'];
+  for (const page of pages) {
+    assert.equal(LibCopy.ownBook('books/display-test.md', page), LIB_BOOK('display-test.md'), page);
+    assert.equal(LibCopy.ownBook('./books/a%20b.md', page), LIB_BOOK('a b.md'), page);
+    assert.equal(LibCopy.ownBook('/md/books/x.md', page), LIB_BOOK('x.md'), page);
+    assert.equal(LibCopy.ownBook('https://lib.i36o.workers.dev/books/x_ocr.md', page), LIB_BOOK('x_ocr.md'), page);
+    assert.equal(LibCopy.ownBook('https://i360-hub.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
+    assert.equal(LibCopy.ownBook('https://i360-e.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
+    assert.equal(LibCopy.ownBook('https://i360-md.web.app/books/x.md', page), LIB_BOOK('x.md'), page);
+  }
+  // The page's own site, by its full address (the app's built-in server, a local test server).
+  assert.equal(LibCopy.ownBook('https://localhost/md/books/x.md', 'https://localhost/md/index.html'), LIB_BOOK('x.md'));
+  assert.equal(LibCopy.ownBook('http://127.0.0.1:8080/md/books/x.md', 'http://127.0.0.1:8080/md/index.html'), LIB_BOOK('x.md'));
+  // Anything else is not one of our books.
+  for (const v of ['http://lib.i36o.workers.dev/books/x.md', 'https://lib.i36o.workers.dev/b/1/catalog.json', 'https://lib.i36o.workers.dev/books/',
+    'books/../x.md', 'books/%2e%2e', 'books/a/b.md', 'books/a%2Fb.md', 'books/', 'https://example.com/md/books/x.md', 'https://localhost/md/books/x.md',
+    '//example.com/books/x.md', 'javascript:alert(1)', 'data:text/markdown,x', STREAM, '', null]) {
+    assert.equal(LibCopy.ownBook(v, 'https://i360-e.web.app/md/index.html'), null, String(v));
+  }
 });
 
 test('scan links: the BookReader at a position; the book named only in a multi-book item', () => {

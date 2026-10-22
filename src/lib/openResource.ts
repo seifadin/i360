@@ -23,9 +23,9 @@ export interface OpenContext {
 // today's hub address (Seif 2026-10-22), the future i360-e.web.app one and the old
 // forwarder. Always as /<page>/index.html: Capacitor's built-in server answers a
 // path without a file extension with the app's own index.html (i360-hub.md §10).
-const OWN_PAGES = ['day']
+const OWN_PAGES = ['day', 'md']
 const OWN_HOSTS = ['i360-hub.web.app', 'i360-e.web.app']
-const FORWARDERS: Record<string, string> = { 'i360-day.web.app': 'day' }
+const FORWARDERS: Record<string, string> = { 'i360-day.web.app': 'day', 'i360-md.web.app': 'md' }
 
 export function ownPagePath(url: string): string | null {
   if (!Capacitor.isNativePlatform()) return null

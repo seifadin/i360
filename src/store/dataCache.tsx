@@ -65,6 +65,18 @@ function cacheFeedbackMailto(sciences: Science[]): void {
   // exactly this kind of transient gap.
 }
 
+// The Reader's public address (i360dbc's MdReader, e.g. "https://…/md/?file="), saved for
+// the app's own Reader page (public/md/, same site and storage): its "copy link" builds the
+// public link from it instead of copying the app's internal address (i360-hub.md §10). The
+// Reader checks the value before using it. Kept when a load lacks it, like the feedback link.
+export const MD_READER_KEY = 'i360.mdReader'
+
+function cacheMdReader(resource: Resource | null): void {
+  if (resource && typeof resource.MdReader === 'string' && resource.MdReader.trim()) {
+    setStoredItem(MD_READER_KEY, resource.MdReader.trim())
+  }
+}
+
 // The 3 icon fields the app uses (Baserow's IconName is unused), as unique
 // names derived from the loaded data — no hardcoded list.
 type IconTier = 'major' | 'intermediate' | 'minor'
@@ -164,6 +176,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }): JSX.El
         const globalResource = resources[0] ?? null
         if (cancelled) return
         setResource(globalResource)
+        cacheMdReader(globalResource)
 
         const editionChanged = hasChanged('i360Edition', globalResource?.Edition)
         const versionChanged = hasChanged('i360Version', globalResource?.Version)

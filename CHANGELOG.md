@@ -12,6 +12,11 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 - The Daily Reflection has a bar at the top, like the other i360 pages: theme, numerals and a language button (it opens the list of the five languages), the page's name and, inside the app, the close button. On iPhone the bar stays clear of the status bar (2026-10-22)
 - The theme button now comes before the numerals button on every page, the encyclopedia's bottom bar included (2026-10-22)
 - The book search is now called «البحث في i360إ» (2026-10-22)
+- The Markdown Reader («القارئ») has the same kind of top bar: menu, theme and numerals, a connection icon (green online, red offline), «فتح ملف», the page arrows, search, contents, its name and, inside the app, the close button. Zoom, text size and the other view buttons are in the menu; on narrow screens more of the bar moves there, but the page arrows always stay (2026-10-22)
+- The Markdown Reader opens only the i360 library's books — our own books and the books the i360 search has indexed — and reads them from the library itself. «نسخ رابط هذه الصفحة» copies the Reader's public link, also inside the app (2026-10-22)
+
+### Added
+- The Markdown Reader now opens inside the app instead of the browser, with a close button back to the encyclopedia (2026-10-22)
 
 ---
 

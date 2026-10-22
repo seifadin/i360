@@ -85,14 +85,15 @@
       border-bottom: 1px solid var(--toolbar-border);
       min-height: var(--toolbar-h);
       padding-top: env(safe-area-inset-top);
-      padding-inline: 0.5rem;
+      /* iPhone: clear of the rounded corners and the notch in landscape (viewport-fit=cover) */
+      padding-left: calc(0.5rem + env(safe-area-inset-left));
+      padding-right: calc(0.5rem + env(safe-area-inset-right));
       display: flex;
       align-items: center;
       gap: 0.25rem;
       user-select: none;
       z-index: 100;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      direction: ltr;
     }
     .tb-start, .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
     .tb-main {
@@ -103,7 +104,20 @@
       justify-content: center;
       gap: 0.2rem;
     }
-    .tb-slot, .tb-group { display: flex; align-items: center; gap: 0.15rem; }
+    .tb-group { display: flex; align-items: center; gap: 0.15rem; }
+    /* The arrows keep their places whatever the language: in an RTL book the left one is "next". */
+    #group-nav { direction: ltr; }
+    .tb-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--heading);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 14rem;
+      padding: 0 0.35rem;
+      flex-shrink: 0;
+    }
 
     .toolbar-btn {
       background: transparent;
@@ -171,20 +185,27 @@
     .vol-select { padding: 0 0.2rem; max-width: 5.5rem; }
     .page-input:focus, .vol-select:focus { border-color: var(--focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus) 25%, transparent); }
 
-    .status-icon { display: flex; align-items: center; color: var(--icon-color); padding: 0 0.25rem; }
+    /* Connection: green online (the theme's Quran green, in every theme), red offline (live). Its words show only inside the ⋮ menu. */
+    :root { --offline: #b91c1c; }
+    :root[data-theme="dark"] { --offline: #f87171; }
+    .status-icon { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.25rem; color: var(--quran); font-size: 0.85rem; }
+    .status-icon.offline { color: var(--offline); }
+    .status-text { display: none; }
+    .more-menu .status-icon { height: 2rem; padding: 0 0.4rem; }
+    .more-menu .status-text { display: inline; }
     .btn-open-file {
       background-color: var(--input-bg);
       border: 1px solid var(--toolbar-border);
       font-weight: 700;
     }
 
-    /* "More" menu: on narrow screens the less-used groups move in here */
-    #btn-more { display: none; }
+    /* The ⋮ menu: zoom, text size and the view buttons; on narrow screens also search,
+       «فتح ملف», the connection icon and, last, the volume menu. */
     .more-menu {
       position: absolute;
       top: 100%;
-      left: 0.5rem;
-      right: 0.5rem;
+      left: calc(0.5rem + env(safe-area-inset-left));
+      right: calc(0.5rem + env(safe-area-inset-right));
       margin-top: 0.35rem;
       background: var(--panel-bg);
       border: 1px solid var(--toolbar-border);
@@ -197,24 +218,25 @@
       gap: 0.35rem 0.5rem;
       z-index: 103;
     }
-    .more-menu .divider { display: none; }
     .more-menu .tb-group { padding: 0.15rem; border: 1px solid var(--toolbar-border); border-radius: 0.375rem; }
 
-    body.compact #btn-more { display: flex; }
-    body.compact .btn-open-file { border: none; background: transparent; }
-    body.compact .btn-open-file span { display: none; }
-    body.compact .page-input { width: 2.8rem; }
-    body.compact .status-icon { display: none; }
-    /* Tightest level, chosen by measurement when even the compact row doesn't fit */
-    body.tight .toolbar { padding-inline: 0.2rem; gap: 0.1rem; }
-    body.tight .tb-main { gap: 0.05rem; }
-    body.tight .tb-main > .divider { display: none; }
+    /* Levels chosen by measurement (fitToolbar): no title; then search, «فتح ملف» and the
+       connection icon in ⋮; no file position; tighter spacing; no "of N"; volume menu in ⋮. */
+    body.notitle .tb-title { display: none; }
+    body.folded .page-input { width: 2.8rem; }
+    body.tight .toolbar { gap: 0.1rem; }
+    body.tight .tb-start, body.tight .tb-end, body.tight .tb-main { gap: 0.05rem; }
+    body.tight .tb-start > .divider { margin: 0 0.05rem; }
     body.tight .toolbar-btn { min-width: 1.85rem; padding: 0 0.25rem; }
     body.tight .page-counter { gap: 0.2rem; font-size: 0.82rem; }
     body.tight .page-input { width: 2.4rem; }
     body.tight .vol-select { max-width: 3.6rem; }
-    /* Further levels, also chosen by measurement: drop "of N", then move the volume menu */
     body.tighter #lbl-of, body.tighter #total-pages { display: none; }
+    /* Last resort (very narrow screens with large text): the smallest buttons, no divider */
+    body.tightest .toolbar { padding-left: calc(0.15rem + env(safe-area-inset-left)); padding-right: calc(0.15rem + env(safe-area-inset-right)); }
+    body.tightest .toolbar-btn { min-width: 1.6rem; padding: 0 0.1rem; }
+    body.tightest .tb-start > .divider { display: none; }
+    body.tightest .page-input { width: 2rem; }
     /* Position in the file, next to the printed page number (as Acrobat shows page labels) */
     .page-pos { color: var(--muted); font-size: 0.8em; }
     body.nopos .page-pos { display: none; }
@@ -257,6 +279,8 @@
       flex: 1;
       overflow: auto;
       padding: var(--container-gap);
+      padding-left: calc(var(--container-gap) + env(safe-area-inset-left));
+      padding-right: calc(var(--container-gap) + env(safe-area-inset-right));
       padding-bottom: calc(var(--container-gap) + env(safe-area-inset-bottom));
       width: 100%;
       overscroll-behavior: contain;
@@ -455,7 +479,7 @@
     .search-popup {
       position: absolute;
       top: calc(var(--toolbar-h) + 0.5rem + env(safe-area-inset-top));
-      right: 1rem;
+      inset-inline-end: 1rem;
       width: min(26rem, calc(100vw - 1.5rem));
       background-color: var(--panel-bg);
       border: 1px solid var(--toolbar-border);
@@ -660,41 +684,25 @@
 </head>
 <body>
 
-  <!-- Toolbar. Groups inside .tb-slot move into the "more" menu on narrow screens. -->
+  <!-- Toolbar (i360-hub.md §10 "Toolbars"). It follows the UI language: in Arabic its start is
+       on the right. Start: ⋮, theme, numerals, then the connection icon and «فتح ملف»; middle:
+       the page arrows and number; end: search, contents, the title and ✕ (in the app only).
+       Zoom, text size and the view buttons live in the ⋮ menu; when the row doesn't fit
+       (measured, not by screen width) the title goes first, then search, «فتح ملف» and the
+       connection icon move into ⋮ too. -->
   <header class="toolbar" id="toolbar">
     <div class="tb-start">
-      <button class="toolbar-btn" id="btn-panel" type="button" aria-controls="side-panel" aria-expanded="false">
-        <svg data-lucide="list" viewBox="0 0 24 24"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
+      <button class="toolbar-btn" id="btn-more" type="button" aria-controls="more-menu" aria-expanded="false">
+        <svg data-lucide="ellipsis-vertical" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
       </button>
+      <button class="toolbar-btn" id="btn-theme" type="button"></button>
+      <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
+      <div class="divider"></div>
+      <span class="status-icon" id="status-icon" role="img"></span>
+      <button class="toolbar-btn btn-open-file" id="btn-open-file" type="button"><svg data-lucide="folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg><span id="open-file-label">Open file</span></button>
     </div>
 
     <div class="tb-main">
-      <div class="tb-slot" id="slot-zoom">
-        <div class="tb-group" id="group-zoom">
-          <button class="toolbar-btn" id="btn-zoom-out" type="button">
-            <svg data-lucide="minus" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg>
-          </button>
-          <button class="toolbar-btn" id="btn-zoom-in" type="button">
-            <svg data-lucide="plus" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-          </button>
-          <button class="toolbar-btn" id="btn-fit-width" type="button">
-            <svg data-lucide="move-horizontal" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4"></path><path d="M2 12h20"></path><path d="m6 8-4 4 4 4"></path></svg>
-          </button>
-          <button class="toolbar-btn" id="btn-fit-page" type="button">
-            <svg data-lucide="move-vertical" viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m8 18 4 4 4-4"></path><path d="m8 6 4-4 4 4"></path></svg>
-          </button>
-        </div>
-        <div class="divider"></div>
-      </div>
-
-      <div class="tb-slot" id="slot-text">
-        <div class="tb-group" id="group-text">
-          <button class="toolbar-btn text-size-btn" id="btn-text-smaller" type="button" dir="ltr"></button>
-          <button class="toolbar-btn text-size-btn" id="btn-text-larger" type="button" dir="ltr"></button>
-        </div>
-        <div class="divider"></div>
-      </div>
-
       <div class="tb-group" id="group-nav">
         <button class="toolbar-btn" id="btn-nav-left" type="button">
           <svg data-lucide="chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
@@ -710,40 +718,54 @@
           <svg data-lucide="chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
         </button>
       </div>
-
-      <div class="tb-slot" id="slot-view">
-        <div class="divider"></div>
-        <div class="tb-group" id="group-view">
-          <button class="toolbar-btn" id="btn-scan" type="button" hidden>
-            <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
-          </button>
-          <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
-          <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
-          <button class="toolbar-btn" id="btn-theme" type="button"></button>
-          <button class="toolbar-btn" id="btn-bookmark" type="button" aria-pressed="false">
-            <svg data-lucide="bookmark" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"></path></svg>
-          </button>
-          <button class="toolbar-btn" id="btn-reading" type="button">
-            <svg data-lucide="maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-      <button class="toolbar-btn" id="btn-search-toggle" type="button" aria-controls="search-popup" aria-expanded="false">
-        <svg data-lucide="search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
-      </button>
-      <button class="toolbar-btn" id="btn-more" type="button" aria-controls="more-menu" aria-expanded="false">
-        <svg data-lucide="ellipsis-vertical" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-      </button>
     </div>
 
     <div class="tb-end">
-      <button class="toolbar-btn btn-open-file" id="btn-open-file" type="button"><svg data-lucide="folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg><span id="open-file-label">Open file</span></button>
-      <span class="status-icon" id="status-icon"></span>
+      <button class="toolbar-btn" id="btn-search-toggle" type="button" aria-controls="search-popup" aria-expanded="false">
+        <svg data-lucide="search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+      </button>
+      <button class="toolbar-btn" id="btn-panel" type="button" aria-controls="side-panel" aria-expanded="false">
+        <svg data-lucide="list" viewBox="0 0 24 24"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
+      </button>
+      <span class="tb-title" id="tb-title"></span>
+      <button class="toolbar-btn" id="btn-close" type="button" hidden>
+        <svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+      </button>
     </div>
 
-    <div class="more-menu" id="more-menu" hidden></div>
+    <div class="more-menu" id="more-menu" hidden>
+      <div class="tb-group" id="group-fold" hidden></div>
+      <div class="tb-group" id="group-zoom">
+        <button class="toolbar-btn" id="btn-zoom-out" type="button">
+          <svg data-lucide="minus" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-zoom-in" type="button">
+          <svg data-lucide="plus" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-fit-width" type="button">
+          <svg data-lucide="move-horizontal" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4"></path><path d="M2 12h20"></path><path d="m6 8-4 4 4 4"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-fit-page" type="button">
+          <svg data-lucide="move-vertical" viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m8 18 4 4 4-4"></path><path d="m8 6 4-4 4 4"></path></svg>
+        </button>
+      </div>
+      <div class="tb-group" id="group-text">
+        <button class="toolbar-btn text-size-btn" id="btn-text-smaller" type="button" dir="ltr"></button>
+        <button class="toolbar-btn text-size-btn" id="btn-text-larger" type="button" dir="ltr"></button>
+      </div>
+      <div class="tb-group" id="group-view">
+        <button class="toolbar-btn" id="btn-scan" type="button" hidden>
+          <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
+        <button class="toolbar-btn" id="btn-bookmark" type="button" aria-pressed="false">
+          <svg data-lucide="bookmark" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-reading" type="button">
+          <svg data-lucide="maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- Search -->
@@ -876,8 +898,12 @@
       wholeWord: 'كلمة كاملة',
       moreResults: (n) => `و${n} نتيجة أخرى`,
       openFile: 'فتح ملف',
-      localMode: 'بيئة محليّة (file://)',
-      onlineMode: 'بيئة خادم على الإنترنت',
+      online: 'متصل بالإنترنت',
+      offline: 'غير متصل',
+      barTitle: 'القارئ',
+      close: 'إغلاق',
+      notInLibrary: 'هذا الكتاب ليس في مكتبة i360، فلا يمكن فتحه هنا.',
+      unverified: 'تعذّر التحقق من الكتاب في مكتبة i360 — تحقّق من الاتصال ثم أعد المحاولة.',
       ofLabel: 'من',
       pageInput: 'رقم الصفحة المطبوع — للكتب متعددة الأجزاء: الجزء:الصفحة — وللموضع في الملف: (12)',
       position: (i, n) => `الموضع في الملف: ${i} من ${n}`,
@@ -943,8 +969,12 @@
       wholeWord: 'Whole word',
       moreResults: (n) => `and ${n} more`,
       openFile: 'Open file',
-      localMode: 'Local environment (file://)',
-      onlineMode: 'Online server environment',
+      online: 'Online',
+      offline: 'Offline',
+      barTitle: 'Reader',
+      close: 'Close',
+      notInLibrary: 'This book isn’t in the i360 library, so it can’t be opened here.',
+      unverified: 'Couldn’t check this book against the i360 library — check the connection and try again.',
       ofLabel: 'of',
       pageInput: 'Printed page number — multi-volume books: volume:page — position in the file: (12)',
       position: (i, n) => `Position in the file: ${i} of ${n}`,
@@ -1011,6 +1041,7 @@
     theme: 'system',
     libSource: null,        // the catalog entry when the book is our copy from the lib site
     libBooks: 0,            // how many books its archive.org item holds (for the scan link)
+    bookLink: null,         // the book's own address, for the public link (null for a file from the device)
     textScale: 1,
     bookKey: null,          // identifies the open book (saved position, bookmarks)
     panelTab: 'contents'
@@ -1072,12 +1103,29 @@
   const toastEl = $('toast');
   const statusIcon = $('status-icon');
   const btnOpenFile = $('btn-open-file');
+  const tbTitle = $('tb-title');
+  const btnClose = $('btn-close');
   const fileInput = $('file-input');
   const missingPagesBanner = $('missing-pages-banner');
   const missingPagesText = $('missing-pages-text');
   const emptyState = $('empty-state');
 
   const t = () => TRANSLATIONS[state.dir === 'rtl' ? 'ar' : 'en'];
+
+  // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
+  const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+
+  /* Connection icon: green while the device is online, red while it isn't, live. */
+  function updateConnection() {
+    const online = navigator.onLine !== false;
+    const label = online ? t().online : t().offline;
+    statusIcon.innerHTML = `${online ? ICON.globeCheck : ICON.globeX}<span class="status-text"></span>`;
+    statusIcon.lastChild.textContent = label;
+    statusIcon.classList.toggle('offline', !online);
+    setTitle(statusIcon, label);
+  }
+  window.addEventListener('online', updateConnection);
+  window.addEventListener('offline', updateConnection);
 
   /* ================================================================
      Small helpers
@@ -1202,6 +1250,10 @@
         line.textContent = tr.libLoading(n.done, n.total);
       } else if (n.type === 'readError') {
         line.textContent = tr.readError;
+      } else if (n.type === 'notInLibrary') {
+        line.textContent = tr.notInLibrary;
+      } else if (n.type === 'unverified') {
+        line.textContent = tr.unverified;
       }
       line.textContent = fmtNum(line.textContent);
       missingPagesText.appendChild(line);
@@ -1569,10 +1621,36 @@
     if (idx >= 0) { scrollToSheet(idx); updateCounter(true); }
   });
 
+  /* The public link to this page of the book. Its start is the Reader's address from
+     Baserow (i360dbc's MdReader field, e.g. "https://…/md/?file="), which the i360إ app
+     saves on the device — never an address written into this page. Used only if it is an
+     https address ending in "file="; then the book's own address and the page are added.
+     Without it: on the web, this page's own address (already a public link); inside the
+     app, nothing — the app's internal address must never be copied (the button hides). */
+  const MD_READER_KEY = 'i360.mdReader';
+  function readerBase() {
+    let v = null;
+    try { v = localStorage.getItem(MD_READER_KEY); } catch { return null; }
+    if (typeof v !== 'string' || !/[?&]file=$/.test(v)) return null;
+    try {
+      const u = new URL(v);
+      if (u.protocol !== 'https:' || u.username || u.password) return null;
+    } catch { return null; }
+    return v;
+  }
+
+  function shareLink() {
+    const base = readerBase();
+    if (base && state.bookLink) return base + encodeURIComponent(state.bookLink) + window.location.hash;
+    return IN_APP ? null : window.location.href;
+  }
+
   async function copyPageLink() {
     updateHash();
+    const link = shareLink();
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      if (!link) throw new Error('no public link');
+      await navigator.clipboard.writeText(link);
       toast(t().linkCopied);
     } catch {
       toast(t().copyFailed);
@@ -1716,6 +1794,7 @@
     saveNow();
     state.bookKey = null;
     state.libSource = null;
+    state.bookLink = null;
     updateScanButton();
     clearSearch();
     search.indexes = {};
@@ -1748,10 +1827,7 @@
     document.body.dir = state.dir;
     searchPopup.dir = state.dir;
     missingPagesBanner.dir = state.dir;
-    moreMenu.dir = 'ltr';
-    // The view group (numerals, theme, bookmark…) keeps the toolbar's own order inside the
-    // menu too, so numerals stays right of theme in Arabic, as in every i360 app.
-    $('group-view').dir = state.dir;
+    moreMenu.dir = state.dir;
 
     setTitle(btnPanel, tr.panel);
     setTitle(btnZoomIn, tr.zoomIn);
@@ -1794,8 +1870,9 @@
     lblOf.textContent = tr.ofLabel;
     setTitle(pageNumInput, tr.pageInput);
 
-    const isLocal = window.location.protocol === 'file:';
-    statusIcon.title = isLocal ? tr.localMode : tr.onlineMode;
+    tbTitle.textContent = tr.barTitle;
+    setTitle(btnClose, tr.close);
+    updateConnection();
 
     emptyState.textContent = fmtNum(tr.emptyHint);
     emptyState.classList.toggle('visible', state.sheets.length === 0);
@@ -2316,7 +2393,7 @@
     const tr = t();
     tabContents.setAttribute('aria-selected', state.panelTab === 'contents' ? 'true' : 'false');
     tabBookmarks.setAttribute('aria-selected', state.panelTab === 'bookmarks' ? 'true' : 'false');
-    btnCopyLink.hidden = !isLinkable();
+    btnCopyLink.hidden = !(isLinkable() && shareLink());
     panelBody.textContent = '';
 
     if (state.sheets.length === 0) { panelBody.appendChild(emptyNote(tr.emptyHint)); return; }
@@ -2389,47 +2466,43 @@
 
   /* ================================================================
      Toolbar layout by measurement (no fixed screen widths)
-     Level 0: everything in one row. Level 1 (compact): zoom, text size and
-     view groups move into the "more" menu. Level 2: the file position
-     "(12/70)" is hidden (it stays in the page box's tooltip). Level 3
-     (tight): smaller spacing. Level 4: the "of N" total is hidden.
-     Level 5: the volume menu moves into "more" too. The first level whose row really
-     fits is used, so it follows the language, labels, digits, fonts and
-     the browser's text size.
+     Level 0: everything in one row. Level 1: the title is hidden. Level 2:
+     search, «فتح ملف» and the connection icon move into the ⋮ menu.
+     Level 3: the file position "(12/70)" is hidden (it stays in the page
+     box's tooltip). Level 4: tighter spacing. Level 5: the "of N" total is
+     hidden. Level 6: the volume menu moves into ⋮ too. Level 7: the smallest
+     buttons, for very narrow screens with large text. The page arrows
+     always stay. The first level whose row really fits is used, so it
+     follows the language, labels, digits, fonts and the browser's text size.
      ================================================================ */
-  const SLOTS = [
-    { slot: 'slot-zoom', group: 'group-zoom', atEnd: false },
-    { slot: 'slot-text', group: 'group-text', atEnd: false },
-    { slot: 'slot-view', group: 'group-view', atEnd: true }
-  ];
+  const groupFold = $('group-fold');
+  // Moved into ⋮ at level 2, in this order; each returns to its own place.
+  const FOLD = [statusIcon, btnOpenFile, btnSearchToggle].map((el) => {
+    const home = document.createComment(el.id);
+    el.parentNode.insertBefore(home, el);
+    return { el, home };
+  });
   let toolbarLevel = -1;
-  const TOOLBAR_LEVELS = 5;
+  const TOOLBAR_LEVELS = 7;
 
   function setToolbarLevel(level) {
     if (level === toolbarLevel) return;
     toolbarLevel = level;
-    const compact = level >= 1;
-    document.body.classList.toggle('compact', compact);
-    document.body.classList.toggle('nopos', level >= 2);
-    document.body.classList.toggle('tight', level >= 3);
-    document.body.classList.toggle('tighter', level >= 4);
-    const counter = toolbar.querySelector('.page-counter');
-    if (level >= 5) { if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild); }
-    else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
-    for (const s of SLOTS) {
-      const slot = $(s.slot);
-      const group = $(s.group);
-      if (compact) {
-        if (group.parentElement !== moreMenu) moreMenu.appendChild(group);
-        slot.hidden = true;
-      } else {
-        if (group.parentElement !== slot) {
-          if (s.atEnd) slot.appendChild(group); else slot.insertBefore(group, slot.firstChild);
-        }
-        slot.hidden = false;
-      }
+    document.body.classList.toggle('notitle', level >= 1);
+    const folded = level >= 2;
+    document.body.classList.toggle('folded', folded);
+    document.body.classList.toggle('nopos', level >= 3);
+    document.body.classList.toggle('tight', level >= 4);
+    document.body.classList.toggle('tighter', level >= 5);
+    document.body.classList.toggle('tightest', level >= 7);
+    for (const f of FOLD) {
+      if (folded) { if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el); }
+      else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
     }
-    if (!compact) closeMore();
+    groupFold.hidden = !folded;
+    const counter = toolbar.querySelector('.page-counter');
+    if (level >= 6) { if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild); }
+    else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
   }
 
   function rowWidth(el) {
@@ -2483,6 +2556,10 @@
 
   document.addEventListener('click', (e) => {
     if (!moreMenu.hidden && !moreMenu.contains(e.target) && !btnMore.contains(e.target)) closeMore();
+  });
+  // Search and «فتح ملف», when they sit in the menu, close it as they open.
+  moreMenu.addEventListener('click', (e) => {
+    if (e.target.closest('#btn-search-toggle, #btn-open-file')) closeMore();
   });
 
   // Anything that can change the toolbar's width re-checks the fit.
@@ -2796,6 +2873,7 @@
       // Name plus the book's opening text: a re-export of the same book keeps
       // its place, two different books with the same file name don't mix.
       state.libSource = null;
+      state.bookLink = null;
       renderDocument(text, null, `file:${file.name}|${hashText(text.slice(0, 4000))}`);
     };
     reader.onerror = () => renderEmpty([{ type: 'readError' }]);
@@ -2805,13 +2883,23 @@
 
   /* ================================================================
      Start
-     ?file=<url> opens a book (relative to this page or absolute; the
-     server must allow cross-origin reads for other sites), and
-     #p=<page> opens it at a page.
+     ?file=<link> opens a book: one of our own books (read from the lib
+     site, wherever the link names it) or a book in the CSE's catalog (our
+     copy, from the lib site); anything else is refused. #p=<page> opens
+     it at a page.
      ================================================================ */
   async function initApp() {
-    const isLocal = window.location.protocol === 'file:';
-    statusIcon.innerHTML = isLocal ? ICON.globeX : ICON.globeCheck;
+    // In the app, ✕ returns to its home: a step back when opened from it (the history
+    // stays home → this page, which the back button and the iOS swipe follow), else home
+    // in place of this page. As in Daily Reflection.
+    if (IN_APP) {
+      btnClose.hidden = false;
+      btnClose.addEventListener('click', () => {
+        let fromApp = false;
+        try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* no referrer */ }
+        if (fromApp) history.back(); else window.location.replace('/index.html');
+      });
+    }
 
     state.numerals = i360Theme.getNumerals();
     state.theme = i360Theme.getChoice();
@@ -2836,32 +2924,37 @@
       try { fileUrl = decodeURIComponent(fileUrl); } catch { /* keep as is */ }
     }
     if (fileUrl) {
-      try {
-        const link = new URL(fileUrl, window.location.href).href;
-        const key = `url:${link}`;
-        // A book from another site that the CSE has indexed (archive.org,
-        // Wikipedia, …): our page-split copy from the lib site. Our own
-        // books on the lib site, and anything not in the catalog, are read
-        // from the link itself.
-        let copy = null;
-        if (/^https?:/i.test(link) && new URL(link).origin !== window.location.origin && !LibCopy.isLibBook(link)) {
-          try {
-            copy = await LibCopy.open(link, fetch, (done, total) => renderEmpty([{ type: 'libLoading', done, total }]));
-          } catch { copy = null; }   // lib site unreachable: try the link itself
+      // Only our own books and the books in the CSE's catalog open here (i360-hub.md §10).
+      const own = LibCopy.ownBook(fileUrl, window.location.href);
+      if (own) {
+        try {
+          const response = await fetch(own);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const text = await response.text();
+          state.bookLink = own;
+          renderDocument(text, null, `url:${own}`);
+        } catch (err) {
+          renderEmpty([{ type: 'loadError', message: err && err.message ? err.message : String(err) }]);
         }
-        if (copy) {
-          renderEmpty([]);
-          state.libSource = copy.source;
-          state.libBooks = copy.books;
-          renderDocument(copy.text, null, key);
-          return;
-        }
-        const response = await fetch(LibCopy.fetchableUrl(link));
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        renderDocument(await response.text(), null, key);
-      } catch (err) {
-        renderEmpty([{ type: 'loadError', message: err && err.message ? err.message : String(err) }]);
+        return;
       }
+      let link = null;
+      try { const u = new URL(fileUrl); if (/^https?:$/.test(u.protocol)) link = u.href; } catch { /* not a full address */ }
+      if (!link) { renderEmpty([{ type: 'notInLibrary' }]); return; }
+      // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
+      let copy = null;
+      try {
+        copy = await LibCopy.open(link, fetch, (done, total) => renderEmpty([{ type: 'libLoading', done, total }]));
+      } catch {
+        renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
+        return;
+      }
+      if (!copy) { renderEmpty([{ type: 'notInLibrary' }]); return; }
+      renderEmpty([]);
+      state.libSource = copy.source;
+      state.libBooks = copy.books;
+      state.bookLink = link;
+      renderDocument(copy.text, null, `url:${link}`);
       return;
     }
     renderEmpty([]);

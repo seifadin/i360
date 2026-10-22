@@ -1,6 +1,6 @@
 // Builds the self-contained pages:
 //   public-hub/index.html      the hub's landing page (from src/hub.src.html)
-//   public-hub/md/index.html   the Reader    (from src/reader.src.html)
+//   public-hub/md/index.html   the Reader    (from src/reader.src.html; also ../public/md/ for the app)
 //   public-hub/cse/index.html  the i360 CSE  (from src/cse.src.html)
 //   public-hub/day/index.html  Daily Reflection (from src/day.html; also ../public/day/ for the app)
 //
@@ -110,13 +110,24 @@ function buildPage({ src, out, scripts, connectSrc, fills = [] }) {
 
 const file = (p, name) => ({ code: read(join(root, p)), name: name || p.split('/').pop() });
 
+// A page inside the i360إ app (i360-hub.md §10): the same build in the app's public/<page>/,
+// so the app, i360-e.web.app/<page>/ and the hub serve one page. Until the hub becomes a
+// forwarder (sprint 7).
+function appCopy(page) {
+  const out = join(root, '..', 'public', page, 'index.html');
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, read(join(root, `public-hub/${page}/index.html`)));
+  console.log(`public/${page}/index.html (the app): the same page`);
+}
+
 // marked's package exports don't list this file, so it's read by path.
 const marked = {
   code: read(join(root, 'node_modules/marked/lib/marked.umd.js')).replace('//# sourceMappingURL=marked.umd.js.map', '').trim(),
   name: 'marked'
 };
 
-// The Reader: ?file= may fetch from anywhere.
+// The Reader: reads only the lib site — our own books and our copies of the books
+// in the CSE's catalog (sprint 5; ?file= accepts nothing else).
 buildPage({
   src: 'src/reader.src.html',
   out: 'public-hub/md/index.html',
@@ -126,8 +137,9 @@ buildPage({
     ['/*@@SEARCH_CORE@@*/', file('src/search-core.js')],
     ['/*@@LIB_COPY@@*/', file('src/lib-copy.js')]
   ],
-  connectSrc: '*'
+  connectSrc: 'https://lib.i36o.workers.dev'
 });
+appCopy('md');
 
 // The CSE page: reads only the lib site (and, for testing on this computer,
 // a local copy of the build: ?data=http://localhost:…).
@@ -176,10 +188,5 @@ buildPage({ src: 'src/hub.src.html', out: 'public-hub/index.html', scripts: [], 
     ],
     connectSrc: 'https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev'
   });
-  // The same page inside the i360إ app (sprint 4b, i360-hub.md §10): public/day/ of the app, so the
-  // app, i360-e.web.app/day/ and the hub serve one build. Until the hub becomes a forwarder (sprint 7).
-  const appCopy = join(root, '..', 'public', 'day', 'index.html');
-  mkdirSync(dirname(appCopy), { recursive: true });
-  writeFileSync(appCopy, read(join(root, 'public-hub/day/index.html')));
-  console.log('public/day/index.html (the app): the same page');
+  appCopy('day');   // inside the i360إ app since sprint 4b
 }
