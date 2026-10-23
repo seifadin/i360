@@ -1,0 +1,428 @@
+diff --git a/.firebaserc b/.firebaserc
+index c306ce7..7f8e755 100644
+--- a/.firebaserc
++++ b/.firebaserc
+@@ -1,5 +1,5 @@
+ {
+   "projects": {
+-    "default": "i360-e"
++    "default": "i360-md"
+   }
+ }
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 24de88a..69760b0 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -9,6 +9,7 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic
+ ## [Unreleased] — live on the web and over the air (still version 0.14.0)
+ 
+ ### Changed
++- The encyclopedia's web address is now https://i36o.web.app/ (2026-10-23). The old address https://i360-e.web.app/ and all older ones lead there, links and pages included; on the web, saved choices start fresh once, and an encyclopedia installed from the browser needs installing again
+ - The i360 tools now have one address, the encyclopedia's own: the Reader at https://i360-e.web.app/md/, the book search at /cse/ and the Daily Reflection at /day/. The old addresses (i360-hub.web.app, i360-md.web.app, i360-cse.web.app, i360-day.web.app) lead there, links and pages included; on the web, saved choices there (theme, numerals, bookmarks, reading positions, city) start fresh once (2026-10-23)
+ - The Daily Reflection has a bar at the top, like the other i360 pages: theme, numerals and a language button (it opens the list of the five languages), the page's name and, inside the app, the close button. On iPhone the bar stays clear of the status bar (2026-10-22)
+ - The theme button now comes before the numerals button on every page, the encyclopedia's bottom bar included (2026-10-22)
+diff --git a/firebase.json b/firebase.json
+index 32a00ad..096ee3c 100644
+--- a/firebase.json
++++ b/firebase.json
+@@ -1,5 +1,6 @@
+ {
+   "hosting": {
++    "site": "i36o",
+     "public": "dist",
+     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+     "rewrites": [
+diff --git a/hub/README.md b/hub/README.md
+index 07c673a..6b17162 100644
+--- a/hub/README.md
++++ b/hub/README.md
+@@ -2,19 +2,23 @@
+ 
+ The Reader, the i360 CSE and Daily Reflection are built here into the app's `public/`
+ (`../public/md/`, `../public/cse/`, `../public/day/`) and served with the app: inside it, at
+-`https://i360-e.web.app/md|cse|day/` and in its OTA bundle (merge into the app, claude/i360-hub.md §10).
++`https://i36o.web.app/md|cse|day/` and in its OTA bundle (merge into the app, claude/i360-hub.md §10).
+ 
+ ## Forwarding sites (Firebase project `i360-md`, display name `i360-hub`)
+ Since merge sprint 7 every site here only forwards (301, path and `?…` kept):
+ | Target | Site | Forwards to |
+ |---|---|---|
+-| `hub` | https://i360-hub.web.app/ | `https://i360-e.web.app/<same path>`; `/md/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+-| `md`  | https://i360-md.web.app/  | `https://i360-e.web.app/md/…`; `/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+-| `cse` | https://i360-cse.web.app/ | `https://i360-e.web.app/cse/…` |
+-| `day` | https://i360-day.web.app/ | `https://i360-e.web.app/day/…` |
++| `hub` | https://i360-hub.web.app/ | `https://i36o.web.app/<same path>`; `/md/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
++| `md`  | https://i360-md.web.app/  | `https://i36o.web.app/md/…`; `/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
++| `cse` | https://i360-cse.web.app/ | `https://i36o.web.app/cse/…` |
++| `day` | https://i360-day.web.app/ | `https://i36o.web.app/day/…` |
+ 
+ `forward/404.html` is their fallback. They rarely change: `firebase deploy --only hosting` (here, in `hub/`).
+ 
++**The app's site** is `i36o` in the same project (since 2026-10-23; the app deploys there from the repo root). Its old
++address `i360-e.web.app` (project `i360-e`) only forwards too: `forward-e/` (its own `firebase.json` and `.firebaserc`),
++deployed with `firebase deploy --only hosting` in `hub/forward-e/` — rarely needed.
++
+ ## Layout
+ ```
+ src/reader.src.html   the Reader        → ../public/md/index.html
+@@ -23,7 +27,7 @@ src/day.html          Daily Reflection «التأمل اليومي» → ../publ
+ library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
+ forward/404.html      fallback for the forwarding sites
+ ```
+-Link to a book: `https://i360-e.web.app/md/?file=books/NAME.md`
++Link to a book: `https://i36o.web.app/md/?file=books/NAME.md`
+ Link to a page: add `#p=45` (or `#p=2:45` for volume 2, page 45).
+ 
+ ## Build
+diff --git a/hub/firebase.json b/hub/firebase.json
+index 0e5512a..484b5fb 100644
+--- a/hub/firebase.json
++++ b/hub/firebase.json
+@@ -16,12 +16,12 @@
+         },
+         {
+           "source": "/",
+-          "destination": "https://i360-e.web.app/",
++          "destination": "https://i36o.web.app/",
+           "type": 301
+         },
+         {
+           "regex": "^/(.+)$",
+-          "destination": "https://i360-e.web.app/:1",
++          "destination": "https://i36o.web.app/:1",
+           "type": 301
+         }
+       ]
+@@ -42,12 +42,12 @@
+         },
+         {
+           "source": "/",
+-          "destination": "https://i360-e.web.app/md/",
++          "destination": "https://i36o.web.app/md/",
+           "type": 301
+         },
+         {
+           "regex": "^/(.+)$",
+-          "destination": "https://i360-e.web.app/md/:1",
++          "destination": "https://i36o.web.app/md/:1",
+           "type": 301
+         }
+       ]
+@@ -63,12 +63,12 @@
+       "redirects": [
+         {
+           "source": "/",
+-          "destination": "https://i360-e.web.app/cse/",
++          "destination": "https://i36o.web.app/cse/",
+           "type": 301
+         },
+         {
+           "regex": "^/(.+)$",
+-          "destination": "https://i360-e.web.app/cse/:1",
++          "destination": "https://i36o.web.app/cse/:1",
+           "type": 301
+         }
+       ]
+@@ -84,12 +84,12 @@
+       "redirects": [
+         {
+           "source": "/",
+-          "destination": "https://i360-e.web.app/day/",
++          "destination": "https://i36o.web.app/day/",
+           "type": 301
+         },
+         {
+           "regex": "^/(.+)$",
+-          "destination": "https://i360-e.web.app/day/:1",
++          "destination": "https://i36o.web.app/day/:1",
+           "type": 301
+         }
+       ]
+diff --git a/hub/forward-e/.firebaserc b/hub/forward-e/.firebaserc
+new file mode 100644
+index 0000000..c306ce7
+--- /dev/null
++++ b/hub/forward-e/.firebaserc
+@@ -0,0 +1,5 @@
++{
++  "projects": {
++    "default": "i360-e"
++  }
++}
+diff --git a/hub/forward-e/firebase.json b/hub/forward-e/firebase.json
+new file mode 100644
+index 0000000..ee855a2
+--- /dev/null
++++ b/hub/forward-e/firebase.json
+@@ -0,0 +1,27 @@
++{
++  "hosting": {
++    "public": "public",
++    "ignore": [
++      "firebase.json",
++      "**/.*",
++      "**/node_modules/**"
++    ],
++    "redirects": [
++      {
++        "regex": "^/md/books/(.+)$",
++        "destination": "https://lib.i36o.workers.dev/books/:1",
++        "type": 301
++      },
++      {
++        "source": "/",
++        "destination": "https://i36o.web.app/",
++        "type": 301
++      },
++      {
++        "regex": "^/(.+)$",
++        "destination": "https://i36o.web.app/:1",
++        "type": 301
++      }
++    ]
++  }
++}
+diff --git a/hub/forward-e/public/404.html b/hub/forward-e/public/404.html
+new file mode 100644
+index 0000000..e058029
+--- /dev/null
++++ b/hub/forward-e/public/404.html
+@@ -0,0 +1,4 @@
++<!doctype html>
++<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex">
++<meta http-equiv="refresh" content="0; url=https://i36o.web.app/"><title>i360إ</title></head>
++<body><p><a href="https://i36o.web.app/">i36o.web.app</a></p></body></html>
+diff --git a/hub/forward/404.html b/hub/forward/404.html
+index c42126b..e058029 100644
+--- a/hub/forward/404.html
++++ b/hub/forward/404.html
+@@ -1,4 +1,4 @@
+ <!doctype html>
+ <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+-<meta http-equiv="refresh" content="0; url=https://i360-e.web.app/"><title>i360إ</title></head>
+-<body><p><a href="https://i360-e.web.app/">i360-e.web.app</a></p></body></html>
++<meta http-equiv="refresh" content="0; url=https://i36o.web.app/"><title>i360إ</title></head>
++<body><p><a href="https://i36o.web.app/">i36o.web.app</a></p></body></html>
+diff --git a/hub/indexer/extract.js b/hub/indexer/extract.js
+index d314523..fee482f 100644
+--- a/hub/indexer/extract.js
++++ b/hub/indexer/extract.js
+@@ -115,7 +115,7 @@ function bookPages(raw) {
+ async function wikimediaPages(fetchFn, src) {
+   const api = `https://${src.lang}.${src.project}.org/w/api.php?format=json&formatversion=2&redirects=1`;
+   const get = async (q) => {
+-    const res = await fetchFn(`${api}&${q}`, { headers: { 'User-Agent': 'i360-cse-indexer/1.0 (+https://i360-e.web.app/)' } });
++    const res = await fetchFn(`${api}&${q}`, { headers: { 'User-Agent': 'i360-cse-indexer/1.0 (+https://i36o.web.app/)' } });
+     if (!res.ok) throw new Error(`${src.project} API HTTP ${res.status}`);
+     return res.json();
+   };
+@@ -162,7 +162,7 @@ function translatedWiki(url) {
+ async function translatedWikiPages(fetchFn, src) {
+   const t = translatedWiki(src.fetchUrl);
+   const api = `https://${t.lang}.${t.project}.org/w/api.php?format=json&formatversion=2&redirects=1&action=query&prop=langlinks&lllang=${encodeURIComponent(t.target)}&titles=${encodeURIComponent(t.title)}`;
+-  const res = await fetchFn(api, { headers: { 'User-Agent': 'i360-cse-indexer/1.0 (+https://i360-e.web.app/)' } });
++  const res = await fetchFn(api, { headers: { 'User-Agent': 'i360-cse-indexer/1.0 (+https://i36o.web.app/)' } });
+   if (!res.ok) throw new Error(`${t.project} API HTTP ${res.status}`);
+   const data = await res.json();
+   const page = data.query && data.query.pages && data.query.pages[0];
+@@ -299,7 +299,7 @@ async function webPages(fetchFn, src) {
+   if (TRANSLATED_IN_BROWSER.test(new URL(src.fetchUrl).hostname)) {
+     throw new Error('Google translates this page in the browser; a download gets the untranslated text (not indexed until decided)');
+   }
+-  const res = await fetchFn(src.fetchUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; i360-cse-indexer/1.0; +https://i360-e.web.app/)' } });
++  const res = await fetchFn(src.fetchUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; i360-cse-indexer/1.0; +https://i36o.web.app/)' } });
+   if (!res.ok) throw new Error(`HTTP ${res.status}`);
+   const html = await res.text();
+   const title = (/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html) || [])[1];
+diff --git a/hub/indexer/inventory.js b/hub/indexer/inventory.js
+index d23ec65..349f2f7 100644
+--- a/hub/indexer/inventory.js
++++ b/hub/indexer/inventory.js
+@@ -27,7 +27,7 @@ const BASEROW_ROWS = 'https://api.baserow.io/api/database/rows/table/';
+ const DEFAULT_TABLE = '193269';
+ const LINK_FIELDS = ['BotKB', 'CustomSearchAIKBlessBotKB'];
+ const GROUP_FIELDS = ['ScienceMajorId', 'ScienceMajor_Ar', 'ScienceIntermediateId', 'ScienceIntermediate_Ar', 'ScienceMinorId', 'ScienceMinor_Ar'];
+-const USER_AGENT = 'i360-cse-inventory/1.0 (+https://i360-e.web.app/)';
++const USER_AGENT = 'i360-cse-inventory/1.0 (+https://i36o.web.app/)';
+ const CONCURRENCY = 4;
+ const TIMEOUT_MS = 30000;
+ const RETRIES = 2;
+@@ -222,7 +222,7 @@ async function fetchFollow(fetchFn, step, url, opts) {
+ async function probeHeaders(fetchFn, step, url) {
+   // As a page on the app's site would ask (i360-hub.md §10). Informational: since merge
+   // sprint 5 the Reader and the CSE read only the lib site, never a source directly.
+-  const origin = { Origin: 'https://i360-e.web.app' };
++  const origin = { Origin: 'https://i36o.web.app' };
+   let { res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'HEAD', headers: origin });
+   if (res.status === 405 || res.status === 501) {
+     ({ res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'GET', headers: { ...origin, Range: 'bytes=0-0' } }));
+diff --git a/hub/scripts/build.js b/hub/scripts/build.js
+index 9cd69b1..0a16059 100644
+--- a/hub/scripts/build.js
++++ b/hub/scripts/build.js
+@@ -1,5 +1,5 @@
+ // Builds the self-contained pages into the i360إ app (i360-hub.md §10), served by the app,
+-// i360-e.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
++// i36o.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
+ //   ../public/md/index.html    the Reader    (from src/reader.src.html)
+ //   ../public/cse/index.html   the i360 CSE  (from src/cse.src.html)
+ //   ../public/day/index.html   Daily Reflection (from src/day.html)
+diff --git a/hub/src/cse-view.js b/hub/src/cse-view.js
+index feae0db..ba5ab05 100644
+--- a/hub/src/cse-view.js
++++ b/hub/src/cse-view.js
+@@ -10,7 +10,7 @@
+   'use strict';
+ 
+   const LIB_HOST = 'lib.i36o.workers.dev';
+-  // The Reader on the same site as this page (the hub, i360-e.web.app or the app's own copy).
++  // The Reader on the same site as this page (i36o.web.app or the app's own copy).
+   // Always /md/index.html: inside the app, Capacitor's server answers /md/ with the app's
+   // home page (i360-hub.md §10).
+   const READER = '/md/index.html';
+diff --git a/hub/src/lib-copy.js b/hub/src/lib-copy.js
+index 719ddc8..5801998 100644
+--- a/hub/src/lib-copy.js
++++ b/hub/src/lib-copy.js
+@@ -62,7 +62,7 @@
+      the Reader page) — and returns the lib site's address for it, or null.
+      Everything else is opened only through open(), i.e. only when the
+      catalog lists it. */
+-  const OLD_BOOK_PATHS = { 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
++  const OLD_BOOK_PATHS = { 'i36o.web.app': '/md/books/', 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
+ 
+   function bookName(path, prefix) {
+     if (!path.startsWith(prefix)) return null;
+diff --git a/hub/test/lib-copy.test.js b/hub/test/lib-copy.test.js
+index 2d29df3..e071503 100644
+--- a/hub/test/lib-copy.test.js
++++ b/hub/test/lib-copy.test.js
+@@ -32,7 +32,7 @@ test('a link is found in the catalog however it is written', () => {
+ 
+ test('our own books: recognised wherever a link names them, and always read from the lib site', () => {
+   const LIB_BOOK = (name) => `https://lib.i36o.workers.dev/books/${encodeURIComponent(name)}`;
+-  const pages = ['https://i360-e.web.app/md/index.html?file=x', 'https://i360-hub.web.app/md/', 'https://localhost/md/index.html', 'capacitor://localhost/md/index.html', 'file:///home/seif/reader.html'];
++  const pages = ['https://i36o.web.app/md/index.html?file=x', 'https://i360-e.web.app/md/index.html?file=x', 'https://i360-hub.web.app/md/', 'https://localhost/md/index.html', 'capacitor://localhost/md/index.html', 'file:///home/seif/reader.html'];
+   for (const page of pages) {
+     assert.equal(LibCopy.ownBook('books/display-test.md', page), LIB_BOOK('display-test.md'), page);
+     assert.equal(LibCopy.ownBook('./books/a%20b.md', page), LIB_BOOK('a b.md'), page);
+@@ -40,6 +40,7 @@ test('our own books: recognised wherever a link names them, and always read from
+     assert.equal(LibCopy.ownBook('https://lib.i36o.workers.dev/books/x_ocr.md', page), LIB_BOOK('x_ocr.md'), page);
+     assert.equal(LibCopy.ownBook('https://i360-hub.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
+     assert.equal(LibCopy.ownBook('https://i360-e.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
++    assert.equal(LibCopy.ownBook('https://i36o.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
+     assert.equal(LibCopy.ownBook('https://i360-md.web.app/books/x.md', page), LIB_BOOK('x.md'), page);
+   }
+   // The page's own site, by its full address (the app's built-in server, a local test server).
+diff --git a/public/cse/index.html b/public/cse/index.html
+index d318170..8657150 100644
+--- a/public/cse/index.html
++++ b/public/cse/index.html
+@@ -3,7 +3,7 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-L4POgpDsfp92lZzkTMmmtUDI0NWnZ1AG3Bjk6Aay35g=' 'sha256-iFI7JKoMeAuTnEDy4toE/oizRbcHM/wKfrDL2x0SpRU='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
++  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-3thlmQHBkQab26cGr1gKct62Kep+/lnPrmFIT12qj30=' 'sha256-iFI7JKoMeAuTnEDy4toE/oizRbcHM/wKfrDL2x0SpRU='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+   <meta name="referrer" content="strict-origin-when-cross-origin">
+   <title>البحث في &#x2066;i360إ&#x2069;</title>
+   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
+@@ -1055,7 +1055,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
+   'use strict';
+ 
+   const LIB_HOST = 'lib.i36o.workers.dev';
+-  // The Reader on the same site as this page (the hub, i360-e.web.app or the app's own copy).
++  // The Reader on the same site as this page (i36o.web.app or the app's own copy).
+   // Always /md/index.html: inside the app, Capacitor's server answers /md/ with the app's
+   // home page (i360-hub.md §10).
+   const READER = '/md/index.html';
+diff --git a/public/llms.txt b/public/llms.txt
+index 964cc42..d37e985 100644
+--- a/public/llms.txt
++++ b/public/llms.txt
+@@ -6,7 +6,7 @@ i360إ aggregates content from a curated resource database, web search, and the
+ 
+ ## Access
+ 
+-- [Web app](https://i360-e.web.app/): usable directly in any browser, installable to a device home screen
++- [Web app](https://i36o.web.app/): usable directly in any browser, installable to a device home screen
+ - [Google Play](https://play.google.com/store/apps/details?id=com.appgyver.i360): Android app
+ - [Apple App Store](https://apps.apple.com/app/id1632337666): iOS app
+ 
+@@ -16,9 +16,9 @@ The app organizes resources across Islamic science disciplines including the Qur
+ 
+ ## Tools inside the app
+ 
+-- [Book search (i360 CSE)](https://i360-e.web.app/cse/): full-text search over the books and pages linked in the app's resource database, grouped by discipline; Arabic. Result pages (`/cse/?q=…`) are not meant for indexing.
+-- [Markdown Reader](https://i360-e.web.app/md/): reads the i360 library's books page by page, opened from search results or from the library (`/md/?file=<book link>#p=<page>`).
+-- [Daily Reflection](https://i360-e.web.app/day/): a daily Qur'an verse and hadith with the Hijri date and prayer times, in five languages.
++- [Book search (i360 CSE)](https://i36o.web.app/cse/): full-text search over the books and pages linked in the app's resource database, grouped by discipline; Arabic. Result pages (`/cse/?q=…`) are not meant for indexing.
++- [Markdown Reader](https://i36o.web.app/md/): reads the i360 library's books page by page, opened from search results or from the library (`/md/?file=<book link>#p=<page>`).
++- [Daily Reflection](https://i36o.web.app/day/): a daily Qur'an verse and hadith with the Hijri date and prayer times, in five languages.
+ 
+ ## Data
+ 
+diff --git a/public/md/index.html b/public/md/index.html
+index 94b1827..245dbc6 100644
+--- a/public/md/index.html
++++ b/public/md/index.html
+@@ -3,7 +3,7 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-9DZDWqmykLn21TZNs97tpjZhoqcumHxYRCgvU4xaawY=' 'sha256-EZ429RhQeRqR4+crMfIanKkWdZ1UDyWjWfn7xn2k2QI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
++  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-EZ429RhQeRqR4+crMfIanKkWdZ1UDyWjWfn7xn2k2QI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+   <meta name="referrer" content="strict-origin-when-cross-origin">
+   <title>قارئ الماركداون</title>
+ 
+@@ -1665,7 +1665,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
+      the Reader page) — and returns the lib site's address for it, or null.
+      Everything else is opened only through open(), i.e. only when the
+      catalog lists it. */
+-  const OLD_BOOK_PATHS = { 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
++  const OLD_BOOK_PATHS = { 'i36o.web.app': '/md/books/', 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
+ 
+   function bookName(path, prefix) {
+     if (!path.startsWith(prefix)) return null;
+diff --git a/scripts/pre-push-hook.sh b/scripts/pre-push-hook.sh
+index 9812b43..328b655 100644
+--- a/scripts/pre-push-hook.sh
++++ b/scripts/pre-push-hook.sh
+@@ -429,15 +429,15 @@ if [ "$DEPLOY_NEEDED" = true ]; then
+   fi
+   echo "✓ Preview channel updated."
+   if [ "$OTA_WITH_RELEASE" = true ]; then
+-    RELEASE_TARGETS="web (i360-e.web.app) and phones (OTA)"
++    RELEASE_TARGETS="web (i36o.web.app) and phones (OTA)"
+   else
+-    RELEASE_TARGETS="web (i360-e.web.app)"
++    RELEASE_TARGETS="web (i36o.web.app)"
+   fi
+   LC_ALL=C.UTF-8 read -p "  Release this build to users — $RELEASE_TARGETS? (y/N) " -n 1 -r < /dev/tty
+   echo
+   if is_yes "$REPLY"; then
+     RELEASE_TO_USERS=true
+-    echo "→ Releasing to the web (i360-e.web.app)..."
++    echo "→ Releasing to the web (i36o.web.app)..."
+     if firebase deploy --only hosting; then
+       echo "✓ Web released."
+     else
+diff --git a/src/lib/openResource.ts b/src/lib/openResource.ts
+index 2b6da0b..cc357f2 100644
+--- a/src/lib/openResource.ts
++++ b/src/lib/openResource.ts
+@@ -20,11 +20,11 @@ export interface OpenContext {
+ // to a new tab and reports that result — never an unhandled rejection.
+ // The app's own pages (hub/, built into public/ — i360-hub.md §10). In the installed app,
+ // a link to one opens the app's own copy in the app's view, not the browser overlay:
+-// today's hub address (Seif 2026-10-22), the future i360-e.web.app one and the old
+-// forwarder. Always as /<page>/index.html: Capacitor's built-in server answers a
++// the app's address i36o.web.app (since 2026-10-23), the old i360-e.web.app and hub
++// addresses and the old forwarders. Always as /<page>/index.html: Capacitor's built-in server answers a
+ // path without a file extension with the app's own index.html (i360-hub.md §10).
+ const OWN_PAGES = ['day', 'md', 'cse']
+-const OWN_HOSTS = ['i360-hub.web.app', 'i360-e.web.app']
++const OWN_HOSTS = ['i36o.web.app', 'i360-e.web.app', 'i360-hub.web.app']
+ const FORWARDERS: Record<string, string> = { 'i360-day.web.app': 'day', 'i360-md.web.app': 'md', 'i360-cse.web.app': 'cse' }
+ 
+ export function ownPagePath(url: string): string | null {
