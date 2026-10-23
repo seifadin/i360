@@ -2,18 +2,22 @@
 
 The Reader, the i360 CSE and Daily Reflection are built here into the app's `public/`
 (`../public/md/`, `../public/cse/`, `../public/day/`) and served with the app: inside it, at
-`https://i360-e.web.app/md|cse|day/` and in its OTA bundle (merge into the app, claude/i360-hub.md §10).
+`https://i36o.web.app/md|cse|day/` and in its OTA bundle (merge into the app, claude/i360-hub.md §10).
 
 ## Forwarding sites (Firebase project `i360-md`, display name `i360-hub`)
 Since merge sprint 7 every site here only forwards (301, path and `?…` kept):
 | Target | Site | Forwards to |
 |---|---|---|
-| `hub` | https://i360-hub.web.app/ | `https://i360-e.web.app/<same path>`; `/md/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
-| `md`  | https://i360-md.web.app/  | `https://i360-e.web.app/md/…`; `/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
-| `cse` | https://i360-cse.web.app/ | `https://i360-e.web.app/cse/…` |
-| `day` | https://i360-day.web.app/ | `https://i360-e.web.app/day/…` |
+| `hub` | https://i360-hub.web.app/ | `https://i36o.web.app/<same path>`; `/md/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+| `md`  | https://i360-md.web.app/  | `https://i36o.web.app/md/…`; `/books/<file>` → `lib.i36o.workers.dev/books/<file>` |
+| `cse` | https://i360-cse.web.app/ | `https://i36o.web.app/cse/…` |
+| `day` | https://i360-day.web.app/ | `https://i36o.web.app/day/…` |
 
 `forward/404.html` is their fallback. They rarely change: `firebase deploy --only hosting` (here, in `hub/`).
+
+**The app's site** is `i36o` in the same project (since 2026-10-23; the app deploys there from the repo root). Its old
+address `i360-e.web.app` (project `i360-e`) only forwards too: `forward-e/` (its own `firebase.json` and `.firebaserc`),
+deployed with `firebase deploy --only hosting` in `hub/forward-e/` — rarely needed.
 
 ## Layout
 ```
@@ -23,7 +27,7 @@ src/day.html          Daily Reflection «التأمل اليومي» → ../publ
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites
 ```
-Link to a book: `https://i360-e.web.app/md/?file=books/NAME.md`
+Link to a book: `https://i36o.web.app/md/?file=books/NAME.md`
 Link to a page: add `#p=45` (or `#p=2:45` for volume 2, page 45).
 
 ## Build

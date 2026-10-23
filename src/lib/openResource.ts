@@ -20,11 +20,11 @@ export interface OpenContext {
 // to a new tab and reports that result — never an unhandled rejection.
 // The app's own pages (hub/, built into public/ — i360-hub.md §10). In the installed app,
 // a link to one opens the app's own copy in the app's view, not the browser overlay:
-// today's hub address (Seif 2026-10-22), the future i360-e.web.app one and the old
-// forwarder. Always as /<page>/index.html: Capacitor's built-in server answers a
+// the app's address i36o.web.app (since 2026-10-23), the old i360-e.web.app and hub
+// addresses and the old forwarders. Always as /<page>/index.html: Capacitor's built-in server answers a
 // path without a file extension with the app's own index.html (i360-hub.md §10).
 const OWN_PAGES = ['day', 'md', 'cse']
-const OWN_HOSTS = ['i360-hub.web.app', 'i360-e.web.app']
+const OWN_HOSTS = ['i36o.web.app', 'i360-e.web.app', 'i360-hub.web.app']
 const FORWARDERS: Record<string, string> = { 'i360-day.web.app': 'day', 'i360-md.web.app': 'md', 'i360-cse.web.app': 'cse' }
 
 export function ownPagePath(url: string): string | null {

@@ -429,15 +429,15 @@ if [ "$DEPLOY_NEEDED" = true ]; then
   fi
   echo "✓ Preview channel updated."
   if [ "$OTA_WITH_RELEASE" = true ]; then
-    RELEASE_TARGETS="web (i360-e.web.app) and phones (OTA)"
+    RELEASE_TARGETS="web (i36o.web.app) and phones (OTA)"
   else
-    RELEASE_TARGETS="web (i360-e.web.app)"
+    RELEASE_TARGETS="web (i36o.web.app)"
   fi
   LC_ALL=C.UTF-8 read -p "  Release this build to users — $RELEASE_TARGETS? (y/N) " -n 1 -r < /dev/tty
   echo
   if is_yes "$REPLY"; then
     RELEASE_TO_USERS=true
-    echo "→ Releasing to the web (i360-e.web.app)..."
+    echo "→ Releasing to the web (i36o.web.app)..."
     if firebase deploy --only hosting; then
       echo "✓ Web released."
     else

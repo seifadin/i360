@@ -6,7 +6,7 @@ i360إ aggregates content from a curated resource database, web search, and the 
 
 ## Access
 
-- [Web app](https://i360-e.web.app/): usable directly in any browser, installable to a device home screen
+- [Web app](https://i36o.web.app/): usable directly in any browser, installable to a device home screen
 - [Google Play](https://play.google.com/store/apps/details?id=com.appgyver.i360): Android app
 - [Apple App Store](https://apps.apple.com/app/id1632337666): iOS app
 
@@ -16,9 +16,9 @@ The app organizes resources across Islamic science disciplines including the Qur
 
 ## Tools inside the app
 
-- [Book search (i360 CSE)](https://i360-e.web.app/cse/): full-text search over the books and pages linked in the app's resource database, grouped by discipline; Arabic. Result pages (`/cse/?q=…`) are not meant for indexing.
-- [Markdown Reader](https://i360-e.web.app/md/): reads the i360 library's books page by page, opened from search results or from the library (`/md/?file=<book link>#p=<page>`).
-- [Daily Reflection](https://i360-e.web.app/day/): a daily Qur'an verse and hadith with the Hijri date and prayer times, in five languages.
+- [Book search (i360 CSE)](https://i36o.web.app/cse/): full-text search over the books and pages linked in the app's resource database, grouped by discipline; Arabic. Result pages (`/cse/?q=…`) are not meant for indexing.
+- [Markdown Reader](https://i36o.web.app/md/): reads the i360 library's books page by page, opened from search results or from the library (`/md/?file=<book link>#p=<page>`).
+- [Daily Reflection](https://i36o.web.app/day/): a daily Qur'an verse and hadith with the Hijri date and prayer times, in five languages.
 
 ## Data
 

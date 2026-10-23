@@ -32,7 +32,7 @@ test('a link is found in the catalog however it is written', () => {
 
 test('our own books: recognised wherever a link names them, and always read from the lib site', () => {
   const LIB_BOOK = (name) => `https://lib.i36o.workers.dev/books/${encodeURIComponent(name)}`;
-  const pages = ['https://i360-e.web.app/md/index.html?file=x', 'https://i360-hub.web.app/md/', 'https://localhost/md/index.html', 'capacitor://localhost/md/index.html', 'file:///home/seif/reader.html'];
+  const pages = ['https://i36o.web.app/md/index.html?file=x', 'https://i360-e.web.app/md/index.html?file=x', 'https://i360-hub.web.app/md/', 'https://localhost/md/index.html', 'capacitor://localhost/md/index.html', 'file:///home/seif/reader.html'];
   for (const page of pages) {
     assert.equal(LibCopy.ownBook('books/display-test.md', page), LIB_BOOK('display-test.md'), page);
     assert.equal(LibCopy.ownBook('./books/a%20b.md', page), LIB_BOOK('a b.md'), page);
@@ -40,6 +40,7 @@ test('our own books: recognised wherever a link names them, and always read from
     assert.equal(LibCopy.ownBook('https://lib.i36o.workers.dev/books/x_ocr.md', page), LIB_BOOK('x_ocr.md'), page);
     assert.equal(LibCopy.ownBook('https://i360-hub.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
     assert.equal(LibCopy.ownBook('https://i360-e.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
+    assert.equal(LibCopy.ownBook('https://i36o.web.app/md/books/x.md', page), LIB_BOOK('x.md'), page);
     assert.equal(LibCopy.ownBook('https://i360-md.web.app/books/x.md', page), LIB_BOOK('x.md'), page);
   }
   // The page's own site, by its full address (the app's built-in server, a local test server).

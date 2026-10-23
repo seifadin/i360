@@ -16,12 +16,12 @@
         },
         {
           "source": "/",
-          "destination": "https://i360-e.web.app/",
+          "destination": "https://i36o.web.app/",
           "type": 301
         },
         {
           "regex": "^/(.+)$",
-          "destination": "https://i360-e.web.app/:1",
+          "destination": "https://i36o.web.app/:1",
           "type": 301
         }
       ]
@@ -42,12 +42,12 @@
         },
         {
           "source": "/",
-          "destination": "https://i360-e.web.app/md/",
+          "destination": "https://i36o.web.app/md/",
           "type": 301
         },
         {
           "regex": "^/(.+)$",
-          "destination": "https://i360-e.web.app/md/:1",
+          "destination": "https://i36o.web.app/md/:1",
           "type": 301
         }
       ]
@@ -63,12 +63,12 @@
       "redirects": [
         {
           "source": "/",
-          "destination": "https://i360-e.web.app/cse/",
+          "destination": "https://i36o.web.app/cse/",
           "type": 301
         },
         {
           "regex": "^/(.+)$",
-          "destination": "https://i360-e.web.app/cse/:1",
+          "destination": "https://i36o.web.app/cse/:1",
           "type": 301
         }
       ]
@@ -84,12 +84,12 @@
       "redirects": [
         {
           "source": "/",
-          "destination": "https://i360-e.web.app/day/",
+          "destination": "https://i36o.web.app/day/",
           "type": 301
         },
         {
           "regex": "^/(.+)$",
-          "destination": "https://i360-e.web.app/day/:1",
+          "destination": "https://i36o.web.app/day/:1",
           "type": 301
         }
       ]

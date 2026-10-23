@@ -1,5 +1,5 @@
 // Builds the self-contained pages into the i360إ app (i360-hub.md §10), served by the app,
-// i360-e.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
+// i36o.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
 //   ../public/md/index.html    the Reader    (from src/reader.src.html)
 //   ../public/cse/index.html   the i360 CSE  (from src/cse.src.html)
 //   ../public/day/index.html   Daily Reflection (from src/day.html)

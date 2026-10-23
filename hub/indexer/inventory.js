@@ -27,7 +27,7 @@ const BASEROW_ROWS = 'https://api.baserow.io/api/database/rows/table/';
 const DEFAULT_TABLE = '193269';
 const LINK_FIELDS = ['BotKB', 'CustomSearchAIKBlessBotKB'];
 const GROUP_FIELDS = ['ScienceMajorId', 'ScienceMajor_Ar', 'ScienceIntermediateId', 'ScienceIntermediate_Ar', 'ScienceMinorId', 'ScienceMinor_Ar'];
-const USER_AGENT = 'i360-cse-inventory/1.0 (+https://i360-e.web.app/)';
+const USER_AGENT = 'i360-cse-inventory/1.0 (+https://i36o.web.app/)';
 const CONCURRENCY = 4;
 const TIMEOUT_MS = 30000;
 const RETRIES = 2;
@@ -222,7 +222,7 @@ async function fetchFollow(fetchFn, step, url, opts) {
 async function probeHeaders(fetchFn, step, url) {
   // As a page on the app's site would ask (i360-hub.md §10). Informational: since merge
   // sprint 5 the Reader and the CSE read only the lib site, never a source directly.
-  const origin = { Origin: 'https://i360-e.web.app' };
+  const origin = { Origin: 'https://i36o.web.app' };
   let { res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'HEAD', headers: origin });
   if (res.status === 405 || res.status === 501) {
     ({ res, finalUrl } = await fetchFollow(fetchFn, step, url, { method: 'GET', headers: { ...origin, Range: 'bytes=0-0' } }));

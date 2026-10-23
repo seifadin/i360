@@ -9,6 +9,7 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 ## [Unreleased] — live on the web and over the air (still version 0.14.0)
 
 ### Changed
+- The encyclopedia's web address is now https://i36o.web.app/ (2026-10-23). The old address https://i360-e.web.app/ and all older ones lead there, links and pages included; on the web, saved choices start fresh once, and an encyclopedia installed from the browser needs installing again
 - The i360 tools now have one address, the encyclopedia's own: the Reader at https://i360-e.web.app/md/, the book search at /cse/ and the Daily Reflection at /day/. The old addresses (i360-hub.web.app, i360-md.web.app, i360-cse.web.app, i360-day.web.app) lead there, links and pages included; on the web, saved choices there (theme, numerals, bookmarks, reading positions, city) start fresh once (2026-10-23)
 - The Daily Reflection has a bar at the top, like the other i360 pages: theme, numerals and a language button (it opens the list of the five languages), the page's name and, inside the app, the close button. On iPhone the bar stays clear of the status bar (2026-10-22)
 - The theme button now comes before the numerals button on every page, the encyclopedia's bottom bar included (2026-10-22)

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-9DZDWqmykLn21TZNs97tpjZhoqcumHxYRCgvU4xaawY=' 'sha256-EZ429RhQeRqR4+crMfIanKkWdZ1UDyWjWfn7xn2k2QI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-EZ429RhQeRqR4+crMfIanKkWdZ1UDyWjWfn7xn2k2QI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1665,7 +1665,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      the Reader page) — and returns the lib site's address for it, or null.
      Everything else is opened only through open(), i.e. only when the
      catalog lists it. */
-  const OLD_BOOK_PATHS = { 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
+  const OLD_BOOK_PATHS = { 'i36o.web.app': '/md/books/', 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
 
   function bookName(path, prefix) {
     if (!path.startsWith(prefix)) return null;

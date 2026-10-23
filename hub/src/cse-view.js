@@ -10,7 +10,7 @@
   'use strict';
 
   const LIB_HOST = 'lib.i36o.workers.dev';
-  // The Reader on the same site as this page (the hub, i360-e.web.app or the app's own copy).
+  // The Reader on the same site as this page (i36o.web.app or the app's own copy).
   // Always /md/index.html: inside the app, Capacitor's server answers /md/ with the app's
   // home page (i360-hub.md §10).
   const READER = '/md/index.html';

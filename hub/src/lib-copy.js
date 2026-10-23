@@ -62,7 +62,7 @@
      the Reader page) — and returns the lib site's address for it, or null.
      Everything else is opened only through open(), i.e. only when the
      catalog lists it. */
-  const OLD_BOOK_PATHS = { 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
+  const OLD_BOOK_PATHS = { 'i36o.web.app': '/md/books/', 'i360-hub.web.app': '/md/books/', 'i360-e.web.app': '/md/books/', 'i360-md.web.app': '/books/' };
 
   function bookName(path, prefix) {
     if (!path.startsWith(prefix)) return null;
