@@ -26,3 +26,7 @@ ios/**/xcuserdata/
 ios/**/*.xcuserstate
 ios/**/.DS_Store
 *.tsbuildinfo
+
+# Local archives and delivered patches — never committed
+*.zip
+*.patch
