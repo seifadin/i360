@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-3thlmQHBkQab26cGr1gKct62Kep+/lnPrmFIT12qj30=' 'sha256-iFI7JKoMeAuTnEDy4toE/oizRbcHM/wKfrDL2x0SpRU='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-3thlmQHBkQab26cGr1gKct62Kep+/lnPrmFIT12qj30=' 'sha256-vlwrgiYbIYnAAhuFiRo6zXM1508j/QmCXe7n8mdhU+4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -1257,6 +1257,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       loadingIndex: 'جارٍ تحميل الفهرس…',
       searching: 'جارٍ البحث…',
       noResults: 'لا نتائج.',
+      noMatches: 'لا توجد نتائج مطابقة',
       loadError: 'تعذّر تحميل الفهرس. تحقق من الاتصال ثم أعد المحاولة.',
       searchError: 'تعذّر إكمال البحث. تحقق من الاتصال ثم أعد المحاولة.',
       retry: 'إعادة المحاولة',
@@ -1456,18 +1457,10 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       updateSummary(ctx);
       applyNumerals();
 
-      // Open groups in order until about one step of results shows.
-      let shown = 0;
-      outer:
-      for (const m of ctx.majors) {
-        for (const g of m.groups) {
-          if (run !== state.run || shown >= CseView.RESULTS_PER_STEP) break outer;
-          m.el.open = true;
-          if (g.details) g.el.open = true;
-          await loadMore(ctx, g);
-          shown += g.shown;
-        }
-      }
+      // Everything starts collapsed, so every science found shows at once (Seif 2026-10-26); a group is
+      // checked only when opened, so its count stays approximate («≈») until then. A science that is
+      // the only one opens by itself (and a lone sub-group inside it — see makeMajor).
+      if (ctx.majors.length === 1) ctx.majors[0].el.open = true;
     }
 
     // A summary line: name, then its count.
@@ -1496,9 +1489,12 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         body.append(g.el);
       }
       updateMajor(m);
-      // Rows without an intermediate show as soon as the major opens.
+      // Rows without an intermediate show as soon as the major opens; a sub-group that is the
+      // only one inside it opens with it.
       el.addEventListener('toggle', () => {
-        if (el.open) for (const g of m.groups) if (!g.details && g.next === 0 && !g.loading) loadMore(ctx, g);
+        if (!el.open) return;
+        if (m.groups.length === 1 && m.groups[0].details) m.groups[0].el.open = true;
+        for (const g of m.groups) if (!g.details && g.next === 0 && !g.loading) loadMore(ctx, g);
       });
       return m;
     }
@@ -1537,8 +1533,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
         g.count.textContent = fmt(g.done ? fmtNum(n) : `≈ ${fmtNum(n)}`);
         g.count.title = g.done ? T.exactTitle : T.approxTitle;
       }
-      // A group with no real match disappears once checked.
-      g.el.hidden = g.done && g.shown === 0;
+      // A group with no real match stays where it was opened and says so (drawFoot).
     }
 
     function updateMajor(m) {
@@ -1546,7 +1541,6 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       const n = m.groups.reduce((a, g) => a + (g.done ? g.shown : g.gps.length), 0);
       m.count.textContent = fmt(exact ? fmtNum(n) : `≈ ${fmtNum(n)}`);
       m.count.title = exact ? T.exactTitle : T.approxTitle;
-      m.el.hidden = exact && n === 0;
     }
 
     // Pages in several groups are counted once.
@@ -1616,6 +1610,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 
     function drawFoot(ctx, g) {
       g.foot.textContent = '';
+      if (g.done && g.shown === 0) { g.foot.textContent = T.noMatches; return; }
       if (g.done) return;
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'more-btn'; b.textContent = T.more;
