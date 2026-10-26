@@ -9,6 +9,7 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 ## [Unreleased] — live on the web and over the air (still version 0.14.0)
 
 ### Changed
+- The Daily Reflection's credits are on two lines too (city data; prayer-time calculation), in all five languages (2026-10-26)
 - The Daily Reflection's privacy line is on two lines, in all five languages: prayer times are calculated on your device; only the name of the city being searched is sent to Open-Meteo (2026-10-26)
 - The Markdown Reader's top bar uses wide screens again: where there's room, bookmark, «الصفحة الأصلية» and reading mode, then zoom, then text size come out of the ⋮ menu onto the bar, and go back into it as the window narrows. «نسخ رابط هذه الصفحة» moved from the contents panel onto the bar, next to the page arrows (2026-10-26)
 - The encyclopedia's web address is now https://i36o.web.app/ (2026-10-23). The old address https://i360-e.web.app/ and all older ones lead there, links and pages included; on the web, saved choices start fresh once, and an encyclopedia installed from the browser needs installing again

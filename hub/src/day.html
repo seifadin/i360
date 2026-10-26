@@ -903,13 +903,13 @@
                 this.renderEvents();
                 this.reveal();
             },
-            // Credits (Open-Meteo and GeoNames: CC BY 4.0; Adhan: MIT), in the page's language.
+            // Credits (Open-Meteo and GeoNames: CC BY 4.0; Adhan: MIT), in the page's language, on two lines.
             renderCredits() {
                 const L = this.L, box = this.targets.credits; if (!box) return;
                 const link = (text, href) => { const a = mk('a', 'underline', text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
                 box.replaceChildren(
                     document.createTextNode(`${L.creditCities}: `), link('Open-Meteo', 'https://open-meteo.com/'), document.createTextNode(' · '),
-                    link('GeoNames', 'https://www.geonames.org/'), document.createTextNode(` — ${L.creditPrayer}: `),
+                    link('GeoNames', 'https://www.geonames.org/'), document.createElement('br'), document.createTextNode(`${L.creditPrayer}: `),
                     link('Adhan', 'https://github.com/batoulapps/adhan-js'));
             },
             renderSchool() {
