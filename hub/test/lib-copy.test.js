@@ -125,3 +125,35 @@ test('open(): reads the catalog and the chunks from lib, or says the link is not
   assert.equal(await LibCopy.open('https://example.com/book.md', fetchFn), null);
   await assert.rejects(LibCopy.open(STREAM, async () => ({ ok: false, status: 503 })), /503/);
 });
+
+test('split part by part as they arrive, a book has exactly the pages of the whole text (the Reader relies on it)', async () => {
+  // Hard cases at the joins: empty pages, a footnote, volumes, Arabic-Indic digits, "?" and "-" labels,
+  // a marker-like line inside the text, a page with no number.
+  const P = (label, vol, paras) => ({ label, vol, paras });
+  const chunks = [
+    [P('1', null, ['أول']), P('2', null, []), P('3', null, ['نص\n\n__________\n(١) حاشية', 'فقرة'])],
+    [P('٤', '2', ['جزء ثان']), P('?', '2', ['']), P('-', null, ['[ص 9] ليس علامة'])],
+    [P('10', '3', ['أ\nب', 'ج']), P('', null, ['فارغ الرقم'])],
+    [P('11', null, [])],
+    Array.from({ length: 40 }, (_, i) => P(String(12 + i), '4', [`صفحة ${i}`, 'فقرة ثانية']))
+  ];
+  const cat = { sources: [{ key: 'kp', id: 'archive:Parts/parts_djvu.txt', type: 'djvu-txt', url: 'https://archive.org/stream/Parts/parts_djvu.txt',
+    links: ['https://archive.org/stream/Parts/parts_djvu.txt'], chunks: chunks.map((_, i) => i), pageCount: 49 }] };
+  const files = { 'latest.json': { buildId: 'b1' }, 'b/b1/catalog.json': cat };
+  chunks.forEach((pages, i) => { files[`b/b1/text/kp/${i}.json`] = { pages }; });
+  // Parts arrive in a shuffled order, as with parallel downloads.
+  const order = [3, 0, 4, 2, 1];
+  const fetchFn = async (url) => {
+    const path = decodeURIComponent(url.slice(LibCopy.LIB.length));
+    const i = order.indexOf(Number((/text\/kp\/(\d+)\.json$/.exec(path) || [])[1]));
+    if (i >= 0) await new Promise((r) => setTimeout(r, i * 3));
+    return files[path] ? { ok: true, json: async () => files[path] } : { ok: false, status: 404 };
+  };
+  const parts = [];
+  const got = await LibCopy.open('https://archive.org/stream/Parts/parts_djvu.txt', fetchFn, null, (c, text) => { parts[c] = BookFormat.parseBook(text); });
+  assert.equal(parts.length, chunks.length);
+  const whole = BookFormat.parseBook(got.text);
+  assert.deepEqual({ format: 'ocr', pages: parts.flatMap((p) => p.pages) }, whole);
+  assert.ok(parts.every((p) => p.format === 'ocr'));
+});
+

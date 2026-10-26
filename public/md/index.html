@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-m4LxxWzf1hTLeFA//3jPLjvFThMVA3QOazhkF5RL2i4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-5K1GVQYcuLHGXOh1os3zTFif9mpMOEk2RZmRcAWhHIo=' 'sha256-AJ6q9PnAt75S13ZQlzX+VYlacpHcEygbzgspC8GMUWc='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1788,9 +1788,10 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   }
 
   /* ---------------- Opening ----------------
-     fetchFn: fetch. onProgress(done, total): chunks downloaded.
-     Resolves to { source, text } for a link in the catalog, or null. */
-  async function open(link, fetchFn, onProgress) {
+     fetchFn: fetch. onProgress(done, total): chunks downloaded. onPart(c, text, total): each
+     chunk's text as it arrives, ready to split into pages (the Reader does, so the work is spread
+     over the download). Resolves to { source, books, text } for a link in the catalog, or null. */
+  async function open(link, fetchFn, onProgress, onPart) {
     const get = async (path) => {
       const res = await fetchFn(LIB + path, path === 'latest.json' ? { cache: 'no-cache' } : {});
       if (!res.ok) throw new Error(`HTTP ${res.status} (${LIB_HOST})`);
@@ -1809,6 +1810,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       while (next < texts.length) {
         const c = next++;
         texts[c] = toBookText((await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages);
+        // Each part as it will sit in the whole text (followed by the blank line that joins it to
+        // the next), so splitting it into pages gives exactly the whole book's pages (tested).
+        if (onPart && texts[c]) onPart(c, c < texts.length - 1 ? `${texts[c]}\n\n` : texts[c], texts.length);
         done++;
         if (onProgress) onProgress(done, texts.length);
       }
@@ -2912,7 +2916,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      Rendering a book
      ================================================================ */
   // key: identifies the book (saved position, bookmarks, links); none = not remembered.
-  async function renderDocument(rawText, extraNotices, key) {
+  async function renderDocument(rawText, extraNotices, key, parsedAlready) {
     const run = ++buildRun;     // a newer book stops this one
     saveNow();                  // the book being closed
     clearSearch();
@@ -2923,7 +2927,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     await nextFrame();
     if (run !== buildRun) return;
 
-    const parsed = parseBook(rawText);
+    const parsed = parsedAlready || parseBook(rawText);
     await nextFrame();
     if (run !== buildRun) return;
     state.format = parsed.format;
@@ -4188,8 +4192,11 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       if (!link) { renderEmpty([{ type: 'notInLibrary' }]); return; }
       // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
       let copy = null;
+      // Each part is split into pages as it arrives, spread over the download, instead of the whole
+      // book at the end (the same shared parseBook; the same pages — test/lib-copy.test.js).
+      const parts = [];
       try {
-        copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total));
+        copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total), (c, text) => { parts[c] = parseBook(text); });
       } catch {
         renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
         void checkConnection();
@@ -4200,7 +4207,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       state.libSource = copy.source;
       state.libBooks = copy.books;
       state.bookLink = link;
-      renderDocument(copy.text, null, `url:${link}`);
+      const n = copy.source.chunks.length;
+      const whole = parts.length === n && parts.every((p) => p && p.format === 'ocr') ? { format: 'ocr', pages: parts.flatMap((p) => p.pages) } : null;
+      renderDocument(copy.text, null, `url:${link}`, whole);   // anything unusual: parsed whole, as before
       return;
     }
     renderEmpty([]);

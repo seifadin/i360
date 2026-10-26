@@ -1975,7 +1975,7 @@
      Rendering a book
      ================================================================ */
   // key: identifies the book (saved position, bookmarks, links); none = not remembered.
-  async function renderDocument(rawText, extraNotices, key) {
+  async function renderDocument(rawText, extraNotices, key, parsedAlready) {
     const run = ++buildRun;     // a newer book stops this one
     saveNow();                  // the book being closed
     clearSearch();
@@ -1986,7 +1986,7 @@
     await nextFrame();
     if (run !== buildRun) return;
 
-    const parsed = parseBook(rawText);
+    const parsed = parsedAlready || parseBook(rawText);
     await nextFrame();
     if (run !== buildRun) return;
     state.format = parsed.format;
@@ -3251,8 +3251,11 @@
       if (!link) { renderEmpty([{ type: 'notInLibrary' }]); return; }
       // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
       let copy = null;
+      // Each part is split into pages as it arrives, spread over the download, instead of the whole
+      // book at the end (the same shared parseBook; the same pages — test/lib-copy.test.js).
+      const parts = [];
       try {
-        copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total));
+        copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total), (c, text) => { parts[c] = parseBook(text); });
       } catch {
         renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
         void checkConnection();
@@ -3263,7 +3266,9 @@
       state.libSource = copy.source;
       state.libBooks = copy.books;
       state.bookLink = link;
-      renderDocument(copy.text, null, `url:${link}`);
+      const n = copy.source.chunks.length;
+      const whole = parts.length === n && parts.every((p) => p && p.format === 'ocr') ? { format: 'ocr', pages: parts.flatMap((p) => p.pages) } : null;
+      renderDocument(copy.text, null, `url:${link}`, whole);   // anything unusual: parsed whole, as before
       return;
     }
     renderEmpty([]);

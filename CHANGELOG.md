@@ -9,7 +9,7 @@ i360إ is an Arabic-only Islamic knowledge discovery app that organizes Islamic 
 ## [Unreleased] — live on the web and over the air (still version 0.14.0)
 
 ### Changed
-- The Markdown Reader's pause while a big book is prepared is shorter (its empty pages are made a slice at a time), and the moving progress stripe keeps moving through it instead of looking stuck (2026-10-26)
+- The Markdown Reader's pause while a big book is prepared is shorter (each downloaded part is split into pages as it arrives, and its empty pages are made a slice at a time), and the moving progress stripe keeps moving through it instead of looking stuck (2026-10-26)
 - The Daily Reflection uses wide screens: where two columns fit, the verse and the hadith sit on one side and prayer times above the upcoming events on the other, the events list scrolling within the column's height; on phones it stays one column, with a little less padding inside the cards (2026-10-26)
 - The Daily Reflection's credits are on two lines too (city data; prayer-time calculation), in all five languages (2026-10-26)
 - The Daily Reflection's privacy line is on two lines, in all five languages: prayer times are calculated on your device; only the name of the city being searched is sent to Open-Meteo (2026-10-26)

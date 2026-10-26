@@ -164,9 +164,10 @@
   }
 
   /* ---------------- Opening ----------------
-     fetchFn: fetch. onProgress(done, total): chunks downloaded.
-     Resolves to { source, text } for a link in the catalog, or null. */
-  async function open(link, fetchFn, onProgress) {
+     fetchFn: fetch. onProgress(done, total): chunks downloaded. onPart(c, text, total): each
+     chunk's text as it arrives, ready to split into pages (the Reader does, so the work is spread
+     over the download). Resolves to { source, books, text } for a link in the catalog, or null. */
+  async function open(link, fetchFn, onProgress, onPart) {
     const get = async (path) => {
       const res = await fetchFn(LIB + path, path === 'latest.json' ? { cache: 'no-cache' } : {});
       if (!res.ok) throw new Error(`HTTP ${res.status} (${LIB_HOST})`);
@@ -185,6 +186,9 @@
       while (next < texts.length) {
         const c = next++;
         texts[c] = toBookText((await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages);
+        // Each part as it will sit in the whole text (followed by the blank line that joins it to
+        // the next), so splitting it into pages gives exactly the whole book's pages (tested).
+        if (onPart && texts[c]) onPart(c, c < texts.length - 1 ? `${texts[c]}\n\n` : texts[c], texts.length);
         done++;
         if (onProgress) onProgress(done, texts.length);
       }
