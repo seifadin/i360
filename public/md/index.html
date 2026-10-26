@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-EZ429RhQeRqR4+crMfIanKkWdZ1UDyWjWfn7xn2k2QI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-VKk04TqIlegYxoHYFvgH3PBNEmdDYz7XyzE1DN9heXo='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -510,6 +510,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       gap: 0.2rem;
     }
     .tb-group { display: flex; align-items: center; gap: 0.15rem; }
+    .tb-main > .tb-group:not(#group-nav) { padding: 0 0.2rem; }
     /* The arrows keep their places whatever the language: in an RTL book the left one is "next". */
     #group-nav { direction: ltr; }
     .tb-title {
@@ -1114,10 +1115,11 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   <!-- Toolbar (i360-hub.md §10 "Toolbars"). It follows the UI language: in Arabic its start is
        on the right. Start: ⋮, theme, numerals, then the connection icon and «فتح ملف»; middle:
-       the page arrows and number; end: search, contents, the title and ✕ (in the app only).
-       Zoom, text size and the view buttons live in the ⋮ menu; when the row doesn't fit
-       (measured, not by screen width) the title goes first, then search, «فتح ملف» and the
-       connection icon move into ⋮ too. -->
+       the page arrows and number, with copy link after them; end: search, contents, the title
+       and ✕ (in the app only). Where there is room (measured, not by screen width), text size
+       and zoom come out before the page arrows, and bookmark, «الصفحة الأصلية» and reading mode
+       after copy link; they go back into ⋮ first when space runs out, then the title, then
+       search, «فتح ملف» and the connection icon (fitToolbar). Direction always lives in ⋮. -->
   <header class="toolbar" id="toolbar">
     <div class="tb-start">
       <button class="toolbar-btn" id="btn-more" type="button" aria-controls="more-menu" aria-expanded="false">
@@ -1146,6 +1148,9 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
           <svg data-lucide="chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
         </button>
       </div>
+      <button class="toolbar-btn" id="btn-copy-link" type="button" hidden>
+        <svg data-lucide="link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      </button>
     </div>
 
     <div class="tb-end">
@@ -1181,17 +1186,19 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
         <button class="toolbar-btn text-size-btn" id="btn-text-smaller" type="button" dir="ltr"></button>
         <button class="toolbar-btn text-size-btn" id="btn-text-larger" type="button" dir="ltr"></button>
       </div>
-      <div class="tb-group" id="group-view">
-        <button class="toolbar-btn" id="btn-scan" type="button" hidden>
-          <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
-        </button>
-        <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
+      <div class="tb-group" id="group-acts">
         <button class="toolbar-btn" id="btn-bookmark" type="button" aria-pressed="false">
           <svg data-lucide="bookmark" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-scan" type="button" hidden>
+          <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
         </button>
         <button class="toolbar-btn" id="btn-reading" type="button">
           <svg data-lucide="maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
         </button>
+      </div>
+      <div class="tb-group" id="group-view">
+        <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
       </div>
     </div>
   </header>
@@ -1233,9 +1240,6 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     <div class="panel-head" role="tablist">
       <button class="panel-tab" id="tab-contents" type="button" role="tab" aria-selected="true"></button>
       <button class="panel-tab" id="tab-bookmarks" type="button" role="tab" aria-selected="false"></button>
-      <button class="panel-btn" id="btn-copy-link" type="button" hidden>
-        <svg data-lucide="link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-      </button>
       <button class="panel-btn" id="btn-panel-close" type="button">
         <svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
       </button>
@@ -2953,9 +2957,18 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      Our copy of a book (from the lib site): its scan on archive.org
      ================================================================ */
   function updateScanButton() {
+    updateCopyLink();
     const show = !!(state.libSource && LibCopy.scanLink(state.libSource, 0, state.libBooks));
     if (btnScan.hidden === !show) return;
     btnScan.hidden = !show;
+    queueFitToolbar();
+  }
+
+  // Copy link, on the bar whenever this book has a public link (Reader's "share").
+  function updateCopyLink() {
+    const show = isLinkable() && !!shareLink();
+    if (btnCopyLink.hidden === !show) return;
+    btnCopyLink.hidden = !show;
     queueFitToolbar();
   }
 
@@ -3572,7 +3585,6 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     const tr = t();
     tabContents.setAttribute('aria-selected', state.panelTab === 'contents' ? 'true' : 'false');
     tabBookmarks.setAttribute('aria-selected', state.panelTab === 'bookmarks' ? 'true' : 'false');
-    btnCopyLink.hidden = !(isLinkable() && shareLink());
     panelBody.textContent = '';
 
     if (state.sheets.length === 0) { panelBody.appendChild(emptyNote(tr.emptyHint)); return; }
@@ -3645,42 +3657,62 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
   /* ================================================================
      Toolbar layout by measurement (no fixed screen widths)
-     Level 0: everything in one row. Level 1: the title is hidden. Level 2:
-     search, «فتح ملف» and the connection icon move into the ⋮ menu.
-     Level 3: the file position "(12/70)" is hidden (it stays in the page
-     box's tooltip). Level 4: tighter spacing. Level 5: the "of N" total is
-     hidden. Level 6: the volume menu moves into ⋮ too. Level 7: the smallest
-     buttons, for very narrow screens with large text. The page arrows
-     always stay. The first level whose row really fits is used, so it
-     follows the language, labels, digits, fonts and the browser's text size.
+     The first level whose row really fits is used, so it follows the language, labels,
+     digits, fonts and the browser's text size. On a wide screen, groups of the ⋮ menu come
+     out onto the bar; they go back first when space runs out:
+       0: text size, zoom, and bookmark · «الصفحة الأصلية» · reading mode all on the bar
+       1: text size back in ⋮    2: zoom back in ⋮    3: bookmark … reading mode back in ⋮
+       4: the title is hidden    5: search, «فتح ملف» and the connection icon move into ⋮
+       6: the file position "(12/70)" is hidden (it stays in the page box's tooltip)
+       7: tighter spacing        8: the "of N" total is hidden
+       9: the volume menu moves into ⋮ too    10: the smallest buttons, for very narrow
+       screens with large text   11: last resort — copy link into ⋮ too
+     The page arrows always stay; direction always lives in ⋮.
      ================================================================ */
   const groupFold = $('group-fold');
-  // Moved into ⋮ at level 2, in this order; each returns to its own place.
-  const FOLD = [statusIcon, btnOpenFile, btnSearchToggle].map((el) => {
+  // Moved into ⋮'s first row at their level, in this order; each returns to its own place.
+  const FOLD = [[statusIcon, 5], [btnOpenFile, 5], [btnSearchToggle, 5], [btnCopyLink, 11]].map(([el, at]) => {
     const home = document.createComment(el.id);
     el.parentNode.insertBefore(home, el);
-    return { el, home };
+    return { el, home, at };
+  });
+  // ⋮'s groups that come out onto the bar while level < out: each has its place in ⋮
+  // and its place on the bar (text size and zoom before the page arrows, the rest after copy link).
+  const groupNav = $('group-nav');
+  const OUT = [['group-text', 1, 'before'], ['group-zoom', 2, 'before'], ['group-acts', 3, 'after']].map(([id, out, side]) => {
+    const el = $(id);
+    const home = document.createComment(id);
+    el.parentNode.insertBefore(home, el);
+    return { el, home, out, side };
   });
   let toolbarLevel = -1;
-  const TOOLBAR_LEVELS = 7;
+  const TOOLBAR_LEVELS = 11;
 
   function setToolbarLevel(level) {
     if (level === toolbarLevel) return;
     toolbarLevel = level;
-    document.body.classList.toggle('notitle', level >= 1);
-    const folded = level >= 2;
+    // On the bar, in order: text size, zoom, the page arrows, copy link, bookmark … reading mode.
+    for (const g of OUT) {
+      if (level < g.out) {
+        // Text size, then zoom, each placed just before the arrows: they end up in that order.
+        if (g.side === 'before') tbMain.insertBefore(g.el, groupNav);
+        else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
+      } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
+    }
+    document.body.classList.toggle('notitle', level >= 4);
+    const folded = level >= 5;
     document.body.classList.toggle('folded', folded);
-    document.body.classList.toggle('nopos', level >= 3);
-    document.body.classList.toggle('tight', level >= 4);
-    document.body.classList.toggle('tighter', level >= 5);
-    document.body.classList.toggle('tightest', level >= 7);
+    document.body.classList.toggle('nopos', level >= 6);
+    document.body.classList.toggle('tight', level >= 7);
+    document.body.classList.toggle('tighter', level >= 8);
+    document.body.classList.toggle('tightest', level >= 10);
     for (const f of FOLD) {
-      if (folded) { if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el); }
+      if (level >= f.at) { if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el); }
       else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
     }
     groupFold.hidden = !folded;
     const counter = toolbar.querySelector('.page-counter');
-    if (level >= 6) { if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild); }
+    if (level >= 9) { if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild); }
     else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
   }
 
