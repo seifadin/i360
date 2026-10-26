@@ -106,6 +106,13 @@
     }
     .tb-group { display: flex; align-items: center; gap: 0.15rem; }
     .tb-main > .tb-group:not(#group-nav) { padding: 0 0.2rem; }
+    /* On a wide bar, thin dividers between the groups: text size | zoom | the page arrows | the page
+       actions. Each comes and goes with its group, and is part of it when the bar is measured. */
+    .tb-main > #group-text::after, .tb-main > #group-zoom::after {
+      content: ''; width: 1px; height: 1.25rem; background-color: var(--toolbar-border); flex-shrink: 0; margin-inline-start: 0.35rem;
+    }
+    .tb-main > .divider { margin: 0; display: none; }
+    body.acts-out .tb-main > .divider { display: block; }
     /* The arrows keep their places whatever the language: in an RTL book the left one is "next". */
     #group-nav { direction: ltr; }
     .tb-title {
@@ -743,6 +750,7 @@
           <svg data-lucide="chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
         </button>
       </div>
+      <div class="divider" aria-hidden="true"></div>
       <button class="toolbar-btn" id="btn-copy-link" type="button" hidden>
         <svg data-lucide="link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
       </button>
@@ -2762,6 +2770,7 @@
         else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
       } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
     }
+    document.body.classList.toggle('acts-out', level < 3);   // the divider before the page actions
     document.body.classList.toggle('notitle', level >= 4);
     const folded = level >= 5;
     document.body.classList.toggle('folded', folded);
