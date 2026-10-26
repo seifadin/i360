@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-jzRvo57VPy2GXiXBTyaLfbfo+91bo2IlJ+K5m6ROsmM='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-6Xl2fhkCG17PDd+z4S76MNdZj2pIiS8JIGqFv/egZ9I=' 'sha256-m4LxxWzf1hTLeFA//3jPLjvFThMVA3QOazhkF5RL2i4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -632,8 +632,14 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     .progress-text { white-space: nowrap; font-variant-numeric: tabular-nums; flex-shrink: 0; }
     .progress-track { display: block; flex: 1; min-width: 3rem; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
     .progress-fill { display: block; height: 100%; width: 0; background: var(--i360-accent); transition: width 0.2s linear; }
-    .progress.indeterminate .progress-fill { width: 30%; animation: progress-slide 1.2s ease-in-out infinite; }
-    @keyframes progress-slide { from { margin-inline-start: -30%; } to { margin-inline-start: 100%; } }
+    /* The moving stripe slides by transform, which the browser draws on its own track: it keeps
+       moving even while the page is busy (a margin animation froze with it, and looked stuck). */
+    .progress.indeterminate .progress-fill { width: 30%; will-change: transform; animation: progress-slide 1.2s ease-in-out infinite; }
+    /* Direction as the page shows it: the body's, set from the book (the html tag stays rtl). */
+    html[dir="rtl"] body:not([dir="ltr"]) .progress.indeterminate .progress-fill,
+    body[dir="rtl"] .progress.indeterminate .progress-fill { animation-name: progress-slide-rtl; }
+    @keyframes progress-slide { from { transform: translateX(-100%); } to { transform: translateX(334%); } }
+    @keyframes progress-slide-rtl { from { transform: translateX(100%); } to { transform: translateX(-334%); } }
     @media (prefers-reduced-motion: reduce) { .progress.indeterminate .progress-fill { animation: none; width: 100%; opacity: 0.4; } }
 
     /* The ⋮ menu: zoom, text size and the view buttons; on narrow screens also search,
@@ -2933,15 +2939,20 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
 
     applyLocalization();
 
+    // The empty pages, in slices of BUILD_SLICE_MS with a frame between them, so the browser lays
+    // them out a slice at a time instead of all at once (seen as a 1–2 s freeze on big books).
     pagesWrapper.textContent = '';
-    const frag = document.createDocumentFragment();
-    state.sheets = state.pages.map((p, i) => {
-      const sheet = sheetShell(i);
-      frag.appendChild(sheet);
-      return sheet;
-    });
+    state.sheets = [];
     state.built = 0;
-    pagesWrapper.appendChild(frag);
+    state.volTotals = volumeTotals(state.pages);
+    const sheets = new Array(state.pages.length);
+    for (let i = 0; i < sheets.length;) {
+      const start = performance.now(), frag = document.createDocumentFragment();
+      for (; i < sheets.length && performance.now() - start < BUILD_SLICE_MS; i++) frag.appendChild(sheets[i] = sheetShell(i));
+      pagesWrapper.appendChild(frag);
+      if (i < sheets.length) { await nextFrame(); if (run !== buildRun) return; }
+    }
+    state.sheets = sheets;
     emptyState.classList.toggle('visible', state.sheets.length === 0);
 
     buildVolumeSelect();
@@ -3083,7 +3094,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     renderNotices();
     updateSearchCountDisplay();
     updateBookmarkButton();
-    fitToolbar();               // labels and language change the toolbar's width
+    queueFitToolbar();          // labels and language change the toolbar's width (once per frame, before it's drawn)
   }
 
   btnDirToggle.addEventListener('click', () => {
@@ -3280,12 +3291,15 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
     return p.label === '-' ? '—' : (p.label === '?' ? '؟' : fmtNum(p.label));
   }
 
+  // The last printed page of each volume, worked out once per book (renderDocument).
+  function volumeTotals(pages) {
+    const max = new Map();
+    for (const p of pages) if (p.num != null && !(max.get(p.vol) >= p.num)) max.set(p.vol, p.num);
+    return max;
+  }
   function volumeTotal(vol) {
     if (state.format === 'plain') return String(state.pages.length);
-    let max = null;
-    for (const p of state.pages) {
-      if (p.vol === vol && p.num != null && (max == null || p.num > max)) max = p.num;
-    }
+    const max = state.volTotals ? state.volTotals.get(vol) : undefined;
     return max == null ? '—' : String(max);
   }
 

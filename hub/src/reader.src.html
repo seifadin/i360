@@ -227,8 +227,14 @@
     .progress-text { white-space: nowrap; font-variant-numeric: tabular-nums; flex-shrink: 0; }
     .progress-track { display: block; flex: 1; min-width: 3rem; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
     .progress-fill { display: block; height: 100%; width: 0; background: var(--i360-accent); transition: width 0.2s linear; }
-    .progress.indeterminate .progress-fill { width: 30%; animation: progress-slide 1.2s ease-in-out infinite; }
-    @keyframes progress-slide { from { margin-inline-start: -30%; } to { margin-inline-start: 100%; } }
+    /* The moving stripe slides by transform, which the browser draws on its own track: it keeps
+       moving even while the page is busy (a margin animation froze with it, and looked stuck). */
+    .progress.indeterminate .progress-fill { width: 30%; will-change: transform; animation: progress-slide 1.2s ease-in-out infinite; }
+    /* Direction as the page shows it: the body's, set from the book (the html tag stays rtl). */
+    html[dir="rtl"] body:not([dir="ltr"]) .progress.indeterminate .progress-fill,
+    body[dir="rtl"] .progress.indeterminate .progress-fill { animation-name: progress-slide-rtl; }
+    @keyframes progress-slide { from { transform: translateX(-100%); } to { transform: translateX(334%); } }
+    @keyframes progress-slide-rtl { from { transform: translateX(100%); } to { transform: translateX(-334%); } }
     @media (prefers-reduced-motion: reduce) { .progress.indeterminate .progress-fill { animation: none; width: 100%; opacity: 0.4; } }
 
     /* The ⋮ menu: zoom, text size and the view buttons; on narrow screens also search,
@@ -1996,15 +2002,20 @@
 
     applyLocalization();
 
+    // The empty pages, in slices of BUILD_SLICE_MS with a frame between them, so the browser lays
+    // them out a slice at a time instead of all at once (seen as a 1–2 s freeze on big books).
     pagesWrapper.textContent = '';
-    const frag = document.createDocumentFragment();
-    state.sheets = state.pages.map((p, i) => {
-      const sheet = sheetShell(i);
-      frag.appendChild(sheet);
-      return sheet;
-    });
+    state.sheets = [];
     state.built = 0;
-    pagesWrapper.appendChild(frag);
+    state.volTotals = volumeTotals(state.pages);
+    const sheets = new Array(state.pages.length);
+    for (let i = 0; i < sheets.length;) {
+      const start = performance.now(), frag = document.createDocumentFragment();
+      for (; i < sheets.length && performance.now() - start < BUILD_SLICE_MS; i++) frag.appendChild(sheets[i] = sheetShell(i));
+      pagesWrapper.appendChild(frag);
+      if (i < sheets.length) { await nextFrame(); if (run !== buildRun) return; }
+    }
+    state.sheets = sheets;
     emptyState.classList.toggle('visible', state.sheets.length === 0);
 
     buildVolumeSelect();
@@ -2146,7 +2157,7 @@
     renderNotices();
     updateSearchCountDisplay();
     updateBookmarkButton();
-    fitToolbar();               // labels and language change the toolbar's width
+    queueFitToolbar();          // labels and language change the toolbar's width (once per frame, before it's drawn)
   }
 
   btnDirToggle.addEventListener('click', () => {
@@ -2343,12 +2354,15 @@
     return p.label === '-' ? '—' : (p.label === '?' ? '؟' : fmtNum(p.label));
   }
 
+  // The last printed page of each volume, worked out once per book (renderDocument).
+  function volumeTotals(pages) {
+    const max = new Map();
+    for (const p of pages) if (p.num != null && !(max.get(p.vol) >= p.num)) max.set(p.vol, p.num);
+    return max;
+  }
   function volumeTotal(vol) {
     if (state.format === 'plain') return String(state.pages.length);
-    let max = null;
-    for (const p of state.pages) {
-      if (p.vol === vol && p.num != null && (max == null || p.num > max)) max = p.num;
-    }
+    const max = state.volTotals ? state.volTotals.get(vol) : undefined;
     return max == null ? '—' : String(max);
   }
 
