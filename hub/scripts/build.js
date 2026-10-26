@@ -40,6 +40,7 @@ const { join, dirname } = require('node:path');
 const root = join(__dirname, '..');
 const read = (p) => readFileSync(p, 'utf8');
 const { fallbackCss } = require('../theme/fallbacks.js');
+const { checkInlineScripts } = require('./check-scripts.js');
 
 // The shared theme site: theme.css, the fonts (and the hosted copy of the loader).
 const THEME_ORIGIN = process.env.I360_THEME_ORIGIN || 'https://theme.i36o.workers.dev';
@@ -86,6 +87,7 @@ function buildPage({ src, out, scripts, connectSrc, fills = [] }) {
   for (const [placeholder, file] of scripts) html = fill(html, placeholder, inlineScript(file.code, file.name));
   if (/fonts\.googleapis|fonts\.gstatic/.test(html)) throw new Error(`${src}: Google Fonts left in the page: fonts come from the theme site`);
   if (connectSrc !== '*') connectSrc = connectSrc === "'none'" ? THEME_ORIGIN : `${THEME_ORIGIN} ${connectSrc}`;
+  checkInlineScripts(html, src);   // a script that doesn't parse stops the build (scripts/check-scripts.js)
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((m) => `'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
   if (/<script\b[^>]*\bsrc=/i.test(html.replace(/<script>[\s\S]*?<\/script>/g, ''))) {

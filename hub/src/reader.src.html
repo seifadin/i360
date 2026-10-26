@@ -347,9 +347,13 @@
       flex-direction: column;
       flex-shrink: 0;
       font-size: calc(1rem * var(--text-scale));
-      content-visibility: auto;
+      /* Far pages are skipped and not watched (hidden); pages near the screen are watched by the
+         browser and drawn as they come into view (auto). Chrome watches every 'auto' page on every
+         frame something changes, which on a 3,000-page book took a third of each frame (updateNear). */
+      content-visibility: hidden;
       contain-intrinsic-size: auto var(--page-w) calc(var(--page-w) * 1.4142);
     }
+    .page-sheet.near { content-visibility: auto; }
     /* Bookmark ribbon at the page's top corner */
     .page-sheet.bookmarked::before {
       content: "";
@@ -715,7 +719,7 @@
       .toolbar, .search-popup, .missing-pages-banner, .side-panel, .floating-btn, .toast, .empty-state { display: none !important; }
       .viewer-container { overflow: visible; padding: 0; }
       .pages-wrapper { zoom: 1 !important; width: auto; }
-      .page-sheet { box-shadow: none; break-after: page; content-visibility: visible; min-height: 0; background: #fff; color: #000; }
+      .page-sheet, .page-sheet.near { box-shadow: none; break-after: page; content-visibility: visible; min-height: 0; background: #fff; color: #000; }
       .page-sheet.bookmarked::before { display: none; }
     }
   </style>
@@ -1653,24 +1657,45 @@
   }
 
   // The sheet at the top of the view (binary search: sheets are in page order).
-  function sheetAtTop() {
-    const sheets = state.sheets, top = viewerContainer.getBoundingClientRect().top;
+  // The first page whose bottom is below y, and the last page whose top is above y.
+  function sheetEndingBelow(y) {
+    const sheets = state.sheets;
     let lo = 0, hi = sheets.length - 1, ans = 0;
     while (lo <= hi) {
       const mid = (lo + hi) >> 1;
-      if (sheets[mid].getBoundingClientRect().bottom > top) { ans = mid; hi = mid - 1; } else lo = mid + 1;
+      if (sheets[mid].getBoundingClientRect().bottom > y) { ans = mid; hi = mid - 1; } else lo = mid + 1;
     }
     return ans;
   }
-
-  function sheetAtBottom() {
-    const sheets = state.sheets, bottom = viewerContainer.getBoundingClientRect().bottom;
+  function sheetStartingAbove(y) {
+    const sheets = state.sheets;
     let lo = 0, hi = sheets.length - 1, ans = 0;
     while (lo <= hi) {
       const mid = (lo + hi) >> 1;
-      if (sheets[mid].getBoundingClientRect().top < bottom) { ans = mid; lo = mid + 1; } else hi = mid - 1;
+      if (sheets[mid].getBoundingClientRect().top < y) { ans = mid; lo = mid + 1; } else hi = mid - 1;
     }
     return ans;
+  }
+  function sheetAtTop() { return sheetEndingBelow(viewerContainer.getBoundingClientRect().top); }
+  function sheetAtBottom() { return sheetStartingAbove(viewerContainer.getBoundingClientRect().bottom); }
+
+  /* Pages near the screen — on it and about one screen's height above and below, measured —
+     carry .near (content-visibility: auto); all others stay hidden, which the browser neither
+     draws nor watches. Updated at most once a frame: on scroll, resize, a jump and while building. */
+  let nearFrom = 0, nearTo = -1, nearQueued = false;
+  function queueNear() {
+    if (nearQueued) return;
+    nearQueued = true;
+    requestAnimationFrame(() => { nearQueued = false; updateNear(); });
+  }
+  function updateNear() {
+    const sheets = state.sheets;
+    if (!sheets.length) { nearFrom = 0; nearTo = -1; return; }
+    const v = viewerContainer.getBoundingClientRect();
+    const from = sheetEndingBelow(v.top - v.height), to = sheetStartingAbove(v.bottom + v.height);
+    for (let i = nearFrom; i <= nearTo; i++) if ((i < from || i > to) && sheets[i]) sheets[i].classList.remove('near');
+    for (let i = from; i <= to; i++) sheets[i].classList.add('near');
+    nearFrom = from; nearTo = to;
   }
 
   // Pages filling in above the view change their height; the view must stay on the same spot
@@ -1731,6 +1756,7 @@
       }
       if (!ready) { ready = true; onReady(); }   // the landing page has its text: go there
       else if (anchor) keepAnchor(anchor);
+      queueNear();
       if (state.built < n) {
         setProgress('building', state.built, n);
         await nextFrame();
@@ -2016,6 +2042,8 @@
       if (i < sheets.length) { await nextFrame(); if (run !== buildRun) return; }
     }
     state.sheets = sheets;
+    nearFrom = 0; nearTo = -1;
+    updateNear();
     emptyState.classList.toggle('visible', state.sheets.length === 0);
 
     buildVolumeSelect();
@@ -2321,7 +2349,10 @@
   btnFitPage.addEventListener('click', fitPage);
 
   let resizeQueued = false;
+  // Anything that moves the pages (zoom, text size, a page filling in, fonts) re-checks which are near.
+  if (typeof ResizeObserver === 'function') new ResizeObserver(queueNear).observe(pagesWrapper);
   window.addEventListener('resize', () => {
+    queueNear();
     if (resizeQueued) return;
     resizeQueued = true;
     requestAnimationFrame(() => {
@@ -2420,7 +2451,7 @@
   viewerContainer.addEventListener('scroll', () => {
     if (scrollQueued) return;
     scrollQueued = true;
-    requestAnimationFrame(() => { scrollQueued = false; updateCounter(false); });
+    requestAnimationFrame(() => { scrollQueued = false; updateNear(); updateCounter(false); });
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
   }, { passive: true });

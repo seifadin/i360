@@ -156,4 +156,3 @@ test('split part by part as they arrive, a book has exactly the pages of the who
   assert.deepEqual({ format: 'ocr', pages: parts.flatMap((p) => p.pages) }, whole);
   assert.ok(parts.every((p) => p.format === 'ocr'));
 });
-
