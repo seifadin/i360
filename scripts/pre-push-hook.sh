@@ -321,6 +321,33 @@ if [ "$BRANCH" != "vite" ]; then
   exit 0
 fi
 
+# --- Hub tests (2026-10-26; claude/i360-instructions.md §12.17) — when this push changes
+# anything in hub/ (or the change list is unknown), the hub's own tests run first, from
+# hub/: the Reader, CSE and Daily Reflection logic, the shared book format and search, the
+# indexer, the theme, the Hijri date, and that every built page's scripts parse. A failure
+# stops the push (exit 1) before anything is published or deployed. The hub's packages are
+# installed once (npm ci) if hub/node_modules is missing. About 25 s.
+if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/'; then
+  echo "→ hub/ changed — running the hub's tests..."
+  if [ ! -d hub/node_modules ]; then
+    echo "  First time: installing the hub's packages (cd hub && npm ci)..."
+    if ! (cd hub && npm ci --no-audit --no-fund); then
+      echo "✗ The hub's packages couldn't be installed — push stopped: nothing was pushed."
+      exit 1
+    fi
+  fi
+  HUB_TEST_LOG=$(mktemp)
+  if (cd hub && npm test --silent) >"$HUB_TEST_LOG" 2>&1; then
+    echo "✓ Hub tests passed."
+    rm -f "$HUB_TEST_LOG"
+  else
+    grep -E -A6 '^not ok' "$HUB_TEST_LOG" | head -30 || true
+    echo "✗ Hub tests failed — push stopped: nothing was pushed, published or released."
+    echo "  Full output: $HUB_TEST_LOG   (or: cd hub && npm test)"
+    exit 1
+  fi
+fi
+
 # --- Hub Workers (merge sprint 2, 2026-10-21; claude/i360-hub.md §2) —
 # replaces the hub's two publish workflows (§12.17). When this push
 # changes hub/theme/ or hub/hijri/, that Worker is checked and published
