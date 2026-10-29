@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-W5wK+hoEd/J06oBRnuCOUMa/HHKASaz2rxCnrxTFWbY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-M7bD44hHIt+4q+o2kV/Pw6Fz7c8RRhIznMzr7w/hsPc='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1011,6 +1011,851 @@
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
+  // theme/site/theme-loader.js
+  var THEMES = ["system", "light", "sepia", "dark"];
+  var NUMERALS = ["western", "arabic", "persian"];
+  var NUMERALS_KEY = "i360.numerals";
+  var CHOICE_KEY = "i360.theme";
+  var CACHE_KEY = "i360.theme.css";
+  var CSS_URL = new URL("theme.css", "https://theme.i36o.workers.dev/theme-loader.js").href;
+  var NUMERALS_SAMPLE = Object.freeze({ western: "456", arabic: "٤٥٦", persian: "۴۵۶" });
+  var LABELS = Object.freeze({
+    ar: {
+      theme: { system: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)", light: "المظهر: فاتح (انقر للتبديل إلى ورقي)", sepia: "المظهر: ورقي (انقر للتبديل إلى داكن)", dark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)" },
+      numerals: { western: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)", arabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)", persian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)" }
+    },
+    en: {
+      theme: { system: "Theme: follows this device (click for light)", light: "Theme: light (click for sepia)", sepia: "Theme: sepia (click for dark)", dark: "Theme: dark (click to follow this device)" },
+      numerals: { western: "Numerals: Western 456 (click for Eastern Arabic ٤٥٦)", arabic: "Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)", persian: "Numerals: Persian/Urdu ۴۵۶ (click for Western 456)" }
+    },
+    tr: {
+      theme: { system: "Tema: cihaza göre (açık için tıklayın)", light: "Tema: açık (sepya için tıklayın)", sepia: "Tema: sepya (koyu için tıklayın)", dark: "Tema: koyu (cihaza göre için tıklayın)" },
+      numerals: { western: "Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)", arabic: "Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)", persian: "Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)" }
+    },
+    id: {
+      theme: { system: "Tema: mengikuti perangkat (klik untuk terang)", light: "Tema: terang (klik untuk sepia)", sepia: "Tema: sepia (klik untuk gelap)", dark: "Tema: gelap (klik untuk mengikuti perangkat)" },
+      numerals: { western: "Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)", arabic: "Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)", persian: "Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)" }
+    },
+    ur: {
+      theme: { system: "تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)", light: "تھیم: روشن (سیپیا کے لیے کلک کریں)", sepia: "تھیم: سیپیا (تاریک کے لیے کلک کریں)", dark: "تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)" },
+      numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
+    }
+  });
+  var labelsFor = (lang2) => LABELS[lang2] || LABELS.ar;
+  function themeLabel(choice, lang2 = "ar") {
+    return labelsFor(lang2).theme[choice] || "";
+  }
+  function numeralsLabel(numerals, lang2 = "ar") {
+    return labelsFor(lang2).numerals[numerals] || "";
+  }
+  var STYLE_ID = "i360-theme";
+  var MAX_CSS = 256 * 1024;
+  var root = document.documentElement;
+  var darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  var listeners = /* @__PURE__ */ new Set();
+  var numeralListeners = /* @__PURE__ */ new Set();
+  var started = false;
+  function read(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+  function write(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  function lockedTheme() {
+    const t2 = root.getAttribute("data-i360-lock");
+    return THEMES.includes(t2) ? t2 : null;
+  }
+  function getChoice() {
+    const lock = lockedTheme();
+    if (lock) return lock;
+    const c = read(CHOICE_KEY);
+    return THEMES.includes(c) ? c : "system";
+  }
+  function getTheme(choice = getChoice()) {
+    if (choice !== "system") return choice;
+    return darkQuery && darkQuery.matches ? "dark" : "light";
+  }
+  function apply() {
+    const choice = getChoice();
+    const theme = getTheme(choice);
+    const changed = root.getAttribute("data-theme") !== theme;
+    root.setAttribute("data-theme", theme);
+    for (const fn2 of listeners) {
+      try {
+        fn2({ choice, theme, changed });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return { choice, theme };
+  }
+  function setChoice(choice) {
+    if (!THEMES.includes(choice)) throw new Error(`Unknown theme: ${choice}`);
+    if (!lockedTheme()) write(CHOICE_KEY, choice);
+    return apply();
+  }
+  function cycle() {
+    const c = getChoice();
+    return setChoice(THEMES[(THEMES.indexOf(c) + 1) % THEMES.length]);
+  }
+  function onChange(fn2) {
+    listeners.add(fn2);
+    return () => listeners.delete(fn2);
+  }
+  var DIGIT_ZERO = { western: 48, arabic: 1632, persian: 1776 };
+  function getNumerals() {
+    const n = read(NUMERALS_KEY);
+    return NUMERALS.includes(n) ? n : "western";
+  }
+  function toNumerals(text, numerals = getNumerals()) {
+    const zero = DIGIT_ZERO[numerals] || DIGIT_ZERO.western;
+    return String(text).replace(/[0-9\u0660-\u0669\u06F0-\u06F9]/g, (d) => {
+      const c = d.charCodeAt(0);
+      const v = c >= 1776 ? c - 1776 : c >= 1632 ? c - 1632 : c - 48;
+      return String.fromCharCode(zero + v);
+    });
+  }
+  function applyNumerals() {
+    const numerals = getNumerals();
+    for (const fn2 of numeralListeners) {
+      try {
+        fn2({ numerals });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return { numerals };
+  }
+  function setNumerals(numerals) {
+    if (!NUMERALS.includes(numerals)) throw new Error(`Unknown numerals: ${numerals}`);
+    write(NUMERALS_KEY, numerals);
+    return applyNumerals();
+  }
+  function cycleNumerals() {
+    const n = getNumerals();
+    return setNumerals(NUMERALS[(NUMERALS.indexOf(n) + 1) % NUMERALS.length]);
+  }
+  function onNumeralsChange(fn2) {
+    numeralListeners.add(fn2);
+    return () => numeralListeners.delete(fn2);
+  }
+  function absolutize(css) {
+    return css.replace(
+      /url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
+      (m, q2, u) => `url(${q2}${new URL(u, CSS_URL).href}${q2})`
+    );
+  }
+  function styleElement() {
+    let el = document.getElementById(STYLE_ID);
+    if (!el) {
+      el = document.createElement("style");
+      el.id = STYLE_ID;
+      document.head.appendChild(el);
+    }
+    return el;
+  }
+  function cached() {
+    try {
+      const c = JSON.parse(read(CACHE_KEY));
+      return c && c.url === CSS_URL && typeof c.css === "string" ? c.css : null;
+    } catch {
+      return null;
+    }
+  }
+  async function init() {
+    const state2 = apply();
+    if (!started) {
+      started = true;
+      if (darkQuery) darkQuery.addEventListener("change", () => {
+        if (getChoice() === "system") apply();
+      });
+      window.addEventListener("storage", (e) => {
+        if (e.key === CHOICE_KEY) apply();
+        if (e.key === NUMERALS_KEY) applyNumerals();
+      });
+    }
+    const copy = cached();
+    const existing = document.getElementById(STYLE_ID);
+    if (copy && (!existing || existing.textContent !== copy)) styleElement().textContent = copy;
+    let source = copy ? "cache" : "fallback";
+    try {
+      const res = await fetch(CSS_URL, { cache: "no-cache", mode: "cors", credentials: "omit" });
+      if (!res.ok) throw new Error(`theme.css: HTTP ${res.status}`);
+      const text = await res.text();
+      if (text.length > MAX_CSS || !text.includes("--i360-bg")) throw new Error("theme.css: unexpected content");
+      const css = absolutize(text);
+      const el = styleElement();
+      if (el.textContent !== css) el.textContent = css;
+      if (css !== copy) write(CACHE_KEY, JSON.stringify({ url: CSS_URL, css }));
+      source = "network";
+    } catch (e) {
+      console.warn("i360 theme: using the", source === "cache" ? "saved copy" : "page's own colours", "—", e.message);
+    }
+    return { ...state2, source };
+  }
+
+  // src/lib-copy.js
+  var LIB = "https://lib.i36o.workers.dev/";
+  var LIB_HOST = "lib.i36o.workers.dev";
+  var PARALLEL = 6;
+  var safeDecode = (s) => {
+    try {
+      return decodeURIComponent(s);
+    } catch {
+      return s;
+    }
+  };
+  function archiveId(link) {
+    let u;
+    try {
+      u = new URL(link);
+    } catch {
+      return null;
+    }
+    if (!/(^|\.)archive\.org$/i.test(u.hostname)) return null;
+    const parts = u.pathname.split("/").filter(Boolean);
+    if (parts.length < 3 || !["stream", "download", "details"].includes(parts[0])) return null;
+    return `archive:${safeDecode(parts[1])}/${parts.slice(2).map(safeDecode).join("/")}`;
+  }
+  function sameLink(link) {
+    try {
+      const u = new URL(link);
+      u.hash = "";
+      return safeDecode(u.href).replace(/\/$/, "");
+    } catch {
+      return String(link);
+    }
+  }
+  function findSource(catalog, link) {
+    const id = archiveId(link);
+    const want = sameLink(link);
+    for (const s of catalog.sources) {
+      if (id && s.id === id) return s;
+      if ([s.url, ...s.links || []].some((l3) => l3 && sameLink(l3) === want)) return s;
+    }
+    return null;
+  }
+  var OLD_BOOK_PATHS = { "i36o.web.app": "/md/books/", "i360-hub.web.app": "/md/books/", "i360-e.web.app": "/md/books/", "i360-md.web.app": "/books/" };
+  function bookName(path, prefix) {
+    if (!path.startsWith(prefix)) return null;
+    const name = safeDecode(path.slice(prefix.length));
+    return name && !/[/\\]/.test(name) && name !== "." && name !== ".." ? name : null;
+  }
+  function ownBook(value, pageHref) {
+    const text = String(value == null ? "" : value).trim();
+    let name = null;
+    if (!/^[a-z][a-z0-9+.-]*:|^\/\//i.test(text)) {
+      const rel = text.replace(/^\.\//, "");
+      name = rel.startsWith("/") ? bookName(rel, "/md/books/") : bookName(rel, "books/");
+    } else {
+      let u;
+      try {
+        u = new URL(text);
+      } catch {
+        return null;
+      }
+      let page = null;
+      try {
+        page = new URL(pageHref);
+      } catch {
+      }
+      if (u.protocol === "https:" && u.hostname === LIB_HOST) name = bookName(u.pathname, "/books/");
+      else if (u.protocol === "https:" && OLD_BOOK_PATHS[u.hostname]) name = bookName(u.pathname, OLD_BOOK_PATHS[u.hostname]);
+      else if (page && /^https?:$/.test(page.protocol) && u.origin === page.origin) name = bookName(u.pathname, "/md/books/");
+    }
+    return name ? `${LIB}books/${encodeURIComponent(name)}` : null;
+  }
+  var MD_PUNCT = /[\\`*_{}()#+\-.!|~<>&=]/g;
+  var URL_RE = /(https?:\/\/[^\s<>]+)/;
+  function escapeLine(line) {
+    let s = line.replace(/^[ \t]+/, "").split(URL_RE).map((part, i) => i % 2 ? part : part.replace(MD_PUNCT, "\\$&")).join("");
+    if (s.startsWith("[")) s = "​" + s;
+    return s;
+  }
+  function marker(page) {
+    const clean = (v) => String(v == null ? "" : v).replace(/[\]\n\r]/g, "").trim();
+    const label = clean(page.label) || "-";
+    const vol = clean(page.vol);
+    return vol ? `[ج ${vol} ص ${label}]` : `[ص ${label}]`;
+  }
+  function toBookText(pages) {
+    return pages.map((p) => {
+      const body = (p.paras || []).map((para) => para.split("\n").map(escapeLine).join("\n")).filter((para) => para.trim()).join("\n\n");
+      return `${marker(p)}
+${body}`;
+    }).join("\n\n");
+  }
+  var itemOf = (id) => {
+    const rest = id.slice("archive:".length);
+    const slash = rest.indexOf("/");
+    return { item: slash < 0 ? rest : rest.slice(0, slash), file: slash < 0 ? "" : rest.slice(slash + 1) };
+  };
+  function itemBooks(catalog, source) {
+    if (!source || !source.id || !source.id.startsWith("archive:")) return 0;
+    const { item } = itemOf(source.id);
+    const ids = /* @__PURE__ */ new Set([...catalog.sources.map((s) => s.id), ...(catalog.unindexed || []).map((u) => u.id)]);
+    let n = 0;
+    for (const id of ids) if (id.startsWith("archive:") && itemOf(id).item === item) n++;
+    return n;
+  }
+  function scanLink(source, index, books) {
+    const id = source && source.id;
+    if (!id || !id.startsWith("archive:") || source.type !== "djvu-txt") return null;
+    const { item, file } = itemOf(id);
+    const sub = file.replace(/_djvu\.txt$/i, "");
+    const parts = ["https://archive.org/details", encodeURIComponent(item)];
+    if (sub && books > 1) parts.push(encodeURIComponent(sub));
+    return `${parts.join("/")}/page/n${Math.max(0, index | 0)}/mode/1up`;
+  }
+  async function open(link, fetchFn, onProgress, onPart) {
+    const get = async (path) => {
+      const res = await fetchFn(LIB + path, path === "latest.json" ? { cache: "no-cache" } : {});
+      if (!res.ok) throw new Error(`HTTP ${res.status} (${LIB_HOST})`);
+      return res.json();
+    };
+    const { buildId } = await get("latest.json");
+    const catalog = await get(`b/${buildId}/catalog.json`);
+    const source = findSource(catalog, link);
+    if (!source) return null;
+    const texts = new Array(source.chunks.length);
+    let next = 0, done = 0;
+    if (onProgress) onProgress(0, texts.length);
+    await Promise.all(Array.from({ length: Math.min(PARALLEL, texts.length) }, async () => {
+      while (next < texts.length) {
+        const c = next++;
+        texts[c] = toBookText((await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages);
+        if (onPart && texts[c]) onPart(c, c < texts.length - 1 ? `${texts[c]}
+
+` : texts[c], texts.length);
+        done++;
+        if (onProgress) onProgress(done, texts.length);
+      }
+    }));
+    return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join("\n\n") };
+  }
+
+  // src/page-chrome.js
+  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  function setupClose(button, stepsBack = () => 1) {
+    if (!IN_APP) return;
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      let fromApp = false;
+      try {
+        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+      } catch {
+      }
+      if (fromApp) history.go(-stepsBack());
+      else window.location.replace("/index.html");
+    });
+  }
+  var THEME_ICONS = Object.freeze({
+    system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+    light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+    dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
+  });
+
+  // src/reader/text.js
+  var ICON = {
+    stepForward: `<svg data-lucide="step-forward" viewBox="0 0 24 24"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"></path><path d="M3 4v16"></path></svg>`,
+    stepBack: `<svg data-lucide="step-back" viewBox="0 0 24 24"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"></path><path d="M21 20V4"></path></svg>`,
+    globeX: `<svg data-lucide="globe-x" viewBox="0 0 24 24"><path d="m16 3 5 5"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path><path d="m21 3-5 5"></path></svg>`,
+    globeCheck: `<svg data-lucide="globe-check" viewBox="0 0 24 24"><path d="m15 6 2 2 4-4"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path></svg>`,
+    trash: `<svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`
+  };
+  var QURAN_OPEN = "﴿";
+  var QURAN_CLOSE = "﴾";
+  var ZOOM_MIN = 0.5;
+  var ZOOM_MAX = 2.5;
+  var ZOOM_STEP = 0.1;
+  var TEXT_SCALES = [0.85, 0.92, 1, 1.1, 1.2, 1.32, 1.45, 1.6];
+  var PANEL_COVERS = 0.6;
+  var CURRENT_PAGE_LINE = 0.25;
+  var SEARCH_DEBOUNCE_MS = 250;
+  var SEARCH_MIN_CHARS = 2;
+  var SEARCH_MAX_MATCHES = 5e3;
+  var SEARCH_LIST_MAX = 300;
+  var SNIPPET_CHARS = 45;
+  var SAVE_DEBOUNCE_MS = 500;
+  var PIN_MS = 1500;
+  var PIN_SETTLE_MS = 800;
+  var PIN_MAX_MS = 1e4;
+  var POSITIONS_MAX = 100;
+  var TOAST_MS = 1800;
+  var BLOCK_SEL = "p,li,h1,h2,h3,h4,h5,h6,td,th,pre,.fn-note";
+
+  // src/locales.js
+  var READER = {
+    ar: {
+      appTitle: "قارئ الماركداون",
+      zoomIn: "تكبير (Ctrl +)",
+      zoomOut: "تصغير (Ctrl -)",
+      fitWidth: "ملاءمة العرض",
+      fitPage: "ملاءمة الصفحة",
+      textSmaller: "تصغير الخط",
+      textLarger: "تكبير الخط",
+      textLetter: "أ",
+      prevPage: (key) => `الصفحة السابقة (${key})`,
+      nextPage: (key) => `الصفحة التالية (${key})`,
+      dirRTL: "الاتجاه الحالي: من اليمين لليسار (انقر للتغيير إلى LTR)",
+      dirLTR: "الاتجاه الحالي: من اليسار لليمين (انقر للتغيير إلى RTL)",
+      scan: "الصفحة الأصلية: صورة هذه الصفحة على archive.org",
+      bookmarkAdd: "إضافة علامة لهذه الصفحة",
+      bookmarkRemove: "إزالة علامة هذه الصفحة",
+      bookmarkAdded: "أُضيفت العلامة",
+      bookmarkRemoved: "أُزيلت العلامة",
+      reading: "وضع القراءة",
+      exitReading: "الخروج من وضع القراءة (Esc)",
+      more: "المزيد",
+      panel: "المحتويات والعلامات",
+      contentsTab: "المحتويات",
+      bookmarksTab: "العلامات",
+      noHeadings: "لا توجد عناوين في هذا الكتاب.",
+      noBookmarks: "لا توجد علامات بعد. استخدم زر العلامة لحفظ الصفحة الحالية.",
+      removeBookmark: "حذف العلامة",
+      closePanel: "إغلاق",
+      copyLink: "نسخ رابط هذه الصفحة",
+      linkCopied: "نُسخ الرابط",
+      copyFailed: "تعذّر النسخ",
+      volume: "الجزء",
+      search: "بحث في المستند (Ctrl+F)",
+      searchInput: "بحث في النص...",
+      prevMatch: "النتيجة السابقة (Shift+Enter)",
+      nextMatch: "النتيجة التالية (Enter)",
+      showResults: "قائمة النتائج",
+      closeSearch: "إغلاق البحث (Esc)",
+      matchDiacritics: "مطابقة التشكيل",
+      wholeWord: "كلمة كاملة",
+      moreResults: (n) => `و${n} نتيجة أخرى`,
+      openFile: "فتح ملف",
+      downloading: "جارٍ تحميل",
+      building: "جارٍ عرض",
+      searchWait: "يُتاح البحث بعد اكتمال عرض الكتاب",
+      online: "متصل بالإنترنت",
+      offline: "غير متصل",
+      barTitle: "القارئ",
+      close: "إغلاق",
+      notInLibrary: "هذا الكتاب ليس في مكتبة i360، فلا يمكن فتحه هنا.",
+      unverified: "تعذّر التحقق من الكتاب في مكتبة i360 — تحقّق من الاتصال ثم أعد المحاولة.",
+      ofLabel: "من",
+      pageInput: "رقم الصفحة المطبوع — للكتب متعددة الأجزاء: الجزء:الصفحة — وللموضع في الملف: (12)",
+      position: (i, n) => `الموضع في الملف: ${i} من ${n}`,
+      page: "ص",
+      vol: "ج",
+      listSep: "، ",
+      missingPagesWarn: (count, ranges) => `تنبيه: تم اكتشاف ${count} صفحة مفقودة: ${ranges}`,
+      untranscribedWarn: (count, list) => `تنبيه: ${count} صفحة لم تُنسخ: ${list}`,
+      untranscribedPage: "لم تُنسخ هذه الصفحة.",
+      after: (label) => `بعد ${label}`,
+      loadError: (msg) => `تعذّر تحميل الملف: ${msg}`,
+      readError: "تعذّر قراءة الملف.",
+      emptyHint: "لا يوجد ملف مفتوح. اضغط «فتح ملف» لاختيار كتاب.",
+      noResults: "0 من 0"
+    },
+    en: {
+      appTitle: "Markdown Reader",
+      zoomIn: "Zoom in (Ctrl +)",
+      zoomOut: "Zoom out (Ctrl -)",
+      fitWidth: "Fit width",
+      fitPage: "Fit page",
+      textSmaller: "Smaller text",
+      textLarger: "Larger text",
+      textLetter: "A",
+      prevPage: (key) => `Previous page (${key})`,
+      nextPage: (key) => `Next page (${key})`,
+      dirRTL: "Current Direction: RTL (Click for LTR)",
+      dirLTR: "Current Direction: LTR (Click for RTL)",
+      scan: "Original page: the scan of this page on archive.org",
+      bookmarkAdd: "Bookmark this page",
+      bookmarkRemove: "Remove this page’s bookmark",
+      bookmarkAdded: "Bookmark added",
+      bookmarkRemoved: "Bookmark removed",
+      reading: "Reading mode",
+      exitReading: "Exit reading mode (Esc)",
+      more: "More",
+      panel: "Contents and bookmarks",
+      contentsTab: "Contents",
+      bookmarksTab: "Bookmarks",
+      noHeadings: "This book has no headings.",
+      noBookmarks: "No bookmarks yet. Use the bookmark button to save the current page.",
+      removeBookmark: "Remove bookmark",
+      closePanel: "Close",
+      copyLink: "Copy link to this page",
+      linkCopied: "Link copied",
+      copyFailed: "Could not copy",
+      volume: "Volume",
+      search: "Search within document (Ctrl+F)",
+      searchInput: "Search text...",
+      prevMatch: "Previous match (Shift+Enter)",
+      nextMatch: "Next match (Enter)",
+      showResults: "Results list",
+      closeSearch: "Close search (Esc)",
+      matchDiacritics: "Match diacritics",
+      wholeWord: "Whole word",
+      moreResults: (n) => `and ${n} more`,
+      openFile: "Open file",
+      downloading: "Downloading",
+      building: "Preparing",
+      searchWait: "Search is available once the book is ready",
+      online: "Online",
+      offline: "Offline",
+      barTitle: "Reader",
+      close: "Close",
+      notInLibrary: "This book isn’t in the i360 library, so it can’t be opened here.",
+      unverified: "Couldn’t check this book against the i360 library — check the connection and try again.",
+      ofLabel: "of",
+      pageInput: "Printed page number — multi-volume books: volume:page — position in the file: (12)",
+      position: (i, n) => `Position in the file: ${i} of ${n}`,
+      page: "p.",
+      vol: "vol.",
+      listSep: ", ",
+      missingPagesWarn: (count, ranges) => `Warning: ${count} missing page(s) detected: ${ranges}`,
+      untranscribedWarn: (count, list) => `Warning: ${count} page(s) not transcribed: ${list}`,
+      untranscribedPage: "This page was not transcribed.",
+      after: (label) => `after ${label}`,
+      loadError: (msg) => `Could not load the file: ${msg}`,
+      readError: "Could not read the file.",
+      emptyHint: "No file open. Press “Open file” to choose a book.",
+      noResults: "0 of 0"
+    }
+  };
+
+  // src/book-format.js
+  var book_format_exports = {};
+  __export(book_format_exports, {
+    VERSION: () => VERSION,
+    createRenderer: () => createRenderer,
+    escapeHtml: () => escapeHtml,
+    hasVisibleContent: () => hasVisibleContent,
+    makePage: () => makePage,
+    parseBook: () => parseBook,
+    splitFootnotes: () => splitFootnotes,
+    stripComments: () => stripComments,
+    toWestern: () => toWestern
+  });
+  var VERSION = 1;
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  }
+  function toWestern(s) {
+    return String(s).replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 1632)).replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 1776));
+  }
+  var SAFE_RENDERER = {
+    renderer: {
+      html(token) {
+        if (/^<br\s*\/?>$/i.test(token.text.trim())) return "<br>";
+        return escapeHtml(token.text);
+      },
+      link(token) {
+        const text = this.parser.parseInline(token.tokens);
+        if (/^https?:\/\//i.test(token.href)) {
+          return `<a href="${escapeHtml(token.href)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
+        return text;
+      },
+      image(token) {
+        return escapeHtml(token.text || "");
+      }
+    }
+  };
+  function stripComments(s) {
+    return s.replace(/<!--[\s\S]*?-->/g, "");
+  }
+  function protectMarkdown(s) {
+    return stripComments(s).replace(/\[/g, "\\[").replace(/([^\n])\n([ \t]*(?:-{3,}|={3,})[ \t]*)$/gm, "$1\n\n$2");
+  }
+  function createRenderer(marked) {
+    const mdStandard = new marked.Marked({ gfm: true, breaks: false, async: false });
+    const mdOcr = new marked.Marked({ gfm: true, breaks: true, async: false });
+    mdStandard.use(SAFE_RENDERER);
+    mdOcr.use(SAFE_RENDERER);
+    const md = (format) => format === "ocr" ? mdOcr : mdStandard;
+    return {
+      block: (format, s) => md(format).parse(protectMarkdown(s)),
+      inline: (format, s) => md(format).parseInline(protectMarkdown(s))
+    };
+  }
+  var PAGE_MARKER_RE = /^[ \t]*\[(?:ج[ \t]*([^\s\]]+)[ \t]+)?ص[ \t]*([^\]\n]*?)[ \t]*\]/gm;
+  function hasVisibleContent(s) {
+    return stripComments(s).trim().length > 0;
+  }
+  function makePage(kind, vol, label, mdText) {
+    const lab = toWestern(label.trim());
+    return {
+      kind,
+      vol: vol == null ? null : toWestern(String(vol).trim()),
+      label: lab,
+      num: /^\d+$/.test(lab) ? parseInt(lab, 10) : null,
+      md: mdText
+    };
+  }
+  function parseBook(raw) {
+    const text = raw.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+    const marks = [...text.matchAll(PAGE_MARKER_RE)];
+    if (marks.length > 0) {
+      const pages = [];
+      const lead = text.slice(0, marks[0].index);
+      if (hasVisibleContent(lead)) pages.push(makePage("front", null, "", lead));
+      marks.forEach((m, i) => {
+        const start = m.index + m[0].length;
+        const end = i + 1 < marks.length ? marks[i + 1].index : text.length;
+        const label = m[2].trim();
+        pages.push(makePage(label === "?" ? "untranscribed" : "page", m[1], label, text.slice(start, end)));
+      });
+      return { format: "ocr", pages };
+    }
+    const legacy = [...text.matchAll(/==Start\s+p(\d+)==([\s\S]*?)==End\s+p\1==/gi)];
+    if (legacy.length > 0) {
+      const pages = legacy.map((m) => makePage("page", null, m[1], m[2]));
+      pages.sort((a, b) => a.num - b.num);
+      return { format: "legacy", pages };
+    }
+    return { format: "plain", pages: [makePage("page", null, "", text)] };
+  }
+  var NOTE_START_RE = /^\((\d{1,3})\)\s*([\s\S]*)$|^(\d{1,3})\s*[-–]\s+([\s\S]*)$/;
+  function toWesternNoteLine(line) {
+    return line.replace(/^\(([\u0660-\u0669\u06F0-\u06F9]{1,3})\)/, (m, d) => `(${toWestern(d)})`);
+  }
+  function splitFootnotes(mdText) {
+    const lines = stripComments(mdText).split("\n");
+    let sep = -1;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (/^[ \t]*-{3,}[ \t]*$/.test(lines[i])) {
+        sep = i;
+        break;
+      }
+    }
+    if (sep < 0) return { body: mdText, notes: [] };
+    const after = lines.slice(sep + 1).map((l3) => toWesternNoteLine(l3.trim())).filter(Boolean);
+    if (!after.some((l3) => NOTE_START_RE.test(l3))) return { body: mdText, notes: [] };
+    const notes = [];
+    let cur = null;
+    for (const line of after) {
+      const m = NOTE_START_RE.exec(line);
+      if (m) {
+        cur = { n: m[1] || m[3], md: m[2] != null ? m[2] : m[4] };
+        notes.push(cur);
+      } else if (cur) {
+        cur.md += " " + line;
+      } else {
+        cur = { n: null, md: line };
+        notes.push(cur);
+      }
+    }
+    const out = [];
+    for (const note of notes) {
+      let rest = note;
+      for (; ; ) {
+        out.push(rest);
+        if (rest.n == null) break;
+        const next = String(parseInt(rest.n, 10) + 1);
+        const re2 = new RegExp(`\\s\\(${next}\\)\\s`);
+        const m = re2.exec(rest.md);
+        if (!m) break;
+        const tail = { n: next, md: rest.md.slice(m.index + m[0].length) };
+        rest.md = rest.md.slice(0, m.index);
+        rest = tail;
+      }
+    }
+    return { body: lines.slice(0, sep).join("\n"), notes: out };
+  }
+
+  // src/reader/state.js
+  var state = {
+    format: "ocr",
+    // 'ocr' | 'legacy' | 'plain'
+    pages: [],
+    // { kind, vol, label, num, md }
+    sheets: [],
+    // matching <article> elements
+    volumes: [],
+    // distinct volume labels, in book order
+    detectedDir: "rtl",
+    dir: "rtl",
+    zoom: 1,
+    multiVolume: false,
+    notices: [],
+    currentIdx: 0,
+    numerals: "western",
+    // the shared i360 choice: 'western' 0123 | 'arabic' ٠١٢٣ | 'persian' ۰۱۲۳ — display only
+    theme: "system",
+    libSource: null,
+    // the catalog entry when the book is our copy from the lib site
+    libBooks: 0,
+    // how many books its archive.org item holds (for the scan link)
+    bookLink: null,
+    // the book's own address, for the public link (null for a file from the device)
+    built: 0,
+    // pages whose text is built so far (buildSheets)
+    textScale: 1,
+    bookKey: null,
+    // identifies the open book (saved position, bookmarks)
+    panelTab: "contents"
+  };
+  var search = {
+    indexes: {},
+    matches: [],
+    current: -1,
+    timer: 0,
+    query: "",
+    exact: false,
+    // match diacritics and letter forms exactly
+    word: false,
+    // whole word only
+    listOpen: false
+  };
+  var $ = (id) => document.getElementById(id);
+  var toolbar = $("toolbar");
+  var tbStart = toolbar.querySelector(".tb-start");
+  var tbMain = toolbar.querySelector(".tb-main");
+  var tbEnd = toolbar.querySelector(".tb-end");
+  var pagesWrapper = $("pages-wrapper");
+  var viewerContainer = $("viewer-container");
+  var pageNumInput = $("page-num-input");
+  var totalPagesLabel = $("total-pages");
+  var pagePos = $("page-pos");
+  var volSelect = $("vol-select");
+  var lblOf = $("lbl-of");
+  var btnPanel = $("btn-panel");
+  var btnZoomIn = $("btn-zoom-in");
+  var btnZoomOut = $("btn-zoom-out");
+  var btnFitWidth = $("btn-fit-width");
+  var btnFitPage = $("btn-fit-page");
+  var btnTextSmaller = $("btn-text-smaller");
+  var btnTextLarger = $("btn-text-larger");
+  var btnNavLeft = $("btn-nav-left");
+  var btnNavRight = $("btn-nav-right");
+  var btnDirToggle = $("btn-dir-toggle");
+  var btnNumerals = $("btn-numerals");
+  var btnTheme = $("btn-theme");
+  var btnScan = $("btn-scan");
+  var btnBookmark = $("btn-bookmark");
+  var btnReading = $("btn-reading");
+  var btnExitReading = $("btn-exit-reading");
+  var btnMore = $("btn-more");
+  var moreMenu = $("more-menu");
+  var btnSearchToggle = $("btn-search-toggle");
+  var searchPopup = $("search-popup");
+  var searchInput = $("search-input");
+  var searchCount = $("search-count");
+  var btnSearchPrev = $("btn-search-prev");
+  var btnSearchNext = $("btn-search-next");
+  var btnSearchList = $("btn-search-list");
+  var btnSearchClose = $("btn-search-close");
+  var optDiacritics = $("opt-diacritics");
+  var optWord = $("opt-word");
+  var searchResults = $("search-results");
+  var sidePanel = $("side-panel");
+  var tabContents = $("tab-contents");
+  var tabBookmarks = $("tab-bookmarks");
+  var btnCopyLink = $("btn-copy-link");
+  var btnPanelClose = $("btn-panel-close");
+  var panelBody = $("panel-body");
+  var toastEl = $("toast");
+  var statusIcon = $("status-icon");
+  var btnOpenFile = $("btn-open-file");
+  var tbTitle = $("tb-title");
+  var progressEl = $("progress");
+  var progressText = $("progress-text");
+  var progressFill = $("progress-fill");
+  var btnClose = $("btn-close");
+  var fileInput = $("file-input");
+  var missingPagesBanner = $("missing-pages-banner");
+  var missingPagesText = $("missing-pages-text");
+  var emptyState = $("empty-state");
+  var lang = () => state.dir === "rtl" ? "ar" : "en";
+  var t = () => READER[lang()];
+  var CONNECTION_CHECK_MS = 3e4;
+  var CONNECTION_TIMEOUT_MS = 8e3;
+  var online = navigator.onLine !== false;
+  var connectionCheck = null;
+  function checkConnection() {
+    if (connectionCheck) return connectionCheck;
+    const ctl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (ctl) ctl.abort();
+    }, CONNECTION_TIMEOUT_MS);
+    connectionCheck = fetch(`${LIB}latest.json`, { cache: "no-store", signal: ctl ? ctl.signal : void 0 }).then(() => true, () => false).then((ok) => {
+      online = ok;
+    }).finally(() => {
+      clearTimeout(timer);
+      connectionCheck = null;
+      updateConnection();
+    });
+    return connectionCheck;
+  }
+  function updateConnection() {
+    const label = online ? t().online : t().offline;
+    statusIcon.innerHTML = `${online ? ICON.globeCheck : ICON.globeX}<span class="status-text"></span>`;
+    statusIcon.lastChild.textContent = label;
+    statusIcon.classList.toggle("offline", !online);
+    setTitle(statusIcon, label);
+  }
+  var { toWestern: toWestern2, stripComments: stripComments2, hasVisibleContent: hasVisibleContent2, parseBook: parseBook2, splitFootnotes: splitFootnotes2 } = book_format_exports;
+  var nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+  var STORE_PREFIX = "i360reader.";
+  function storeGet(key, fallback) {
+    try {
+      const v = localStorage.getItem(STORE_PREFIX + key);
+      return v == null ? fallback : JSON.parse(v);
+    } catch {
+      return fallback;
+    }
+  }
+  function storeSet(key, value) {
+    try {
+      localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value));
+    } catch {
+    }
+  }
+  function fmtNum(s) {
+    return toNumerals(String(s), state.numerals);
+  }
+  function hashText(s) {
+    let h2 = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+      h2 ^= s.charCodeAt(i);
+      h2 = Math.imul(h2, 16777619);
+    }
+    return (h2 >>> 0).toString(36);
+  }
+  function detectDirection(text) {
+    const sample = text.length > 2e5 ? text.slice(0, 2e5) : text;
+    const arabic = (sample.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+    const latin = (sample.match(/[A-Za-z\u00C0-\u024F]/g) || []).length;
+    if (latin > arabic) return "ltr";
+    return "rtl";
+  }
+  function setTitle(el, text) {
+    el.title = text;
+    el.setAttribute("aria-label", text);
+  }
+  function wireState() {
+    window.addEventListener("online", () => {
+      void checkConnection();
+    });
+    window.addEventListener("offline", () => {
+      online = false;
+      updateConnection();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) void checkConnection();
+    });
+    setInterval(() => {
+      if (!document.hidden) void checkConnection();
+    }, CONNECTION_CHECK_MS);
+  }
+
   // node_modules/marked/lib/marked.esm.js
   var marked_esm_exports = {};
   __export(marked_esm_exports, {
@@ -1093,7 +1938,7 @@
   var Ne = /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/;
   var ge = /^( {2,}|\\)\n(?!\s*$)[ \t]*/;
   var Qe = /^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/;
-  var $ = /[\p{P}\p{S}]/u;
+  var $2 = /[\p{P}\p{S}]/u;
   var B = /[\s\p{P}\p{S}]/u;
   var Q = /[^\s\p{P}\p{S}]/u;
   var je = h(/^((?![*_])punctSpace)/, "u").replace(/punctSpace/g, B).getRegex();
@@ -1103,22 +1948,22 @@
   var Ke = /(?:[^\s\p{P}\p{S}]|~)/u;
   var We = h(/link|precode-code|html/, "g").replace("link", /\[(?:[^\[\]`]|(?<a>`+)[^`]+\k<a>(?!`))*?\]\((?:\\[\s\S]|[^\\\(\)]|\((?:\\[\s\S]|[^\\\(\)])*\))*\)/).replace("precode-", _e ? "(?<!`)()" : "(^^|[^`])").replace("code", /(?<b>`+)[^`]+\k<b>(?!`)/).replace("html", /<(?! )[^<>]*?>/).getRegex();
   var me = /^(?:\*+(?:((?!\*)punct)|([^\s*]))?)|^_+(?:((?!_)punct)|([^\s_]))?/;
-  var Xe = h(me, "u").replace(/punct/g, $).getRegex();
+  var Xe = h(me, "u").replace(/punct/g, $2).getRegex();
   var Je = h(me, "u").replace(/punct/g, fe).getRegex();
   var Ve = /^(?:\*+(?:((?!\*)(?!openQuote)punct)|([^\s*]))?)|^_+(?:((?!_)(?!openQuote)punct)|([^\s_]))?/;
-  var Ye = h(Ve, "u").replace(/openQuote/g, Fe).replace(/punct/g, $).getRegex();
+  var Ye = h(Ve, "u").replace(/openQuote/g, Fe).replace(/punct/g, $2).getRegex();
   var xe = "^[^_*]*?__[^_*]*?\\*[^_*]*?(?=__)|[^*]+(?=[^*])|(?!\\*)punct(\\*+)(?=[\\s]|$)|notPunctSpace(\\*+)(?!\\*)(?=punctSpace|$)|(?!\\*)punctSpace(\\*+)(?=notPunctSpace)|[\\s](\\*+)(?!\\*)(?=punct)|(?!\\*)punct(\\*+)(?!\\*)(?=punct)|notPunctSpace(\\*+)(?=notPunctSpace)";
-  var et = h(xe, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $).getRegex();
+  var et = h(xe, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $2).getRegex();
   var tt = h(xe, "gu").replace(/notPunctSpace/g, Ke).replace(/punctSpace/g, Ue).replace(/punct/g, fe).getRegex();
   var nt = "^[^_*]*?__[^_*]*?\\*[^_*]*?(?=__)|[^*]+(?=[^*])|(?!\\*)punct(\\*+)(?=[\\s]|$)|notPunctSpace(\\*+)(?!\\*)(?=punctSpace|$)|(?!\\*)[\\s](\\*+)(?=notPunctSpace)|[\\s](\\*+)(?!\\*)(?=punct)|(?!\\*)punct(\\*+)(?!\\*)(?=punct)|(?:(?!\\*)punct|notPunctSpace)(\\*+)(?!\\*)(?=notPunctSpace)";
-  var rt = h(nt, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $).getRegex();
-  var st = h("^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)punctSpace(_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)", "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $).getRegex();
+  var rt = h(nt, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $2).getRegex();
+  var st = h("^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)punctSpace(_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)", "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $2).getRegex();
   var it = "^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)[\\s](_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)|(?:(?!_)punct|notPunctSpace)(_+)(?!_)(?=notPunctSpace)";
-  var ot = h(it, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $).getRegex();
-  var at = h(/^~~?(?:((?!~)punct)|[^\s~])/, "u").replace(/punct/g, $).getRegex();
+  var ot = h(it, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $2).getRegex();
+  var at = h(/^~~?(?:((?!~)punct)|[^\s~])/, "u").replace(/punct/g, $2).getRegex();
   var lt = "^[^~]+(?=[^~])|(?!~)punct(~~?)(?=[\\s]|$)|notPunctSpace(~~?)(?!~)(?=punctSpace|$)|(?!~)punctSpace(~~?)(?=notPunctSpace)|[\\s](~~?)(?!~)(?=punct)|(?!~)punct(~~?)(?!~)(?=punct)|notPunctSpace(~~?)(?=notPunctSpace)";
-  var ut = h(lt, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $).getRegex();
-  var pt = h(/\\(punct)/, "gu").replace(/punct/g, $).getRegex();
+  var ut = h(lt, "gu").replace(/notPunctSpace/g, Q).replace(/punctSpace/g, B).replace(/punct/g, $2).getRegex();
+  var pt = h(/\\(punct)/, "gu").replace(/punct/g, $2).getRegex();
   var ct = h(/^<(scheme:[^\s\x00-\x1f<>]*|email)>/).replace("scheme", /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/).replace("email", /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/).getRegex();
   var ht = h(ee).replace("(?:-->|$)", "-->").getRegex();
   var dt = h("^comment|^</[a-zA-Z][a-zA-Z0-9-]*\\s*>|^<[a-zA-Z][a-zA-Z0-9-]*(?:attribute)*?\\s*/?>|^<\\?[\\s\\S]*?\\?>|^<![a-zA-Z]+\\s[\\s\\S]*?>|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>").replace("comment", ht).replace("attribute", /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/).getRegex();
@@ -2367,336 +3212,18 @@ Please report this to https://github.com/markedjs/marked.`, e) {
   var Rn = T.parse;
   var Tn = R.lex;
 
-  // theme/site/theme-loader.js
-  var THEMES = ["system", "light", "sepia", "dark"];
-  var NUMERALS = ["western", "arabic", "persian"];
-  var NUMERALS_KEY = "i360.numerals";
-  var CHOICE_KEY = "i360.theme";
-  var CACHE_KEY = "i360.theme.css";
-  var CSS_URL = new URL("theme.css", "https://theme.i36o.workers.dev/theme-loader.js").href;
-  var NUMERALS_SAMPLE = Object.freeze({ western: "456", arabic: "٤٥٦", persian: "۴۵۶" });
-  var LABELS = Object.freeze({
-    ar: {
-      theme: { system: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)", light: "المظهر: فاتح (انقر للتبديل إلى ورقي)", sepia: "المظهر: ورقي (انقر للتبديل إلى داكن)", dark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)" },
-      numerals: { western: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)", arabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)", persian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)" }
-    },
-    en: {
-      theme: { system: "Theme: follows this device (click for light)", light: "Theme: light (click for sepia)", sepia: "Theme: sepia (click for dark)", dark: "Theme: dark (click to follow this device)" },
-      numerals: { western: "Numerals: Western 456 (click for Eastern Arabic ٤٥٦)", arabic: "Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)", persian: "Numerals: Persian/Urdu ۴۵۶ (click for Western 456)" }
-    },
-    tr: {
-      theme: { system: "Tema: cihaza göre (açık için tıklayın)", light: "Tema: açık (sepya için tıklayın)", sepia: "Tema: sepya (koyu için tıklayın)", dark: "Tema: koyu (cihaza göre için tıklayın)" },
-      numerals: { western: "Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)", arabic: "Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)", persian: "Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)" }
-    },
-    id: {
-      theme: { system: "Tema: mengikuti perangkat (klik untuk terang)", light: "Tema: terang (klik untuk sepia)", sepia: "Tema: sepia (klik untuk gelap)", dark: "Tema: gelap (klik untuk mengikuti perangkat)" },
-      numerals: { western: "Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)", arabic: "Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)", persian: "Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)" }
-    },
-    ur: {
-      theme: { system: "تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)", light: "تھیم: روشن (سیپیا کے لیے کلک کریں)", sepia: "تھیم: سیپیا (تاریک کے لیے کلک کریں)", dark: "تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)" },
-      numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
-    }
-  });
-  var labelsFor = (lang2) => LABELS[lang2] || LABELS.ar;
-  function themeLabel(choice, lang2 = "ar") {
-    return labelsFor(lang2).theme[choice] || "";
-  }
-  function numeralsLabel(numerals, lang2 = "ar") {
-    return labelsFor(lang2).numerals[numerals] || "";
-  }
-  var STYLE_ID = "i360-theme";
-  var MAX_CSS = 256 * 1024;
-  var root = document.documentElement;
-  var darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
-  var listeners = /* @__PURE__ */ new Set();
-  var numeralListeners = /* @__PURE__ */ new Set();
-  var started = false;
-  function read(key) {
-    try {
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  }
-  function write(key, value) {
-    try {
-      localStorage.setItem(key, value);
+  // src/frame.js
+  function oncePerFrame(fn2) {
+    let queued = false;
+    return () => {
+      if (queued) return false;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        fn2();
+      });
       return true;
-    } catch {
-      return false;
-    }
-  }
-  function lockedTheme() {
-    const t2 = root.getAttribute("data-i360-lock");
-    return THEMES.includes(t2) ? t2 : null;
-  }
-  function getChoice() {
-    const lock = lockedTheme();
-    if (lock) return lock;
-    const c = read(CHOICE_KEY);
-    return THEMES.includes(c) ? c : "system";
-  }
-  function getTheme(choice = getChoice()) {
-    if (choice !== "system") return choice;
-    return darkQuery && darkQuery.matches ? "dark" : "light";
-  }
-  function apply() {
-    const choice = getChoice();
-    const theme = getTheme(choice);
-    const changed = root.getAttribute("data-theme") !== theme;
-    root.setAttribute("data-theme", theme);
-    for (const fn2 of listeners) {
-      try {
-        fn2({ choice, theme, changed });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return { choice, theme };
-  }
-  function setChoice(choice) {
-    if (!THEMES.includes(choice)) throw new Error(`Unknown theme: ${choice}`);
-    if (!lockedTheme()) write(CHOICE_KEY, choice);
-    return apply();
-  }
-  function cycle() {
-    const c = getChoice();
-    return setChoice(THEMES[(THEMES.indexOf(c) + 1) % THEMES.length]);
-  }
-  function onChange(fn2) {
-    listeners.add(fn2);
-    return () => listeners.delete(fn2);
-  }
-  var DIGIT_ZERO = { western: 48, arabic: 1632, persian: 1776 };
-  function getNumerals() {
-    const n = read(NUMERALS_KEY);
-    return NUMERALS.includes(n) ? n : "western";
-  }
-  function toNumerals(text, numerals = getNumerals()) {
-    const zero = DIGIT_ZERO[numerals] || DIGIT_ZERO.western;
-    return String(text).replace(/[0-9\u0660-\u0669\u06F0-\u06F9]/g, (d) => {
-      const c = d.charCodeAt(0);
-      const v = c >= 1776 ? c - 1776 : c >= 1632 ? c - 1632 : c - 48;
-      return String.fromCharCode(zero + v);
-    });
-  }
-  function applyNumerals() {
-    const numerals = getNumerals();
-    for (const fn2 of numeralListeners) {
-      try {
-        fn2({ numerals });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return { numerals };
-  }
-  function setNumerals(numerals) {
-    if (!NUMERALS.includes(numerals)) throw new Error(`Unknown numerals: ${numerals}`);
-    write(NUMERALS_KEY, numerals);
-    return applyNumerals();
-  }
-  function cycleNumerals() {
-    const n = getNumerals();
-    return setNumerals(NUMERALS[(NUMERALS.indexOf(n) + 1) % NUMERALS.length]);
-  }
-  function onNumeralsChange(fn2) {
-    numeralListeners.add(fn2);
-    return () => numeralListeners.delete(fn2);
-  }
-  function absolutize(css) {
-    return css.replace(
-      /url\(\s*(['"]?)(?![a-z][a-z0-9+.-]*:|\/|#)([^'")]+)\1\s*\)/gi,
-      (m, q2, u) => `url(${q2}${new URL(u, CSS_URL).href}${q2})`
-    );
-  }
-  function styleElement() {
-    let el = document.getElementById(STYLE_ID);
-    if (!el) {
-      el = document.createElement("style");
-      el.id = STYLE_ID;
-      document.head.appendChild(el);
-    }
-    return el;
-  }
-  function cached() {
-    try {
-      const c = JSON.parse(read(CACHE_KEY));
-      return c && c.url === CSS_URL && typeof c.css === "string" ? c.css : null;
-    } catch {
-      return null;
-    }
-  }
-  async function init() {
-    const state2 = apply();
-    if (!started) {
-      started = true;
-      if (darkQuery) darkQuery.addEventListener("change", () => {
-        if (getChoice() === "system") apply();
-      });
-      window.addEventListener("storage", (e) => {
-        if (e.key === CHOICE_KEY) apply();
-        if (e.key === NUMERALS_KEY) applyNumerals();
-      });
-    }
-    const copy = cached();
-    const existing = document.getElementById(STYLE_ID);
-    if (copy && (!existing || existing.textContent !== copy)) styleElement().textContent = copy;
-    let source = copy ? "cache" : "fallback";
-    try {
-      const res = await fetch(CSS_URL, { cache: "no-cache", mode: "cors", credentials: "omit" });
-      if (!res.ok) throw new Error(`theme.css: HTTP ${res.status}`);
-      const text = await res.text();
-      if (text.length > MAX_CSS || !text.includes("--i360-bg")) throw new Error("theme.css: unexpected content");
-      const css = absolutize(text);
-      const el = styleElement();
-      if (el.textContent !== css) el.textContent = css;
-      if (css !== copy) write(CACHE_KEY, JSON.stringify({ url: CSS_URL, css }));
-      source = "network";
-    } catch (e) {
-      console.warn("i360 theme: using the", source === "cache" ? "saved copy" : "page's own colours", "—", e.message);
-    }
-    return { ...state2, source };
-  }
-
-  // src/book-format.js
-  var book_format_exports = {};
-  __export(book_format_exports, {
-    VERSION: () => VERSION,
-    createRenderer: () => createRenderer,
-    escapeHtml: () => escapeHtml,
-    hasVisibleContent: () => hasVisibleContent,
-    makePage: () => makePage,
-    parseBook: () => parseBook,
-    splitFootnotes: () => splitFootnotes,
-    stripComments: () => stripComments,
-    toWestern: () => toWestern
-  });
-  var VERSION = 1;
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-  }
-  function toWestern(s) {
-    return String(s).replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 1632)).replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 1776));
-  }
-  var SAFE_RENDERER = {
-    renderer: {
-      html(token) {
-        if (/^<br\s*\/?>$/i.test(token.text.trim())) return "<br>";
-        return escapeHtml(token.text);
-      },
-      link(token) {
-        const text = this.parser.parseInline(token.tokens);
-        if (/^https?:\/\//i.test(token.href)) {
-          return `<a href="${escapeHtml(token.href)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-        }
-        return text;
-      },
-      image(token) {
-        return escapeHtml(token.text || "");
-      }
-    }
-  };
-  function stripComments(s) {
-    return s.replace(/<!--[\s\S]*?-->/g, "");
-  }
-  function protectMarkdown(s) {
-    return stripComments(s).replace(/\[/g, "\\[").replace(/([^\n])\n([ \t]*(?:-{3,}|={3,})[ \t]*)$/gm, "$1\n\n$2");
-  }
-  function createRenderer(marked) {
-    const mdStandard = new marked.Marked({ gfm: true, breaks: false, async: false });
-    const mdOcr = new marked.Marked({ gfm: true, breaks: true, async: false });
-    mdStandard.use(SAFE_RENDERER);
-    mdOcr.use(SAFE_RENDERER);
-    const md = (format) => format === "ocr" ? mdOcr : mdStandard;
-    return {
-      block: (format, s) => md(format).parse(protectMarkdown(s)),
-      inline: (format, s) => md(format).parseInline(protectMarkdown(s))
     };
-  }
-  var PAGE_MARKER_RE = /^[ \t]*\[(?:ج[ \t]*([^\s\]]+)[ \t]+)?ص[ \t]*([^\]\n]*?)[ \t]*\]/gm;
-  function hasVisibleContent(s) {
-    return stripComments(s).trim().length > 0;
-  }
-  function makePage(kind, vol, label, mdText) {
-    const lab = toWestern(label.trim());
-    return {
-      kind,
-      vol: vol == null ? null : toWestern(String(vol).trim()),
-      label: lab,
-      num: /^\d+$/.test(lab) ? parseInt(lab, 10) : null,
-      md: mdText
-    };
-  }
-  function parseBook(raw) {
-    const text = raw.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
-    const marks = [...text.matchAll(PAGE_MARKER_RE)];
-    if (marks.length > 0) {
-      const pages = [];
-      const lead = text.slice(0, marks[0].index);
-      if (hasVisibleContent(lead)) pages.push(makePage("front", null, "", lead));
-      marks.forEach((m, i) => {
-        const start = m.index + m[0].length;
-        const end = i + 1 < marks.length ? marks[i + 1].index : text.length;
-        const label = m[2].trim();
-        pages.push(makePage(label === "?" ? "untranscribed" : "page", m[1], label, text.slice(start, end)));
-      });
-      return { format: "ocr", pages };
-    }
-    const legacy = [...text.matchAll(/==Start\s+p(\d+)==([\s\S]*?)==End\s+p\1==/gi)];
-    if (legacy.length > 0) {
-      const pages = legacy.map((m) => makePage("page", null, m[1], m[2]));
-      pages.sort((a, b) => a.num - b.num);
-      return { format: "legacy", pages };
-    }
-    return { format: "plain", pages: [makePage("page", null, "", text)] };
-  }
-  var NOTE_START_RE = /^\((\d{1,3})\)\s*([\s\S]*)$|^(\d{1,3})\s*[-–]\s+([\s\S]*)$/;
-  function toWesternNoteLine(line) {
-    return line.replace(/^\(([\u0660-\u0669\u06F0-\u06F9]{1,3})\)/, (m, d) => `(${toWestern(d)})`);
-  }
-  function splitFootnotes(mdText) {
-    const lines = stripComments(mdText).split("\n");
-    let sep = -1;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      if (/^[ \t]*-{3,}[ \t]*$/.test(lines[i])) {
-        sep = i;
-        break;
-      }
-    }
-    if (sep < 0) return { body: mdText, notes: [] };
-    const after = lines.slice(sep + 1).map((l3) => toWesternNoteLine(l3.trim())).filter(Boolean);
-    if (!after.some((l3) => NOTE_START_RE.test(l3))) return { body: mdText, notes: [] };
-    const notes = [];
-    let cur = null;
-    for (const line of after) {
-      const m = NOTE_START_RE.exec(line);
-      if (m) {
-        cur = { n: m[1] || m[3], md: m[2] != null ? m[2] : m[4] };
-        notes.push(cur);
-      } else if (cur) {
-        cur.md += " " + line;
-      } else {
-        cur = { n: null, md: line };
-        notes.push(cur);
-      }
-    }
-    const out = [];
-    for (const note of notes) {
-      let rest = note;
-      for (; ; ) {
-        out.push(rest);
-        if (rest.n == null) break;
-        const next = String(parseInt(rest.n, 10) + 1);
-        const re2 = new RegExp(`\\s\\(${next}\\)\\s`);
-        const m = re2.exec(rest.md);
-        if (!m) break;
-        const tail = { n: next, md: rest.md.slice(m.index + m[0].length) };
-        rest.md = rest.md.slice(0, m.index);
-        rest = tail;
-      }
-    }
-    return { body: lines.slice(0, sep).join("\n"), notes: out };
   }
 
   // src/search-core.js
@@ -2815,524 +3342,1229 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     };
   }
 
-  // src/lib-copy.js
-  var LIB = "https://lib.i36o.workers.dev/";
-  var LIB_HOST = "lib.i36o.workers.dev";
-  var PARALLEL = 6;
-  var safeDecode = (s) => {
-    try {
-      return decodeURIComponent(s);
-    } catch {
-      return s;
+  // src/reader/search.js
+  function buildSearchIndex(exact) {
+    const pages = [];
+    state.sheets.forEach((sheet, idx) => {
+      const root2 = sheet.querySelector(".page-content");
+      const b = createPage(exact);
+      let lastBlock = null;
+      const walker = document.createTreeWalker(root2, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          if (node.tagName === "BR") b.lineBreak();
+          continue;
+        }
+        const block = node.parentElement ? node.parentElement.closest(BLOCK_SEL) : null;
+        if (block !== lastBlock) {
+          b.paragraph();
+          lastBlock = block;
+        }
+        b.text(node.nodeValue, node);
+      }
+      b.page.sheet = sheet;
+      b.page.idx = idx;
+      pages.push(b.page);
+    });
+    return pages;
+  }
+  function getIndex() {
+    const key = search.exact ? "exact" : "loose";
+    if (!search.indexes[key]) search.indexes[key] = buildSearchIndex(search.exact);
+    return search.indexes[key];
+  }
+  function matchBounds(page, s, e) {
+    const endNode = page.nodes[page.oNode[e - 1]];
+    let eo = page.oOff[e - 1] + 1;
+    while (eo < endNode.nodeValue.length && isDropChar(endNode.nodeValue[eo])) eo++;
+    return {
+      startContainer: page.nodes[page.oNode[s]],
+      startOffset: page.oOff[s],
+      endContainer: endNode,
+      endOffset: eo
+    };
+  }
+  function staticRange(m) {
+    return new StaticRange(matchBounds(m.page, m.s, m.e));
+  }
+  function liveRange(m) {
+    const b = matchBounds(m.page, m.s, m.e);
+    const r = document.createRange();
+    r.setStart(b.startContainer, b.startOffset);
+    r.setEnd(b.endContainer, b.endOffset);
+    return r;
+  }
+  var hasHighlights = typeof CSS !== "undefined" && CSS.highlights && typeof Highlight === "function";
+  function clearSearch() {
+    clearTimeout(search.timer);
+    search.matches = [];
+    search.current = -1;
+    search.query = "";
+    if (hasHighlights) {
+      CSS.highlights.delete("search");
+      CSS.highlights.delete("search-active");
     }
-  };
-  function archiveId(link) {
-    let u;
+    renderResultsList();
+    updateSearchCountDisplay();
+  }
+  function performSearch(rawQuery) {
+    const q2 = normalizeQuery(rawQuery, search.exact);
+    if (q2 === search.query) return;
+    clearSearch();
+    search.query = q2;
+    if (q2.length < SEARCH_MIN_CHARS || state.sheets.length === 0 || isBuilding()) return;
+    const matches = findMatches(getIndex(), q2, { word: search.word, max: SEARCH_MAX_MATCHES });
+    search.matches = matches;
+    renderResultsList();
+    if (matches.length === 0) {
+      updateSearchCountDisplay();
+      return;
+    }
+    if (hasHighlights) {
+      const all = new Highlight();
+      for (const m of matches) all.add(staticRange(m));
+      CSS.highlights.set("search", all);
+    }
+    const curIdx = Math.max(0, findCurrentIdx());
+    let start = matches.findIndex((m) => m.page.idx >= curIdx);
+    if (start < 0) start = 0;
+    showMatch(start);
+  }
+  function rerunSearch() {
+    search.query = "";
+    performSearch(searchInput.value);
+  }
+  async function showMatch(i) {
+    search.current = i;
+    updateSearchCountDisplay();
+    markActiveResult();
+    const m = search.matches[i];
+    if (!m) return;
+    if (hasHighlights) CSS.highlights.set("search-active", new Highlight(staticRange(m)));
+    const range = liveRange(m);
+    let r = range.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) {
+      scrollToSheet(m.page.idx);
+      await nextFrame();
+      await nextFrame();
+      if (search.current !== i) return;
+      r = range.getBoundingClientRect();
+    }
+    const v = viewerContainer.getBoundingClientRect();
+    viewerContainer.scrollTop += r.top - v.top - viewerContainer.clientHeight / 3;
+    if (r.left < v.left || r.right > v.right) {
+      viewerContainer.scrollLeft += (r.left + r.right) / 2 - (v.left + v.right) / 2;
+    }
+    const startEl = range.startContainer.parentElement;
+    const block = startEl && (startEl.closest(BLOCK_SEL) || startEl);
+    if (block) pinElement(block, block.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
+  }
+  function updateSearchCountDisplay() {
+    if (search.matches.length === 0) {
+      searchCount.textContent = fmtNum(t().noResults);
+      return;
+    }
+    const total = search.matches.length >= SEARCH_MAX_MATCHES ? `${SEARCH_MAX_MATCHES}+` : search.matches.length;
+    searchCount.textContent = fmtNum(`${search.current + 1} ${state.dir === "rtl" ? "من" : "of"} ${total}`);
+  }
+  function stepMatch(delta) {
+    const n = search.matches.length;
+    if (n === 0) return;
+    showMatch((search.current + delta + n) % n);
+  }
+  function renderResultsList() {
+    searchResults.textContent = "";
+    searchResults.hidden = !search.listOpen || search.matches.length === 0;
+    if (searchResults.hidden) return;
+    const tr = t();
+    const shown = Math.min(search.matches.length, SEARCH_LIST_MAX);
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < shown; i++) {
+      const m = search.matches[i];
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      const page = document.createElement("span");
+      page.className = "res-page";
+      page.textContent = state.format === "plain" ? "" : pageLabelText(state.pages[m.page.idx], tr);
+      const text = document.createElement("span");
+      text.dir = "auto";
+      const sn = snippet(m, SNIPPET_CHARS);
+      const mark = document.createElement("mark");
+      mark.textContent = sn.hit;
+      text.append(document.createTextNode(sn.before), mark, document.createTextNode(sn.after));
+      btn.append(page, text);
+      btn.addEventListener("click", () => showMatch(i));
+      li.appendChild(btn);
+      frag.appendChild(li);
+    }
+    if (search.matches.length > shown) {
+      const li = document.createElement("li");
+      li.className = "res-more";
+      li.textContent = fmtNum(tr.moreResults(search.matches.length - shown));
+      frag.appendChild(li);
+    }
+    searchResults.appendChild(frag);
+    markActiveResult();
+  }
+  function markActiveResult() {
+    if (searchResults.hidden) return;
+    const items = searchResults.children;
+    for (let i = 0; i < items.length; i++) items[i].classList.toggle("active", i === search.current);
+    const active = items[search.current];
+    if (active && active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
+  }
+  function setOption(btn, value) {
+    btn.setAttribute("aria-pressed", value ? "true" : "false");
+  }
+  function openSearch() {
+    closeMore();
+    searchPopup.classList.add("active");
+    btnSearchToggle.setAttribute("aria-expanded", "true");
+    searchInput.focus();
+    searchInput.select();
+    if (searchInput.value) rerunSearch();
+  }
+  function closeSearch() {
+    searchPopup.classList.remove("active");
+    btnSearchToggle.setAttribute("aria-expanded", "false");
+    clearSearch();
+  }
+  function wireSearch() {
+    optDiacritics.addEventListener("click", () => {
+      search.exact = !search.exact;
+      setOption(optDiacritics, search.exact);
+      storeSet("searchExact", search.exact);
+      rerunSearch();
+    });
+    optWord.addEventListener("click", () => {
+      search.word = !search.word;
+      setOption(optWord, search.word);
+      storeSet("searchWord", search.word);
+      rerunSearch();
+    });
+    btnSearchList.addEventListener("click", () => {
+      search.listOpen = !search.listOpen;
+      setOption(btnSearchList, search.listOpen);
+      renderResultsList();
+    });
+    btnSearchToggle.addEventListener("click", () => {
+      if (searchPopup.classList.contains("active")) closeSearch();
+      else openSearch();
+    });
+    btnSearchClose.addEventListener("click", closeSearch);
+    btnSearchNext.addEventListener("click", () => stepMatch(1));
+    btnSearchPrev.addEventListener("click", () => stepMatch(-1));
+    searchInput.addEventListener("input", () => {
+      clearTimeout(search.timer);
+      search.timer = setTimeout(() => performSearch(searchInput.value), SEARCH_DEBOUNCE_MS);
+    });
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(search.timer);
+        if (normalizeQuery(searchInput.value, search.exact) !== search.query) performSearch(searchInput.value);
+        else stepMatch(e.shiftKey ? -1 : 1);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSearch();
+        btnSearchToggle.focus();
+      }
+    });
+  }
+
+  // src/reader/panel.js
+  function panelCoversPage() {
+    return sidePanel.getBoundingClientRect().width >= viewerContainer.clientWidth * PANEL_COVERS;
+  }
+  function openPanel() {
+    closeMore();
+    sidePanel.classList.add("open");
+    sidePanel.setAttribute("aria-hidden", "false");
+    btnPanel.setAttribute("aria-expanded", "true");
+    btnPanel.setAttribute("aria-pressed", "true");
+    renderPanel();
+  }
+  function closePanel() {
+    sidePanel.classList.remove("open");
+    sidePanel.setAttribute("aria-hidden", "true");
+    btnPanel.setAttribute("aria-expanded", "false");
+    btnPanel.setAttribute("aria-pressed", "false");
+  }
+  async function jumpToElement(idx, el) {
+    scrollToSheet(idx);
+    if (el) {
+      await nextFrame();
+      await nextFrame();
+      const v = viewerContainer.getBoundingClientRect();
+      viewerContainer.scrollTop += el.getBoundingClientRect().top - v.top - remPx(0.75);
+      pinElement(el, remPx(0.75));
+    }
+    updateCounter(true);
+    if (panelCoversPage()) closePanel();
+  }
+  function panelItem(text, pageText, onClick, extraClass) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "panel-item" + (extraClass ? " " + extraClass : "");
+    const s1 = document.createElement("span");
+    s1.className = "item-text";
+    s1.textContent = text;
+    s1.dir = "auto";
+    const s2 = document.createElement("span");
+    s2.className = "item-page";
+    s2.textContent = pageText;
+    btn.append(s1, s2);
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+  function emptyNote(text) {
+    const div = document.createElement("div");
+    div.className = "panel-empty";
+    div.textContent = text;
+    return div;
+  }
+  function pageSummary(idx) {
+    const sheet = state.sheets[idx];
+    const h2 = sheet && sheet.querySelector(".markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4");
+    const text = (h2 ? h2.textContent : sheet ? sheet.querySelector(".markdown-body").textContent : "").replace(/\s+/g, " ").trim();
+    return text.length > 70 ? text.slice(0, 70) + "…" : text;
+  }
+  function renderPanel() {
+    const tr = t();
+    tabContents.setAttribute("aria-selected", state.panelTab === "contents" ? "true" : "false");
+    tabBookmarks.setAttribute("aria-selected", state.panelTab === "bookmarks" ? "true" : "false");
+    panelBody.textContent = "";
+    if (state.sheets.length === 0) {
+      panelBody.appendChild(emptyNote(tr.emptyHint));
+      return;
+    }
+    const ul = document.createElement("ul");
+    ul.className = "panel-list";
+    if (state.panelTab === "contents") {
+      state.sheets.forEach((sheet, idx) => {
+        for (const h2 of sheet.querySelectorAll(".markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4")) {
+          const text = h2.textContent.replace(/\s+/g, " ").trim();
+          if (!text) continue;
+          const li = document.createElement("li");
+          li.appendChild(panelItem(
+            text,
+            state.format === "plain" ? "" : pageLabelText(state.pages[idx], tr),
+            () => jumpToElement(idx, h2),
+            `lvl-${h2.tagName.slice(1)}`
+          ));
+          ul.appendChild(li);
+        }
+      });
+      if (!ul.firstChild) {
+        panelBody.appendChild(emptyNote(tr.noHeadings));
+        return;
+      }
+    } else {
+      const indices = [...bookmarkedSet()].sort((a, b) => a - b);
+      for (const idx of indices) {
+        const li = document.createElement("li");
+        li.className = "bm-row";
+        const label = state.format === "plain" ? fmtNum(idx + 1) : pageLabelText(state.pages[idx], tr);
+        li.appendChild(panelItem(pageSummary(idx) || label, label, () => jumpToElement(idx, null)));
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "panel-btn";
+        del.innerHTML = ICON.trash;
+        setTitle(del, tr.removeBookmark);
+        del.addEventListener("click", () => removeBookmarkAt(idx));
+        li.appendChild(del);
+        ul.appendChild(li);
+      }
+      if (!ul.firstChild) {
+        panelBody.appendChild(emptyNote(tr.noBookmarks));
+        return;
+      }
+    }
+    panelBody.appendChild(ul);
+  }
+  function enterReading() {
+    const anchor = captureAnchor();
+    closePanel();
+    closeSearch();
+    closeMore();
+    document.body.classList.add("reading");
+    restoreAnchor(anchor);
+    const el = document.documentElement;
+    if (el.requestFullscreen && !document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {
+      });
+    }
+    btnExitReading.focus();
+  }
+  function exitReading() {
+    if (!document.body.classList.contains("reading")) return;
+    const anchor = captureAnchor();
+    document.body.classList.remove("reading");
+    fitToolbar();
+    restoreAnchor(anchor);
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {
+    });
+  }
+  var groupFold = $("group-fold");
+  var FOLD = [[statusIcon, 5], [btnOpenFile, 5], [btnSearchToggle, 5], [btnCopyLink, 11, $("group-mark")]].map(([el, at2, into]) => {
+    const home = document.createComment(el.id);
+    el.parentNode.insertBefore(home, el);
+    return { el, home, at: at2, into };
+  });
+  var groupNav = $("group-nav");
+  var OUT = [["group-text", 1, "before"], ["group-zoom", 2, "before"], ["group-mark", 3, "after"], ["group-acts", 3, "after"]].map(([id, out, side]) => {
+    const el = $(id);
+    const home = document.createComment(id);
+    el.parentNode.insertBefore(home, el);
+    return { el, home, out, side };
+  });
+  var toolbarLevel = -1;
+  var TOOLBAR_LEVELS = 11;
+  function setToolbarLevel(level) {
+    if (level === toolbarLevel) return;
+    toolbarLevel = level;
+    for (const g of OUT) {
+      if (level < g.out) {
+        if (g.side === "before") tbMain.insertBefore(g.el, groupNav);
+        else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
+      } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
+    }
+    document.body.classList.toggle("acts-out", level < 3);
+    document.body.classList.toggle("notitle", level >= 4);
+    const folded = level >= 5;
+    document.body.classList.toggle("folded", folded);
+    document.body.classList.toggle("nopos", level >= 6);
+    document.body.classList.toggle("tight", level >= 7);
+    document.body.classList.toggle("tighter", level >= 8);
+    document.body.classList.toggle("tightest", level >= 10);
+    for (const f of FOLD) {
+      if (level >= f.at) {
+        if (f.into) {
+          if (f.into.firstElementChild !== f.el) f.into.insertBefore(f.el, f.into.firstChild);
+        } else if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el);
+      } else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
+    }
+    groupFold.hidden = !folded;
+    const counter = toolbar.querySelector(".page-counter");
+    if (level >= 9) {
+      if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild);
+    } else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
+  }
+  function rowWidth(el) {
+    const cs = getComputedStyle(el);
+    const gap = parseFloat(cs.columnGap) || 0;
+    let w = 0, n = 0;
+    for (const c of el.children) {
+      if (c.hidden || c.classList.contains("more-menu") || getComputedStyle(c).display === "none") continue;
+      w += c.getBoundingClientRect().width;
+      n++;
+    }
+    return w + gap * Math.max(0, n - 1);
+  }
+  function toolbarFits() {
+    const cs = getComputedStyle(toolbar);
+    const inner = toolbar.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const gap = parseFloat(cs.columnGap) || 0;
+    const need = tbStart.getBoundingClientRect().width + rowWidth(tbMain) + tbEnd.getBoundingClientRect().width + gap * 2;
+    return need <= inner;
+  }
+  function fitToolbar() {
+    if (document.body.classList.contains("reading")) return;
+    for (let level = 0; level <= TOOLBAR_LEVELS; level++) {
+      setToolbarLevel(level);
+      if (toolbarFits()) return;
+    }
+  }
+  var queueFitToolbar = oncePerFrame(() => fitToolbar());
+  function closeMore() {
+    moreMenu.hidden = true;
+    btnMore.setAttribute("aria-expanded", "false");
+    btnMore.setAttribute("aria-pressed", "false");
+  }
+  function wirePanel() {
+    btnPanel.addEventListener("click", () => {
+      if (sidePanel.classList.contains("open")) closePanel();
+      else openPanel();
+    });
+    btnPanelClose.addEventListener("click", closePanel);
+    tabContents.addEventListener("click", () => {
+      state.panelTab = "contents";
+      renderPanel();
+    });
+    tabBookmarks.addEventListener("click", () => {
+      state.panelTab = "bookmarks";
+      renderPanel();
+    });
+    btnCopyLink.addEventListener("click", copyPageLink);
+    btnReading.addEventListener("click", enterReading);
+    btnExitReading.addEventListener("click", exitReading);
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) exitReading();
+    });
+    btnMore.addEventListener("click", () => {
+      const open2 = moreMenu.hidden;
+      moreMenu.hidden = !open2;
+      btnMore.setAttribute("aria-expanded", open2 ? "true" : "false");
+      btnMore.setAttribute("aria-pressed", open2 ? "true" : "false");
+    });
+    document.addEventListener("click", (e) => {
+      if (!moreMenu.hidden && !moreMenu.contains(e.target) && !btnMore.contains(e.target)) closeMore();
+    });
+    moreMenu.addEventListener("click", (e) => {
+      if (e.target.closest("#btn-search-toggle, #btn-open-file")) closeMore();
+    });
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(queueFitToolbar).observe(toolbar);
+      new ResizeObserver(queueFitToolbar).observe(tbEnd);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFitToolbar);
+    document.addEventListener("keydown", (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      const tag = e.target && e.target.tagName;
+      const typing = tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || e.target && e.target.isContentEditable;
+      if (mod && !e.altKey) {
+        const k2 = e.key.toLowerCase();
+        if (k2 === "f" && state.sheets.length > 0 && !isBuilding()) {
+          e.preventDefault();
+          exitReading();
+          openSearch();
+          return;
+        }
+        if (k2 === "=" || k2 === "+") {
+          e.preventDefault();
+          setZoom(state.zoom + ZOOM_STEP);
+          return;
+        }
+        if (k2 === "-" || k2 === "_") {
+          e.preventDefault();
+          setZoom(state.zoom - ZOOM_STEP);
+          return;
+        }
+        if (k2 === "0") {
+          e.preventDefault();
+          setZoom(1);
+          return;
+        }
+        return;
+      }
+      if (e.key === "Escape") {
+        if (!moreMenu.hidden) {
+          closeMore();
+          return;
+        }
+        if (searchPopup.classList.contains("active")) {
+          closeSearch();
+          return;
+        }
+        if (sidePanel.classList.contains("open")) {
+          closePanel();
+          return;
+        }
+        exitReading();
+        return;
+      }
+      if (typing || e.altKey) return;
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          goPage(leftDelta());
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          goPage(-leftDelta());
+          break;
+        case "PageDown":
+          e.preventDefault();
+          goPage(1);
+          break;
+        case "PageUp":
+          e.preventDefault();
+          goPage(-1);
+          break;
+        case "Home":
+          e.preventDefault();
+          goEdge(false);
+          break;
+        case "End":
+          e.preventDefault();
+          goEdge(true);
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  // src/reader/nav.js
+  function findCurrentIdx() {
+    const sheets = state.sheets;
+    if (sheets.length === 0) return -1;
+    const v = viewerContainer.getBoundingClientRect();
+    const line = v.top + v.height * CURRENT_PAGE_LINE;
+    let lo = 0, hi = sheets.length - 1, ans = 0;
+    while (lo <= hi) {
+      const mid = lo + hi >> 1;
+      if (sheets[mid].getBoundingClientRect().top <= line) {
+        ans = mid;
+        lo = mid + 1;
+      } else hi = mid - 1;
+    }
+    return ans;
+  }
+  function counterValue(p, idx) {
+    if (state.format === "plain") return fmtNum(idx + 1);
+    if (!p.label) return "—";
+    return p.label === "-" ? "—" : p.label === "?" ? "؟" : fmtNum(p.label);
+  }
+  function volumeTotals(pages) {
+    const max = /* @__PURE__ */ new Map();
+    for (const p of pages) if (p.num != null && !(max.get(p.vol) >= p.num)) max.set(p.vol, p.num);
+    return max;
+  }
+  function volumeTotal(vol) {
+    if (state.format === "plain") return String(state.pages.length);
+    const max = state.volTotals ? state.volTotals.get(vol) : void 0;
+    return max == null ? "—" : String(max);
+  }
+  function buildVolumeSelect() {
+    volSelect.textContent = "";
+    volSelect.hidden = !state.multiVolume;
+    if (!state.multiVolume) return;
+    for (const v of state.volumes) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = fmtNum(`${t().vol} ${v}`);
+      volSelect.appendChild(opt);
+    }
+    queueFitToolbar();
+  }
+  function updateCounter(force) {
+    const idx = findCurrentIdx();
+    const none = idx < 0;
+    btnNavLeft.disabled = none;
+    btnNavRight.disabled = none;
+    if (none) {
+      pageNumInput.value = "";
+      totalPagesLabel.textContent = fmtNum("0");
+      pagePos.textContent = "";
+      setTitle(pageNumInput, t().pageInput);
+      updateBookmarkButton();
+      return;
+    }
+    if (!force && idx === state.currentIdx) return;
+    state.currentIdx = idx;
+    const p = state.pages[idx];
+    if (document.activeElement !== pageNumInput) pageNumInput.value = counterValue(p, idx);
+    const total = fmtNum(volumeTotal(p.vol));
+    if (totalPagesLabel.textContent !== total) {
+      totalPagesLabel.textContent = total;
+      queueFitToolbar();
+    }
+    const pos = state.format === "plain" ? "" : fmtNum(`(${idx + 1}/${state.pages.length})`);
+    if (pagePos.textContent !== pos) {
+      const grew = pos.length !== pagePos.textContent.length;
+      pagePos.textContent = pos;
+      if (grew) queueFitToolbar();
+    }
+    setTitle(pageNumInput, `${t().pageInput}
+${fmtNum(t().position(idx + 1, state.pages.length))}`);
+    if (state.multiVolume && p.vol != null && document.activeElement !== volSelect) volSelect.value = p.vol;
+    updateBookmarkButton();
+  }
+  var queueScroll = oncePerFrame(() => {
+    updateNear();
+    updateCounter(false);
+  });
+  var pin = null;
+  function pinElement(el, offset, frac = 0) {
+    const now = performance.now();
+    const p = { el, offset, frac, started: now, until: now + PIN_MS };
+    pin = p;
+    if (document.fonts && document.fonts.status === "loading") {
+      document.fonts.ready.then(() => {
+        if (pin === p) p.until = Math.max(p.until, performance.now() + PIN_SETTLE_MS);
+      });
+    }
+    requestAnimationFrame(pinStep);
+  }
+  function placePinned(p) {
+    const r = p.el.getBoundingClientRect();
+    const want = viewerContainer.getBoundingClientRect().top + p.offset - p.frac * r.height;
+    const d = r.top - want;
+    if (Math.abs(d) >= 1) viewerContainer.scrollTop += d;
+  }
+  function pinStep() {
+    const p = pin;
+    if (!p) return;
+    if (!p.el.isConnected || performance.now() > Math.min(p.until, p.started + PIN_MAX_MS)) {
+      pin = null;
+      updateCounter(true);
+      return;
+    }
+    placePinned(p);
+    requestAnimationFrame(pinStep);
+  }
+  function releasePin() {
+    pin = null;
+  }
+  function scrollToSheet(idx) {
+    const sheet = state.sheets[idx];
+    if (!sheet) return;
+    const pad = parseFloat(getComputedStyle(viewerContainer).paddingTop) || 0;
+    const p = { el: sheet, offset: pad, frac: 0 };
+    placePinned(p);
+    pinElement(sheet, pad);
+  }
+  function goPage(delta) {
+    const idx = findCurrentIdx();
+    if (idx < 0) return;
+    let target = idx + delta;
+    if (delta < 0) {
+      const vTop = viewerContainer.getBoundingClientRect().top;
+      const pad = parseFloat(getComputedStyle(viewerContainer).paddingTop) || 0;
+      if (state.sheets[idx].getBoundingClientRect().top < vTop + pad - remPx(0.5)) target = idx;
+    }
+    target = Math.max(0, Math.min(state.sheets.length - 1, target));
+    scrollToSheet(target);
+    updateCounter(true);
+  }
+  function goEdge(last) {
+    if (state.sheets.length === 0) return;
+    scrollToSheet(last ? state.sheets.length - 1 : 0);
+    updateCounter(true);
+  }
+  var leftDelta = () => state.dir === "rtl" ? 1 : -1;
+  function findPage(input, allowAnyVolume) {
+    const raw = toWestern2(String(input).trim()).replace(/^ص\s*/, "");
+    if (!raw) return -1;
+    const pm = /^\(\s*(\d+)\s*(?:\/\s*\d+\s*)?\)$/.exec(raw);
+    if (pm) {
+      const n = parseInt(pm[1], 10);
+      return n >= 1 && n <= state.pages.length ? n - 1 : -1;
+    }
+    if (state.format === "plain") {
+      const n = parseInt(raw, 10);
+      return n >= 1 && n <= state.pages.length ? n - 1 : 0;
+    }
+    const cur = state.pages[state.currentIdx] || state.pages[0];
+    let vol = cur ? cur.vol : null;
+    let label = raw;
+    const vm = /^(?:ج\s*)?([^\s:/]+)\s*[:/]\s*(?:ص\s*)?(\S+)$/.exec(raw);
+    if (vm && (state.multiVolume || allowAnyVolume)) {
+      vol = vm[1];
+      label = vm[2];
+    }
+    if (label === "؟") label = "?";
+    const inVol = (p) => !state.multiVolume || p.vol === vol;
+    const idx = state.pages.findIndex((p) => inVol(p) && p.label === label);
+    if (idx >= 0) return idx;
+    if (/^\d+$/.test(label)) {
+      const n = parseInt(label, 10);
+      let best = -1, bestDiff = Infinity;
+      state.pages.forEach((p, i) => {
+        if (!inVol(p) || p.num == null) return;
+        const d = Math.abs(p.num - n);
+        if (d < bestDiff) {
+          bestDiff = d;
+          best = i;
+        }
+      });
+      return best;
+    }
+    return -1;
+  }
+  function goToInput() {
+    const idx = findPage(pageNumInput.value);
+    if (idx >= 0) {
+      scrollToSheet(idx);
+      pageNumInput.blur();
+      requestAnimationFrame(() => updateCounter(true));
+    } else {
+      updateCounter(true);
+      const p = state.pages[state.currentIdx];
+      if (p) pageNumInput.value = counterValue(p, state.currentIdx);
+    }
+  }
+  function revealElement(target) {
+    const v = viewerContainer.getBoundingClientRect();
+    const r = target.getBoundingClientRect();
+    viewerContainer.scrollTop += r.top - v.top - viewerContainer.clientHeight / 3;
+    pinElement(target, target.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
+    target.classList.remove("flash");
+    void target.offsetWidth;
+    target.classList.add("flash");
+  }
+  function wireNav() {
+    volSelect.addEventListener("change", () => {
+      const idx = state.pages.findIndex((p) => p.vol === volSelect.value);
+      if (idx >= 0) {
+        scrollToSheet(idx);
+        updateCounter(true);
+      }
+      volSelect.blur();
+    });
+    viewerContainer.addEventListener("scroll", () => {
+      if (!queueScroll()) return;
+      queueSave();
+    }, { passive: true });
+    for (const ev of ["wheel", "touchstart", "pointerdown"]) {
+      viewerContainer.addEventListener(ev, releasePin, { passive: true });
+    }
+    document.addEventListener("keydown", releasePin, true);
+    btnNavLeft.addEventListener("click", () => goPage(leftDelta()));
+    btnNavRight.addEventListener("click", () => goPage(-leftDelta()));
+    pageNumInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        goToInput();
+      } else if (e.key === "Escape") {
+        pageNumInput.blur();
+        updateCounter(true);
+      }
+    });
+    pageNumInput.addEventListener("change", goToInput);
+    pageNumInput.addEventListener("focus", () => pageNumInput.select());
+    pagesWrapper.addEventListener("click", (e) => {
+      const a = e.target.closest("a.fn-ref, a.fn-back");
+      if (!a) return;
+      e.preventDefault();
+      const target = document.getElementById(a.dataset.target);
+      if (target) revealElement(target);
+    });
+  }
+
+  // src/reader/view.js
+  function applyLocalization() {
+    const isRtl = state.dir === "rtl";
+    const tr = t();
+    document.title = tr.appTitle;
+    document.documentElement.lang = isRtl ? "ar" : "en";
+    document.body.dir = state.dir;
+    searchPopup.dir = state.dir;
+    missingPagesBanner.dir = state.dir;
+    moreMenu.dir = state.dir;
+    setTitle(btnPanel, tr.panel);
+    setTitle(btnZoomIn, tr.zoomIn);
+    setTitle(btnZoomOut, tr.zoomOut);
+    setTitle(btnFitWidth, tr.fitWidth);
+    setTitle(btnFitPage, tr.fitPage);
+    setTitle(btnTextSmaller, tr.textSmaller);
+    setTitle(btnTextLarger, tr.textLarger);
+    btnTextSmaller.innerHTML = `${tr.textLetter}<small>−</small>`;
+    btnTextLarger.innerHTML = `${tr.textLetter}<small>+</small>`;
+    setTitle(btnNavLeft, isRtl ? tr.nextPage("←") : tr.prevPage("←"));
+    setTitle(btnNavRight, isRtl ? tr.prevPage("→") : tr.nextPage("→"));
+    setTitle(btnDirToggle, isRtl ? tr.dirRTL : tr.dirLTR);
+    btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
+    btnNumerals.textContent = NUMERALS_SAMPLE[state.numerals];
+    setTitle(btnNumerals, numeralsLabel(state.numerals, lang()));
+    btnTheme.innerHTML = THEME_ICONS[state.theme];
+    setTitle(btnTheme, themeLabel(state.theme, lang()));
+    setTitle(btnScan, tr.scan);
+    setTitle(btnReading, tr.reading);
+    setTitle(btnExitReading, tr.exitReading);
+    setTitle(btnMore, tr.more);
+    setTitle(btnSearchToggle, btnSearchToggle.disabled ? tr.searchWait : tr.search);
+    searchInput.placeholder = tr.searchInput;
+    searchInput.setAttribute("aria-label", tr.search);
+    setTitle(btnSearchPrev, tr.prevMatch);
+    setTitle(btnSearchNext, tr.nextMatch);
+    setTitle(btnSearchList, tr.showResults);
+    setTitle(btnSearchClose, tr.closeSearch);
+    optDiacritics.textContent = tr.matchDiacritics;
+    optWord.textContent = tr.wholeWord;
+    tabContents.textContent = tr.contentsTab;
+    tabBookmarks.textContent = tr.bookmarksTab;
+    setTitle(btnCopyLink, tr.copyLink);
+    setTitle(btnPanelClose, tr.closePanel);
+    setTitle(volSelect, tr.volume);
+    document.getElementById("open-file-label").textContent = tr.openFile;
+    setTitle(btnOpenFile, tr.openFile);
+    lblOf.textContent = tr.ofLabel;
+    setTitle(pageNumInput, tr.pageInput);
+    tbTitle.textContent = tr.barTitle;
+    setTitle(btnClose, tr.close);
+    updateConnection();
+    emptyState.textContent = fmtNum(tr.emptyHint);
+    emptyState.classList.toggle("visible", state.sheets.length === 0);
+    renderNotices();
+    updateSearchCountDisplay();
+    updateBookmarkButton();
+    queueFitToolbar();
+  }
+  function setTextScale(v) {
+    const anchor = captureAnchor();
+    state.textScale = v;
+    document.documentElement.style.setProperty("--text-scale", String(v));
+    restoreAnchor(anchor);
+    const i = TEXT_SCALES.indexOf(v);
+    btnTextSmaller.disabled = i <= 0;
+    btnTextLarger.disabled = i >= TEXT_SCALES.length - 1;
+  }
+  function stepTextScale(delta) {
+    let i = TEXT_SCALES.indexOf(state.textScale);
+    if (i < 0) i = TEXT_SCALES.indexOf(1);
+    i = Math.max(0, Math.min(TEXT_SCALES.length - 1, i + delta));
+    setTextScale(TEXT_SCALES[i]);
+    storeSet("textScale", state.textScale);
+  }
+  function viewerInner() {
+    const cs = getComputedStyle(viewerContainer);
+    return {
+      w: viewerContainer.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+      h: viewerContainer.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+    };
+  }
+  function remPx(n) {
+    return n * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+  }
+  function cssVarPx(name) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const n = parseFloat(v);
+    if (!Number.isFinite(n)) return 0;
+    return v.endsWith("rem") ? remPx(n) : n;
+  }
+  function pageWidth() {
+    return cssVarPx("--page-w") || cssVarPx("--page-max");
+  }
+  function updatePageWidth() {
+    const w = Math.max(cssVarPx("--page-min"), Math.min(cssVarPx("--page-max"), Math.floor(viewerInner().w)));
+    document.documentElement.style.setProperty("--page-w", `${w}px`);
+  }
+  function captureAnchor() {
+    const idx = findCurrentIdx();
+    const sheet = state.sheets[idx];
+    if (!sheet) return null;
+    const vTop = viewerContainer.getBoundingClientRect().top;
+    const r = sheet.getBoundingClientRect();
+    return { idx, frac: r.height > 0 ? (vTop - r.top) / r.height : 0 };
+  }
+  function restoreAnchor(anchor) {
+    if (!anchor) return;
+    const sheet = state.sheets[anchor.idx];
+    if (!sheet) return;
+    const vTop = viewerContainer.getBoundingClientRect().top;
+    const r = sheet.getBoundingClientRect();
+    viewerContainer.scrollTop += r.top - vTop + anchor.frac * r.height;
+    pinElement(sheet, 0, anchor.frac);
+  }
+  function setZoom(z2, keepAnchor2 = true) {
+    const anchor = keepAnchor2 ? captureAnchor() : null;
+    state.zoom = Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z2)) * 100) / 100;
+    pagesWrapper.style.zoom = String(state.zoom);
+    restoreAnchor(anchor);
+    btnZoomOut.disabled = state.zoom <= ZOOM_MIN;
+    btnZoomIn.disabled = state.zoom >= ZOOM_MAX;
+  }
+  function fitWidthZoom() {
+    return viewerInner().w / pageWidth();
+  }
+  function fitWidth() {
+    setZoom(fitWidthZoom());
+    viewerContainer.scrollLeft = 0;
+  }
+  function fitPage() {
+    const idx = findCurrentIdx();
+    const sheet = state.sheets[idx];
+    if (!sheet) {
+      setZoom(1);
+      return;
+    }
+    const unzoomedH = sheet.getBoundingClientRect().height / state.zoom;
+    const z2 = Math.min(viewerInner().h / unzoomedH, fitWidthZoom());
+    setZoom(z2, false);
+    viewerContainer.scrollLeft = 0;
+    scrollToSheet(idx);
+  }
+  var queueResize = oncePerFrame(() => {
+    const anchor = captureAnchor();
+    updatePageWidth();
+    restoreAnchor(anchor);
+  });
+  function wireView() {
+    btnDirToggle.addEventListener("click", () => {
+      state.dir = state.dir === "rtl" ? "ltr" : "rtl";
+      const blockDir = state.dir === state.detectedDir ? "auto" : state.dir;
+      for (const sheet of state.sheets) {
+        sheet.dir = state.dir;
+        applyBlockDirs(sheet, blockDir, state.dir);
+      }
+      applyLocalization();
+      for (let i = 0; i < state.sheets.length; i++) {
+        const footer = state.sheets[i].querySelector(".page-number-footer");
+        if (footer) footer.textContent = pageLabelText(state.pages[i], t());
+        const ph = state.sheets[i].querySelector(".page-placeholder");
+        if (ph) ph.textContent = t().untranscribedPage;
+      }
+      buildVolumeSelect();
+      updateCounter(true);
+      if (sidePanel.classList.contains("open")) renderPanel();
+    });
+    btnNumerals.addEventListener("click", () => {
+      cycleNumerals();
+    });
+    onNumeralsChange(({ numerals }) => {
+      if (numerals === state.numerals) return;
+      state.numerals = numerals;
+      for (const sheet of state.sheets) applyNumerals2(sheet);
+      search.indexes = {};
+      applyLocalization();
+      buildVolumeSelect();
+      updateCounter(true);
+      if (sidePanel.classList.contains("open")) renderPanel();
+      if (search.query) {
+        const q2 = searchInput.value;
+        search.query = "";
+        performSearch(q2);
+      }
+    });
+    onChange(({ choice }) => {
+      if (choice === state.theme) return;
+      state.theme = choice;
+      applyLocalization();
+    });
+    btnTheme.addEventListener("click", () => {
+      cycle();
+    });
+    btnTextSmaller.addEventListener("click", () => stepTextScale(-1));
+    btnTextLarger.addEventListener("click", () => stepTextScale(1));
+    btnZoomIn.addEventListener("click", () => setZoom(state.zoom + ZOOM_STEP));
+    btnZoomOut.addEventListener("click", () => setZoom(state.zoom - ZOOM_STEP));
+    btnFitWidth.addEventListener("click", fitWidth);
+    btnFitPage.addEventListener("click", fitPage);
+    if (typeof ResizeObserver === "function") new ResizeObserver(() => queueNear()).observe(pagesWrapper);
+    window.addEventListener("resize", () => {
+      queueNear();
+      queueResize();
+    });
+  }
+
+  // src/reader/position.js
+  var toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), TOAST_MS);
+  }
+  var saveTimer = 0;
+  function queueSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
+  }
+  function savePosition() {
+    if (!state.bookKey || state.sheets.length === 0) return;
+    const a = captureAnchor();
+    if (!a) return;
+    const all = storeGet("positions", {}) || {};
+    all[state.bookKey] = { idx: a.idx, frac: Math.round(a.frac * 1e4) / 1e4, t: Date.now() };
+    const keys = Object.keys(all);
+    if (keys.length > POSITIONS_MAX) {
+      keys.sort((x2, y2) => (all[x2].t || 0) - (all[y2].t || 0));
+      for (const k2 of keys.slice(0, keys.length - POSITIONS_MAX)) delete all[k2];
+    }
+    storeSet("positions", all);
+  }
+  function saveNow() {
+    clearTimeout(saveTimer);
+    savePosition();
+    updateHash();
+  }
+  async function restorePosition() {
+    const key = state.bookKey;
+    if (!key) return;
+    const pos = (storeGet("positions", {}) || {})[key];
+    if (!pos || typeof pos.idx !== "number" || pos.idx >= state.sheets.length) return;
+    if (pos.idx === 0 && !(pos.frac > 0.02)) return;
+    const anchor = { idx: pos.idx, frac: Math.max(0, Math.min(1, Number(pos.frac) || 0)) };
+    restoreAnchor(anchor);
+    updateCounter(true);
+  }
+  function isLinkable() {
+    return !!state.bookKey && state.bookKey.startsWith("url:");
+  }
+  function hashTargetIdx() {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const p = params.get("p");
+    if (p) return findPage(p, true);
+    const n = parseInt(toWestern2(params.get("n") || ""), 10);
+    if (n >= 1 && n <= state.pages.length) return n - 1;
+    return -1;
+  }
+  function hashFor(idx) {
+    const p = state.pages[idx];
+    if (!p) return "";
+    if (state.format !== "plain" && p.label && p.label !== "-" && p.label !== "?") {
+      const v = state.multiVolume && p.vol != null ? `${p.vol}:${p.label}` : p.label;
+      return `#p=${encodeURIComponent(v)}`;
+    }
+    return `#n=${idx + 1}`;
+  }
+  function updateHash() {
+    if (!isLinkable() || state.sheets.length === 0) return;
+    const h2 = hashFor(findCurrentIdx());
+    if (h2 && window.location.hash !== h2) {
+      try {
+        history.replaceState(null, "", h2);
+      } catch {
+      }
+    }
+  }
+  var MD_READER_KEY = "i360.mdReader";
+  function readerBase() {
+    let v;
     try {
-      u = new URL(link);
+      v = localStorage.getItem(MD_READER_KEY);
     } catch {
       return null;
     }
-    if (!/(^|\.)archive\.org$/i.test(u.hostname)) return null;
-    const parts = u.pathname.split("/").filter(Boolean);
-    if (parts.length < 3 || !["stream", "download", "details"].includes(parts[0])) return null;
-    return `archive:${safeDecode(parts[1])}/${parts.slice(2).map(safeDecode).join("/")}`;
-  }
-  function sameLink(link) {
+    if (typeof v !== "string" || !/[?&]file=$/.test(v)) return null;
     try {
-      const u = new URL(link);
-      u.hash = "";
-      return safeDecode(u.href).replace(/\/$/, "");
+      const u = new URL(v);
+      if (u.protocol !== "https:" || u.username || u.password) return null;
     } catch {
-      return String(link);
+      return null;
+    }
+    return v;
+  }
+  function shareLink() {
+    const base = readerBase();
+    if (base && state.bookLink) return base + encodeURIComponent(state.bookLink) + window.location.hash;
+    return IN_APP ? null : window.location.href;
+  }
+  async function copyPageLink() {
+    updateHash();
+    const link = shareLink();
+    try {
+      if (!link) throw new Error("no public link");
+      await navigator.clipboard.writeText(link);
+      toast(t().linkCopied);
+    } catch {
+      toast(t().copyFailed);
     }
   }
-  function findSource(catalog, link) {
-    const id = archiveId(link);
-    const want = sameLink(link);
-    for (const s of catalog.sources) {
-      if (id && s.id === id) return s;
-      if ([s.url, ...s.links || []].some((l3) => l3 && sameLink(l3) === want)) return s;
+  function bookmarkList() {
+    if (!state.bookKey) return [];
+    const all = storeGet("bookmarks", {}) || {};
+    return Array.isArray(all[state.bookKey]) ? all[state.bookKey] : [];
+  }
+  function saveBookmarks(list) {
+    if (!state.bookKey) return;
+    const all = storeGet("bookmarks", {}) || {};
+    if (list.length > 0) all[state.bookKey] = list;
+    else delete all[state.bookKey];
+    storeSet("bookmarks", all);
+  }
+  function resolveBookmark(b) {
+    if (b && b.label && b.label !== "-" && b.label !== "?") {
+      const i = state.pages.findIndex((p) => p.label === b.label && p.vol === (b.vol == null ? null : b.vol));
+      if (i >= 0) return i;
     }
-    return null;
+    return b && typeof b.idx === "number" && b.idx < state.pages.length ? b.idx : -1;
   }
-  var OLD_BOOK_PATHS = { "i36o.web.app": "/md/books/", "i360-hub.web.app": "/md/books/", "i360-e.web.app": "/md/books/", "i360-md.web.app": "/books/" };
-  function bookName(path, prefix) {
-    if (!path.startsWith(prefix)) return null;
-    const name = safeDecode(path.slice(prefix.length));
-    return name && !/[/\\]/.test(name) && name !== "." && name !== ".." ? name : null;
+  function bookmarkedSet() {
+    return new Set(bookmarkList().map(resolveBookmark).filter((i) => i >= 0));
   }
-  function ownBook(value, pageHref) {
-    const text = String(value == null ? "" : value).trim();
-    let name = null;
-    if (!/^[a-z][a-z0-9+.-]*:|^\/\//i.test(text)) {
-      const rel = text.replace(/^\.\//, "");
-      name = rel.startsWith("/") ? bookName(rel, "/md/books/") : bookName(rel, "books/");
+  function applyBookmarkRibbons() {
+    const set = bookmarkedSet();
+    state.sheets.forEach((s, i) => s.classList.toggle("bookmarked", set.has(i)));
+    updateBookmarkButton(set);
+  }
+  function updateBookmarkButton(set) {
+    const idx = findCurrentIdx();
+    const on = idx >= 0 && (set || bookmarkedSet()).has(idx);
+    btnBookmark.setAttribute("aria-pressed", on ? "true" : "false");
+    btnBookmark.title = on ? t().bookmarkRemove : t().bookmarkAdd;
+    btnBookmark.setAttribute("aria-label", btnBookmark.title);
+    btnBookmark.disabled = idx < 0 || !state.bookKey;
+  }
+  function toggleBookmark() {
+    const idx = findCurrentIdx();
+    if (idx < 0 || !state.bookKey) return;
+    const list = bookmarkList();
+    const at2 = list.findIndex((b) => resolveBookmark(b) === idx);
+    if (at2 >= 0) {
+      list.splice(at2, 1);
+      toast(t().bookmarkRemoved);
     } else {
-      let u;
-      try {
-        u = new URL(text);
-      } catch {
-        return null;
-      }
-      let page = null;
-      try {
-        page = new URL(pageHref);
-      } catch {
-      }
-      if (u.protocol === "https:" && u.hostname === LIB_HOST) name = bookName(u.pathname, "/books/");
-      else if (u.protocol === "https:" && OLD_BOOK_PATHS[u.hostname]) name = bookName(u.pathname, OLD_BOOK_PATHS[u.hostname]);
-      else if (page && /^https?:$/.test(page.protocol) && u.origin === page.origin) name = bookName(u.pathname, "/md/books/");
+      const p = state.pages[idx];
+      list.push({ idx, vol: p.vol, label: p.label });
+      list.sort((a, b) => resolveBookmark(a) - resolveBookmark(b));
+      toast(t().bookmarkAdded);
     }
-    return name ? `${LIB}books/${encodeURIComponent(name)}` : null;
+    saveBookmarks(list);
+    applyBookmarkRibbons();
+    if (sidePanel.classList.contains("open") && state.panelTab === "bookmarks") renderPanel();
   }
-  var MD_PUNCT = /[\\`*_{}()#+\-.!|~<>&=]/g;
-  var URL_RE = /(https?:\/\/[^\s<>]+)/;
-  function escapeLine(line) {
-    let s = line.replace(/^[ \t]+/, "").split(URL_RE).map((part, i) => i % 2 ? part : part.replace(MD_PUNCT, "\\$&")).join("");
-    if (s.startsWith("[")) s = "​" + s;
-    return s;
+  function removeBookmarkAt(idx) {
+    saveBookmarks(bookmarkList().filter((b) => resolveBookmark(b) !== idx));
+    applyBookmarkRibbons();
+    renderPanel();
   }
-  function marker(page) {
-    const clean = (v) => String(v == null ? "" : v).replace(/[\]\n\r]/g, "").trim();
-    const label = clean(page.label) || "-";
-    const vol = clean(page.vol);
-    return vol ? `[ج ${vol} ص ${label}]` : `[ص ${label}]`;
-  }
-  function toBookText(pages) {
-    return pages.map((p) => {
-      const body = (p.paras || []).map((para) => para.split("\n").map(escapeLine).join("\n")).filter((para) => para.trim()).join("\n\n");
-      return `${marker(p)}
-${body}`;
-    }).join("\n\n");
-  }
-  var itemOf = (id) => {
-    const rest = id.slice("archive:".length);
-    const slash = rest.indexOf("/");
-    return { item: slash < 0 ? rest : rest.slice(0, slash), file: slash < 0 ? "" : rest.slice(slash + 1) };
-  };
-  function itemBooks(catalog, source) {
-    if (!source || !source.id || !source.id.startsWith("archive:")) return 0;
-    const { item } = itemOf(source.id);
-    const ids = /* @__PURE__ */ new Set([...catalog.sources.map((s) => s.id), ...(catalog.unindexed || []).map((u) => u.id)]);
-    let n = 0;
-    for (const id of ids) if (id.startsWith("archive:") && itemOf(id).item === item) n++;
-    return n;
-  }
-  function scanLink(source, index, books) {
-    const id = source && source.id;
-    if (!id || !id.startsWith("archive:") || source.type !== "djvu-txt") return null;
-    const { item, file } = itemOf(id);
-    const sub = file.replace(/_djvu\.txt$/i, "");
-    const parts = ["https://archive.org/details", encodeURIComponent(item)];
-    if (sub && books > 1) parts.push(encodeURIComponent(sub));
-    return `${parts.join("/")}/page/n${Math.max(0, index | 0)}/mode/1up`;
-  }
-  async function open(link, fetchFn, onProgress, onPart) {
-    const get = async (path) => {
-      const res = await fetchFn(LIB + path, path === "latest.json" ? { cache: "no-cache" } : {});
-      if (!res.ok) throw new Error(`HTTP ${res.status} (${LIB_HOST})`);
-      return res.json();
-    };
-    const { buildId } = await get("latest.json");
-    const catalog = await get(`b/${buildId}/catalog.json`);
-    const source = findSource(catalog, link);
-    if (!source) return null;
-    const texts = new Array(source.chunks.length);
-    let next = 0, done = 0;
-    if (onProgress) onProgress(0, texts.length);
-    await Promise.all(Array.from({ length: Math.min(PARALLEL, texts.length) }, async () => {
-      while (next < texts.length) {
-        const c = next++;
-        texts[c] = toBookText((await get(`b/${buildId}/text/${source.key}/${c}.json`)).pages);
-        if (onPart && texts[c]) onPart(c, c < texts.length - 1 ? `${texts[c]}
-
-` : texts[c], texts.length);
-        done++;
-        if (onProgress) onProgress(done, texts.length);
+  function wirePosition() {
+    window.addEventListener("pagehide", saveNow);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") saveNow();
+    });
+    window.addEventListener("hashchange", () => {
+      if (!isLinkable()) return;
+      const idx = hashTargetIdx();
+      if (idx >= 0) {
+        scrollToSheet(idx);
+        updateCounter(true);
       }
-    }));
-    return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join("\n\n") };
+    });
+    btnBookmark.addEventListener("click", toggleBookmark);
   }
 
-  // src/page-chrome.js
-  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
-  function setupClose(button, stepsBack = () => 1) {
-    if (!IN_APP) return;
-    button.hidden = false;
-    button.addEventListener("click", () => {
-      let fromApp = false;
-      try {
-        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
-      } catch {
-      }
-      if (fromApp) history.go(-stepsBack());
-      else window.location.replace("/index.html");
+  // src/reader/library.js
+  function updateScanButton() {
+    updateCopyLink();
+    const show = !!(state.libSource && scanLink(state.libSource, 0, state.libBooks));
+    if (btnScan.hidden === !show) return;
+    btnScan.hidden = !show;
+    queueFitToolbar();
+  }
+  function updateCopyLink() {
+    const show = isLinkable() && !!shareLink();
+    if (btnCopyLink.hidden === !show) return;
+    btnCopyLink.hidden = !show;
+    queueFitToolbar();
+  }
+  function renderEmpty(notices) {
+    cancelBuild();
+    state.built = 0;
+    hideProgress();
+    setSearchReady(true);
+    saveNow();
+    state.bookKey = null;
+    state.libSource = null;
+    state.bookLink = null;
+    updateScanButton();
+    clearSearch();
+    search.indexes = {};
+    state.pages = [];
+    state.sheets = [];
+    state.volumes = [];
+    state.multiVolume = false;
+    state.notices = notices;
+    pagesWrapper.textContent = "";
+    buildVolumeSelect();
+    applyLocalization();
+    updateCounter(true);
+    if (sidePanel.classList.contains("open")) renderPanel();
+  }
+  function wireLibrary() {
+    btnScan.addEventListener("click", () => {
+      const url = scanLink(state.libSource, Math.max(0, state.currentIdx), state.libBooks);
+      if (url) window.open(url, "_blank", "noopener");
     });
   }
-  var THEME_ICONS = Object.freeze({
-    system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
-    light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
-    dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
-  });
 
-  // src/frame.js
-  function oncePerFrame(fn2) {
-    let queued = false;
-    return () => {
-      if (queued) return false;
-      queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        fn2();
-      });
-      return true;
-    };
-  }
-
-  // src/locales.js
-  var READER = {
-    ar: {
-      appTitle: "قارئ الماركداون",
-      zoomIn: "تكبير (Ctrl +)",
-      zoomOut: "تصغير (Ctrl -)",
-      fitWidth: "ملاءمة العرض",
-      fitPage: "ملاءمة الصفحة",
-      textSmaller: "تصغير الخط",
-      textLarger: "تكبير الخط",
-      textLetter: "أ",
-      prevPage: (key) => `الصفحة السابقة (${key})`,
-      nextPage: (key) => `الصفحة التالية (${key})`,
-      dirRTL: "الاتجاه الحالي: من اليمين لليسار (انقر للتغيير إلى LTR)",
-      dirLTR: "الاتجاه الحالي: من اليسار لليمين (انقر للتغيير إلى RTL)",
-      scan: "الصفحة الأصلية: صورة هذه الصفحة على archive.org",
-      bookmarkAdd: "إضافة علامة لهذه الصفحة",
-      bookmarkRemove: "إزالة علامة هذه الصفحة",
-      bookmarkAdded: "أُضيفت العلامة",
-      bookmarkRemoved: "أُزيلت العلامة",
-      reading: "وضع القراءة",
-      exitReading: "الخروج من وضع القراءة (Esc)",
-      more: "المزيد",
-      panel: "المحتويات والعلامات",
-      contentsTab: "المحتويات",
-      bookmarksTab: "العلامات",
-      noHeadings: "لا توجد عناوين في هذا الكتاب.",
-      noBookmarks: "لا توجد علامات بعد. استخدم زر العلامة لحفظ الصفحة الحالية.",
-      removeBookmark: "حذف العلامة",
-      closePanel: "إغلاق",
-      copyLink: "نسخ رابط هذه الصفحة",
-      linkCopied: "نُسخ الرابط",
-      copyFailed: "تعذّر النسخ",
-      volume: "الجزء",
-      search: "بحث في المستند (Ctrl+F)",
-      searchInput: "بحث في النص...",
-      prevMatch: "النتيجة السابقة (Shift+Enter)",
-      nextMatch: "النتيجة التالية (Enter)",
-      showResults: "قائمة النتائج",
-      closeSearch: "إغلاق البحث (Esc)",
-      matchDiacritics: "مطابقة التشكيل",
-      wholeWord: "كلمة كاملة",
-      moreResults: (n) => `و${n} نتيجة أخرى`,
-      openFile: "فتح ملف",
-      downloading: "جارٍ تحميل",
-      building: "جارٍ عرض",
-      searchWait: "يُتاح البحث بعد اكتمال عرض الكتاب",
-      online: "متصل بالإنترنت",
-      offline: "غير متصل",
-      barTitle: "القارئ",
-      close: "إغلاق",
-      notInLibrary: "هذا الكتاب ليس في مكتبة i360، فلا يمكن فتحه هنا.",
-      unverified: "تعذّر التحقق من الكتاب في مكتبة i360 — تحقّق من الاتصال ثم أعد المحاولة.",
-      ofLabel: "من",
-      pageInput: "رقم الصفحة المطبوع — للكتب متعددة الأجزاء: الجزء:الصفحة — وللموضع في الملف: (12)",
-      position: (i, n) => `الموضع في الملف: ${i} من ${n}`,
-      page: "ص",
-      vol: "ج",
-      listSep: "، ",
-      missingPagesWarn: (count, ranges) => `تنبيه: تم اكتشاف ${count} صفحة مفقودة: ${ranges}`,
-      untranscribedWarn: (count, list) => `تنبيه: ${count} صفحة لم تُنسخ: ${list}`,
-      untranscribedPage: "لم تُنسخ هذه الصفحة.",
-      after: (label) => `بعد ${label}`,
-      loadError: (msg) => `تعذّر تحميل الملف: ${msg}`,
-      readError: "تعذّر قراءة الملف.",
-      emptyHint: "لا يوجد ملف مفتوح. اضغط «فتح ملف» لاختيار كتاب.",
-      noResults: "0 من 0"
-    },
-    en: {
-      appTitle: "Markdown Reader",
-      zoomIn: "Zoom in (Ctrl +)",
-      zoomOut: "Zoom out (Ctrl -)",
-      fitWidth: "Fit width",
-      fitPage: "Fit page",
-      textSmaller: "Smaller text",
-      textLarger: "Larger text",
-      textLetter: "A",
-      prevPage: (key) => `Previous page (${key})`,
-      nextPage: (key) => `Next page (${key})`,
-      dirRTL: "Current Direction: RTL (Click for LTR)",
-      dirLTR: "Current Direction: LTR (Click for RTL)",
-      scan: "Original page: the scan of this page on archive.org",
-      bookmarkAdd: "Bookmark this page",
-      bookmarkRemove: "Remove this page’s bookmark",
-      bookmarkAdded: "Bookmark added",
-      bookmarkRemoved: "Bookmark removed",
-      reading: "Reading mode",
-      exitReading: "Exit reading mode (Esc)",
-      more: "More",
-      panel: "Contents and bookmarks",
-      contentsTab: "Contents",
-      bookmarksTab: "Bookmarks",
-      noHeadings: "This book has no headings.",
-      noBookmarks: "No bookmarks yet. Use the bookmark button to save the current page.",
-      removeBookmark: "Remove bookmark",
-      closePanel: "Close",
-      copyLink: "Copy link to this page",
-      linkCopied: "Link copied",
-      copyFailed: "Could not copy",
-      volume: "Volume",
-      search: "Search within document (Ctrl+F)",
-      searchInput: "Search text...",
-      prevMatch: "Previous match (Shift+Enter)",
-      nextMatch: "Next match (Enter)",
-      showResults: "Results list",
-      closeSearch: "Close search (Esc)",
-      matchDiacritics: "Match diacritics",
-      wholeWord: "Whole word",
-      moreResults: (n) => `and ${n} more`,
-      openFile: "Open file",
-      downloading: "Downloading",
-      building: "Preparing",
-      searchWait: "Search is available once the book is ready",
-      online: "Online",
-      offline: "Offline",
-      barTitle: "Reader",
-      close: "Close",
-      notInLibrary: "This book isn’t in the i360 library, so it can’t be opened here.",
-      unverified: "Couldn’t check this book against the i360 library — check the connection and try again.",
-      ofLabel: "of",
-      pageInput: "Printed page number — multi-volume books: volume:page — position in the file: (12)",
-      position: (i, n) => `Position in the file: ${i} of ${n}`,
-      page: "p.",
-      vol: "vol.",
-      listSep: ", ",
-      missingPagesWarn: (count, ranges) => `Warning: ${count} missing page(s) detected: ${ranges}`,
-      untranscribedWarn: (count, list) => `Warning: ${count} page(s) not transcribed: ${list}`,
-      untranscribedPage: "This page was not transcribed.",
-      after: (label) => `after ${label}`,
-      loadError: (msg) => `Could not load the file: ${msg}`,
-      readError: "Could not read the file.",
-      emptyHint: "No file open. Press “Open file” to choose a book.",
-      noResults: "0 of 0"
-    }
-  };
-
-  // src/reader/main.js
-  var ICON = {
-    stepForward: `<svg data-lucide="step-forward" viewBox="0 0 24 24"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"></path><path d="M3 4v16"></path></svg>`,
-    stepBack: `<svg data-lucide="step-back" viewBox="0 0 24 24"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"></path><path d="M21 20V4"></path></svg>`,
-    globeX: `<svg data-lucide="globe-x" viewBox="0 0 24 24"><path d="m16 3 5 5"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path><path d="m21 3-5 5"></path></svg>`,
-    globeCheck: `<svg data-lucide="globe-check" viewBox="0 0 24 24"><path d="m15 6 2 2 4-4"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path></svg>`,
-    trash: `<svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`
-  };
-  var QURAN_OPEN = "﴿";
-  var QURAN_CLOSE = "﴾";
-  var ZOOM_MIN = 0.5;
-  var ZOOM_MAX = 2.5;
-  var ZOOM_STEP = 0.1;
-  var TEXT_SCALES = [0.85, 0.92, 1, 1.1, 1.2, 1.32, 1.45, 1.6];
-  var PANEL_COVERS = 0.6;
-  var CURRENT_PAGE_LINE = 0.25;
-  var SEARCH_DEBOUNCE_MS = 250;
-  var SEARCH_MIN_CHARS = 2;
-  var SEARCH_MAX_MATCHES = 5e3;
-  var SEARCH_LIST_MAX = 300;
-  var SNIPPET_CHARS = 45;
-  var SAVE_DEBOUNCE_MS = 500;
-  var PIN_MS = 1500;
-  var PIN_SETTLE_MS = 800;
-  var PIN_MAX_MS = 1e4;
-  var POSITIONS_MAX = 100;
-  var TOAST_MS = 1800;
-  var BLOCK_SEL = "p,li,h1,h2,h3,h4,h5,h6,td,th,pre,.fn-note";
-  var state = {
-    format: "ocr",
-    // 'ocr' | 'legacy' | 'plain'
-    pages: [],
-    // { kind, vol, label, num, md }
-    sheets: [],
-    // matching <article> elements
-    volumes: [],
-    // distinct volume labels, in book order
-    detectedDir: "rtl",
-    dir: "rtl",
-    zoom: 1,
-    multiVolume: false,
-    notices: [],
-    currentIdx: 0,
-    numerals: "western",
-    // the shared i360 choice: 'western' 0123 | 'arabic' ٠١٢٣ | 'persian' ۰۱۲۳ — display only
-    theme: "system",
-    libSource: null,
-    // the catalog entry when the book is our copy from the lib site
-    libBooks: 0,
-    // how many books its archive.org item holds (for the scan link)
-    bookLink: null,
-    // the book's own address, for the public link (null for a file from the device)
-    built: 0,
-    // pages whose text is built so far (buildSheets)
-    textScale: 1,
-    bookKey: null,
-    // identifies the open book (saved position, bookmarks)
-    panelTab: "contents"
-  };
-  var search = {
-    indexes: {},
-    matches: [],
-    current: -1,
-    timer: 0,
-    query: "",
-    exact: false,
-    // match diacritics and letter forms exactly
-    word: false,
-    // whole word only
-    listOpen: false
-  };
-  var $2 = (id) => document.getElementById(id);
-  var toolbar = $2("toolbar");
-  var tbStart = toolbar.querySelector(".tb-start");
-  var tbMain = toolbar.querySelector(".tb-main");
-  var tbEnd = toolbar.querySelector(".tb-end");
-  var pagesWrapper = $2("pages-wrapper");
-  var viewerContainer = $2("viewer-container");
-  var pageNumInput = $2("page-num-input");
-  var totalPagesLabel = $2("total-pages");
-  var pagePos = $2("page-pos");
-  var volSelect = $2("vol-select");
-  var lblOf = $2("lbl-of");
-  var btnPanel = $2("btn-panel");
-  var btnZoomIn = $2("btn-zoom-in");
-  var btnZoomOut = $2("btn-zoom-out");
-  var btnFitWidth = $2("btn-fit-width");
-  var btnFitPage = $2("btn-fit-page");
-  var btnTextSmaller = $2("btn-text-smaller");
-  var btnTextLarger = $2("btn-text-larger");
-  var btnNavLeft = $2("btn-nav-left");
-  var btnNavRight = $2("btn-nav-right");
-  var btnDirToggle = $2("btn-dir-toggle");
-  var btnNumerals = $2("btn-numerals");
-  var btnTheme = $2("btn-theme");
-  var btnScan = $2("btn-scan");
-  var btnBookmark = $2("btn-bookmark");
-  var btnReading = $2("btn-reading");
-  var btnExitReading = $2("btn-exit-reading");
-  var btnMore = $2("btn-more");
-  var moreMenu = $2("more-menu");
-  var btnSearchToggle = $2("btn-search-toggle");
-  var searchPopup = $2("search-popup");
-  var searchInput = $2("search-input");
-  var searchCount = $2("search-count");
-  var btnSearchPrev = $2("btn-search-prev");
-  var btnSearchNext = $2("btn-search-next");
-  var btnSearchList = $2("btn-search-list");
-  var btnSearchClose = $2("btn-search-close");
-  var optDiacritics = $2("opt-diacritics");
-  var optWord = $2("opt-word");
-  var searchResults = $2("search-results");
-  var sidePanel = $2("side-panel");
-  var tabContents = $2("tab-contents");
-  var tabBookmarks = $2("tab-bookmarks");
-  var btnCopyLink = $2("btn-copy-link");
-  var btnPanelClose = $2("btn-panel-close");
-  var panelBody = $2("panel-body");
-  var toastEl = $2("toast");
-  var statusIcon = $2("status-icon");
-  var btnOpenFile = $2("btn-open-file");
-  var tbTitle = $2("tb-title");
-  var progressEl = $2("progress");
-  var progressText = $2("progress-text");
-  var progressFill = $2("progress-fill");
-  var btnClose = $2("btn-close");
-  var fileInput = $2("file-input");
-  var missingPagesBanner = $2("missing-pages-banner");
-  var missingPagesText = $2("missing-pages-text");
-  var emptyState = $2("empty-state");
-  var lang = () => state.dir === "rtl" ? "ar" : "en";
-  var t = () => READER[lang()];
-  var CONNECTION_CHECK_MS = 3e4;
-  var CONNECTION_TIMEOUT_MS = 8e3;
-  var online = navigator.onLine !== false;
-  var connectionCheck = null;
-  function checkConnection() {
-    if (connectionCheck) return connectionCheck;
-    const ctl = typeof AbortController === "function" ? new AbortController() : null;
-    const timer = setTimeout(() => {
-      if (ctl) ctl.abort();
-    }, CONNECTION_TIMEOUT_MS);
-    connectionCheck = fetch(`${LIB}latest.json`, { cache: "no-store", signal: ctl ? ctl.signal : void 0 }).then(() => true, () => false).then((ok) => {
-      online = ok;
-    }).finally(() => {
-      clearTimeout(timer);
-      connectionCheck = null;
-      updateConnection();
-    });
-    return connectionCheck;
-  }
-  window.addEventListener("online", () => {
-    void checkConnection();
-  });
-  window.addEventListener("offline", () => {
-    online = false;
-    updateConnection();
-  });
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) void checkConnection();
-  });
-  setInterval(() => {
-    if (!document.hidden) void checkConnection();
-  }, CONNECTION_CHECK_MS);
-  function updateConnection() {
-    const label = online ? t().online : t().offline;
-    statusIcon.innerHTML = `${online ? ICON.globeCheck : ICON.globeX}<span class="status-text"></span>`;
-    statusIcon.lastChild.textContent = label;
-    statusIcon.classList.toggle("offline", !online);
-    setTitle(statusIcon, label);
-  }
-  var { toWestern: toWestern2, stripComments: stripComments2, hasVisibleContent: hasVisibleContent2, parseBook: parseBook2, splitFootnotes: splitFootnotes2 } = book_format_exports;
-  var nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
-  var STORE_PREFIX = "i360reader.";
-  function storeGet(key, fallback) {
-    try {
-      const v = localStorage.getItem(STORE_PREFIX + key);
-      return v == null ? fallback : JSON.parse(v);
-    } catch {
-      return fallback;
-    }
-  }
-  function storeSet(key, value) {
-    try {
-      localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value));
-    } catch {
-    }
-  }
-  function fmtNum(s) {
-    return toNumerals(String(s), state.numerals);
-  }
-  function hashText(s) {
-    let h2 = 2166136261;
-    for (let i = 0; i < s.length; i++) {
-      h2 ^= s.charCodeAt(i);
-      h2 = Math.imul(h2, 16777619);
-    }
-    return (h2 >>> 0).toString(36);
-  }
-  function detectDirection(text) {
-    const sample = text.length > 2e5 ? text.slice(0, 2e5) : text;
-    const arabic = (sample.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
-    const latin = (sample.match(/[A-Za-z\u00C0-\u024F]/g) || []).length;
-    if (latin > arabic) return "ltr";
-    return "rtl";
-  }
+  // src/reader/pages.js
   var bookRenderer = createRenderer(marked_esm_exports);
   function renderBlock(s) {
     return bookRenderer.block(state.format, s);
@@ -3637,6 +4869,9 @@ ${body}`;
   }
   var BUILD_SLICE_MS = 12;
   var buildRun = 0;
+  function cancelBuild() {
+    buildRun++;
+  }
   function isBuilding() {
     return state.built < state.sheets.length;
   }
@@ -3713,15 +4948,6 @@ ${body}`;
   var pauseForInput = () => {
     inputPauseUntil = performance.now() + INPUT_PAUSE_MS;
   };
-  for (const ev of ["pointerdown", "touchstart"]) document.addEventListener(ev, () => {
-    pointerIsDown = true;
-    pauseForInput();
-  }, { capture: true, passive: true });
-  for (const ev of ["pointerup", "pointercancel", "touchend", "touchcancel"]) document.addEventListener(ev, () => {
-    pointerIsDown = false;
-    pauseForInput();
-  }, { capture: true, passive: true });
-  document.addEventListener("keydown", pauseForInput, { capture: true, passive: true });
   var sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   async function buildSheets(run, onReady, center) {
     const n = state.sheets.length;
@@ -3792,176 +5018,6 @@ ${body}`;
     btnSearchToggle.disabled = !ready;
     setTitle(btnSearchToggle, ready ? t().search : t().searchWait);
   }
-  var toastTimer = 0;
-  function toast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove("show"), TOAST_MS);
-  }
-  var saveTimer = 0;
-  function savePosition() {
-    if (!state.bookKey || state.sheets.length === 0) return;
-    const a = captureAnchor();
-    if (!a) return;
-    const all = storeGet("positions", {}) || {};
-    all[state.bookKey] = { idx: a.idx, frac: Math.round(a.frac * 1e4) / 1e4, t: Date.now() };
-    const keys = Object.keys(all);
-    if (keys.length > POSITIONS_MAX) {
-      keys.sort((x2, y2) => (all[x2].t || 0) - (all[y2].t || 0));
-      for (const k2 of keys.slice(0, keys.length - POSITIONS_MAX)) delete all[k2];
-    }
-    storeSet("positions", all);
-  }
-  function saveNow() {
-    clearTimeout(saveTimer);
-    savePosition();
-    updateHash();
-  }
-  async function restorePosition() {
-    const key = state.bookKey;
-    if (!key) return;
-    const pos = (storeGet("positions", {}) || {})[key];
-    if (!pos || typeof pos.idx !== "number" || pos.idx >= state.sheets.length) return;
-    if (pos.idx === 0 && !(pos.frac > 0.02)) return;
-    const anchor = { idx: pos.idx, frac: Math.max(0, Math.min(1, Number(pos.frac) || 0)) };
-    restoreAnchor(anchor);
-    updateCounter(true);
-  }
-  window.addEventListener("pagehide", saveNow);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") saveNow();
-  });
-  function isLinkable() {
-    return !!state.bookKey && state.bookKey.startsWith("url:");
-  }
-  function hashTargetIdx() {
-    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const p = params.get("p");
-    if (p) return findPage(p, true);
-    const n = parseInt(toWestern2(params.get("n") || ""), 10);
-    if (n >= 1 && n <= state.pages.length) return n - 1;
-    return -1;
-  }
-  function hashFor(idx) {
-    const p = state.pages[idx];
-    if (!p) return "";
-    if (state.format !== "plain" && p.label && p.label !== "-" && p.label !== "?") {
-      const v = state.multiVolume && p.vol != null ? `${p.vol}:${p.label}` : p.label;
-      return `#p=${encodeURIComponent(v)}`;
-    }
-    return `#n=${idx + 1}`;
-  }
-  function updateHash() {
-    if (!isLinkable() || state.sheets.length === 0) return;
-    const h2 = hashFor(findCurrentIdx());
-    if (h2 && window.location.hash !== h2) {
-      try {
-        history.replaceState(null, "", h2);
-      } catch {
-      }
-    }
-  }
-  window.addEventListener("hashchange", () => {
-    if (!isLinkable()) return;
-    const idx = hashTargetIdx();
-    if (idx >= 0) {
-      scrollToSheet(idx);
-      updateCounter(true);
-    }
-  });
-  var MD_READER_KEY = "i360.mdReader";
-  function readerBase() {
-    let v;
-    try {
-      v = localStorage.getItem(MD_READER_KEY);
-    } catch {
-      return null;
-    }
-    if (typeof v !== "string" || !/[?&]file=$/.test(v)) return null;
-    try {
-      const u = new URL(v);
-      if (u.protocol !== "https:" || u.username || u.password) return null;
-    } catch {
-      return null;
-    }
-    return v;
-  }
-  function shareLink() {
-    const base = readerBase();
-    if (base && state.bookLink) return base + encodeURIComponent(state.bookLink) + window.location.hash;
-    return IN_APP ? null : window.location.href;
-  }
-  async function copyPageLink() {
-    updateHash();
-    const link = shareLink();
-    try {
-      if (!link) throw new Error("no public link");
-      await navigator.clipboard.writeText(link);
-      toast(t().linkCopied);
-    } catch {
-      toast(t().copyFailed);
-    }
-  }
-  function bookmarkList() {
-    if (!state.bookKey) return [];
-    const all = storeGet("bookmarks", {}) || {};
-    return Array.isArray(all[state.bookKey]) ? all[state.bookKey] : [];
-  }
-  function saveBookmarks(list) {
-    if (!state.bookKey) return;
-    const all = storeGet("bookmarks", {}) || {};
-    if (list.length > 0) all[state.bookKey] = list;
-    else delete all[state.bookKey];
-    storeSet("bookmarks", all);
-  }
-  function resolveBookmark(b) {
-    if (b && b.label && b.label !== "-" && b.label !== "?") {
-      const i = state.pages.findIndex((p) => p.label === b.label && p.vol === (b.vol == null ? null : b.vol));
-      if (i >= 0) return i;
-    }
-    return b && typeof b.idx === "number" && b.idx < state.pages.length ? b.idx : -1;
-  }
-  function bookmarkedSet() {
-    return new Set(bookmarkList().map(resolveBookmark).filter((i) => i >= 0));
-  }
-  function applyBookmarkRibbons() {
-    const set = bookmarkedSet();
-    state.sheets.forEach((s, i) => s.classList.toggle("bookmarked", set.has(i)));
-    updateBookmarkButton(set);
-  }
-  function updateBookmarkButton(set) {
-    const idx = findCurrentIdx();
-    const on = idx >= 0 && (set || bookmarkedSet()).has(idx);
-    btnBookmark.setAttribute("aria-pressed", on ? "true" : "false");
-    btnBookmark.title = on ? t().bookmarkRemove : t().bookmarkAdd;
-    btnBookmark.setAttribute("aria-label", btnBookmark.title);
-    btnBookmark.disabled = idx < 0 || !state.bookKey;
-  }
-  function toggleBookmark() {
-    const idx = findCurrentIdx();
-    if (idx < 0 || !state.bookKey) return;
-    const list = bookmarkList();
-    const at2 = list.findIndex((b) => resolveBookmark(b) === idx);
-    if (at2 >= 0) {
-      list.splice(at2, 1);
-      toast(t().bookmarkRemoved);
-    } else {
-      const p = state.pages[idx];
-      list.push({ idx, vol: p.vol, label: p.label });
-      list.sort((a, b) => resolveBookmark(a) - resolveBookmark(b));
-      toast(t().bookmarkAdded);
-    }
-    saveBookmarks(list);
-    applyBookmarkRibbons();
-    if (sidePanel.classList.contains("open") && state.panelTab === "bookmarks") renderPanel();
-  }
-  function removeBookmarkAt(idx) {
-    saveBookmarks(bookmarkList().filter((b) => resolveBookmark(b) !== idx));
-    applyBookmarkRibbons();
-    renderPanel();
-  }
-  btnBookmark.addEventListener("click", toggleBookmark);
   async function renderDocument(rawText, extraNotices, key, parsedAlready) {
     const run = ++buildRun;
     saveNow();
@@ -4022,1050 +5078,19 @@ ${body}`;
       if (sidePanel.classList.contains("open")) renderPanel();
     }, center);
   }
-  function updateScanButton() {
-    updateCopyLink();
-    const show = !!(state.libSource && scanLink(state.libSource, 0, state.libBooks));
-    if (btnScan.hidden === !show) return;
-    btnScan.hidden = !show;
-    queueFitToolbar();
-  }
-  function updateCopyLink() {
-    const show = isLinkable() && !!shareLink();
-    if (btnCopyLink.hidden === !show) return;
-    btnCopyLink.hidden = !show;
-    queueFitToolbar();
-  }
-  btnScan.addEventListener("click", () => {
-    const url = scanLink(state.libSource, Math.max(0, state.currentIdx), state.libBooks);
-    if (url) window.open(url, "_blank", "noopener");
-  });
-  function renderEmpty(notices) {
-    buildRun++;
-    state.built = 0;
-    hideProgress();
-    setSearchReady(true);
-    saveNow();
-    state.bookKey = null;
-    state.libSource = null;
-    state.bookLink = null;
-    updateScanButton();
-    clearSearch();
-    search.indexes = {};
-    state.pages = [];
-    state.sheets = [];
-    state.volumes = [];
-    state.multiVolume = false;
-    state.notices = notices;
-    pagesWrapper.textContent = "";
-    buildVolumeSelect();
-    applyLocalization();
-    updateCounter(true);
-    if (sidePanel.classList.contains("open")) renderPanel();
-  }
-  function setTitle(el, text) {
-    el.title = text;
-    el.setAttribute("aria-label", text);
-  }
-  function applyLocalization() {
-    const isRtl = state.dir === "rtl";
-    const tr = t();
-    document.title = tr.appTitle;
-    document.documentElement.lang = isRtl ? "ar" : "en";
-    document.body.dir = state.dir;
-    searchPopup.dir = state.dir;
-    missingPagesBanner.dir = state.dir;
-    moreMenu.dir = state.dir;
-    setTitle(btnPanel, tr.panel);
-    setTitle(btnZoomIn, tr.zoomIn);
-    setTitle(btnZoomOut, tr.zoomOut);
-    setTitle(btnFitWidth, tr.fitWidth);
-    setTitle(btnFitPage, tr.fitPage);
-    setTitle(btnTextSmaller, tr.textSmaller);
-    setTitle(btnTextLarger, tr.textLarger);
-    btnTextSmaller.innerHTML = `${tr.textLetter}<small>−</small>`;
-    btnTextLarger.innerHTML = `${tr.textLetter}<small>+</small>`;
-    setTitle(btnNavLeft, isRtl ? tr.nextPage("←") : tr.prevPage("←"));
-    setTitle(btnNavRight, isRtl ? tr.prevPage("→") : tr.nextPage("→"));
-    setTitle(btnDirToggle, isRtl ? tr.dirRTL : tr.dirLTR);
-    btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
-    btnNumerals.textContent = NUMERALS_SAMPLE[state.numerals];
-    setTitle(btnNumerals, numeralsLabel(state.numerals, lang()));
-    btnTheme.innerHTML = THEME_ICONS[state.theme];
-    setTitle(btnTheme, themeLabel(state.theme, lang()));
-    setTitle(btnScan, tr.scan);
-    setTitle(btnReading, tr.reading);
-    setTitle(btnExitReading, tr.exitReading);
-    setTitle(btnMore, tr.more);
-    setTitle(btnSearchToggle, btnSearchToggle.disabled ? tr.searchWait : tr.search);
-    searchInput.placeholder = tr.searchInput;
-    searchInput.setAttribute("aria-label", tr.search);
-    setTitle(btnSearchPrev, tr.prevMatch);
-    setTitle(btnSearchNext, tr.nextMatch);
-    setTitle(btnSearchList, tr.showResults);
-    setTitle(btnSearchClose, tr.closeSearch);
-    optDiacritics.textContent = tr.matchDiacritics;
-    optWord.textContent = tr.wholeWord;
-    tabContents.textContent = tr.contentsTab;
-    tabBookmarks.textContent = tr.bookmarksTab;
-    setTitle(btnCopyLink, tr.copyLink);
-    setTitle(btnPanelClose, tr.closePanel);
-    setTitle(volSelect, tr.volume);
-    document.getElementById("open-file-label").textContent = tr.openFile;
-    setTitle(btnOpenFile, tr.openFile);
-    lblOf.textContent = tr.ofLabel;
-    setTitle(pageNumInput, tr.pageInput);
-    tbTitle.textContent = tr.barTitle;
-    setTitle(btnClose, tr.close);
-    updateConnection();
-    emptyState.textContent = fmtNum(tr.emptyHint);
-    emptyState.classList.toggle("visible", state.sheets.length === 0);
-    renderNotices();
-    updateSearchCountDisplay();
-    updateBookmarkButton();
-    queueFitToolbar();
-  }
-  btnDirToggle.addEventListener("click", () => {
-    state.dir = state.dir === "rtl" ? "ltr" : "rtl";
-    const blockDir = state.dir === state.detectedDir ? "auto" : state.dir;
-    for (const sheet of state.sheets) {
-      sheet.dir = state.dir;
-      applyBlockDirs(sheet, blockDir, state.dir);
-    }
-    applyLocalization();
-    for (let i = 0; i < state.sheets.length; i++) {
-      const footer = state.sheets[i].querySelector(".page-number-footer");
-      if (footer) footer.textContent = pageLabelText(state.pages[i], t());
-      const ph = state.sheets[i].querySelector(".page-placeholder");
-      if (ph) ph.textContent = t().untranscribedPage;
-    }
-    buildVolumeSelect();
-    updateCounter(true);
-    if (sidePanel.classList.contains("open")) renderPanel();
-  });
-  btnNumerals.addEventListener("click", () => {
-    cycleNumerals();
-  });
-  onNumeralsChange(({ numerals }) => {
-    if (numerals === state.numerals) return;
-    state.numerals = numerals;
-    for (const sheet of state.sheets) applyNumerals2(sheet);
-    search.indexes = {};
-    applyLocalization();
-    buildVolumeSelect();
-    updateCounter(true);
-    if (sidePanel.classList.contains("open")) renderPanel();
-    if (search.query) {
-      const q2 = searchInput.value;
-      search.query = "";
-      performSearch(q2);
-    }
-  });
-  onChange(({ choice }) => {
-    if (choice === state.theme) return;
-    state.theme = choice;
-    applyLocalization();
-  });
-  btnTheme.addEventListener("click", () => {
-    cycle();
-  });
-  function setTextScale(v) {
-    const anchor = captureAnchor();
-    state.textScale = v;
-    document.documentElement.style.setProperty("--text-scale", String(v));
-    restoreAnchor(anchor);
-    const i = TEXT_SCALES.indexOf(v);
-    btnTextSmaller.disabled = i <= 0;
-    btnTextLarger.disabled = i >= TEXT_SCALES.length - 1;
-  }
-  function stepTextScale(delta) {
-    let i = TEXT_SCALES.indexOf(state.textScale);
-    if (i < 0) i = TEXT_SCALES.indexOf(1);
-    i = Math.max(0, Math.min(TEXT_SCALES.length - 1, i + delta));
-    setTextScale(TEXT_SCALES[i]);
-    storeSet("textScale", state.textScale);
-  }
-  btnTextSmaller.addEventListener("click", () => stepTextScale(-1));
-  btnTextLarger.addEventListener("click", () => stepTextScale(1));
-  function viewerInner() {
-    const cs = getComputedStyle(viewerContainer);
-    return {
-      w: viewerContainer.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
-      h: viewerContainer.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
-    };
-  }
-  function remPx(n) {
-    return n * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-  }
-  function cssVarPx(name) {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    const n = parseFloat(v);
-    if (!Number.isFinite(n)) return 0;
-    return v.endsWith("rem") ? remPx(n) : n;
-  }
-  function pageWidth() {
-    return cssVarPx("--page-w") || cssVarPx("--page-max");
-  }
-  function updatePageWidth() {
-    const w = Math.max(cssVarPx("--page-min"), Math.min(cssVarPx("--page-max"), Math.floor(viewerInner().w)));
-    document.documentElement.style.setProperty("--page-w", `${w}px`);
-  }
-  function captureAnchor() {
-    const idx = findCurrentIdx();
-    const sheet = state.sheets[idx];
-    if (!sheet) return null;
-    const vTop = viewerContainer.getBoundingClientRect().top;
-    const r = sheet.getBoundingClientRect();
-    return { idx, frac: r.height > 0 ? (vTop - r.top) / r.height : 0 };
-  }
-  function restoreAnchor(anchor) {
-    if (!anchor) return;
-    const sheet = state.sheets[anchor.idx];
-    if (!sheet) return;
-    const vTop = viewerContainer.getBoundingClientRect().top;
-    const r = sheet.getBoundingClientRect();
-    viewerContainer.scrollTop += r.top - vTop + anchor.frac * r.height;
-    pinElement(sheet, 0, anchor.frac);
-  }
-  function setZoom(z2, keepAnchor2 = true) {
-    const anchor = keepAnchor2 ? captureAnchor() : null;
-    state.zoom = Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z2)) * 100) / 100;
-    pagesWrapper.style.zoom = String(state.zoom);
-    restoreAnchor(anchor);
-    btnZoomOut.disabled = state.zoom <= ZOOM_MIN;
-    btnZoomIn.disabled = state.zoom >= ZOOM_MAX;
-  }
-  function fitWidthZoom() {
-    return viewerInner().w / pageWidth();
-  }
-  function fitWidth() {
-    setZoom(fitWidthZoom());
-    viewerContainer.scrollLeft = 0;
-  }
-  function fitPage() {
-    const idx = findCurrentIdx();
-    const sheet = state.sheets[idx];
-    if (!sheet) {
-      setZoom(1);
-      return;
-    }
-    const unzoomedH = sheet.getBoundingClientRect().height / state.zoom;
-    const z2 = Math.min(viewerInner().h / unzoomedH, fitWidthZoom());
-    setZoom(z2, false);
-    viewerContainer.scrollLeft = 0;
-    scrollToSheet(idx);
-  }
-  btnZoomIn.addEventListener("click", () => setZoom(state.zoom + ZOOM_STEP));
-  btnZoomOut.addEventListener("click", () => setZoom(state.zoom - ZOOM_STEP));
-  btnFitWidth.addEventListener("click", fitWidth);
-  btnFitPage.addEventListener("click", fitPage);
-  var queueResize = oncePerFrame(() => {
-    const anchor = captureAnchor();
-    updatePageWidth();
-    restoreAnchor(anchor);
-  });
-  if (typeof ResizeObserver === "function") new ResizeObserver(() => queueNear()).observe(pagesWrapper);
-  window.addEventListener("resize", () => {
-    queueNear();
-    queueResize();
-  });
-  function findCurrentIdx() {
-    const sheets = state.sheets;
-    if (sheets.length === 0) return -1;
-    const v = viewerContainer.getBoundingClientRect();
-    const line = v.top + v.height * CURRENT_PAGE_LINE;
-    let lo = 0, hi = sheets.length - 1, ans = 0;
-    while (lo <= hi) {
-      const mid = lo + hi >> 1;
-      if (sheets[mid].getBoundingClientRect().top <= line) {
-        ans = mid;
-        lo = mid + 1;
-      } else hi = mid - 1;
-    }
-    return ans;
-  }
-  function counterValue(p, idx) {
-    if (state.format === "plain") return fmtNum(idx + 1);
-    if (!p.label) return "—";
-    return p.label === "-" ? "—" : p.label === "?" ? "؟" : fmtNum(p.label);
-  }
-  function volumeTotals(pages) {
-    const max = /* @__PURE__ */ new Map();
-    for (const p of pages) if (p.num != null && !(max.get(p.vol) >= p.num)) max.set(p.vol, p.num);
-    return max;
-  }
-  function volumeTotal(vol) {
-    if (state.format === "plain") return String(state.pages.length);
-    const max = state.volTotals ? state.volTotals.get(vol) : void 0;
-    return max == null ? "—" : String(max);
-  }
-  function buildVolumeSelect() {
-    volSelect.textContent = "";
-    volSelect.hidden = !state.multiVolume;
-    if (!state.multiVolume) return;
-    for (const v of state.volumes) {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = fmtNum(`${t().vol} ${v}`);
-      volSelect.appendChild(opt);
-    }
-    queueFitToolbar();
-  }
-  volSelect.addEventListener("change", () => {
-    const idx = state.pages.findIndex((p) => p.vol === volSelect.value);
-    if (idx >= 0) {
-      scrollToSheet(idx);
-      updateCounter(true);
-    }
-    volSelect.blur();
-  });
-  function updateCounter(force) {
-    const idx = findCurrentIdx();
-    const none = idx < 0;
-    btnNavLeft.disabled = none;
-    btnNavRight.disabled = none;
-    if (none) {
-      pageNumInput.value = "";
-      totalPagesLabel.textContent = fmtNum("0");
-      pagePos.textContent = "";
-      setTitle(pageNumInput, t().pageInput);
-      updateBookmarkButton();
-      return;
-    }
-    if (!force && idx === state.currentIdx) return;
-    state.currentIdx = idx;
-    const p = state.pages[idx];
-    if (document.activeElement !== pageNumInput) pageNumInput.value = counterValue(p, idx);
-    const total = fmtNum(volumeTotal(p.vol));
-    if (totalPagesLabel.textContent !== total) {
-      totalPagesLabel.textContent = total;
-      queueFitToolbar();
-    }
-    const pos = state.format === "plain" ? "" : fmtNum(`(${idx + 1}/${state.pages.length})`);
-    if (pagePos.textContent !== pos) {
-      const grew = pos.length !== pagePos.textContent.length;
-      pagePos.textContent = pos;
-      if (grew) queueFitToolbar();
-    }
-    setTitle(pageNumInput, `${t().pageInput}
-${fmtNum(t().position(idx + 1, state.pages.length))}`);
-    if (state.multiVolume && p.vol != null && document.activeElement !== volSelect) volSelect.value = p.vol;
-    updateBookmarkButton();
-  }
-  var queueScroll = oncePerFrame(() => {
-    updateNear();
-    updateCounter(false);
-  });
-  viewerContainer.addEventListener("scroll", () => {
-    if (!queueScroll()) return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
-  }, { passive: true });
-  var pin = null;
-  function pinElement(el, offset, frac = 0) {
-    const now = performance.now();
-    const p = { el, offset, frac, started: now, until: now + PIN_MS };
-    pin = p;
-    if (document.fonts && document.fonts.status === "loading") {
-      document.fonts.ready.then(() => {
-        if (pin === p) p.until = Math.max(p.until, performance.now() + PIN_SETTLE_MS);
-      });
-    }
-    requestAnimationFrame(pinStep);
-  }
-  function placePinned(p) {
-    const r = p.el.getBoundingClientRect();
-    const want = viewerContainer.getBoundingClientRect().top + p.offset - p.frac * r.height;
-    const d = r.top - want;
-    if (Math.abs(d) >= 1) viewerContainer.scrollTop += d;
-  }
-  function pinStep() {
-    const p = pin;
-    if (!p) return;
-    if (!p.el.isConnected || performance.now() > Math.min(p.until, p.started + PIN_MAX_MS)) {
-      pin = null;
-      updateCounter(true);
-      return;
-    }
-    placePinned(p);
-    requestAnimationFrame(pinStep);
-  }
-  function releasePin() {
-    pin = null;
-  }
-  for (const ev of ["wheel", "touchstart", "pointerdown"]) {
-    viewerContainer.addEventListener(ev, releasePin, { passive: true });
-  }
-  document.addEventListener("keydown", releasePin, true);
-  function scrollToSheet(idx) {
-    const sheet = state.sheets[idx];
-    if (!sheet) return;
-    const pad = parseFloat(getComputedStyle(viewerContainer).paddingTop) || 0;
-    const p = { el: sheet, offset: pad, frac: 0 };
-    placePinned(p);
-    pinElement(sheet, pad);
-  }
-  function goPage(delta) {
-    const idx = findCurrentIdx();
-    if (idx < 0) return;
-    let target = idx + delta;
-    if (delta < 0) {
-      const vTop = viewerContainer.getBoundingClientRect().top;
-      const pad = parseFloat(getComputedStyle(viewerContainer).paddingTop) || 0;
-      if (state.sheets[idx].getBoundingClientRect().top < vTop + pad - remPx(0.5)) target = idx;
-    }
-    target = Math.max(0, Math.min(state.sheets.length - 1, target));
-    scrollToSheet(target);
-    updateCounter(true);
-  }
-  function goEdge(last) {
-    if (state.sheets.length === 0) return;
-    scrollToSheet(last ? state.sheets.length - 1 : 0);
-    updateCounter(true);
-  }
-  var leftDelta = () => state.dir === "rtl" ? 1 : -1;
-  btnNavLeft.addEventListener("click", () => goPage(leftDelta()));
-  btnNavRight.addEventListener("click", () => goPage(-leftDelta()));
-  function findPage(input, allowAnyVolume) {
-    const raw = toWestern2(String(input).trim()).replace(/^ص\s*/, "");
-    if (!raw) return -1;
-    const pm = /^\(\s*(\d+)\s*(?:\/\s*\d+\s*)?\)$/.exec(raw);
-    if (pm) {
-      const n = parseInt(pm[1], 10);
-      return n >= 1 && n <= state.pages.length ? n - 1 : -1;
-    }
-    if (state.format === "plain") {
-      const n = parseInt(raw, 10);
-      return n >= 1 && n <= state.pages.length ? n - 1 : 0;
-    }
-    const cur = state.pages[state.currentIdx] || state.pages[0];
-    let vol = cur ? cur.vol : null;
-    let label = raw;
-    const vm = /^(?:ج\s*)?([^\s:/]+)\s*[:/]\s*(?:ص\s*)?(\S+)$/.exec(raw);
-    if (vm && (state.multiVolume || allowAnyVolume)) {
-      vol = vm[1];
-      label = vm[2];
-    }
-    if (label === "؟") label = "?";
-    const inVol = (p) => !state.multiVolume || p.vol === vol;
-    const idx = state.pages.findIndex((p) => inVol(p) && p.label === label);
-    if (idx >= 0) return idx;
-    if (/^\d+$/.test(label)) {
-      const n = parseInt(label, 10);
-      let best = -1, bestDiff = Infinity;
-      state.pages.forEach((p, i) => {
-        if (!inVol(p) || p.num == null) return;
-        const d = Math.abs(p.num - n);
-        if (d < bestDiff) {
-          bestDiff = d;
-          best = i;
-        }
-      });
-      return best;
-    }
-    return -1;
-  }
-  function goToInput() {
-    const idx = findPage(pageNumInput.value);
-    if (idx >= 0) {
-      scrollToSheet(idx);
-      pageNumInput.blur();
-      requestAnimationFrame(() => updateCounter(true));
-    } else {
-      updateCounter(true);
-      const p = state.pages[state.currentIdx];
-      if (p) pageNumInput.value = counterValue(p, state.currentIdx);
-    }
-  }
-  pageNumInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      goToInput();
-    } else if (e.key === "Escape") {
-      pageNumInput.blur();
-      updateCounter(true);
-    }
-  });
-  pageNumInput.addEventListener("change", goToInput);
-  pageNumInput.addEventListener("focus", () => pageNumInput.select());
-  function revealElement(target) {
-    const v = viewerContainer.getBoundingClientRect();
-    const r = target.getBoundingClientRect();
-    viewerContainer.scrollTop += r.top - v.top - viewerContainer.clientHeight / 3;
-    pinElement(target, target.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
-    target.classList.remove("flash");
-    void target.offsetWidth;
-    target.classList.add("flash");
-  }
-  pagesWrapper.addEventListener("click", (e) => {
-    const a = e.target.closest("a.fn-ref, a.fn-back");
-    if (!a) return;
-    e.preventDefault();
-    const target = document.getElementById(a.dataset.target);
-    if (target) revealElement(target);
-  });
-  function panelCoversPage() {
-    return sidePanel.getBoundingClientRect().width >= viewerContainer.clientWidth * PANEL_COVERS;
-  }
-  function openPanel() {
-    closeMore();
-    sidePanel.classList.add("open");
-    sidePanel.setAttribute("aria-hidden", "false");
-    btnPanel.setAttribute("aria-expanded", "true");
-    btnPanel.setAttribute("aria-pressed", "true");
-    renderPanel();
-  }
-  function closePanel() {
-    sidePanel.classList.remove("open");
-    sidePanel.setAttribute("aria-hidden", "true");
-    btnPanel.setAttribute("aria-expanded", "false");
-    btnPanel.setAttribute("aria-pressed", "false");
-  }
-  btnPanel.addEventListener("click", () => {
-    if (sidePanel.classList.contains("open")) closePanel();
-    else openPanel();
-  });
-  btnPanelClose.addEventListener("click", closePanel);
-  tabContents.addEventListener("click", () => {
-    state.panelTab = "contents";
-    renderPanel();
-  });
-  tabBookmarks.addEventListener("click", () => {
-    state.panelTab = "bookmarks";
-    renderPanel();
-  });
-  btnCopyLink.addEventListener("click", copyPageLink);
-  async function jumpToElement(idx, el) {
-    scrollToSheet(idx);
-    if (el) {
-      await nextFrame();
-      await nextFrame();
-      const v = viewerContainer.getBoundingClientRect();
-      viewerContainer.scrollTop += el.getBoundingClientRect().top - v.top - remPx(0.75);
-      pinElement(el, remPx(0.75));
-    }
-    updateCounter(true);
-    if (panelCoversPage()) closePanel();
-  }
-  function panelItem(text, pageText, onClick, extraClass) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "panel-item" + (extraClass ? " " + extraClass : "");
-    const s1 = document.createElement("span");
-    s1.className = "item-text";
-    s1.textContent = text;
-    s1.dir = "auto";
-    const s2 = document.createElement("span");
-    s2.className = "item-page";
-    s2.textContent = pageText;
-    btn.append(s1, s2);
-    btn.addEventListener("click", onClick);
-    return btn;
-  }
-  function emptyNote(text) {
-    const div = document.createElement("div");
-    div.className = "panel-empty";
-    div.textContent = text;
-    return div;
-  }
-  function pageSummary(idx) {
-    const sheet = state.sheets[idx];
-    const h2 = sheet && sheet.querySelector(".markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4");
-    const text = (h2 ? h2.textContent : sheet ? sheet.querySelector(".markdown-body").textContent : "").replace(/\s+/g, " ").trim();
-    return text.length > 70 ? text.slice(0, 70) + "…" : text;
-  }
-  function renderPanel() {
-    const tr = t();
-    tabContents.setAttribute("aria-selected", state.panelTab === "contents" ? "true" : "false");
-    tabBookmarks.setAttribute("aria-selected", state.panelTab === "bookmarks" ? "true" : "false");
-    panelBody.textContent = "";
-    if (state.sheets.length === 0) {
-      panelBody.appendChild(emptyNote(tr.emptyHint));
-      return;
-    }
-    const ul = document.createElement("ul");
-    ul.className = "panel-list";
-    if (state.panelTab === "contents") {
-      state.sheets.forEach((sheet, idx) => {
-        for (const h2 of sheet.querySelectorAll(".markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4")) {
-          const text = h2.textContent.replace(/\s+/g, " ").trim();
-          if (!text) continue;
-          const li = document.createElement("li");
-          li.appendChild(panelItem(
-            text,
-            state.format === "plain" ? "" : pageLabelText(state.pages[idx], tr),
-            () => jumpToElement(idx, h2),
-            `lvl-${h2.tagName.slice(1)}`
-          ));
-          ul.appendChild(li);
-        }
-      });
-      if (!ul.firstChild) {
-        panelBody.appendChild(emptyNote(tr.noHeadings));
-        return;
-      }
-    } else {
-      const indices = [...bookmarkedSet()].sort((a, b) => a - b);
-      for (const idx of indices) {
-        const li = document.createElement("li");
-        li.className = "bm-row";
-        const label = state.format === "plain" ? fmtNum(idx + 1) : pageLabelText(state.pages[idx], tr);
-        li.appendChild(panelItem(pageSummary(idx) || label, label, () => jumpToElement(idx, null)));
-        const del = document.createElement("button");
-        del.type = "button";
-        del.className = "panel-btn";
-        del.innerHTML = ICON.trash;
-        setTitle(del, tr.removeBookmark);
-        del.addEventListener("click", () => removeBookmarkAt(idx));
-        li.appendChild(del);
-        ul.appendChild(li);
-      }
-      if (!ul.firstChild) {
-        panelBody.appendChild(emptyNote(tr.noBookmarks));
-        return;
-      }
-    }
-    panelBody.appendChild(ul);
-  }
-  function enterReading() {
-    const anchor = captureAnchor();
-    closePanel();
-    closeSearch();
-    closeMore();
-    document.body.classList.add("reading");
-    restoreAnchor(anchor);
-    const el = document.documentElement;
-    if (el.requestFullscreen && !document.fullscreenElement) {
-      el.requestFullscreen().catch(() => {
-      });
-    }
-    btnExitReading.focus();
-  }
-  function exitReading() {
-    if (!document.body.classList.contains("reading")) return;
-    const anchor = captureAnchor();
-    document.body.classList.remove("reading");
-    fitToolbar();
-    restoreAnchor(anchor);
-    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {
-    });
-  }
-  btnReading.addEventListener("click", enterReading);
-  btnExitReading.addEventListener("click", exitReading);
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) exitReading();
-  });
-  var groupFold = $2("group-fold");
-  var FOLD = [[statusIcon, 5], [btnOpenFile, 5], [btnSearchToggle, 5], [btnCopyLink, 11, $2("group-mark")]].map(([el, at2, into]) => {
-    const home = document.createComment(el.id);
-    el.parentNode.insertBefore(home, el);
-    return { el, home, at: at2, into };
-  });
-  var groupNav = $2("group-nav");
-  var OUT = [["group-text", 1, "before"], ["group-zoom", 2, "before"], ["group-mark", 3, "after"], ["group-acts", 3, "after"]].map(([id, out, side]) => {
-    const el = $2(id);
-    const home = document.createComment(id);
-    el.parentNode.insertBefore(home, el);
-    return { el, home, out, side };
-  });
-  var toolbarLevel = -1;
-  var TOOLBAR_LEVELS = 11;
-  function setToolbarLevel(level) {
-    if (level === toolbarLevel) return;
-    toolbarLevel = level;
-    for (const g of OUT) {
-      if (level < g.out) {
-        if (g.side === "before") tbMain.insertBefore(g.el, groupNav);
-        else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
-      } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
-    }
-    document.body.classList.toggle("acts-out", level < 3);
-    document.body.classList.toggle("notitle", level >= 4);
-    const folded = level >= 5;
-    document.body.classList.toggle("folded", folded);
-    document.body.classList.toggle("nopos", level >= 6);
-    document.body.classList.toggle("tight", level >= 7);
-    document.body.classList.toggle("tighter", level >= 8);
-    document.body.classList.toggle("tightest", level >= 10);
-    for (const f of FOLD) {
-      if (level >= f.at) {
-        if (f.into) {
-          if (f.into.firstElementChild !== f.el) f.into.insertBefore(f.el, f.into.firstChild);
-        } else if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el);
-      } else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
-    }
-    groupFold.hidden = !folded;
-    const counter = toolbar.querySelector(".page-counter");
-    if (level >= 9) {
-      if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild);
-    } else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
-  }
-  function rowWidth(el) {
-    const cs = getComputedStyle(el);
-    const gap = parseFloat(cs.columnGap) || 0;
-    let w = 0, n = 0;
-    for (const c of el.children) {
-      if (c.hidden || c.classList.contains("more-menu") || getComputedStyle(c).display === "none") continue;
-      w += c.getBoundingClientRect().width;
-      n++;
-    }
-    return w + gap * Math.max(0, n - 1);
-  }
-  function toolbarFits() {
-    const cs = getComputedStyle(toolbar);
-    const inner = toolbar.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const gap = parseFloat(cs.columnGap) || 0;
-    const need = tbStart.getBoundingClientRect().width + rowWidth(tbMain) + tbEnd.getBoundingClientRect().width + gap * 2;
-    return need <= inner;
-  }
-  function fitToolbar() {
-    if (document.body.classList.contains("reading")) return;
-    for (let level = 0; level <= TOOLBAR_LEVELS; level++) {
-      setToolbarLevel(level);
-      if (toolbarFits()) return;
-    }
-  }
-  var queueFitToolbar = oncePerFrame(() => fitToolbar());
-  function closeMore() {
-    moreMenu.hidden = true;
-    btnMore.setAttribute("aria-expanded", "false");
-    btnMore.setAttribute("aria-pressed", "false");
-  }
-  btnMore.addEventListener("click", () => {
-    const open2 = moreMenu.hidden;
-    moreMenu.hidden = !open2;
-    btnMore.setAttribute("aria-expanded", open2 ? "true" : "false");
-    btnMore.setAttribute("aria-pressed", open2 ? "true" : "false");
-  });
-  document.addEventListener("click", (e) => {
-    if (!moreMenu.hidden && !moreMenu.contains(e.target) && !btnMore.contains(e.target)) closeMore();
-  });
-  moreMenu.addEventListener("click", (e) => {
-    if (e.target.closest("#btn-search-toggle, #btn-open-file")) closeMore();
-  });
-  if (typeof ResizeObserver === "function") {
-    new ResizeObserver(queueFitToolbar).observe(toolbar);
-    new ResizeObserver(queueFitToolbar).observe(tbEnd);
-  }
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFitToolbar);
-  document.addEventListener("keydown", (e) => {
-    const mod = e.ctrlKey || e.metaKey;
-    const tag = e.target && e.target.tagName;
-    const typing = tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || e.target && e.target.isContentEditable;
-    if (mod && !e.altKey) {
-      const k2 = e.key.toLowerCase();
-      if (k2 === "f" && state.sheets.length > 0 && !isBuilding()) {
-        e.preventDefault();
-        exitReading();
-        openSearch();
-        return;
-      }
-      if (k2 === "=" || k2 === "+") {
-        e.preventDefault();
-        setZoom(state.zoom + ZOOM_STEP);
-        return;
-      }
-      if (k2 === "-" || k2 === "_") {
-        e.preventDefault();
-        setZoom(state.zoom - ZOOM_STEP);
-        return;
-      }
-      if (k2 === "0") {
-        e.preventDefault();
-        setZoom(1);
-        return;
-      }
-      return;
-    }
-    if (e.key === "Escape") {
-      if (!moreMenu.hidden) {
-        closeMore();
-        return;
-      }
-      if (searchPopup.classList.contains("active")) {
-        closeSearch();
-        return;
-      }
-      if (sidePanel.classList.contains("open")) {
-        closePanel();
-        return;
-      }
-      exitReading();
-      return;
-    }
-    if (typing || e.altKey) return;
-    switch (e.key) {
-      case "ArrowLeft":
-        e.preventDefault();
-        goPage(leftDelta());
-        break;
-      case "ArrowRight":
-        e.preventDefault();
-        goPage(-leftDelta());
-        break;
-      case "PageDown":
-        e.preventDefault();
-        goPage(1);
-        break;
-      case "PageUp":
-        e.preventDefault();
-        goPage(-1);
-        break;
-      case "Home":
-        e.preventDefault();
-        goEdge(false);
-        break;
-      case "End":
-        e.preventDefault();
-        goEdge(true);
-        break;
-      default:
-        break;
-    }
-  });
-  function buildSearchIndex(exact) {
-    const pages = [];
-    state.sheets.forEach((sheet, idx) => {
-      const root2 = sheet.querySelector(".page-content");
-      const b = createPage(exact);
-      let lastBlock = null;
-      const walker = document.createTreeWalker(root2, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
-      let node;
-      while (node = walker.nextNode()) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.tagName === "BR") b.lineBreak();
-          continue;
-        }
-        const block = node.parentElement ? node.parentElement.closest(BLOCK_SEL) : null;
-        if (block !== lastBlock) {
-          b.paragraph();
-          lastBlock = block;
-        }
-        b.text(node.nodeValue, node);
-      }
-      b.page.sheet = sheet;
-      b.page.idx = idx;
-      pages.push(b.page);
-    });
-    return pages;
-  }
-  function getIndex() {
-    const key = search.exact ? "exact" : "loose";
-    if (!search.indexes[key]) search.indexes[key] = buildSearchIndex(search.exact);
-    return search.indexes[key];
-  }
-  function matchBounds(page, s, e) {
-    const endNode = page.nodes[page.oNode[e - 1]];
-    let eo = page.oOff[e - 1] + 1;
-    while (eo < endNode.nodeValue.length && isDropChar(endNode.nodeValue[eo])) eo++;
-    return {
-      startContainer: page.nodes[page.oNode[s]],
-      startOffset: page.oOff[s],
-      endContainer: endNode,
-      endOffset: eo
-    };
-  }
-  function staticRange(m) {
-    return new StaticRange(matchBounds(m.page, m.s, m.e));
-  }
-  function liveRange(m) {
-    const b = matchBounds(m.page, m.s, m.e);
-    const r = document.createRange();
-    r.setStart(b.startContainer, b.startOffset);
-    r.setEnd(b.endContainer, b.endOffset);
-    return r;
-  }
-  var hasHighlights = typeof CSS !== "undefined" && CSS.highlights && typeof Highlight === "function";
-  function clearSearch() {
-    clearTimeout(search.timer);
-    search.matches = [];
-    search.current = -1;
-    search.query = "";
-    if (hasHighlights) {
-      CSS.highlights.delete("search");
-      CSS.highlights.delete("search-active");
-    }
-    renderResultsList();
-    updateSearchCountDisplay();
-  }
-  function performSearch(rawQuery) {
-    const q2 = normalizeQuery(rawQuery, search.exact);
-    if (q2 === search.query) return;
-    clearSearch();
-    search.query = q2;
-    if (q2.length < SEARCH_MIN_CHARS || state.sheets.length === 0 || isBuilding()) return;
-    const matches = findMatches(getIndex(), q2, { word: search.word, max: SEARCH_MAX_MATCHES });
-    search.matches = matches;
-    renderResultsList();
-    if (matches.length === 0) {
-      updateSearchCountDisplay();
-      return;
-    }
-    if (hasHighlights) {
-      const all = new Highlight();
-      for (const m of matches) all.add(staticRange(m));
-      CSS.highlights.set("search", all);
-    }
-    const curIdx = Math.max(0, findCurrentIdx());
-    let start = matches.findIndex((m) => m.page.idx >= curIdx);
-    if (start < 0) start = 0;
-    showMatch(start);
-  }
-  function rerunSearch() {
-    search.query = "";
-    performSearch(searchInput.value);
-  }
-  async function showMatch(i) {
-    search.current = i;
-    updateSearchCountDisplay();
-    markActiveResult();
-    const m = search.matches[i];
-    if (!m) return;
-    if (hasHighlights) CSS.highlights.set("search-active", new Highlight(staticRange(m)));
-    const range = liveRange(m);
-    let r = range.getBoundingClientRect();
-    if (r.width === 0 && r.height === 0) {
-      scrollToSheet(m.page.idx);
-      await nextFrame();
-      await nextFrame();
-      if (search.current !== i) return;
-      r = range.getBoundingClientRect();
-    }
-    const v = viewerContainer.getBoundingClientRect();
-    viewerContainer.scrollTop += r.top - v.top - viewerContainer.clientHeight / 3;
-    if (r.left < v.left || r.right > v.right) {
-      viewerContainer.scrollLeft += (r.left + r.right) / 2 - (v.left + v.right) / 2;
-    }
-    const startEl = range.startContainer.parentElement;
-    const block = startEl && (startEl.closest(BLOCK_SEL) || startEl);
-    if (block) pinElement(block, block.getBoundingClientRect().top - viewerContainer.getBoundingClientRect().top);
-  }
-  function updateSearchCountDisplay() {
-    if (search.matches.length === 0) {
-      searchCount.textContent = fmtNum(t().noResults);
-      return;
-    }
-    const total = search.matches.length >= SEARCH_MAX_MATCHES ? `${SEARCH_MAX_MATCHES}+` : search.matches.length;
-    searchCount.textContent = fmtNum(`${search.current + 1} ${state.dir === "rtl" ? "من" : "of"} ${total}`);
-  }
-  function stepMatch(delta) {
-    const n = search.matches.length;
-    if (n === 0) return;
-    showMatch((search.current + delta + n) % n);
-  }
-  function renderResultsList() {
-    searchResults.textContent = "";
-    searchResults.hidden = !search.listOpen || search.matches.length === 0;
-    if (searchResults.hidden) return;
-    const tr = t();
-    const shown = Math.min(search.matches.length, SEARCH_LIST_MAX);
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < shown; i++) {
-      const m = search.matches[i];
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      const page = document.createElement("span");
-      page.className = "res-page";
-      page.textContent = state.format === "plain" ? "" : pageLabelText(state.pages[m.page.idx], tr);
-      const text = document.createElement("span");
-      text.dir = "auto";
-      const sn = snippet(m, SNIPPET_CHARS);
-      const mark = document.createElement("mark");
-      mark.textContent = sn.hit;
-      text.append(document.createTextNode(sn.before), mark, document.createTextNode(sn.after));
-      btn.append(page, text);
-      btn.addEventListener("click", () => showMatch(i));
-      li.appendChild(btn);
-      frag.appendChild(li);
-    }
-    if (search.matches.length > shown) {
-      const li = document.createElement("li");
-      li.className = "res-more";
-      li.textContent = fmtNum(tr.moreResults(search.matches.length - shown));
-      frag.appendChild(li);
-    }
-    searchResults.appendChild(frag);
-    markActiveResult();
-  }
-  function markActiveResult() {
-    if (searchResults.hidden) return;
-    const items = searchResults.children;
-    for (let i = 0; i < items.length; i++) items[i].classList.toggle("active", i === search.current);
-    const active = items[search.current];
-    if (active && active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
-  }
-  function setOption(btn, value) {
-    btn.setAttribute("aria-pressed", value ? "true" : "false");
-  }
-  optDiacritics.addEventListener("click", () => {
-    search.exact = !search.exact;
-    setOption(optDiacritics, search.exact);
-    storeSet("searchExact", search.exact);
-    rerunSearch();
-  });
-  optWord.addEventListener("click", () => {
-    search.word = !search.word;
-    setOption(optWord, search.word);
-    storeSet("searchWord", search.word);
-    rerunSearch();
-  });
-  btnSearchList.addEventListener("click", () => {
-    search.listOpen = !search.listOpen;
-    setOption(btnSearchList, search.listOpen);
-    renderResultsList();
-  });
-  function openSearch() {
-    closeMore();
-    searchPopup.classList.add("active");
-    btnSearchToggle.setAttribute("aria-expanded", "true");
-    searchInput.focus();
-    searchInput.select();
-    if (searchInput.value) rerunSearch();
-  }
-  function closeSearch() {
-    searchPopup.classList.remove("active");
-    btnSearchToggle.setAttribute("aria-expanded", "false");
-    clearSearch();
-  }
-  btnSearchToggle.addEventListener("click", () => {
-    if (searchPopup.classList.contains("active")) closeSearch();
-    else openSearch();
-  });
-  btnSearchClose.addEventListener("click", closeSearch);
-  btnSearchNext.addEventListener("click", () => stepMatch(1));
-  btnSearchPrev.addEventListener("click", () => stepMatch(-1));
-  searchInput.addEventListener("input", () => {
-    clearTimeout(search.timer);
-    search.timer = setTimeout(() => performSearch(searchInput.value), SEARCH_DEBOUNCE_MS);
-  });
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      clearTimeout(search.timer);
-      if (normalizeQuery(searchInput.value, search.exact) !== search.query) performSearch(searchInput.value);
-      else stepMatch(e.shiftKey ? -1 : 1);
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      closeSearch();
-      btnSearchToggle.focus();
-    }
-  });
-  btnOpenFile.addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", () => {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = String(reader.result);
-      state.libSource = null;
-      state.bookLink = null;
-      renderDocument(text, null, `file:${file.name}|${hashText(text.slice(0, 4e3))}`);
-    };
-    reader.onerror = () => renderEmpty([{ type: "readError" }]);
-    reader.readAsText(file, "utf-8");
-    fileInput.value = "";
-  });
+  function wirePages() {
+    for (const ev of ["pointerdown", "touchstart"]) document.addEventListener(ev, () => {
+      pointerIsDown = true;
+      pauseForInput();
+    }, { capture: true, passive: true });
+    for (const ev of ["pointerup", "pointercancel", "touchend", "touchcancel"]) document.addEventListener(ev, () => {
+      pointerIsDown = false;
+      pauseForInput();
+    }, { capture: true, passive: true });
+    document.addEventListener("keydown", pauseForInput, { capture: true, passive: true });
+  }
+
+  // src/reader/main.js
   async function initApp() {
     void checkConnection();
     setupClose(btnClose);
@@ -5142,6 +5167,29 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
     }
     renderEmpty([]);
   }
+  wireState();
+  wirePages();
+  wirePosition();
+  wireLibrary();
+  wireView();
+  wireNav();
+  wirePanel();
+  wireSearch();
+  btnOpenFile.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result);
+      state.libSource = null;
+      state.bookLink = null;
+      renderDocument(text, null, `file:${file.name}|${hashText(text.slice(0, 4e3))}`);
+    };
+    reader.onerror = () => renderEmpty([{ type: "readError" }]);
+    reader.readAsText(file, "utf-8");
+    fileInput.value = "";
+  });
   window.addEventListener("DOMContentLoaded", initApp);
 })();
 </script>
