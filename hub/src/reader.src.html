@@ -1218,7 +1218,7 @@
      Small helpers
      ================================================================ */
   // Shared with the CSE indexer: src/book-format.js (BookFormat).
-  const { escapeHtml, toWestern, stripComments, hasVisibleContent, parseBook, splitFootnotes } = BookFormat;
+  const { toWestern, stripComments, hasVisibleContent, parseBook, splitFootnotes } = BookFormat;
 
 
   const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
@@ -1898,7 +1898,7 @@
      app, nothing — the app's internal address must never be copied (the button hides). */
   const MD_READER_KEY = 'i360.mdReader';
   function readerBase() {
-    let v = null;
+    let v;
     try { v = localStorage.getItem(MD_READER_KEY); } catch { return null; }
     if (typeof v !== 'string' || !/[?&]file=$/.test(v)) return null;
     try {
@@ -3281,7 +3281,7 @@
       try { const u = new URL(fileUrl); if (/^https?:$/.test(u.protocol)) link = u.href; } catch { /* not a full address */ }
       if (!link) { renderEmpty([{ type: 'notInLibrary' }]); return; }
       // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
-      let copy = null;
+      let copy;
       // Each part is split into pages as it arrives, spread over the download, instead of the whole
       // book at the end (the same shared parseBook; the same pages — test/lib-copy.test.js).
       const parts = [];

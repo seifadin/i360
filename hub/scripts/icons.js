@@ -20,7 +20,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = ['src/cse.src.html', 'src/reader.src.html', 'src/day.html'];
+const PAGES = ['src/cse.src.html', 'src/reader.src.html', 'src/day.src.html'];
 const SVG = /<svg\b([^>]*)>([\s\S]*?)<\/svg>/g;
 const NAME = /\sdata-lucide="([a-z0-9-]+)"/;
 const FONT_AWESOME = /font-?awesome|\bfa-(solid|regular|brands|[a-z]+-[a-z])|\bfa[srb]? fa-/i;
@@ -53,7 +53,7 @@ function check(html, icons = lucide()) {
 
 // The page with every tagged icon redrawn from Lucide (unknown names left as they are).
 function write(html, icons = lucide()) {
-  return html.replace(SVG, (all, attrs, inner) => {
+  return html.replace(SVG, (all, attrs) => {
     const name = (attrs.match(NAME) || [])[1];
     return name && icons[name] ? `<svg${attrs}>${draw(icons[name])}</svg>` : all;
   });

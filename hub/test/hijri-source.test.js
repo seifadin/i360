@@ -31,7 +31,7 @@ function page(h, gregorian) {
 // The fake Dar al-Ifta: `show` decides what the site prints; the API always times out (as from Cloudflare).
 function fakeDar(show) {
   const calls = [];
-  const fetch = async (url, init) => {
+  const fetch = async (url) => {
     calls.push(url);
     if (url === S.SITE) {
       const s = show();

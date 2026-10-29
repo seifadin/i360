@@ -11,7 +11,7 @@ function checkInlineScripts(html, label) {
   const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   scripts.forEach((code, i) => {
     try { new vm.Script(code, { filename: `${label} (inline script ${i + 1})` }); }
-    catch (e) { throw new Error(`${label}: inline script ${i + 1} doesn't parse: ${e.message}`); }
+    catch (e) { throw new Error(`${label}: inline script ${i + 1} doesn't parse: ${e.message}`, { cause: e }); }
   });
   return scripts.length;
 }

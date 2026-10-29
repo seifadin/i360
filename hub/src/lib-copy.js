@@ -67,7 +67,7 @@
   function bookName(path, prefix) {
     if (!path.startsWith(prefix)) return null;
     const name = safeDecode(path.slice(prefix.length));
-    return name && !/[\/\\]/.test(name) && name !== '.' && name !== '..' ? name : null;
+    return name && !/[/\\]/.test(name) && name !== '.' && name !== '..' ? name : null;
   }
 
   function ownBook(value, pageHref) {

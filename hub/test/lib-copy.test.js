@@ -69,7 +69,7 @@ test('scan links: the BookReader at a position; the book named only in a multi-b
 const textOf = (html) => html
   .replace(/<br>/g, '\n').replace(/<\/p>/g, '\n\n').replace(/<[^>]+>/g, '')
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
-  .replace(/​/g, '');
+  .replace(/\u200B/g, '');
 const norm = (s) => s.replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 
 test('our copy becomes the Reader\'s book: same pages, labels, volumes and text, nothing turned into Markdown', () => {

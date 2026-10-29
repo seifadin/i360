@@ -13,17 +13,19 @@ Since merge sprint 7 every site here only forwards (301, path and `?…` kept):
 | `cse` | https://i360-cse.web.app/ | `https://i36o.web.app/cse/…` |
 | `day` | https://i360-day.web.app/ | `https://i36o.web.app/day/…` |
 
-`forward/404.html` is their fallback. They rarely change: `firebase deploy --only hosting` (here, in `hub/`).
+`forward/404.html` is their fallback. They rarely change: `npm run deploy-forwarders` (here, in `hub/`).
 
 **The app's site** is `i36o` in the same project (since 2026-10-23; the app deploys there from the repo root). Its old
-address `i360-e.web.app` (project `i360-e`) only forwards too: `forward-e/` (its own `firebase.json` and `.firebaserc`),
-deployed with `firebase deploy --only hosting` in `hub/forward-e/` — rarely needed.
+address `i360-e.web.app` (project `i360-e`) only forwards too: target `e` in the same `firebase.json` (same rules and
+`forward/` folder as `hub`; `.firebaserc` maps it to project `i360-e`), deployed by the same `npm run deploy-forwarders`.
+A bare `firebase deploy --only hosting` here now stops at once ("target e not configured for project i360-md"): nothing
+is deployed.
 
 ## Layout
 ```
 src/reader.src.html   the Reader        → ../public/md/index.html
 src/cse.src.html      the i360 CSE      → ../public/cse/index.html
-src/day.html          Daily Reflection «التأمل اليومي» → ../public/day/index.html
+src/day.src.html        Daily Reflection «التأمل اليومي» → ../public/day/index.html
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites
 ```
@@ -34,6 +36,7 @@ Link to a page: add `#p=45` (or `#p=2:45` for volume 2, page 45).
 ```
 npm test && npm run build
 ```
+`npm test` runs ESLint first (`eslint.config.js`; `npm run lint` alone), then the tests.
 Then commit the app's `public/md|cse|day/index.html`; they reach users with the app's web + OTA release.
 
 Never edit the built pages in `../public/` by hand: edit `src/`, then build. The pages'

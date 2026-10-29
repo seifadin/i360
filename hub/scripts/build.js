@@ -2,7 +2,7 @@
 // i36o.web.app/<page>/ and its OTA bundle (since merge sprint 7 the hub site only forwards):
 //   ../public/md/index.html    the Reader    (from src/reader.src.html)
 //   ../public/cse/index.html   the i360 CSE  (from src/cse.src.html)
-//   ../public/day/index.html   Daily Reflection (from src/day.html)
+//   ../public/day/index.html   Daily Reflection (from src/day.src.html)
 //
 //   npm run build
 //
@@ -152,8 +152,8 @@ buildPage({
 {
   const tailwind = execFileSync(process.execPath, [require.resolve('tailwindcss/lib/cli.js'), '-c', join(root, 'src/day.tailwind.js'), '--minify'],
     { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-  if (!/\.dark\b/.test(tailwind) || tailwind.length < 5000) throw new Error('src/day.html: the Tailwind build looks wrong (no dark: rules, or too small)');
-  if (/<\/style/i.test(tailwind)) throw new Error('src/day.html: the Tailwind CSS contains </style');
+  if (!/\.dark\b/.test(tailwind) || tailwind.length < 5000) throw new Error('src/day.src.html: the Tailwind build looks wrong (no dark: rules, or too small)');
+  if (/<\/style/i.test(tailwind)) throw new Error('src/day.src.html: the Tailwind CSS contains </style');
   // adhan's package exports don't list its bundles, so it's read by path (like marked).
   const adhanPkg = JSON.parse(read(join(root, 'node_modules/adhan/package.json')));
   const adhan = {
@@ -165,7 +165,7 @@ buildPage({
   const zones = Object.fromEntries(Object.entries(table.zones).map(([tz, z]) => [tz, { cc: z.cc, lat: z.lat, lng: z.lng, n: z.n }]));
   const cities = { code: `window.DAY_CITIES = ${JSON.stringify({ zones, aliases: table.aliases })};`, name: 'src/day-cities.json' };
   buildPage({
-    src: 'src/day.html',
+    src: 'src/day.src.html',
     out: '../public/day/index.html',
     fills: [['/*@@TAILWIND@@*/', tailwind.trim()]],
     scripts: [

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-TWYnnxBXtU6AFD1SYFH4ySM8woKnsJ3qT+SVyLwlCbs='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-GySvV+3RtSS9ttgBq96qZvc5XcsW/5tgkoUYS3BoJ8Q=' 'sha256-K6kCB3/m8pJA467kKixTQ1qzPwvM5dN8Rqu1TeqxkJg=' 'sha256-v6UJ2DYkkHrA7SoQJzJ8JeUSge5KUhAFW4iWMPdyQnk=' 'sha256-xJTS/3UzCG2+qHVYI4xuVafDLoDpbjTG5fGOxpDd3+M=' 'sha256-arszuqqrcAMElcg9DGwQrANHtJ7xQo2ozUCFWRe8hfE=' 'sha256-KHY//zJua0rLVpZpFIlkZgNwoG0nZKaEDNuCKJeqwBA='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
@@ -1417,7 +1417,7 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
                 document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
                 Picker.init();
                 // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
-                if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
+                if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
                     x.hidden = false;
                     x.addEventListener('click', () => {

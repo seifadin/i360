@@ -1,12 +1,11 @@
 /* i360 CSE view — what the CSE page shows for a result: the source's name,
    the page label, the link to open, and the groups to list. No screen code
-   here, so it can be tested in Node; the page inlines it after SearchCore
-   and CseIndex. Works as a plain <script> (window.CseView) and as a Node
-   module (require). */
+   here, so it can be tested in Node. Works as a plain <script>
+   (window.CseView) and as a Node module (require). */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./cse-index.js'));
-  else root.CseView = factory(root.CseIndex);
-}(typeof globalThis !== 'undefined' ? globalThis : this, function (CseIndex) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CseView = factory();
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
   const LIB_HOST = 'lib.i36o.workers.dev';

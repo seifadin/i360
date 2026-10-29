@@ -287,7 +287,6 @@
   (function () {
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
     const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
-    const STORE_PREFIX = 'i360cse.';
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
 
     // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
@@ -332,17 +331,6 @@
       openReader: 'فتح في القارئ',
       about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
     };
-
-    /* ---------------- Saved settings ---------------- */
-    function storeGet(key, fallback) {
-      try {
-        const v = localStorage.getItem(STORE_PREFIX + key);
-        return v == null ? fallback : JSON.parse(v);
-      } catch { return fallback; }
-    }
-    function storeSet(key, value) {
-      try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); } catch { /* not remembered */ }
-    }
 
     const state = {
       theme: 'system',

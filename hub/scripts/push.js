@@ -9,7 +9,7 @@
 //   3. git push — always, whatever happened in 1–2. Anything that went wrong
 //      there is shown as a warning with its cause, and a half-done font update
 //      is undone first.
-// The push publishes the new fonts too (the Theme publish workflow).
+// The push publishes the new fonts too (the pre-push hook publishes the theme Worker).
 
 const { execFileSync, spawnSync } = require('child_process');
 const path = require('path');

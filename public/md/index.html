@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-5K1GVQYcuLHGXOh1os3zTFif9mpMOEk2RZmRcAWhHIo=' 'sha256-2GN4xTbL84ROGkHIJ9jxAhho2shAJNxW9VbzzsAT8UE='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-zg0OZv4SVMRYH88X1lk7NJ9pcI+UjK8vlafAGm+FJSU=' 'sha256-PRW0t844RCMbrxJamCkiWtVe/bzwnZWVLNEU22Eb38U=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-B8zP1JdCYRaRqpGmIvrMwrmp3kWMXPtPWqZwXubevCg=' 'sha256-sHvVOeK17GfbfQlHqV3I/sBgUzoKKAaS9tNX2odaEK0='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1695,7 +1695,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
   function bookName(path, prefix) {
     if (!path.startsWith(prefix)) return null;
     const name = safeDecode(path.slice(prefix.length));
-    return name && !/[\/\\]/.test(name) && name !== '.' && name !== '..' ? name : null;
+    return name && !/[/\\]/.test(name) && name !== '.' && name !== '..' ? name : null;
   }
 
   function ownBook(value, pageHref) {
@@ -2159,7 +2159,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      Small helpers
      ================================================================ */
   // Shared with the CSE indexer: src/book-format.js (BookFormat).
-  const { escapeHtml, toWestern, stripComments, hasVisibleContent, parseBook, splitFootnotes } = BookFormat;
+  const { toWestern, stripComments, hasVisibleContent, parseBook, splitFootnotes } = BookFormat;
 
 
   const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
@@ -2839,7 +2839,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
      app, nothing — the app's internal address must never be copied (the button hides). */
   const MD_READER_KEY = 'i360.mdReader';
   function readerBase() {
-    let v = null;
+    let v;
     try { v = localStorage.getItem(MD_READER_KEY); } catch { return null; }
     if (typeof v !== 'string' || !/[?&]file=$/.test(v)) return null;
     try {
@@ -4222,7 +4222,7 @@ if(__exports != exports)module.exports = exports;return module.exports}));</scri
       try { const u = new URL(fileUrl); if (/^https?:$/.test(u.protocol)) link = u.href; } catch { /* not a full address */ }
       if (!link) { renderEmpty([{ type: 'notInLibrary' }]); return; }
       // A book the CSE has indexed (archive.org, Wikipedia, …): our page-split copy from the lib site.
-      let copy = null;
+      let copy;
       // Each part is split into pages as it arrives, spread over the download, instead of the whole
       // book at the end (the same shared parseBook; the same pages — test/lib-copy.test.js).
       const parts = [];

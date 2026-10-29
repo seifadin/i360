@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-3thlmQHBkQab26cGr1gKct62Kep+/lnPrmFIT12qj30=' 'sha256-vlwrgiYbIYnAAhuFiRo6zXM1508j/QmCXe7n8mdhU+4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-e1Divnp2HvNnj1aiC2Tk4ED/G7NqJGbNxSHixp/rxVI=' 'sha256-n3Cxw6f5mtMObt4OxwFWgjABRoR1VOEL7uuJgGQT/I8=' 'sha256-YnE9YiV28fvflJe+0yVILXnq+Jgnx+7FcQjkg3vKrWU=' 'sha256-zWb4qGCpgX59GGx/96U8Ee3T0AhDBM7LlGiPH87tyk0=' 'sha256-ZUDyOhneKcCcaLrt1tBw8rL9f81VHAQtiUcktOyJk7Q='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -1045,13 +1045,12 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
 </script>
   <script>/* i360 CSE view — what the CSE page shows for a result: the source's name,
    the page label, the link to open, and the groups to list. No screen code
-   here, so it can be tested in Node; the page inlines it after SearchCore
-   and CseIndex. Works as a plain <script> (window.CseView) and as a Node
-   module (require). */
+   here, so it can be tested in Node. Works as a plain <script>
+   (window.CseView) and as a Node module (require). */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./cse-index.js'));
-  else root.CseView = factory(root.CseIndex);
-}(typeof globalThis !== 'undefined' ? globalThis : this, function (CseIndex) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CseView = factory();
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
   const LIB_HOST = 'lib.i36o.workers.dev';
@@ -1226,7 +1225,6 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
   (function () {
     const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
     const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
-    const STORE_PREFIX = 'i360cse.';
     const CONFIRM_BATCH = 8;   // candidate pages checked at once
 
     // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
@@ -1271,17 +1269,6 @@ window.i360Theme = Object.freeze({ THEMES, NUMERALS, NUMERALS_KEY, CHOICE_KEY, C
       openReader: 'فتح في القارئ',
       about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
     };
-
-    /* ---------------- Saved settings ---------------- */
-    function storeGet(key, fallback) {
-      try {
-        const v = localStorage.getItem(STORE_PREFIX + key);
-        return v == null ? fallback : JSON.parse(v);
-      } catch { return fallback; }
-    }
-    function storeSet(key, value) {
-      try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); } catch { /* not remembered */ }
-    }
 
     const state = {
       theme: 'system',

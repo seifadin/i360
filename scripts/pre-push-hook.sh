@@ -325,12 +325,13 @@ fi
 # anything in hub/ (or the change list is unknown), the hub's own tests run first, from
 # hub/: the Reader, CSE and Daily Reflection logic, the shared book format and search, the
 # indexer, the theme, the Hijri date, and that every built page's scripts parse. A failure
-# stops the push (exit 1) before anything is published or deployed. The hub's packages are
-# installed once (npm ci) if hub/node_modules is missing. About 25 s.
+# stops the push (exit 1) before anything is published or deployed. ESLint runs first (part
+# of npm test). The hub's packages are installed (npm ci) if hub/node_modules is missing or
+# this push changes hub/package-lock.json. About 25 s.
 if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/'; then
   echo "→ hub/ changed — running the hub's tests..."
-  if [ ! -d hub/node_modules ]; then
-    echo "  First time: installing the hub's packages (cd hub && npm ci)..."
+  if [ ! -d hub/node_modules ] || printf '%s\n' "$CHANGED_FILES" | grep -qx 'hub/package-lock.json'; then
+    echo "  Installing the hub's packages (cd hub && npm ci)..."
     if ! (cd hub && npm ci --no-audit --no-fund); then
       echo "✗ The hub's packages couldn't be installed — push stopped: nothing was pushed."
       exit 1
@@ -341,7 +342,11 @@ if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/
     echo "✓ Hub tests passed."
     rm -f "$HUB_TEST_LOG"
   else
-    grep -E -A6 '^not ok' "$HUB_TEST_LOG" | head -30 || true
+    if grep -q '^not ok' "$HUB_TEST_LOG"; then
+      grep -E -A6 '^not ok' "$HUB_TEST_LOG" | head -30
+    else
+      tail -30 "$HUB_TEST_LOG"   # ESLint's findings (the tests didn't start)
+    fi
     echo "✗ Hub tests failed — push stopped: nothing was pushed, published or released."
     echo "  Full output: $HUB_TEST_LOG   (or: cd hub && npm test)"
     exit 1

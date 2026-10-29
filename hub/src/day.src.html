@@ -880,7 +880,7 @@
                 document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
                 Picker.init();
                 // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
-                if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) {
+                if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
                     const x = document.getElementById('btn-close');
                     x.hidden = false;
                     x.addEventListener('click', () => {

@@ -30,7 +30,7 @@ const ROWS = [
 ];
 
 function services(state) {
-  return async (url, opts = {}) => {
+  return async (url) => {
     state.calls.push(url);
     if (url.startsWith('https://api.baserow.io/')) return reply(200, { next: null, results: ROWS });
     if (url === 'https://archive.org/metadata/bukhari') {

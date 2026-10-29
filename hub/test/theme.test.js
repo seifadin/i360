@@ -48,7 +48,7 @@ test('the fallback is variables only, with plain colours', () => {
   const fb = fallbackCss(css);
   assert.doesNotMatch(fb, /color-mix|@font-face|@supports|url\(/);
   assert.match(fb, /--i360-frame: #F2EFEA;/);
-  assert.match(fb, /\[data-theme="dark"\] \{\n  color-scheme: dark;/);
+  assert.match(fb, /\[data-theme="dark"\] \{\n {2}color-scheme: dark;/);
 });
 
 test('fonts: every file theme.css names is there, in a versioned folder, with its licence', () => {

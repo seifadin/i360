@@ -58,7 +58,7 @@ function older(a, b) {
 async function fetchOk(url, what) {
   let res;
   try { res = await fetch(url, { signal: AbortSignal.timeout(20000) }); } catch (e) {
-    throw new Error(`${what}: no answer from ${new URL(url).host} (${(e.cause && e.cause.code) || e.name || e.message})`);
+    throw new Error(`${what}: no answer from ${new URL(url).host} (${(e.cause && e.cause.code) || e.name || e.message})`, { cause: e });
   }
   if (!res.ok) throw new Error(`${what}: HTTP ${res.status} from ${new URL(url).host}`);
   return res;
