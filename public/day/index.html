@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-GYp8OS2xN2klQEdzl54iRHPefMJVgR4Ti/lSckFBsgo=' 'sha256-BTwRlRn1r/u178m+dCqTrAUbI/fqkgx0BMTpi+p55Xw='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-GYp8OS2xN2klQEdzl54iRHPefMJVgR4Ti/lSckFBsgo=' 'sha256-cqJhVXmpq41zxh0+ZCxt0YCyjSWCHasJI6Q1bPoOWqI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
@@ -1588,10 +1588,10 @@
     button.addEventListener("click", () => {
       let fromApp = false;
       try {
-        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+        fromApp = window.history.length > 1 && !!document.referrer && new URL(document.referrer).origin === window.location.origin;
       } catch {
       }
-      if (fromApp) history.go(-stepsBack());
+      if (fromApp) window.history.go(-stepsBack());
       else window.location.replace("/index.html");
     });
   }

@@ -15,8 +15,8 @@ export function setupClose(button, stepsBack = () => 1) {
   button.hidden = false;
   button.addEventListener('click', () => {
     let fromApp = false;
-    try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* no referrer */ }
-    if (fromApp) history.go(-stepsBack()); else window.location.replace('/index.html');
+    try { fromApp = window.history.length > 1 && !!document.referrer && new URL(document.referrer).origin === window.location.origin; } catch { /* no referrer */ }
+    if (fromApp) window.history.go(-stepsBack()); else window.location.replace('/index.html');
   });
 }
 

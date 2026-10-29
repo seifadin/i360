@@ -127,11 +127,11 @@ function syncAddress(q, push) {
   if (url === window.location.pathname + window.location.search) return;
   // Each entry carries how many searches deep it is in this page, so ✕ can step back
   // past all of them at once (stepsIn()).
-  if (push) history.pushState({ i360cse: stepsIn() + 1 }, '', url); else history.replaceState(history.state, '', url);
+  if (push) window.history.pushState({ i360cse: stepsIn() + 1 }, '', url); else window.history.replaceState(window.history.state, '', url);
 }
 
 function stepsIn() {
-  const s = history.state;
+  const s = window.history.state;
   return s && typeof s.i360cse === 'number' && s.i360cse > 0 ? s.i360cse : 0;
 }
 

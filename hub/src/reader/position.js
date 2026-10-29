@@ -91,7 +91,7 @@ function updateHash() {
   if (!isLinkable() || state.sheets.length === 0) return;
   const h = hashFor(findCurrentIdx());
   if (h && window.location.hash !== h) {
-    try { history.replaceState(null, '', h); } catch { /* ignore */ }
+    try { window.history.replaceState(null, '', h); } catch { /* ignore */ }
   }
 }
 

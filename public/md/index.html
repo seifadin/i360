@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-M7bD44hHIt+4q+o2kV/Pw6Fz7c8RRhIznMzr7w/hsPc='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-UKe0FE7O6D2DkIeoM2cppRnMbTs+TVtpE1cahq8o630='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1351,10 +1351,10 @@ ${body}`;
     button.addEventListener("click", () => {
       let fromApp = false;
       try {
-        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+        fromApp = window.history.length > 1 && !!document.referrer && new URL(document.referrer).origin === window.location.origin;
       } catch {
       }
-      if (fromApp) history.go(-stepsBack());
+      if (fromApp) window.history.go(-stepsBack());
       else window.location.replace("/index.html");
     });
   }
@@ -4408,7 +4408,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
     const h2 = hashFor(findCurrentIdx());
     if (h2 && window.location.hash !== h2) {
       try {
-        history.replaceState(null, "", h2);
+        window.history.replaceState(null, "", h2);
       } catch {
       }
     }

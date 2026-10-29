@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-p38dE4e5MjfoltjeVwHpjMkM2CAeg81uESz32QrQQts='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-cixYRpGACq0Og+T3QpZ/MpJu+3veS5AesQFk8Zf2rBw='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -1011,10 +1011,10 @@
     button.addEventListener("click", () => {
       let fromApp = false;
       try {
-        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+        fromApp = window.history.length > 1 && !!document.referrer && new URL(document.referrer).origin === window.location.origin;
       } catch {
       }
-      if (fromApp) history.go(-stepsBack());
+      if (fromApp) window.history.go(-stepsBack());
       else window.location.replace("/index.html");
     });
   }
@@ -1146,11 +1146,11 @@
     const s = writeAddress({ q, exact: state.exact, word: state.word, data: state.dataBase === DEFAULT_DATA ? null : state.dataBase });
     const url = window.location.pathname + s;
     if (url === window.location.pathname + window.location.search) return;
-    if (push) history.pushState({ i360cse: stepsIn() + 1 }, "", url);
-    else history.replaceState(history.state, "", url);
+    if (push) window.history.pushState({ i360cse: stepsIn() + 1 }, "", url);
+    else window.history.replaceState(window.history.state, "", url);
   }
   function stepsIn() {
-    const s = history.state;
+    const s = window.history.state;
     return s && typeof s.i360cse === "number" && s.i360cse > 0 ? s.i360cse : 0;
   }
   function setRobots(q) {
