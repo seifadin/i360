@@ -1,15 +1,14 @@
 // Tests for src/cse-index.js and indexer/index-writer.js. The main check:
 // searching a written build gives exactly the pages and counts that running
 // SearchCore over every page directly gives, for every query and option.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { mkdtempSync, readFileSync, readdirSync } = require('node:fs');
-const { tmpdir } = require('node:os');
-const { join } = require('node:path');
-const SC = require('../src/search-core.js');
-const CI = require('../src/cse-index.js');
-const { writeBuild } = require('../indexer/index-writer.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import * as SC from '../src/search-core.js';
+import * as CI from '../src/cse-index.js';
+import { writeBuild } from '../indexer/index-writer.js';
 
 test('trigrams stay inside a paragraph; short queries are refused', () => {
   const page = CI.searchPage(['أبجد', 'هوز'], false);

@@ -1,12 +1,11 @@
-'use strict';
 // The indexer takes unchanged text from the previous build on the lib site
 // (S4): nothing is kept between runs except what was published.
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const { mkdtempSync, cpSync, readFileSync, existsSync, rmSync } = require('node:fs');
-const { join } = require('node:path');
-const { tmpdir } = require('node:os');
-const { run } = require('../indexer/build-index.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, cpSync, readFileSync, existsSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { run } from '../indexer/build-index.js';
 
 const LIB = 'https://lib.i36o.workers.dev/';
 const row = (id, links, inter = ['2.1', 'فقه العبادات']) => ({

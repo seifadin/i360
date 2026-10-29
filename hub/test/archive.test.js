@@ -1,10 +1,9 @@
 // Tests for the archive.org page splitter in indexer/extract.js, using the
 // formats seen in a real sample (indexer/out/sample.txt, 2026-10-16).
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { gzipSync } = require('node:zlib');
-const ex = require('../indexer/extract.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { gzipSync } from 'node:zlib';
+import * as ex from '../indexer/extract.js';
 
 function reply(status, body) {
   const buf = Buffer.isBuffer(body) ? body : Buffer.from(typeof body === 'string' ? body : JSON.stringify(body));

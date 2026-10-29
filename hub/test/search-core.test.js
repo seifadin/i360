@@ -1,8 +1,7 @@
 // Fixed cases for src/search-core.js — run with `npm test`.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const SC = require('../src/search-core.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as SC from '../src/search-core.js';
 
 // A page from paragraphs; within a paragraph, '\n' is a printed line break.
 function page(paragraphs, exact = false) {

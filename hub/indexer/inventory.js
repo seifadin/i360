@@ -19,9 +19,8 @@
 //
 // Needs BASEROW_KEY in .env (the read-only Baserow token, same value as the
 // app's VITE_BASEROW_KEY). Optional: BASEROW_TABLE_SCIENCES (default 193269).
-'use strict';
-const { existsSync, mkdirSync, readFileSync, writeFileSync } = require('node:fs');
-const { join } = require('node:path');
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const BASEROW_ROWS = 'https://api.baserow.io/api/database/rows/table/';
 const DEFAULT_TABLE = '193269';
@@ -569,13 +568,13 @@ async function run({ fetchFn = fetch, key, table = DEFAULT_TABLE, outDir, all = 
 const clearProbeCache = () => archiveMeta.clear();
 
 // Also used by the indexer (indexer/build-index.js).
-module.exports = { run, clearProbeCache, parseCell, normalizeUrl, fieldText, summary, causeText, readRows, collectSources, probe, fetchWithRetry, ARCHIVE_HELPERS, DEFAULT_TABLE, USER_AGENT };
+export { run, clearProbeCache, parseCell, normalizeUrl, fieldText, summary, causeText, readRows, collectSources, probe, fetchWithRetry, ARCHIVE_HELPERS, DEFAULT_TABLE, USER_AGENT };
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   run({
     key: process.env.BASEROW_KEY,
     table: process.env.BASEROW_TABLE_SCIENCES || DEFAULT_TABLE,
-    outDir: join(__dirname, 'out'),
+    outDir: join(import.meta.dirname, 'out'),
     all: process.argv.includes('--all')
   }).catch((err) => {
     console.error(`\nInventory stopped: ${err.message}`);

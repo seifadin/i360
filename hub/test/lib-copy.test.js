@@ -1,12 +1,11 @@
-'use strict';
 // Opening our copy of a book in the Reader (S5): catalog lookup, and the
 // book text it builds reads back — through the Reader's own parser and
 // renderer — as exactly the pages and text of the copy.
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const markedLib = require('marked');
-const LibCopy = require('../src/lib-copy.js');
-const BookFormat = require('../src/book-format.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as markedLib from 'marked';
+import * as LibCopy from '../src/lib-copy.js';
+import * as BookFormat from '../src/book-format.js';
 
 const STREAM = 'https://archive.org/stream/QuranIntermediateExegesis/التفسير-الوسيط-للقرآن-الكريم_1413هـ_djvu.txt';
 const catalog = {

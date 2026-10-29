@@ -1,4 +1,3 @@
-'use strict';
 // i360 icons: Lucide (lucide.dev, ISC licence), from the lucide-static npm
 // package (version fixed by package-lock.json). The pages carry each icon as inline SVG,
 // tagged with its Lucide name:
@@ -16,17 +15,18 @@
 // that differs from Lucide's, or anything left of Font Awesome. The tests run
 // the check (test/icons.test.js).
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const ROOT = path.join(__dirname, '..');
+const ROOT = path.join(import.meta.dirname, '..');
 const PAGES = ['src/cse.src.html', 'src/reader.src.html', 'src/day.src.html'];
 const SVG = /<svg\b([^>]*)>([\s\S]*?)<\/svg>/g;
 const NAME = /\sdata-lucide="([a-z0-9-]+)"/;
 const FONT_AWESOME = /font-?awesome|\bfa-(solid|regular|brands|[a-z]+-[a-z])|\bfa[srb]? fa-/i;
 
-const lucide = () => require('lucide-static/icon-nodes.json');
-const version = () => require('lucide-static/package.json').version;
+const LUCIDE = path.join(ROOT, 'node_modules/lucide-static');
+const lucide = () => JSON.parse(fs.readFileSync(path.join(LUCIDE, 'icon-nodes.json'), 'utf8'));
+const version = () => JSON.parse(fs.readFileSync(path.join(LUCIDE, 'package.json'), 'utf8')).version;
 
 // Lucide's drawing for one icon, as the pages write it.
 function draw(nodes) {
@@ -75,5 +75,5 @@ function main() {
   console.log(`Icons: every page icon is Lucide ${version()}`);
 }
 
-if (require.main === module) main();
-module.exports = { PAGES, draw, check, write, version };
+if (process.argv[1] === import.meta.filename) main();
+export { PAGES, draw, check, write, version };

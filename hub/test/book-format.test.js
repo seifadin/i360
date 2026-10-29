@@ -1,10 +1,9 @@
 // Tests for src/book-format.js in Node, as the CSE indexer will use it.
 // The Reader's use of the same file is checked side by side in a browser.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const marked = require('marked');
-const BF = require('../src/book-format.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as marked from 'marked';
+import * as BF from '../src/book-format.js';
 
 test('OCR export: page markers, volumes, front matter, untranscribed pages', () => {
   const book = '\uFEFFعنوان قبل الصفحات\n[ص 1]\nنص\n[ص -]\nبلا رقم\n[ص ?]\n<!-- لم تُنسخ -->\n[ج ٢ ص ١٢]\nجزء ثان\n';

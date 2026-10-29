@@ -1,0 +1,6 @@
+# dar-hijri.i36o.workers.dev/calc.js and /client.js — the two shared files, as ES modules
+# importable from any site (a module from another site needs this header), like the theme
+# site's loader. Applies to these static files only; the Worker sets the date answer's own.
+/*
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff

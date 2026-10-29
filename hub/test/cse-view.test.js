@@ -1,8 +1,7 @@
-'use strict';
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const CseView = require('../src/cse-view.js');
-const CseIndex = require('../src/cse-index.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as CseView from '../src/cse-view.js';
+import * as CseIndex from '../src/cse-index.js';
 
 const catalog = {
   sources: [

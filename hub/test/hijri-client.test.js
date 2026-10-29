@@ -1,12 +1,8 @@
 // Fixed cases for hijri/client.js with a fake Worker — run with `npm test`.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const vm = require('node:vm');
-const HC = require('../hijri/calc.js');
-const Client = require('../hijri/client.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as HC from '../hijri/calc.js';
+import * as Client from '../hijri/client.js';
 
 const DATE = '2026-10-19';
 const DAR = { y: 1448, m: 5, d: 8 };
@@ -80,14 +76,4 @@ test('a slow Worker times out and the calculated date is used', async () => {
 
 test('a bad date is a caller error, not a fallback', async () => {
   await assert.rejects(Client.get({ date: '19-10-2026', fetch: fakeFetch(answer()) }), RangeError);
-});
-
-test('also loads as a plain browser script after calc.js', async () => {
-  const sandbox = { Intl, Date, Math, Object, String, Number, RangeError, Error, Promise, parseInt, setTimeout, clearTimeout };
-  sandbox.globalThis = sandbox;
-  vm.runInNewContext(readFileSync(join(__dirname, '../hijri/calc.js'), 'utf8'), sandbox);
-  vm.runInNewContext(readFileSync(join(__dirname, '../hijri/client.js'), 'utf8'), sandbox);
-  assert.equal(sandbox.HijriClient.VERSION, Client.VERSION);
-  const r = await sandbox.HijriClient.get({ date: DATE, fetch: fakeFetch(answer()) });
-  assert.equal(r.source, 'dar');
 });

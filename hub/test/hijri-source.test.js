@@ -1,11 +1,10 @@
 // Scenarios for hijri/worker/source.js with a fake clock, a fake Dar al-Ifta and a
 // fake KV — run with `npm test`. Dates follow Jumada al-Ula 1448 as Dar al-Ifta showed
 // it (8 Jumada al-Ula = 2026-10-19), so the 29th falls on 2026-11-09.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const calc = require('../hijri/calc.js');
-const S = require('../hijri/worker/source.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as calc from '../hijri/calc.js';
+import * as S from '../hijri/worker/source.js';
 
 const EN = ['Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Akhir", 'Jumada al-Ula', 'Jumada al-Akhirah', 'Rajab', "Sha'ban", 'Ramadan', 'Shawwal', "Dhu al-Qi'dah", 'Dhu al-Hijjah'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

@@ -1,11 +1,7 @@
 // Fixed cases for hijri/calc.js — run with `npm test`.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const vm = require('node:vm');
-const HC = require('../hijri/calc.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as HC from '../hijri/calc.js';
 
 test('version, calendar and sources are fixed values', () => {
   assert.ok(Number.isInteger(HC.VERSION) && HC.VERSION >= 1);
@@ -75,13 +71,4 @@ test('labels: every source and provisional in every language, Arabic as the fall
     assert.equal(HC.label(source, 'xx'), HC.LABELS[source].ar);
   }
   assert.equal(HC.label('nope', 'ar'), '');
-});
-
-test('also loads as a plain browser script (window.HijriCalc)', () => {
-  const code = readFileSync(join(__dirname, '../hijri/calc.js'), 'utf8');
-  const sandbox = { Intl, Date, Math, Object, String, Number, RangeError, parseInt };
-  sandbox.globalThis = sandbox;
-  vm.runInNewContext(code, sandbox);
-  assert.equal(sandbox.HijriCalc.VERSION, HC.VERSION);
-  assert.equal(JSON.stringify(sandbox.HijriCalc.fromCivil('2026-10-18')), JSON.stringify({ y: 1448, m: 5, d: 8 }));   // another realm: compare values
 });

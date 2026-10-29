@@ -1,12 +1,11 @@
 // Tests for indexer/inventory.js, with Baserow, archive.org, Wikipedia,
 // Wikisource and other hosts simulated (no network). Run with `npm test`.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { mkdtempSync, readFileSync } = require('node:fs');
-const { tmpdir } = require('node:os');
-const { join } = require('node:path');
-const inv = require('../indexer/inventory.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import * as inv from '../indexer/inventory.js';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'inv-'));
 

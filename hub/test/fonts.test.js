@@ -1,19 +1,20 @@
-'use strict';
 // theme/fonts.js against a simulated npm registry, on a copy of theme/site.
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const http = require('http');
-const crypto = require('crypto');
-const { execFileSync } = require('child_process');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import http from 'http';
+import crypto from 'crypto';
+import { execFileSync } from 'child_process';
 
-const REAL_SITE = path.join(__dirname, '..', 'theme', 'site');
-const woff2 = require('../theme/woff2.js');
+import * as woff2 from '../theme/woff2.js';
+import * as F0 from '../theme/fonts.js';
+
+const REAL_SITE = path.join(import.meta.dirname, '..', 'theme', 'site');
 
 // The versions in use now, and a newer one for the simulated registry.
-const CUR = require('../theme/fonts.js').currentVersions();
+const CUR = F0.currentVersions();
 const bump = v => v.split('.').map((n, i) => (i === 1 ? Number(n) + 1 : i === 2 ? 0 : n)).join('.');
 const NEXT = { amiri: bump(CUR.amiri), 'amiri-quran': bump(CUR['amiri-quran']) };
 
@@ -60,26 +61,26 @@ function startRegistry(registry) {
   return new Promise(r => server.listen(0, '127.0.0.1', () => r(server)));
 }
 
-// A copy of theme/site and a fresh theme/fonts.js pointed at it.
-function sandbox(port) {
+// A copy of theme/site and a fresh theme/fonts.js pointed at it (a new module
+// instance each time: the query makes it a different module, read afresh).
+let fresh = 0;
+async function sandbox(port) {
   const site = fs.mkdtempSync(path.join(os.tmpdir(), 'site-'));
   fs.cpSync(REAL_SITE, site, { recursive: true });
   process.env.I360_THEME_SITE = site;
   process.env.I360_NPM_REGISTRY = `http://127.0.0.1:${port}`;
-  delete require.cache[require.resolve('../theme/fonts.js')];
-  return { site, fonts: require('../theme/fonts.js') };
+  return { site, fonts: await import(`../theme/fonts.js?fresh=${++fresh}`) };
 }
 const stop = s => new Promise(r => { s.closeAllConnections(); s.close(r); });
 const snapshot = dir => execFileSync('find', [dir, '-type', 'f'], { encoding: 'utf8' }).split('\n').sort().join('\n') + fs.readFileSync(path.join(dir, 'theme.css'), 'utf8');
 
 test('fonts: newest already → nothing to do', async (t) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'reg-'));
-  const F0 = require('../theme/fonts.js');
   const reg = {};
   for (const p of F0.PACKAGES) reg[p.pkg] = { version: CUR[p.dir], tarball: makeTarball(tmp, p) };
   const server = await startRegistry(reg);
   t.after(() => stop(server));
-  const { site, fonts } = sandbox(server.address().port);
+  const { site, fonts } = await sandbox(server.address().port);
   const before = snapshot(site);
   const infos = await fonts.check();
   assert.deepEqual(infos.map(i => [i.family, i.current, i.latest, i.newer]), [['Amiri', CUR.amiri, CUR.amiri, false], ['Amiri Quran', CUR['amiri-quran'], CUR['amiri-quran'], false]]);
@@ -89,14 +90,13 @@ test('fonts: newest already → nothing to do', async (t) => {
 
 test('fonts: a newer version → new folder, theme.css rewritten, previous folder kept, older removed', async (t) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'reg-'));
-  const F0 = require('../theme/fonts.js');
   const amiri = F0.PACKAGES[0], quran = F0.PACKAGES[1];
   const server = await startRegistry({
     [amiri.pkg]: { version: NEXT.amiri, tarball: makeTarball(tmp, amiri) },
     [quran.pkg]: { version: CUR['amiri-quran'], tarball: makeTarball(tmp, quran) }
   });
   t.after(() => stop(server));
-  const { site, fonts } = sandbox(server.address().port);
+  const { site, fonts } = await sandbox(server.address().port);
   fs.mkdirSync(path.join(site, 'fonts/amiri/0.0.1'));   // an older folder, to be removed
   const report = await fonts.apply();
   assert.equal(report.length, 1);
@@ -122,7 +122,6 @@ test('fonts: a newer version → new folder, theme.css rewritten, previous folde
 
 test('fonts: safety check — a new Amiri Quran missing characters is refused, nothing changes', async (t) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'reg-'));
-  const F0 = require('../theme/fonts.js');
   const amiri = F0.PACKAGES[0], quran = F0.PACKAGES[1];
   const server = await startRegistry({
     [amiri.pkg]: { version: NEXT.amiri, tarball: makeTarball(tmp, amiri) },
@@ -130,7 +129,7 @@ test('fonts: safety check — a new Amiri Quran missing characters is refused, n
     [quran.pkg]: { version: NEXT['amiri-quran'], tarball: makeTarball(tmp, quran, { 'amiri-quran-arabic-400-normal.woff2': 'amiri-quran-latin-400-normal.woff2' }) }
   });
   t.after(() => stop(server));
-  const { site, fonts } = sandbox(server.address().port);
+  const { site, fonts } = await sandbox(server.address().port);
   const before = snapshot(site);
   await assert.rejects(fonts.apply(), /safety check: Amiri Quran \S+ amiri-quran-arabic-400-normal\.woff2 lacks U\+06/);
   assert.equal(snapshot(site), before, 'all or nothing: the Amiri update made before is undone too');
@@ -138,19 +137,18 @@ test('fonts: safety check — a new Amiri Quran missing characters is refused, n
 
 test('fonts: a wrong checksum is refused; no registry → a clear reason', async (t) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'reg-'));
-  const F0 = require('../theme/fonts.js');
   const server = await startRegistry({
     [F0.PACKAGES[0].pkg]: { version: NEXT.amiri, tarball: makeTarball(tmp, F0.PACKAGES[0]), badSum: true },
     [F0.PACKAGES[1].pkg]: { version: CUR['amiri-quran'], tarball: makeTarball(tmp, F0.PACKAGES[1]) }
   });
   t.after(() => stop(server));
-  const { site, fonts } = sandbox(server.address().port);
+  const { site, fonts } = await sandbox(server.address().port);
   const before = snapshot(site);
   await assert.rejects(fonts.apply(), /checksum mismatch/);
   assert.equal(snapshot(site), before);
   const port = server.address().port;
   await stop(server);   // now nothing listens there
-  const again = sandbox(port);
+  const again = await sandbox(port);
   await assert.rejects(again.fonts.check(), /checking @fontsource\/amiri: no answer from 127\.0\.0\.1/);
 });
 

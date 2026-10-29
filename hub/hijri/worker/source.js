@@ -20,7 +20,6 @@
    State, one KV key (STATE_KEY):
      { anchor: {date, h}, previous: {date, h} | null, offset, checkedAt, error }
    anchor = the last date confirmed from Dar al-Ifta (date = Cairo civil date). */
-'use strict';
 
 const CAIRO = 'Africa/Cairo';
 const STATE_KEY = 'state';
@@ -206,4 +205,4 @@ function createSource({ calc, fetch, kv }) {
 
 const why = (e) => (e && e.name === 'AbortError') ? 'timeout' : ((e && e.message) || 'failed');
 
-module.exports = { createSource, parseSite, parseApi, hijriMonthNumber, CAIRO, STATE_KEY, CHECK_FROM_HOUR, FIRST_READ_HOUR, MAX_OFFSET, SITE, API };
+export { createSource, parseSite, parseApi, hijriMonthNumber, CAIRO, STATE_KEY, CHECK_FROM_HOUR, FIRST_READ_HOUR, MAX_OFFSET, SITE, API };

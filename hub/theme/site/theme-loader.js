@@ -4,9 +4,9 @@
 //   1. the app's built-in fallback colours (node theme/fallbacks.js --css),
 //   2. theme/early.js inlined (applies the saved theme and the saved copy of
 //      theme.css before anything is drawn),
-//   3. this loader: either built into the page (the hub's pages: scripts/build.js
-//      turns it into a plain script, window.i360Theme, so it also works offline),
-//      or imported from the theme site in a module script:
+//   3. this loader: either bundled into the page (the hub's pages, by scripts/build.js,
+//      and the i360إ app, by Vite — so it also works offline), or imported from the
+//      theme site in a module script:
 //        import * as theme from 'https://theme.i36o.workers.dev/theme-loader.js';
 //        theme.init();
 //

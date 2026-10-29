@@ -17,72 +17,69 @@
      GET <WORKER>/?date=YYYY-MM-DD  ->  200 { date, h: {y, m, d}, source, provisional, v }
    where v is the Worker's calc.js VERSION. Anything else counts as no answer.
 
-   Works as a plain <script> after calc.js (window.HijriClient) and as a Node
-   module (require / import). */
-(function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./calc.js'));
-  else root.HijriClient = factory(root.HijriCalc);
-}(typeof globalThis !== 'undefined' ? globalThis : this, function (Calc) {
-  'use strict';
-  if (!Calc) throw new Error('HijriClient: load hijri/calc.js first');
+   An ES module, like everything here: bundled into the pages, imported by Node
+   and by the Worker, and served as is at dar-hijri.i36o.workers.dev/client.js
+   (it imports calc.js from beside itself). */
+import * as Calc from './calc.js';
 
-  const VERSION = 2;                 // 2: the label says when a date is provisional
-  const WORKER = 'https://dar-hijri.i36o.workers.dev';
-  const TIMEOUT_MS = 8000;
+if (!Calc) throw new Error('HijriClient: load hijri/calc.js first');
 
-  function localToday() {
-    return Calc.todayIn(Intl.DateTimeFormat().resolvedOptions().timeZone);
+const VERSION = 2;                 // 2: the label says when a date is provisional
+const WORKER = 'https://dar-hijri.i36o.workers.dev';
+const TIMEOUT_MS = 8000;
+
+function localToday() {
+  return Calc.todayIn(Intl.DateTimeFormat().resolvedOptions().timeZone);
+}
+
+// The Worker's JSON, checked against the contract; null if it doesn't match.
+function readAnswer(j, date) {
+  if (!j || j.date !== date || !Calc.isHijri(j.h)) return null;
+  if (j.source !== Calc.SOURCES.DAR && j.source !== Calc.SOURCES.CALC) return null;
+  if (typeof j.provisional !== 'boolean' || !Number.isInteger(j.v)) return null;
+  return { h: { y: j.h.y, m: j.h.m, d: j.h.d }, source: j.source, provisional: j.provisional, v: j.v };
+}
+
+async function ask(url, date, timeoutMs, fetchImpl) {
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => { if (ctrl) ctrl.abort(); reject(new Error('timeout')); }, timeoutMs);
+  });
+  try {
+    const request = (async () => {
+      const r = await fetchImpl(`${url}/?date=${date}`, ctrl ? { signal: ctrl.signal } : {});
+      if (!r.ok) throw new Error(`status ${r.status}`);
+      const a = readAnswer(await r.json(), date);
+      if (!a) throw new Error('unexpected answer');
+      return a;
+    })();
+    return await Promise.race([request, timeout]);
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  // The Worker's JSON, checked against the contract; null if it doesn't match.
-  function readAnswer(j, date) {
-    if (!j || j.date !== date || !Calc.isHijri(j.h)) return null;
-    if (j.source !== Calc.SOURCES.DAR && j.source !== Calc.SOURCES.CALC) return null;
-    if (typeof j.provisional !== 'boolean' || !Number.isInteger(j.v)) return null;
-    return { h: { y: j.h.y, m: j.h.m, d: j.h.d }, source: j.source, provisional: j.provisional, v: j.v };
-  }
-
-  async function ask(url, date, timeoutMs, fetchImpl) {
-    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
-    let timer;
-    const timeout = new Promise((_, reject) => {
-      timer = setTimeout(() => { if (ctrl) ctrl.abort(); reject(new Error('timeout')); }, timeoutMs);
-    });
+async function get(options) {
+  const o = options || {};
+  const date = o.date || localToday();
+  if (!Calc.parseYMD(date)) throw new RangeError(`HijriClient: not a civil date "${date}"`);
+  const lang = o.lang || 'ar';
+  const fetchImpl = o.fetch || (typeof fetch === 'function' ? fetch.bind(globalThis) : null);
+  if (fetchImpl) {
     try {
-      const request = (async () => {
-        const r = await fetchImpl(`${url}/?date=${date}`, ctrl ? { signal: ctrl.signal } : {});
-        if (!r.ok) throw new Error(`status ${r.status}`);
-        const a = readAnswer(await r.json(), date);
-        if (!a) throw new Error('unexpected answer');
-        return a;
-      })();
-      return await Promise.race([request, timeout]);
-    } finally {
-      clearTimeout(timer);
+      const a = await ask(o.url || WORKER, date, o.timeoutMs || TIMEOUT_MS, fetchImpl);
+      return { date, h: a.h, source: a.source, provisional: a.provisional, label: Calc.label(a.provisional ? 'provisional' : a.source, lang), outdated: a.v !== Calc.VERSION, error: null };
+    } catch (e) {
+      return fallback(date, lang, (e && e.name === 'AbortError') ? 'timeout' : ((e && e.message) || 'failed'));
     }
   }
+  return fallback(date, lang, 'no fetch available');
+}
 
-  async function get(options) {
-    const o = options || {};
-    const date = o.date || localToday();
-    if (!Calc.parseYMD(date)) throw new RangeError(`HijriClient: not a civil date "${date}"`);
-    const lang = o.lang || 'ar';
-    const fetchImpl = o.fetch || (typeof fetch === 'function' ? fetch.bind(globalThis) : null);
-    if (fetchImpl) {
-      try {
-        const a = await ask(o.url || WORKER, date, o.timeoutMs || TIMEOUT_MS, fetchImpl);
-        return { date, h: a.h, source: a.source, provisional: a.provisional, label: Calc.label(a.provisional ? 'provisional' : a.source, lang), outdated: a.v !== Calc.VERSION, error: null };
-      } catch (e) {
-        return fallback(date, lang, (e && e.name === 'AbortError') ? 'timeout' : ((e && e.message) || 'failed'));
-      }
-    }
-    return fallback(date, lang, 'no fetch available');
-  }
+function fallback(date, lang, error) {
+  const source = Calc.SOURCES.CALC;
+  return { date, h: Calc.fromCivil(date), source, provisional: false, label: Calc.label(source, lang), outdated: false, error };
+}
 
-  function fallback(date, lang, error) {
-    const source = Calc.SOURCES.CALC;
-    return { date, h: Calc.fromCivil(date), source, provisional: false, label: Calc.label(source, lang), outdated: false, error };
-  }
-
-  return Object.freeze({ VERSION, WORKER, TIMEOUT_MS, get });
-}));
+export { VERSION, WORKER, TIMEOUT_MS, get };

@@ -12,12 +12,9 @@
 // "Today" is this machine's date: the same day as the Gregorian half, which the
 // hook takes from `date`.
 //
-// hub/ is CommonJS (hub/package.json) while this repo is "type": "module", so the
-// two files load through require(); client.js requires calc.js itself.
-import { createRequire } from 'node:module';
+// Like the whole repo, they are ES modules; client.js imports calc.js itself.
+import * as HijriClient from '../hub/hijri/client.js';
 
-const require = createRequire(import.meta.url);
-const HijriClient = require('../hub/hijri/client.js');
 const pad = (n) => String(n).padStart(2, '0');
 const note = (s) => process.stderr.write(`${s}\n`);
 

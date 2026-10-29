@@ -1,11 +1,12 @@
 // hijri/worker/index.js as the Worker runs it, with a fake KV and a fake
 // Dar al-Ifta — run with `npm test`. Uses the real clock: dates are built from
 // Cairo's date at the time of the run.
-'use strict';
-const { test, before, after } = require('node:test');
-const assert = require('node:assert/strict');
-const calc = require('../hijri/calc.js');
-const S = require('../hijri/worker/source.js');
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { realpathSync, lstatSync } from 'node:fs';
+import { join } from 'node:path';
+import * as calc from '../hijri/calc.js';
+import * as S from '../hijri/worker/source.js';
 
 let worker;
 const realFetch = globalThis.fetch;
@@ -87,11 +88,9 @@ test('OPTIONS and other methods', async () => {
 });
 
 test('the Worker serves the real shared files: hijri/site/ links to them', () => {
-  const { realpathSync, lstatSync } = require('node:fs');
-  const { join } = require('node:path');
   for (const name of ['calc.js', 'client.js']) {
-    const link = join(__dirname, '../hijri/site', name);
+    const link = join(import.meta.dirname, '../hijri/site', name);
     assert.ok(lstatSync(link).isSymbolicLink(), `hijri/site/${name} must be a symlink, not a copy`);
-    assert.equal(realpathSync(link), realpathSync(join(__dirname, '../hijri', name)));
+    assert.equal(realpathSync(link), realpathSync(join(import.meta.dirname, '../hijri', name)));
   }
 });

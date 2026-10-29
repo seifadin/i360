@@ -1,4 +1,3 @@
-'use strict';
 // i360 theme: plain-colour fallbacks for colours worked out with color-mix().
 //
 //   node theme/fallbacks.js           check that every @derived line in
@@ -11,10 +10,10 @@
 // OKLab with weights (100 − p)% and p%, then converts back to sRGB. Results
 // are rounded to whole 0–255 channels, as browsers report them.
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const THEME_CSS = path.join(__dirname, 'site', 'theme.css');
+const THEME_CSS = path.join(import.meta.dirname, 'site', 'theme.css');
 
 // ---------- colour maths ----------
 
@@ -153,9 +152,9 @@ function fallbackCss(css) {
   }).join('\n');
 }
 
-module.exports = { mixOklab, parseColor, toHex, check, fallbackCss, themeBlocks, derivedRules, THEME_CSS };
+export { mixOklab, parseColor, toHex, check, fallbackCss, themeBlocks, derivedRules, THEME_CSS };
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   const arg = process.argv[2] || '--check';
   const css = fs.readFileSync(THEME_CSS, 'utf8');
   if (arg === '--css') {

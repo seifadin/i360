@@ -1,14 +1,13 @@
-'use strict';
 // The built pages' inline scripts all parse (scripts/check-scripts.js, the same check the build runs).
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const { checkInlineScripts } = require('../scripts/check-scripts.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { checkInlineScripts } from '../scripts/check-scripts.js';
 
 for (const page of ['md', 'cse', 'day']) {
   test(`the built ${page} page's inline scripts all parse`, () => {
-    const html = fs.readFileSync(path.join(__dirname, '..', '..', 'public', page, 'index.html'), 'utf8');
+    const html = fs.readFileSync(path.join(import.meta.dirname, '..', '..', 'public', page, 'index.html'), 'utf8');
     assert.ok(checkInlineScripts(html, page) > 0, `${page}: no inline scripts found`);
   });
 }

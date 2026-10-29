@@ -1,4 +1,3 @@
-'use strict';
 // npm run push [-- <git push arguments>]
 //
 // git push, with the fonts kept up to date on the way:
@@ -11,11 +10,11 @@
 //      is undone first.
 // The push publishes the new fonts too (the pre-push hook publishes the theme Worker).
 
-const { execFileSync, spawnSync } = require('child_process');
-const path = require('path');
-const fonts = require('../theme/fonts.js');
+import { execFileSync, spawnSync } from 'child_process';
+import path from 'path';
+import * as fonts from '../theme/fonts.js';
 
-const root = path.join(__dirname, '..');
+const root = path.join(import.meta.dirname, '..');
 const SITE_REL = 'theme/site';
 
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });

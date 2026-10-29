@@ -6,11 +6,10 @@
 //
 // Reads indexer/dist/ (from `npm run index`). Results are grouped by
 // ScienceMajor_Ar → ScienceIntermediate_Ar → source, in the app's order.
-'use strict';
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const CseIndex = require('../src/cse-index.js');
-const SearchCore = require('../src/search-core.js');
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import * as CseIndex from '../src/cse-index.js';
+import * as SearchCore from '../src/search-core.js';
 
 async function search(distDir, raw, opts = {}) {
   const { buildId } = JSON.parse(readFileSync(join(distDir, 'latest.json'), 'utf8'));
@@ -37,7 +36,7 @@ async function main() {
     return;
   }
   const t0 = Date.now();
-  const r = await search(join(__dirname, 'dist'), raw, opts);
+  const r = await search(join(import.meta.dirname, 'dist'), raw, opts);
   const total = r.hits.reduce((a, h) => a + h.count, 0);
   console.log(`«${raw}»${opts.exact ? ' [exact]' : ''}${opts.word ? ' [word]' : ''}: ${total} matches on ${r.hits.length} pages (${r.candidates} candidate pages checked, ${Date.now() - t0} ms)\n`);
   for (const g of r.groups) {
@@ -58,6 +57,6 @@ async function main() {
   }
 }
 
-module.exports = { search, pageLabel };
+export { search, pageLabel };
 
-if (require.main === module) main().catch((e) => { console.error(e.message); process.exitCode = 1; });
+if (process.argv[1] === import.meta.filename) main().catch((e) => { console.error(e.message); process.exitCode = 1; });

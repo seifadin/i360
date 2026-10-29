@@ -17,7 +17,8 @@
   "triggers": { "crons": ["*/30 * * * *"] },
   // The two shared files, served as they are for anything outside this repo that wants
   // them: /calc.js and /client.js. site/ holds symlinks to ../calc.js and
-  // ../client.js, so there is still one copy of each. Anything else goes to the Worker.
+  // ../client.js, so there is still one copy of each; both are ES modules, importable from
+  // any site (CORS in site/_headers). Anything else goes to the Worker.
   "assets": { "directory": "./site", "not_found_handling": "none" },
   "workers_dev": true,
   "preview_urls": false

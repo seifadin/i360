@@ -1,11 +1,10 @@
-'use strict';
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
-const { mixOklab, check, fallbackCss, themeBlocks, THEME_CSS } = require('../theme/fallbacks.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'fs';
+import path from 'path';
+import { mixOklab, check, fallbackCss, themeBlocks, THEME_CSS } from '../theme/fallbacks.js';
 
-const SITE = path.join(__dirname, '..', 'theme', 'site');
+const SITE = path.join(import.meta.dirname, '..', 'theme', 'site');
 const css = fs.readFileSync(THEME_CSS, 'utf8');
 
 test('OKLab mixing matches CSS color-mix', () => {
@@ -89,7 +88,7 @@ test('_headers: CORS everywhere, theme files never cached stale, fonts immutable
 });
 
 test('early.js and theme-loader.js agree on storage keys and themes', () => {
-  const early = fs.readFileSync(path.join(__dirname, '..', 'theme', 'early.js'), 'utf8');
+  const early = fs.readFileSync(path.join(import.meta.dirname, '..', 'theme', 'early.js'), 'utf8');
   const loader = fs.readFileSync(path.join(SITE, 'theme-loader.js'), 'utf8');
   const themes = /THEMES = (\[[^\]]+\])/.exec(loader)[1];
   assert.ok(early.includes(themes.replace(/^\[|\]$/g, '')), 'same themes, same order');
@@ -124,6 +123,6 @@ test('numerals: any digits to 0123, ٠١٢٣ or ۰۱۲۳; the cycle order; the b
   m.cycleNumerals(); m.cycleNumerals(); m.cycleNumerals();
   assert.deepEqual(seen, ['arabic', 'persian', 'western']);
   assert.equal(store['i360.numerals'], 'western');
-  const built = fs.readFileSync(path.join(__dirname, '..', '..', 'public', 'md', 'index.html'), 'utf8');
+  const built = fs.readFileSync(path.join(import.meta.dirname, '..', '..', 'public', 'md', 'index.html'), 'utf8');
   for (const k of ['getNumerals', 'setNumerals', 'cycleNumerals', 'onNumeralsChange', 'toNumerals']) assert.ok(built.includes(k), k);
 });

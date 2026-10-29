@@ -1,15 +1,14 @@
 // End-to-end test of indexer/build-index.js with simulated services: Baserow,
 // Wikipedia, Wikisource, a web page, an archive.org book and a book of our own
 // in library/books/. Then searches the build like the CSE page will.
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } = require('node:fs');
-const { tmpdir } = require('node:os');
-const { join } = require('node:path');
-const idx = require('../indexer/build-index.js');
-const { search } = require('../indexer/search.js');
-const ex = require('../indexer/extract.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import * as idx from '../indexer/build-index.js';
+import { search } from '../indexer/search.js';
+import * as ex from '../indexer/extract.js';
 
 function reply(status, body, headers = {}, text) {
   const h = new Map(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
@@ -175,7 +174,7 @@ test('a source that never worked is listed as not indexed, the rest still builds
 });
 
 test('a translated Wikipedia link with no Arabic article is listed as not indexed, with the reason', async () => {
-  const ex2 = require('../indexer/extract.js');
+  const ex2 = ex;
   const state = { calls: [], md5: 'a1' };
   await assert.rejects(ex2.translatedWikiPages(services(state), { fetchUrl: 'https://en-wikipedia-org.translate.goog/wiki/NoArabic?_x_tr_tl=ar' }),
     /«NoArabic» has no ar version on wikipedia; not indexed/);

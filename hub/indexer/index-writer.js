@@ -8,12 +8,11 @@
 //
 // The trigram lists are built in several passes, each covering a slice of
 // the shards, to keep memory low; every pass reads the pages again.
-'use strict';
-const { mkdirSync, writeFileSync, statSync, readdirSync, rmSync } = require('node:fs');
-const { join } = require('node:path');
-const SearchCore = require('../src/search-core.js');
-const BookFormat = require('../src/book-format.js');
-const CseIndex = require('../src/cse-index.js');
+import { mkdirSync, writeFileSync, statSync, readdirSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import * as SearchCore from '../src/search-core.js';
+import * as BookFormat from '../src/book-format.js';
+import * as CseIndex from '../src/cse-index.js';
 
 // Cloudflare Workers static assets (Free plan): files per version, bytes per file.
 const MAX_FILES = 20000;
@@ -136,4 +135,4 @@ async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = C
   return { catalog, stats };
 }
 
-module.exports = { writeBuild, MAX_FILES, MAX_FILE_BYTES };
+export { writeBuild, MAX_FILES, MAX_FILE_BYTES };

@@ -1,10 +1,9 @@
-'use strict';
 // Just enough of a WOFF2 reader for the font update's safety check: which
 // characters a font has (cmap) and its version string (name ID 5).
 // WOFF2: https://www.w3.org/TR/WOFF2/ — one Brotli stream holds every table,
 // in directory order, back to back.
 
-const zlib = require('zlib');
+import zlib from 'zlib';
 
 const KNOWN_TAGS = ['cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2', 'post', 'cvt ', 'fpgm', 'glyf', 'loca', 'prep',
   'CFF ', 'VORG', 'EBDT', 'EBLC', 'gasp', 'hdmx', 'kern', 'LTSH', 'PCLT', 'VDMX', 'vhea', 'vmtx', 'BASE', 'GDEF', 'GPOS',
@@ -100,4 +99,4 @@ function versionString(buf) {
   return null;
 }
 
-module.exports = { readTables, codePoints, versionString };
+export { readTables, codePoints, versionString };

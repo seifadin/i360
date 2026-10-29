@@ -1,4 +1,3 @@
-'use strict';
 // i360 theme fonts: Amiri and Amiri Quran, taken from the @fontsource npm
 // packages (Google Fonts' own files, split by script).
 //
@@ -15,14 +14,14 @@
 // Safety check: a new file must have every character its current one has
 // (for Amiri Quran: every Quranic mark), or the update stops.
 
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const crypto = require('crypto');
-const { execFileSync } = require('child_process');
-const woff2 = require('./woff2.js');
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import crypto from 'crypto';
+import { execFileSync } from 'child_process';
+import * as woff2 from './woff2.js';
 
-const SITE = process.env.I360_THEME_SITE || path.join(__dirname, 'site');   // the variable: tests only
+const SITE = process.env.I360_THEME_SITE || path.join(import.meta.dirname, 'site');   // the variable: tests only
 const FONTS = path.join(SITE, 'fonts');
 const THEME_CSS = path.join(SITE, 'theme.css');
 const REGISTRY = process.env.I360_NPM_REGISTRY || 'https://registry.npmjs.org';
@@ -213,9 +212,9 @@ async function apply(infos) {
 
 const describe = (i) => `${i.family}: ${i.current || 'none'}${i.newer ? ` → ${i.latest} available` : ' (newest)'}`;
 
-module.exports = { PACKAGES, MARK, check, apply, currentVersions, older, fontsSection, rangesFromCss, sectionEntryFromDisk, describe, THEME_CSS, FONTS };
+export { PACKAGES, MARK, check, apply, currentVersions, older, fontsSection, rangesFromCss, sectionEntryFromDisk, describe, THEME_CSS, FONTS };
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   const arg = process.argv[2] || '';
   (async () => {
     if (arg === '--apply') {

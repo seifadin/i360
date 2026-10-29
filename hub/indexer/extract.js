@@ -5,9 +5,9 @@
 // with the Reader's own Markdown rules, then cut into paragraphs the way the
 // Reader's search does (one paragraph per text block, <br> as a line break),
 // so the index holds exactly the text the Reader shows.
-'use strict';
-const marked = require('marked');
-const BookFormat = require('../src/book-format.js');
+import * as marked from 'marked';
+import zlib from 'node:zlib';
+import * as BookFormat from '../src/book-format.js';
 
 const renderer = BookFormat.createRenderer(marked);
 
@@ -252,7 +252,6 @@ async function archiveFingerprint(fetchFn, src) {
 }
 
 async function archivePages(fetchFn, src) {
-  const zlib = require('node:zlib');
   const meta = await archiveMetadata(fetchFn, src.item);
   const files = Array.isArray(meta.files) ? meta.files : [];
   const has = (name) => files.some((f) => f.name === name);
@@ -307,4 +306,4 @@ async function webPages(fetchFn, src) {
   return { pages: [{ label: '', vol: null, paras: htmlToParas(body) }], title: title ? decodeEntities(title.trim()) : null, fingerprint: res.headers.get('etag') ? `etag:${res.headers.get('etag')}` : null };
 }
 
-module.exports = { htmlToParas, decodeEntities, bookPages, wikimediaPages, webPages, archivePages, archiveFingerprint, djvuXmlPages, pageLabels, translatedWiki, translatedWikiPages };
+export { htmlToParas, decodeEntities, bookPages, wikimediaPages, webPages, archivePages, archiveFingerprint, djvuXmlPages, pageLabels, translatedWiki, translatedWikiPages };

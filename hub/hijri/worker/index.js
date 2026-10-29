@@ -11,8 +11,8 @@
 //   GET /?check=1          run the scheduled check now (it asks Dar al-Ifta only when the
 //                          rules say so; useful right after a deploy)
 //   scheduled (every 30 minutes, see wrangler.jsonc): the check
-import calc from '../calc.js';
-import S from './source.js';
+import * as calc from '../calc.js';
+import * as S from './source.js';
 
 const ALLOW_ORIGIN = '*';
 const CORS = {

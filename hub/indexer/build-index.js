@@ -26,15 +26,14 @@
 // Text is gathered in indexer/work/ during a run and removed afterwards;
 // indexer/dist/ and indexer/work/ are git-ignored.
 // Needs BASEROW_KEY in .env, like the inventory.
-'use strict';
-const { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, copyFileSync, rmSync, appendFileSync } = require('node:fs');
-const { join } = require('node:path');
-const inventory = require('./inventory.js');
-const extract = require('./extract.js');
-const { writeBuild } = require('./index-writer.js');
-const BookFormat = require('../src/book-format.js');
-const SearchCore = require('../src/search-core.js');
-const CseIndex = require('../src/cse-index.js');
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, copyFileSync, rmSync, appendFileSync } from 'node:fs';
+import { join } from 'node:path';
+import * as inventory from './inventory.js';
+import * as extract from './extract.js';
+import { writeBuild } from './index-writer.js';
+import * as BookFormat from '../src/book-format.js';
+import * as SearchCore from '../src/search-core.js';
+import * as CseIndex from '../src/cse-index.js';
 
 // Bump when the way text is extracted changes: every cached text is redone.
 const EXTRACTOR_VERSION = 1;
@@ -187,7 +186,7 @@ async function mapLimit(items, limit, fn) {
 }
 
 async function run({
-  fetchFn = fetch, key, table = inventory.DEFAULT_TABLE, rootDir = __dirname,
+  fetchFn = fetch, key, table = inventory.DEFAULT_TABLE, rootDir = import.meta.dirname,
   refresh = [], archivePages = extract.archivePages, passes = 8, log = console.log, buildId,
   check = 'full', previous = 'lib'
 }) {
@@ -322,9 +321,9 @@ async function runIn({ fetchFn, key, table, refresh, archivePages, passes, log, 
   return { catalog, report, changed: true };
 }
 
-module.exports = { run, EXTRACTOR_VERSION, cacheKey, catalogSignature, plannedSignature, LIB_HEADERS };
+export { run, EXTRACTOR_VERSION, cacheKey, catalogSignature, plannedSignature, LIB_HEADERS };
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   const args = process.argv.slice(2);
   const refresh = [];
   let check = 'full', previous = 'lib';

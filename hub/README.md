@@ -23,9 +23,9 @@ is deployed.
 
 ## Layout
 ```
-src/reader.src.html   the Reader        → ../public/md/index.html
-src/cse.src.html      the i360 CSE      → ../public/cse/index.html
-src/day.src.html        Daily Reflection «التأمل اليومي» → ../public/day/index.html
+src/reader.src.html + src/reader/main.js   the Reader        → ../public/md/index.html
+src/cse.src.html + src/cse/main.js         the i360 CSE      → ../public/cse/index.html
+src/day.src.html + src/day/main.js         Daily Reflection «التأمل اليومي» → ../public/day/index.html
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites
 ```
@@ -37,6 +37,9 @@ Link to a page: add `#p=45` (or `#p=2:45` for volume 2, page 45).
 npm test && npm run build
 ```
 `npm test` runs ESLint first (`eslint.config.js`; `npm run lint` alone), then the tests.
+Every `.js` here is an ES module (`"type": "module"`, like the app). The build bundles each
+page's `main.js` with what it imports (shared files, marked, adhan, the theme loader) into
+one inline script, with esbuild (pinned).
 Then commit the app's `public/md|cse|day/index.html`; they reach users with the app's web + OTA release.
 
 Never edit the built pages in `../public/` by hand: edit `src/`, then build. The pages'
@@ -56,7 +59,7 @@ theme/fonts.js, woff2.js     font check and update (from the @fontsource npm pac
 theme/wrangler.jsonc         the theme Worker (files only)
 ```
 - **The pages** (Daily Reflection, Reader, CSE) build in the built-in colours, `early.js`
-  and the loader (`window.i360Theme`), so the theme button also works offline. New colours
+  and the loader (bundled into each page's script), so the theme button also works offline. New colours
   and fonts on the theme site reach them without a rebuild; a change to the loader needs one.
   One theme choice is shared by all of them.
 - **Publishing:** the i360 pre-push hook, on every push to `vite` that changes `hub/theme/`

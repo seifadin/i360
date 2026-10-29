@@ -14,11 +14,10 @@
 //
 // A zone whose city Open-Meteo can't match keeps its English name in every
 // language (listed at the end of --names). The time-zone database is public domain.
-'use strict';
-const { readFileSync, writeFileSync, existsSync } = require('node:fs');
-const { join } = require('node:path');
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
-const OUT = join(__dirname, '..', 'src', 'day-cities.json');
+const OUT = join(import.meta.dirname, '..', 'src', 'day-cities.json');
 const ZONEINFO = '/usr/share/zoneinfo';
 const LANGS = ['en', 'ar', 'tr', 'id', 'ur'];
 const SEARCH = 'https://geocoding-api.open-meteo.com/v1/search';
