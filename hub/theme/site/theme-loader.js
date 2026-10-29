@@ -25,6 +25,39 @@ export const NUMERALS_KEY = 'i360.numerals';
 export const CHOICE_KEY = 'i360.theme';
 export const CACHE_KEY = 'i360.theme.css';
 export const CSS_URL = new URL('theme.css', import.meta.url).href;
+
+// The two buttons' text, the same on every i360 page and in the i360إ app (claude/i360-hub.md §3):
+// the numerals button shows a sample of the choice (4–6, because 1–3 look the same in ٠١٢٣ and
+// ۰۱۲۳), and each button's tooltip names the current choice and what a click switches to, in
+// every language an i360 page offers. themeLabel() / numeralsLabel(): Arabic when a language has none.
+export const NUMERALS_SAMPLE = Object.freeze({ western: '456', arabic: '٤٥٦', persian: '۴۵۶' });
+export const LABELS = Object.freeze({
+  ar: {
+    theme: { system: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', light: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', sepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', dark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
+    numerals: { western: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)', arabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)', persian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)' }
+  },
+  en: {
+    theme: { system: 'Theme: follows this device (click for light)', light: 'Theme: light (click for sepia)', sepia: 'Theme: sepia (click for dark)', dark: 'Theme: dark (click to follow this device)' },
+    numerals: { western: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)', arabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)', persian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)' }
+  },
+  tr: {
+    theme: { system: 'Tema: cihaza göre (açık için tıklayın)', light: 'Tema: açık (sepya için tıklayın)', sepia: 'Tema: sepya (koyu için tıklayın)', dark: 'Tema: koyu (cihaza göre için tıklayın)' },
+    numerals: { western: 'Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)', arabic: 'Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)', persian: 'Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)' }
+  },
+  id: {
+    theme: { system: 'Tema: mengikuti perangkat (klik untuk terang)', light: 'Tema: terang (klik untuk sepia)', sepia: 'Tema: sepia (klik untuk gelap)', dark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
+    numerals: { western: 'Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)', arabic: 'Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)', persian: 'Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)' }
+  },
+  ur: {
+    theme: { system: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', light: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', sepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', dark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' },
+    numerals: { western: 'اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)', arabic: 'اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)', persian: 'اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)' }
+  }
+});
+const labelsFor = (lang) => LABELS[lang] || LABELS.ar;
+/** The theme button's tooltip for a choice (system, light, sepia, dark). */
+export function themeLabel(choice, lang = 'ar') { return labelsFor(lang).theme[choice] || ''; }
+/** The numerals button's tooltip for a choice (western, arabic, persian). */
+export function numeralsLabel(numerals, lang = 'ar') { return labelsFor(lang).numerals[numerals] || ''; }
 const STYLE_ID = 'i360-theme';
 const MAX_CSS = 256 * 1024;
 

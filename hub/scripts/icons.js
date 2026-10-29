@@ -1,6 +1,6 @@
 // i360 icons: Lucide (lucide.dev, ISC licence), from the lucide-static npm
-// package (version fixed by package-lock.json). The pages carry each icon as inline SVG,
-// tagged with its Lucide name:
+// package (version fixed by package-lock.json). The pages carry each icon as inline SVG
+// (in their HTML, or as text in their scripts), tagged with its Lucide name:
 //
 //   <svg data-lucide="search" viewBox="0 0 24 24">…drawing…</svg>
 //
@@ -19,7 +19,11 @@ import fs from 'fs';
 import path from 'path';
 
 const ROOT = path.join(import.meta.dirname, '..');
-const PAGES = ['src/cse.src.html', 'src/reader.src.html', 'src/day.src.html'];
+// Every file of the pages: their HTML and every script they bundle (src/, all of it).
+const PAGES = fs.readdirSync(path.join(ROOT, 'src'), { recursive: true })
+  .filter((f) => /\.(html|js)$/.test(f))
+  .map((f) => path.posix.join('src', f.split(path.sep).join('/')))
+  .sort();
 const SVG = /<svg\b([^>]*)>([\s\S]*?)<\/svg>/g;
 const NAME = /\sdata-lucide="([a-z0-9-]+)"/;
 const FONT_AWESOME = /font-?awesome|\bfa-(solid|regular|brands|[a-z]+-[a-z])|\bfa[srb]? fa-/i;

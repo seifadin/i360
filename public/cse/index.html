@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-fupIjzYIo7p/TeIxaVwAWYNUjYnk/Dy8N0yVGHw0sp0='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-p38dE4e5MjfoltjeVwHpjMkM2CAeg81uESz32QrQQts='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -410,6 +410,36 @@
   var CHOICE_KEY = "i360.theme";
   var CACHE_KEY = "i360.theme.css";
   var CSS_URL = new URL("theme.css", "https://theme.i36o.workers.dev/theme-loader.js").href;
+  var NUMERALS_SAMPLE = Object.freeze({ western: "456", arabic: "٤٥٦", persian: "۴۵۶" });
+  var LABELS = Object.freeze({
+    ar: {
+      theme: { system: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)", light: "المظهر: فاتح (انقر للتبديل إلى ورقي)", sepia: "المظهر: ورقي (انقر للتبديل إلى داكن)", dark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)" },
+      numerals: { western: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)", arabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)", persian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)" }
+    },
+    en: {
+      theme: { system: "Theme: follows this device (click for light)", light: "Theme: light (click for sepia)", sepia: "Theme: sepia (click for dark)", dark: "Theme: dark (click to follow this device)" },
+      numerals: { western: "Numerals: Western 456 (click for Eastern Arabic ٤٥٦)", arabic: "Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)", persian: "Numerals: Persian/Urdu ۴۵۶ (click for Western 456)" }
+    },
+    tr: {
+      theme: { system: "Tema: cihaza göre (açık için tıklayın)", light: "Tema: açık (sepya için tıklayın)", sepia: "Tema: sepya (koyu için tıklayın)", dark: "Tema: koyu (cihaza göre için tıklayın)" },
+      numerals: { western: "Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)", arabic: "Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)", persian: "Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)" }
+    },
+    id: {
+      theme: { system: "Tema: mengikuti perangkat (klik untuk terang)", light: "Tema: terang (klik untuk sepia)", sepia: "Tema: sepia (klik untuk gelap)", dark: "Tema: gelap (klik untuk mengikuti perangkat)" },
+      numerals: { western: "Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)", arabic: "Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)", persian: "Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)" }
+    },
+    ur: {
+      theme: { system: "تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)", light: "تھیم: روشن (سیپیا کے لیے کلک کریں)", sepia: "تھیم: سیپیا (تاریک کے لیے کلک کریں)", dark: "تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)" },
+      numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
+    }
+  });
+  var labelsFor = (lang) => LABELS[lang] || LABELS.ar;
+  function themeLabel(choice, lang = "ar") {
+    return labelsFor(lang).theme[choice] || "";
+  }
+  function numeralsLabel(numerals, lang = "ar") {
+    return labelsFor(lang).numerals[numerals] || "";
+  }
   var STYLE_ID = "i360-theme";
   var MAX_CSS = 256 * 1024;
   var root = document.documentElement;
@@ -973,11 +1003,55 @@
     return s ? `?${s}` : "";
   }
 
+  // src/page-chrome.js
+  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  function setupClose(button, stepsBack = () => 1) {
+    if (!IN_APP) return;
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      let fromApp = false;
+      try {
+        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+      } catch {
+      }
+      if (fromApp) history.go(-stepsBack());
+      else window.location.replace("/index.html");
+    });
+  }
+  var THEME_ICONS = Object.freeze({
+    system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+    light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+    dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
+  });
+
+  // src/locales.js
+  var CSE = {
+    ar: {
+      tooShort: (n) => `اكتب ${n} أحرف على الأقل.`,
+      loadingIndex: "جارٍ تحميل الفهرس…",
+      searching: "جارٍ البحث…",
+      noResults: "لا نتائج.",
+      noMatches: "لا توجد نتائج مطابقة",
+      loadError: "تعذّر تحميل الفهرس. تحقق من الاتصال ثم أعد المحاولة.",
+      searchError: "تعذّر إكمال البحث. تحقق من الاتصال ثم أعد المحاولة.",
+      retry: "إعادة المحاولة",
+      summary: (pages, groups, exact) => `الصفحات: ${exact ? "" : "≈ "}${pages} · المجموعات: ${groups}`,
+      approxTitle: "عدد تقريبي للصفحات؛ يصبح دقيقًا بعد فحص المجموعة",
+      exactTitle: "عدد الصفحات المطابقة",
+      more: "المزيد",
+      checking: "جارٍ الفحص…",
+      spots: (n) => `مواضع: ${n}`,
+      openTitle: "فتح في المصدر",
+      openReader: "فتح في القارئ",
+      about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
+    }
+  };
+
   // src/cse/main.js
   var DEFAULT_DATA = "https://lib.i36o.workers.dev/";
   var BRAND = "⁦i360‎إ⁩";
   var CONFIRM_BATCH = 8;
-  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
   var $ = (id) => document.getElementById(id);
   var form = $("search-form");
   var input = $("q");
@@ -989,38 +1063,7 @@
   var resultsEl = $("results");
   var aboutEl = $("about");
   var barEl = $("bar-btns");
-  var ICON = {
-    system: '<svg data-lucide="monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
-    sun: '<svg data-lucide="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
-    moon: '<svg data-lucide="moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
-  };
-  var T = {
-    themeSystem: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)",
-    themeLight: "المظهر: فاتح (انقر للتبديل إلى ورقي)",
-    themeSepia: "المظهر: ورقي (انقر للتبديل إلى داكن)",
-    themeDark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)",
-    numeralsWestern: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)",
-    numeralsArabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)",
-    numeralsPersian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)",
-    tooShort: (n) => `اكتب ${n} أحرف على الأقل.`,
-    loadingIndex: "جارٍ تحميل الفهرس…",
-    searching: "جارٍ البحث…",
-    noResults: "لا نتائج.",
-    noMatches: "لا توجد نتائج مطابقة",
-    loadError: "تعذّر تحميل الفهرس. تحقق من الاتصال ثم أعد المحاولة.",
-    searchError: "تعذّر إكمال البحث. تحقق من الاتصال ثم أعد المحاولة.",
-    retry: "إعادة المحاولة",
-    summary: (pages, groups, exact) => `الصفحات: ${exact ? "" : "≈ "}${pages} · المجموعات: ${groups}`,
-    approxTitle: "عدد تقريبي للصفحات؛ يصبح دقيقًا بعد فحص المجموعة",
-    exactTitle: "عدد الصفحات المطابقة",
-    more: "المزيد",
-    checking: "جارٍ الفحص…",
-    spots: (n) => `مواضع: ${n}`,
-    openTitle: "فتح في المصدر",
-    openReader: "فتح في القارئ",
-    about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
-  };
+  var T = CSE.ar;
   var state = {
     theme: "system",
     numerals: "western",
@@ -1036,8 +1079,8 @@
   var fmt = (s) => toNumerals(s, state.numerals);
   var fmtNum = (n) => fmt(Number(n).toLocaleString("en-US"));
   function applyNumerals2() {
-    btnNumerals.textContent = { western: "456", arabic: "٤٥٦", persian: "۴۵۶" }[state.numerals];
-    btnNumerals.title = { western: T.numeralsWestern, arabic: T.numeralsArabic, persian: T.numeralsPersian }[state.numerals];
+    btnNumerals.textContent = NUMERALS_SAMPLE[state.numerals];
+    btnNumerals.title = numeralsLabel(state.numerals);
     btnNumerals.setAttribute("aria-label", btnNumerals.title);
     const conv = fmt;
     for (const root2 of [document.querySelector(".brand"), document.querySelector("main")]) {
@@ -1050,8 +1093,8 @@
     }
   }
   function applyTheme() {
-    btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
-    btnTheme.title = { system: T.themeSystem, light: T.themeLight, sepia: T.themeSepia, dark: T.themeDark }[state.theme];
+    btnTheme.innerHTML = THEME_ICONS[state.theme];
+    btnTheme.title = themeLabel(state.theme);
     btnTheme.setAttribute("aria-label", btnTheme.title);
   }
   onChange(({ choice }) => {
@@ -1467,19 +1510,7 @@
     if (t === document.body && ["PageDown", "PageUp", "Home", "End", "ArrowDown", "ArrowUp", " "].includes(e.key)) $("scroller").focus({ preventScroll: true });
   });
   function init2() {
-    if (IN_APP) {
-      const x = $("btn-close");
-      x.hidden = false;
-      x.addEventListener("click", () => {
-        let fromApp = false;
-        try {
-          fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
-        } catch {
-        }
-        if (fromApp) history.go(-(stepsIn() + 1));
-        else window.location.replace("/index.html");
-      });
-    }
+    setupClose($("btn-close"), () => stepsIn() + 1);
     state.theme = getChoice();
     init();
     state.numerals = getNumerals();

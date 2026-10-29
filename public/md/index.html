@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-q3Mw6TVpTf889tuLNCfTlHo6fQDoHmVXck2t8l++X6k='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-W5wK+hoEd/J06oBRnuCOUMa/HHKASaz2rxCnrxTFWbY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -2374,6 +2374,36 @@ Please report this to https://github.com/markedjs/marked.`, e) {
   var CHOICE_KEY = "i360.theme";
   var CACHE_KEY = "i360.theme.css";
   var CSS_URL = new URL("theme.css", "https://theme.i36o.workers.dev/theme-loader.js").href;
+  var NUMERALS_SAMPLE = Object.freeze({ western: "456", arabic: "٤٥٦", persian: "۴۵۶" });
+  var LABELS = Object.freeze({
+    ar: {
+      theme: { system: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)", light: "المظهر: فاتح (انقر للتبديل إلى ورقي)", sepia: "المظهر: ورقي (انقر للتبديل إلى داكن)", dark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)" },
+      numerals: { western: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)", arabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)", persian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)" }
+    },
+    en: {
+      theme: { system: "Theme: follows this device (click for light)", light: "Theme: light (click for sepia)", sepia: "Theme: sepia (click for dark)", dark: "Theme: dark (click to follow this device)" },
+      numerals: { western: "Numerals: Western 456 (click for Eastern Arabic ٤٥٦)", arabic: "Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)", persian: "Numerals: Persian/Urdu ۴۵۶ (click for Western 456)" }
+    },
+    tr: {
+      theme: { system: "Tema: cihaza göre (açık için tıklayın)", light: "Tema: açık (sepya için tıklayın)", sepia: "Tema: sepya (koyu için tıklayın)", dark: "Tema: koyu (cihaza göre için tıklayın)" },
+      numerals: { western: "Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)", arabic: "Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)", persian: "Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)" }
+    },
+    id: {
+      theme: { system: "Tema: mengikuti perangkat (klik untuk terang)", light: "Tema: terang (klik untuk sepia)", sepia: "Tema: sepia (klik untuk gelap)", dark: "Tema: gelap (klik untuk mengikuti perangkat)" },
+      numerals: { western: "Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)", arabic: "Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)", persian: "Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)" }
+    },
+    ur: {
+      theme: { system: "تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)", light: "تھیم: روشن (سیپیا کے لیے کلک کریں)", sepia: "تھیم: سیپیا (تاریک کے لیے کلک کریں)", dark: "تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)" },
+      numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
+    }
+  });
+  var labelsFor = (lang2) => LABELS[lang2] || LABELS.ar;
+  function themeLabel(choice, lang2 = "ar") {
+    return labelsFor(lang2).theme[choice] || "";
+  }
+  function numeralsLabel(numerals, lang2 = "ar") {
+    return labelsFor(lang2).numerals[numerals] || "";
+  }
   var STYLE_ID = "i360-theme";
   var MAX_CSS = 256 * 1024;
   var root = document.documentElement;
@@ -2925,19 +2955,44 @@ ${body}`;
     return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join("\n\n") };
   }
 
-  // src/reader/main.js
-  var ICON = {
-    stepForward: `<svg data-lucide="step-forward" viewBox="0 0 24 24"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"></path><path d="M3 4v16"></path></svg>`,
-    stepBack: `<svg data-lucide="step-back" viewBox="0 0 24 24"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"></path><path d="M21 20V4"></path></svg>`,
-    globeX: `<svg data-lucide="globe-x" viewBox="0 0 24 24"><path d="m16 3 5 5"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path><path d="m21 3-5 5"></path></svg>`,
-    globeCheck: `<svg data-lucide="globe-check" viewBox="0 0 24 24"><path d="m15 6 2 2 4-4"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path></svg>`,
-    sun: `<svg data-lucide="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`,
-    sepia: `<svg data-lucide="coffee" viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>`,
-    moon: `<svg data-lucide="moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>`,
-    system: `<svg data-lucide="monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>`,
-    trash: `<svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`
-  };
-  var TRANSLATIONS = {
+  // src/page-chrome.js
+  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  function setupClose(button, stepsBack = () => 1) {
+    if (!IN_APP) return;
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      let fromApp = false;
+      try {
+        fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+      } catch {
+      }
+      if (fromApp) history.go(-stepsBack());
+      else window.location.replace("/index.html");
+    });
+  }
+  var THEME_ICONS = Object.freeze({
+    system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+    light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
+    dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
+  });
+
+  // src/frame.js
+  function oncePerFrame(fn2) {
+    let queued = false;
+    return () => {
+      if (queued) return false;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        fn2();
+      });
+      return true;
+    };
+  }
+
+  // src/locales.js
+  var READER = {
     ar: {
       appTitle: "قارئ الماركداون",
       zoomIn: "تكبير (Ctrl +)",
@@ -2951,10 +3006,6 @@ ${body}`;
       nextPage: (key) => `الصفحة التالية (${key})`,
       dirRTL: "الاتجاه الحالي: من اليمين لليسار (انقر للتغيير إلى LTR)",
       dirLTR: "الاتجاه الحالي: من اليسار لليمين (انقر للتغيير إلى RTL)",
-      themeSystem: "المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)",
-      themeLight: "المظهر: فاتح (انقر للتبديل إلى ورقي)",
-      themeSepia: "المظهر: ورقي (انقر للتبديل إلى داكن)",
-      themeDark: "المظهر: داكن (انقر للتبديل إلى حسب الجهاز)",
       scan: "الصفحة الأصلية: صورة هذه الصفحة على archive.org",
       bookmarkAdd: "إضافة علامة لهذه الصفحة",
       bookmarkRemove: "إزالة علامة هذه الصفحة",
@@ -3006,10 +3057,7 @@ ${body}`;
       loadError: (msg) => `تعذّر تحميل الملف: ${msg}`,
       readError: "تعذّر قراءة الملف.",
       emptyHint: "لا يوجد ملف مفتوح. اضغط «فتح ملف» لاختيار كتاب.",
-      noResults: "0 من 0",
-      numeralsWestern: "الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)",
-      numeralsArabic: "الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)",
-      numeralsPersian: "الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)"
+      noResults: "0 من 0"
     },
     en: {
       appTitle: "Markdown Reader",
@@ -3024,10 +3072,6 @@ ${body}`;
       nextPage: (key) => `Next page (${key})`,
       dirRTL: "Current Direction: RTL (Click for LTR)",
       dirLTR: "Current Direction: LTR (Click for RTL)",
-      themeSystem: "Theme: follows this device (click for light)",
-      themeLight: "Theme: light (click for sepia)",
-      themeSepia: "Theme: sepia (click for dark)",
-      themeDark: "Theme: dark (click to follow this device)",
       scan: "Original page: the scan of this page on archive.org",
       bookmarkAdd: "Bookmark this page",
       bookmarkRemove: "Remove this page’s bookmark",
@@ -3079,11 +3123,17 @@ ${body}`;
       loadError: (msg) => `Could not load the file: ${msg}`,
       readError: "Could not read the file.",
       emptyHint: "No file open. Press “Open file” to choose a book.",
-      noResults: "0 of 0",
-      numeralsWestern: "Numerals: Western 456 (click for Eastern Arabic ٤٥٦)",
-      numeralsArabic: "Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)",
-      numeralsPersian: "Numerals: Persian/Urdu ۴۵۶ (click for Western 456)"
+      noResults: "0 of 0"
     }
+  };
+
+  // src/reader/main.js
+  var ICON = {
+    stepForward: `<svg data-lucide="step-forward" viewBox="0 0 24 24"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"></path><path d="M3 4v16"></path></svg>`,
+    stepBack: `<svg data-lucide="step-back" viewBox="0 0 24 24"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"></path><path d="M21 20V4"></path></svg>`,
+    globeX: `<svg data-lucide="globe-x" viewBox="0 0 24 24"><path d="m16 3 5 5"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path><path d="m21 3-5 5"></path></svg>`,
+    globeCheck: `<svg data-lucide="globe-check" viewBox="0 0 24 24"><path d="m15 6 2 2 4-4"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path></svg>`,
+    trash: `<svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`
   };
   var QURAN_OPEN = "﴿";
   var QURAN_CLOSE = "﴾";
@@ -3207,8 +3257,8 @@ ${body}`;
   var missingPagesBanner = $2("missing-pages-banner");
   var missingPagesText = $2("missing-pages-text");
   var emptyState = $2("empty-state");
-  var t = () => TRANSLATIONS[state.dir === "rtl" ? "ar" : "en"];
-  var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  var lang = () => state.dir === "rtl" ? "ar" : "en";
+  var t = () => READER[lang()];
   var CONNECTION_CHECK_MS = 3e4;
   var CONNECTION_TIMEOUT_MS = 8e3;
   var online = navigator.onLine !== false;
@@ -3632,15 +3682,7 @@ ${body}`;
   }
   var nearFrom = 0;
   var nearTo = -1;
-  var nearQueued = false;
-  function queueNear() {
-    if (nearQueued) return;
-    nearQueued = true;
-    requestAnimationFrame(() => {
-      nearQueued = false;
-      updateNear();
-    });
-  }
+  var queueNear = oncePerFrame(() => updateNear());
   function updateNear() {
     const sheets = state.sheets;
     if (!sheets.length) {
@@ -4046,10 +4088,10 @@ ${body}`;
     setTitle(btnNavRight, isRtl ? tr.prevPage("→") : tr.nextPage("→"));
     setTitle(btnDirToggle, isRtl ? tr.dirRTL : tr.dirLTR);
     btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
-    btnNumerals.textContent = { western: "456", arabic: "٤٥٦", persian: "۴۵۶" }[state.numerals];
-    setTitle(btnNumerals, { western: tr.numeralsWestern, arabic: tr.numeralsArabic, persian: tr.numeralsPersian }[state.numerals]);
-    btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
-    setTitle(btnTheme, { system: tr.themeSystem, light: tr.themeLight, sepia: tr.themeSepia, dark: tr.themeDark }[state.theme]);
+    btnNumerals.textContent = NUMERALS_SAMPLE[state.numerals];
+    setTitle(btnNumerals, numeralsLabel(state.numerals, lang()));
+    btnTheme.innerHTML = THEME_ICONS[state.theme];
+    setTitle(btnTheme, themeLabel(state.theme, lang()));
     setTitle(btnScan, tr.scan);
     setTitle(btnReading, tr.reading);
     setTitle(btnExitReading, tr.exitReading);
@@ -4216,18 +4258,15 @@ ${body}`;
   btnZoomOut.addEventListener("click", () => setZoom(state.zoom - ZOOM_STEP));
   btnFitWidth.addEventListener("click", fitWidth);
   btnFitPage.addEventListener("click", fitPage);
-  var resizeQueued = false;
-  if (typeof ResizeObserver === "function") new ResizeObserver(queueNear).observe(pagesWrapper);
+  var queueResize = oncePerFrame(() => {
+    const anchor = captureAnchor();
+    updatePageWidth();
+    restoreAnchor(anchor);
+  });
+  if (typeof ResizeObserver === "function") new ResizeObserver(() => queueNear()).observe(pagesWrapper);
   window.addEventListener("resize", () => {
     queueNear();
-    if (resizeQueued) return;
-    resizeQueued = true;
-    requestAnimationFrame(() => {
-      resizeQueued = false;
-      const anchor = captureAnchor();
-      updatePageWidth();
-      restoreAnchor(anchor);
-    });
+    queueResize();
   });
   function findCurrentIdx() {
     const sheets = state.sheets;
@@ -4312,15 +4351,12 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
     if (state.multiVolume && p.vol != null && document.activeElement !== volSelect) volSelect.value = p.vol;
     updateBookmarkButton();
   }
-  var scrollQueued = false;
+  var queueScroll = oncePerFrame(() => {
+    updateNear();
+    updateCounter(false);
+  });
   viewerContainer.addEventListener("scroll", () => {
-    if (scrollQueued) return;
-    scrollQueued = true;
-    requestAnimationFrame(() => {
-      scrollQueued = false;
-      updateNear();
-      updateCounter(false);
-    });
+    if (!queueScroll()) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
   }, { passive: true });
@@ -4688,15 +4724,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
       if (toolbarFits()) return;
     }
   }
-  var fitQueued = false;
-  function queueFitToolbar() {
-    if (fitQueued) return;
-    fitQueued = true;
-    requestAnimationFrame(() => {
-      fitQueued = false;
-      fitToolbar();
-    });
-  }
+  var queueFitToolbar = oncePerFrame(() => fitToolbar());
   function closeMore() {
     moreMenu.hidden = true;
     btnMore.setAttribute("aria-expanded", "false");
@@ -5040,18 +5068,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
   });
   async function initApp() {
     void checkConnection();
-    if (IN_APP) {
-      btnClose.hidden = false;
-      btnClose.addEventListener("click", () => {
-        let fromApp = false;
-        try {
-          fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
-        } catch {
-        }
-        if (fromApp) history.back();
-        else window.location.replace("/index.html");
-      });
-    }
+    setupClose(btnClose);
     state.numerals = getNumerals();
     state.theme = getChoice();
     init();

@@ -27,21 +27,9 @@ const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 
 // The shared theme's two buttons (2026-10-21, §15t) — the same choices, labels
 // and icons as the hub pages (claude/i360-hub.md §3), stored per site, so the
-// app and its merged pages share them.
+// app and its merged pages share them. Their text (the numerals sample and both
+// tooltips) comes from the shared theme loader, like the hub pages'.
 const THEME_ICON: Record<ThemeChoice, typeof Monitor> = { system: Monitor, light: Sun, sepia: Coffee, dark: Moon }
-const THEME_LABEL: Record<ThemeChoice, string> = {
-  system: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
-  light: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
-  sepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
-  dark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
-}
-// 1–3 look the same in the two eastern sets, so the labels use 456.
-const NUMERALS_TEXT: Record<Numerals, string> = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' }
-const NUMERALS_LABEL: Record<Numerals, string> = {
-  western: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
-  arabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
-  persian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
-}
 
 // The current choices, kept in step with changes made here, in another tab, or by the device.
 function useSharedChoices() {
@@ -254,19 +242,19 @@ export default function OSRow() {
         <button
           onClick={() => { i360Theme.cycle() }}
           className="text-brand-blue"
-          aria-label={THEME_LABEL[choice]}
-          title={THEME_LABEL[choice]}
+          aria-label={i360Theme.themeLabel(choice)}
+          title={i360Theme.themeLabel(choice)}
         >
           <ThemeIcon size={18} />
         </button>
         <button
           onClick={() => { i360Theme.cycleNumerals() }}
           className="min-w-[2.25rem] text-base font-bold leading-none text-brand-blue"
-          aria-label={NUMERALS_LABEL[numerals]}
-          title={NUMERALS_LABEL[numerals]}
+          aria-label={i360Theme.numeralsLabel(numerals)}
+          title={i360Theme.numeralsLabel(numerals)}
           data-i360-digits="keep"
         >
-          {NUMERALS_TEXT[numerals]}
+          {i360Theme.NUMERALS_SAMPLE[numerals]}
         </button>
       </div>
 

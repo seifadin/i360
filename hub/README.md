@@ -26,6 +26,9 @@ is deployed.
 src/reader.src.html + src/reader/main.js   the Reader        → ../public/md/index.html
 src/cse.src.html + src/cse/main.js         the i360 CSE      → ../public/cse/index.html
 src/day.src.html + src/day/main.js         Daily Reflection «التأمل اليومي» → ../public/day/index.html
+src/locales.js        every page's interface text, one section per page, all its languages
+src/page-chrome.js    shared by the pages: in-app check, the ✕ back to the app, theme icons
+src/frame.js          oncePerFrame(): layout work at most once per frame
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites
 ```

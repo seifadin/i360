@@ -6,6 +6,9 @@ import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as BookFormat from '../book-format.js';
 import * as SearchCore from '../search-core.js';
 import * as LibCopy from '../lib-copy.js';
+import { IN_APP, setupClose, THEME_ICONS } from '../page-chrome.js';
+import { oncePerFrame } from '../frame.js';
+import { READER as LOCALES } from '../locales.js';
 
 /* ================================================================
    Icons and UI text
@@ -15,161 +18,9 @@ const ICON = {
   stepBack: `<svg data-lucide="step-back" viewBox="0 0 24 24"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"></path><path d="M21 20V4"></path></svg>`,
   globeX: `<svg data-lucide="globe-x" viewBox="0 0 24 24"><path d="m16 3 5 5"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path><path d="m21 3-5 5"></path></svg>`,
   globeCheck: `<svg data-lucide="globe-check" viewBox="0 0 24 24"><path d="m15 6 2 2 4-4"></path><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"></path></svg>`,
-  sun: `<svg data-lucide="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`,
-  sepia: `<svg data-lucide="coffee" viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>`,
-  moon: `<svg data-lucide="moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>`,
-  system: `<svg data-lucide="monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>`,
   trash: `<svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`
 };
 
-const TRANSLATIONS = {
-  ar: {
-    appTitle: 'قارئ الماركداون',
-    zoomIn: 'تكبير (Ctrl +)',
-    zoomOut: 'تصغير (Ctrl -)',
-    fitWidth: 'ملاءمة العرض',
-    fitPage: 'ملاءمة الصفحة',
-    textSmaller: 'تصغير الخط',
-    textLarger: 'تكبير الخط',
-    textLetter: 'أ',
-    prevPage: (key) => `الصفحة السابقة (${key})`,
-    nextPage: (key) => `الصفحة التالية (${key})`,
-    dirRTL: 'الاتجاه الحالي: من اليمين لليسار (انقر للتغيير إلى LTR)',
-    dirLTR: 'الاتجاه الحالي: من اليسار لليمين (انقر للتغيير إلى RTL)',
-    themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
-    themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
-    themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
-    themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
-    scan: 'الصفحة الأصلية: صورة هذه الصفحة على archive.org',
-    bookmarkAdd: 'إضافة علامة لهذه الصفحة',
-    bookmarkRemove: 'إزالة علامة هذه الصفحة',
-    bookmarkAdded: 'أُضيفت العلامة',
-    bookmarkRemoved: 'أُزيلت العلامة',
-    reading: 'وضع القراءة',
-    exitReading: 'الخروج من وضع القراءة (Esc)',
-    more: 'المزيد',
-    panel: 'المحتويات والعلامات',
-    contentsTab: 'المحتويات',
-    bookmarksTab: 'العلامات',
-    noHeadings: 'لا توجد عناوين في هذا الكتاب.',
-    noBookmarks: 'لا توجد علامات بعد. استخدم زر العلامة لحفظ الصفحة الحالية.',
-    removeBookmark: 'حذف العلامة',
-    closePanel: 'إغلاق',
-    copyLink: 'نسخ رابط هذه الصفحة',
-    linkCopied: 'نُسخ الرابط',
-    copyFailed: 'تعذّر النسخ',
-    volume: 'الجزء',
-    search: 'بحث في المستند (Ctrl+F)',
-    searchInput: 'بحث في النص...',
-    prevMatch: 'النتيجة السابقة (Shift+Enter)',
-    nextMatch: 'النتيجة التالية (Enter)',
-    showResults: 'قائمة النتائج',
-    closeSearch: 'إغلاق البحث (Esc)',
-    matchDiacritics: 'مطابقة التشكيل',
-    wholeWord: 'كلمة كاملة',
-    moreResults: (n) => `و${n} نتيجة أخرى`,
-    openFile: 'فتح ملف',
-    downloading: 'جارٍ تحميل',
-    building: 'جارٍ عرض',
-    searchWait: 'يُتاح البحث بعد اكتمال عرض الكتاب',
-    online: 'متصل بالإنترنت',
-    offline: 'غير متصل',
-    barTitle: 'القارئ',
-    close: 'إغلاق',
-    notInLibrary: 'هذا الكتاب ليس في مكتبة i360، فلا يمكن فتحه هنا.',
-    unverified: 'تعذّر التحقق من الكتاب في مكتبة i360 — تحقّق من الاتصال ثم أعد المحاولة.',
-    ofLabel: 'من',
-    pageInput: 'رقم الصفحة المطبوع — للكتب متعددة الأجزاء: الجزء:الصفحة — وللموضع في الملف: (12)',
-    position: (i, n) => `الموضع في الملف: ${i} من ${n}`,
-    page: 'ص',
-    vol: 'ج',
-    listSep: '، ',
-    missingPagesWarn: (count, ranges) => `تنبيه: تم اكتشاف ${count} صفحة مفقودة: ${ranges}`,
-    untranscribedWarn: (count, list) => `تنبيه: ${count} صفحة لم تُنسخ: ${list}`,
-    untranscribedPage: 'لم تُنسخ هذه الصفحة.',
-    after: (label) => `بعد ${label}`,
-    loadError: (msg) => `تعذّر تحميل الملف: ${msg}`,
-    readError: 'تعذّر قراءة الملف.',
-    emptyHint: 'لا يوجد ملف مفتوح. اضغط «فتح ملف» لاختيار كتاب.',
-    noResults: '0 من 0',
-    numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
-    numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
-    numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)'
-  },
-  en: {
-    appTitle: 'Markdown Reader',
-    zoomIn: 'Zoom in (Ctrl +)',
-    zoomOut: 'Zoom out (Ctrl -)',
-    fitWidth: 'Fit width',
-    fitPage: 'Fit page',
-    textSmaller: 'Smaller text',
-    textLarger: 'Larger text',
-    textLetter: 'A',
-    prevPage: (key) => `Previous page (${key})`,
-    nextPage: (key) => `Next page (${key})`,
-    dirRTL: 'Current Direction: RTL (Click for LTR)',
-    dirLTR: 'Current Direction: LTR (Click for RTL)',
-    themeSystem: 'Theme: follows this device (click for light)',
-    themeLight: 'Theme: light (click for sepia)',
-    themeSepia: 'Theme: sepia (click for dark)',
-    themeDark: 'Theme: dark (click to follow this device)',
-    scan: 'Original page: the scan of this page on archive.org',
-    bookmarkAdd: 'Bookmark this page',
-    bookmarkRemove: 'Remove this page’s bookmark',
-    bookmarkAdded: 'Bookmark added',
-    bookmarkRemoved: 'Bookmark removed',
-    reading: 'Reading mode',
-    exitReading: 'Exit reading mode (Esc)',
-    more: 'More',
-    panel: 'Contents and bookmarks',
-    contentsTab: 'Contents',
-    bookmarksTab: 'Bookmarks',
-    noHeadings: 'This book has no headings.',
-    noBookmarks: 'No bookmarks yet. Use the bookmark button to save the current page.',
-    removeBookmark: 'Remove bookmark',
-    closePanel: 'Close',
-    copyLink: 'Copy link to this page',
-    linkCopied: 'Link copied',
-    copyFailed: 'Could not copy',
-    volume: 'Volume',
-    search: 'Search within document (Ctrl+F)',
-    searchInput: 'Search text...',
-    prevMatch: 'Previous match (Shift+Enter)',
-    nextMatch: 'Next match (Enter)',
-    showResults: 'Results list',
-    closeSearch: 'Close search (Esc)',
-    matchDiacritics: 'Match diacritics',
-    wholeWord: 'Whole word',
-    moreResults: (n) => `and ${n} more`,
-    openFile: 'Open file',
-    downloading: 'Downloading',
-    building: 'Preparing',
-    searchWait: 'Search is available once the book is ready',
-    online: 'Online',
-    offline: 'Offline',
-    barTitle: 'Reader',
-    close: 'Close',
-    notInLibrary: 'This book isn’t in the i360 library, so it can’t be opened here.',
-    unverified: 'Couldn’t check this book against the i360 library — check the connection and try again.',
-    ofLabel: 'of',
-    pageInput: 'Printed page number — multi-volume books: volume:page — position in the file: (12)',
-    position: (i, n) => `Position in the file: ${i} of ${n}`,
-    page: 'p.',
-    vol: 'vol.',
-    listSep: ', ',
-    missingPagesWarn: (count, ranges) => `Warning: ${count} missing page(s) detected: ${ranges}`,
-    untranscribedWarn: (count, list) => `Warning: ${count} page(s) not transcribed: ${list}`,
-    untranscribedPage: 'This page was not transcribed.',
-    after: (label) => `after ${label}`,
-    loadError: (msg) => `Could not load the file: ${msg}`,
-    readError: 'Could not read the file.',
-    emptyHint: 'No file open. Press “Open file” to choose a book.',
-    noResults: '0 of 0',
-    numeralsWestern: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)',
-    numeralsArabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)',
-    numeralsPersian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)'
-  }
-};
 
 /* ================================================================
    Constants
@@ -290,10 +141,9 @@ const missingPagesBanner = $('missing-pages-banner');
 const missingPagesText = $('missing-pages-text');
 const emptyState = $('empty-state');
 
-const t = () => TRANSLATIONS[state.dir === 'rtl' ? 'ar' : 'en'];
-
-// Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
-const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+// The interface follows the book's direction: Arabic for a right-to-left book, else English.
+const lang = () => (state.dir === 'rtl' ? 'ar' : 'en');
+const t = () => LOCALES[lang()];
 
 /* Connection icon: green while the lib site can be reached, red while it can't, live.
    The browser's own online/offline signal isn't enough: Android's WebView never changes
@@ -799,12 +649,8 @@ function sheetAtBottom() { return sheetStartingAbove(viewerContainer.getBounding
 /* Pages near the screen — on it and about one screen's height above and below, measured —
    carry .near (content-visibility: auto); all others stay hidden, which the browser neither
    draws nor watches. Updated at most once a frame: on scroll, resize, a jump and while building. */
-let nearFrom = 0, nearTo = -1, nearQueued = false;
-function queueNear() {
-  if (nearQueued) return;
-  nearQueued = true;
-  requestAnimationFrame(() => { nearQueued = false; updateNear(); });
-}
+let nearFrom = 0, nearTo = -1;
+const queueNear = oncePerFrame(() => updateNear());
 function updateNear() {
   const sheets = state.sheets;
   if (!sheets.length) { nearFrom = 0; nearTo = -1; return; }
@@ -1265,10 +1111,10 @@ function applyLocalization() {
   setTitle(btnNavRight, isRtl ? tr.prevPage('→') : tr.nextPage('→'));
   setTitle(btnDirToggle, isRtl ? tr.dirRTL : tr.dirLTR);
   btnDirToggle.innerHTML = isRtl ? ICON.stepForward : ICON.stepBack;
-  btnNumerals.textContent = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' }[state.numerals];   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
-  setTitle(btnNumerals, { western: tr.numeralsWestern, arabic: tr.numeralsArabic, persian: tr.numeralsPersian }[state.numerals]);
-  btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
-  setTitle(btnTheme, { system: tr.themeSystem, light: tr.themeLight, sepia: tr.themeSepia, dark: tr.themeDark }[state.theme]);
+  btnNumerals.textContent = i360Theme.NUMERALS_SAMPLE[state.numerals];
+  setTitle(btnNumerals, i360Theme.numeralsLabel(state.numerals, lang()));
+  btnTheme.innerHTML = THEME_ICONS[state.theme];
+  setTitle(btnTheme, i360Theme.themeLabel(state.theme, lang()));
   setTitle(btnScan, tr.scan);
   setTitle(btnReading, tr.reading);
   setTitle(btnExitReading, tr.exitReading);
@@ -1465,19 +1311,16 @@ btnZoomOut.addEventListener('click', () => setZoom(state.zoom - ZOOM_STEP));
 btnFitWidth.addEventListener('click', fitWidth);
 btnFitPage.addEventListener('click', fitPage);
 
-let resizeQueued = false;
+const queueResize = oncePerFrame(() => {
+  const anchor = captureAnchor();
+  updatePageWidth();
+  restoreAnchor(anchor);
+});
 // Anything that moves the pages (zoom, text size, a page filling in, fonts) re-checks which are near.
-if (typeof ResizeObserver === 'function') new ResizeObserver(queueNear).observe(pagesWrapper);
+if (typeof ResizeObserver === 'function') new ResizeObserver(() => queueNear()).observe(pagesWrapper);
 window.addEventListener('resize', () => {
   queueNear();
-  if (resizeQueued) return;
-  resizeQueued = true;
-  requestAnimationFrame(() => {
-    resizeQueued = false;
-    const anchor = captureAnchor();
-    updatePageWidth();
-    restoreAnchor(anchor);
-  });
+  queueResize();
 });
 
 /* ================================================================
@@ -1564,11 +1407,9 @@ function updateCounter(force) {
   updateBookmarkButton();
 }
 
-let scrollQueued = false;
+const queueScroll = oncePerFrame(() => { updateNear(); updateCounter(false); });
 viewerContainer.addEventListener('scroll', () => {
-  if (scrollQueued) return;
-  scrollQueued = true;
-  requestAnimationFrame(() => { scrollQueued = false; updateNear(); updateCounter(false); });
+  if (!queueScroll()) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveNow, SAVE_DEBOUNCE_MS);
 }, { passive: true });
@@ -1987,12 +1828,7 @@ function fitToolbar() {
   }
 }
 
-let fitQueued = false;
-function queueFitToolbar() {
-  if (fitQueued) return;
-  fitQueued = true;
-  requestAnimationFrame(() => { fitQueued = false; fitToolbar(); });
-}
+const queueFitToolbar = oncePerFrame(() => fitToolbar());
 
 function closeMore() {
   moreMenu.hidden = true;
@@ -2343,17 +2179,7 @@ fileInput.addEventListener('change', () => {
    ================================================================ */
 async function initApp() {
   void checkConnection();
-  // In the app, ✕ returns to its home: a step back when opened from it (the history
-  // stays home → this page, which the back button and the iOS swipe follow), else home
-  // in place of this page. As in Daily Reflection.
-  if (IN_APP) {
-    btnClose.hidden = false;
-    btnClose.addEventListener('click', () => {
-      let fromApp = false;
-      try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* no referrer */ }
-      if (fromApp) history.back(); else window.location.replace('/index.html');
-    });
-  }
+  setupClose(btnClose);   // in the app, ✕ returns to its home (src/page-chrome.js)
 
   state.numerals = i360Theme.getNumerals();
   state.theme = i360Theme.getChoice();

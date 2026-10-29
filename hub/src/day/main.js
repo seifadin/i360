@@ -8,6 +8,9 @@ import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as HijriCalc from '../../hijri/calc.js';
 import * as HijriClient from '../../hijri/client.js';
 import DAY_CITIES from '../day-cities.json';
+import { setupClose, THEME_ICONS } from '../page-chrome.js';
+import { oncePerFrame } from '../frame.js';
+import { DAY as LOCALES } from '../locales.js';
 
 // Tailwind's dark: styles follow the "dark" class (set in the page's <head> from the saved theme).
 i360Theme.onChange((s) => { document.documentElement.classList.toggle('dark', s.theme === 'dark'); });
@@ -197,200 +200,8 @@ const HE = {
     }
 };
 
-
-const LOCALES = {
-    ar: { 
-        dir:"rtl",title:"التأمل اليومي",quranLabel:"الآية القرآنية",hadithLabel:"الحديث الشريف",prayerLabel:"مواقيت الصلاة",eventsLabel:"المناسبات القادمة",methodLabel:"الطريقة",madhabLabel:"المذهب",locLabel:"الموقع",tzLabel:"المنطقة الزمنية",expected:"متوقع",next:"القادم",todayLabel:"اليوم",months:["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"],
-        events: {
-            h_new: "1 محرم: رأس السنة الهجرية (أحد الأشهر الحُرم)",
-            tasua: "9 محرم: يوم تاسوعاء",
-            ashura: "10 محرم: يوم عاشوراء، يوم نجى الله فيه موسى عليه السلام و أغرق آل فرعون",
-            mig_mecca: "27 صفر: ذكرى هجرة الرسول ﷺ من مكة إلى المدينة (على ما ذُكر في بعض كتب السيرة)",
-            mawlid: "12 ربيع الأول: المولد النبوي ووصول الرسول ﷺ إلى المدينة مهاجرًا",
-            isra: "27 رجب: ليلة الإسراء والمعراج على المشهور، وفي تحديدها خلاف بين أهل العلم (أحد الأشهر الحُرم)",
-            baraah: "15 شعبان: ليلة النصف من شعبان (وفي فضلها خلاف بين أهل العلم)",
-            cres: "29 شعبان: الليلة ترائي هلال رمضان",
-            ram_start: "1 رمضان: أول أيام الصوم",
-            badr: "17 رمضان: غزوة بدر الكبرى (2 هـ)",
-            fath: "20 رمضان: فتح مكة (8 هـ)",
-            qadr: "27 رمضان: ليلة القدر (قد تكون أي ليلة فردية من العشر الأواخر)",
-            f1: "1 شوال: أوَّل أيَّام عيد الفطر", f2: "2 شوال: ثاني أيَّام عيد الفطر", f3: "3 شوال: ثالث أيَّام عيد الفطر",
-            sq: "ذو القعدة: أحد الأشهر الحُرم",
-            sh: "ذو الحجة: أحد الأشهر الحُرم",
-            tar: "8 ذو الحجة: يوم التروية",
-            ara: "9 ذو الحجة: يوم عرفة",
-            a1: "10 ذو الحجة: أوَّل أيَّام عيد الأضحى (يوم النحر)",
-            a2: "11 ذو الحجة: ثاني أيام عيد الأضحى (أول أيام التشريق وثاني أيام النحر)",
-            a3: "12 ذو الحجة: ثالث أيام عيد الأضحى (ثاني أيام التشريق وثالث أيام النحر)",
-            a4: "13 ذو الحجة: رابع أيام عيد الأضحى (ثالث أيام التشريق ورابع أيام النحر)"
-        },
-        footer:"يتم التحديث يومياً.",prayers:["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"]
-    },
-    en: { 
-        dir:"ltr",title:"Daily Reflection",quranLabel:"Quranic Verse",hadithLabel:"Hadith",prayerLabel:"Prayer Times",eventsLabel:"Upcoming Events",methodLabel:"Method",madhabLabel:"Madhab",locLabel:"Location",tzLabel:"Timezone",expected:"Expected",next:"NEXT",todayLabel:"TODAY",months:["Muharram","Safar","Rabi' al-Awwal","Rabi' al-Thani","Jumada al-Ula","Jumada al-Akhira","Rajab","Sha'ban","Ramadan","Shawwal","Dhu al-Qi'dah","Dhu al-Hijjah"],
-        events: {
-            h_new: "1 Muharram: Hijri New Year (Sacred Month)",
-            tasua: "9 Muharram: Day of Tasua",
-            ashura: "10 Muharram: Day of Ashura (Allah saved Moses & drowned Pharaoh)",
-            mig_mecca: "27 Safar: Prophet's ﷺ Migration from Mecca to Medina, as reported in some biographies",
-            mawlid: "12 Rabi' al-Awwal: Mawlid al-Nabi & Arrival in Medina",
-            isra: "27 Rajab: Isra and Mi'raj, per the popular view; scholars differ on its date (Sacred Month)",
-            baraah: "15 Sha'ban: Mid-Sha'ban night (scholars differ on its virtue)",
-            cres: "29 Sha'ban: Night of Ramadan moon sighting",
-            ram_start: "1 Ramadan: First day of Ramadan Fasting",
-            badr: "17 Ramadan: Great Battle of Badr (2 AH)",
-            fath: "20 Ramadan: Conquest of Mecca (8 AH)",
-            qadr: "27 Ramadan: Laylat al-Qadr (Potential night of power)",
-            f1: "1 Shawwal: 1st Day of Eid al-Fitr", f2: "2 Shawwal: 2nd Day of Eid al-Fitr", f3: "3 Shawwal: 3rd Day of Eid al-Fitr",
-            sq: "Dhu al-Qi'dah: Sacred Month",
-            sh: "Dhu al-Hijjah: Sacred Month",
-            tar: "8 Dhu al-Hijjah: Day of Tarwiyah",
-            ara: "9 Dhu al-Hijjah: Day of Arafah",
-            a1: "10 Dhu al-Hijjah: 1st Day of Eid al-Adha (Day of Sacrifice)",
-            a2: "11 Dhu al-Hijjah: 2nd Day of Eid (1st Day of Tashreeq)",
-            a3: "12 Dhu al-Hijjah: 3rd Day of Eid (2nd Day of Tashreeq)",
-            a4: "13 Dhu al-Hijjah: 4th Day of Eid (3rd Day of Tashreeq)"
-        },
-        footer:"Updated daily.",prayers:["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"] 
-    },
-    tr: { 
-        dir:"ltr",title:"Günlük Tefekkür",quranLabel:"Kur'an Ayeti",hadithLabel:"Hadis",prayerLabel:"Namaz Vakitleri",eventsLabel:"Etkinlikler",methodLabel:"Yöntem",madhabLabel:"Mezhep",locLabel:"Konum",tzLabel:"Saat Dilimi",expected:"Beklenen",next:"SONRAKİ",todayLabel:"BUGÜN",months:["Muharrem","Safer","Rebiülevvel","Rebiülahir","Cemaziyelevvel","Cemaziyelahir","Recep","Şaban","Ramazan","Şevval","Zilkade","Zilhicce"],
-        events: {
-            h_new: "1 Muharrem: Hicri Yılbaşı (Haram Ay)",
-            tasua: "9 Muharrem: Tasua Günü",
-            ashura: "10 Muharrem: Aşure Günü (Hz. Musa'nın kurtuluşu)",
-            mig_mecca: "27 Safer: Peygamberimizin Mekke'den Medine'ye hicreti (bazı siyer kaynaklarına göre)",
-            mawlid: "12 Rebiülevvel: Mevlid Kandili ve Medine'ye varış",
-            isra: "27 Recep: Miraç Kandili, yaygın görüşe göre; tarihi konusunda âlimler ihtilaf etmiştir (Haram Ay)",
-            baraah: "15 Şaban: Berat Kandili (faziletinde âlimler ihtilaf etmiştir)",
-            cres: "29 Şaban: Ramazan hilali gözlem gecesi",
-            ram_start: "1 Ramazan: Orucun ilk günü",
-            badr: "17 Ramazan: Bedir Gazvesi (Hicri 2)",
-            fath: "20 Ramazan: Mekke'nin Fethi (Hicri 8)",
-            qadr: "27 Ramazan: Kadir Gecesi",
-            f1: "1 Şevval: Ramazan Bayramı 1. Gün", f2: "2 Şevval: Ramazan Bayramı 2. Gün", f3: "3 Şevval: Ramazan Bayramı 3. Gün",
-            sq: "Zilkade: Haram Ay",
-            sh: "Zilhicce: Haram Ay",
-            tar: "8 Zilhicce: Terviye Günü",
-            ara: "9 Zilhicce: Arefe Günü",
-            a1: "10 Zilhicce: Kurban Bayramı 1. Gün",
-            a2: "11 Zilhicce: 2. Gün (Teşrik 1)",
-            a3: "12 Zilhicce: 3. Gün (Teşrik 2)",
-            a4: "13 Zilhicce: 4. Gün (Teşrik 3)"
-        },
-        footer:"Günlük güncellenir.",prayers:["İmsak","Güneş","Öğle","İkindi","Akşam","Yatsı"] 
-    },
-    id: { 
-        dir:"ltr",title:"Refleksi Harian",quranLabel:"Ayat Al-Qur'an",hadithLabel:"Hadist",prayerLabel:"Waktu Shalat",eventsLabel:"Acara Mendatang",methodLabel:"Metode",madhabLabel:"Madzhab",locLabel:"Lokasi",tzLabel:"Zona Waktu",expected:"Perkiraan",next:"LANJUT",todayLabel:"HARI INI",months:["Muharram","Safar","Rabi'ul Awwal","Rabi'ul Akhir","Jumadil Ula","Jumadil Akhira","Rajab","Sya'ban","Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"],
-        events: {
-            h_new: "1 Muharram: Tahun Baru Hijriah (Bulan Haram)",
-            tasua: "9 Muharram: Hari Tasua",
-            ashura: "10 Muharram: Hari Asyura (Allah menyelamatkan Musa)",
-            mig_mecca: "27 Safar: Hijrah Nabi ﷺ dari Mekah ke Madinah (menurut sebagian kitab sirah)",
-            mawlid: "12 Rabi'ul Awwal: Maulid Nabi & Kedatangan di Madinah",
-            isra: "27 Rajab: Isra Mi'raj menurut pendapat yang masyhur; ulama berbeda pendapat tentang tanggalnya (Bulan Haram)",
-            baraah: "15 Sya'ban: Malam Nisfu Sya'ban (keutamaannya diperselisihkan ulama)",
-            cres: "29 Sya'ban: Malam pemantauan hilal Ramadhan",
-            ram_start: "1 Ramadhan: Hari pertama Puasa",
-            badr: "17 Ramadhan: Perang Badar (2 H)",
-            fath: "20 Ramadhan: Pembebasan Mekah (8 H)",
-            qadr: "27 Ramadhan: Lailatul Qadr",
-            f1: "1 Syawal: Idul Fitri Hari ke-1", f2: "2 Syawal: Idul Fitri Hari ke-2", f3: "3 Syawal: Idul Fitri Hari ke-3",
-            sq: "Dzulqa'dah: Bulan Haram",
-            sh: "Dzulhijjah: Bulan Haram",
-            tar: "8 Dzulhijjah: Hari Tarwiyah",
-            ara: "9 Dzulhijjah: Hari Arafah",
-            a1: "10 Dzulhijjah: Idul Adha (Hari Kurban)",
-            a2: "11 Dzulhijjah: Hari Tasyrik 1",
-            a3: "12 Dzulhijjah: Hari Tasyrik 2",
-            a4: "13 Dzulhijjah: Hari Tasyrik 3"
-        },
-        footer:"Referensi terpercaya. Diperbarui setiap hari.",prayers:["Subuh", "Terbit", "Dzuhur", "Ashar", "Maghrib", "Isya"] 
-    },
-    ur: { 
-        dir:"rtl",title:"روزانہ کی عکاسی",quranLabel:"قرآني آیت",hadithLabel:"حدیث",prayerLabel:"نماز کے اوقات",eventsLabel:"آنے والے واقعات",methodLabel:"طریقہ",madhabLabel:"مذہب",locLabel:"مقام",tzLabel:"ٹائم زون",expected:"متوقع",next:"اگلی",todayLabel:"آج",months:["محرم","صفر","ربیع الاول","ربیع الثانی","جمادی الاول","جمادی الثانی","رجب","شعبان","رمضان","شوال","ذوالقعدہ","ذوالحجہ"],
-        events: {
-            h_new: "1 محرم: اسلامی نیا سال (حرمت والا مہینہ)",
-            tasua: "9 محرم: یوم تاسوعاء",
-            ashura: "10 محرم: یوم عاشوراء (اللہ نے موسیٰؑ کو نجات دی اور فرعون کو غرق کیا)",
-            mig_mecca: "27 صفر: ہجرتِ نبوی ﷺ مکہ سے مدینہ (بعض کتبِ سیرت کے مطابق)",
-            mawlid: "12 ربیع الاول: میلاد النبیؐ اور مدینہ آمد",
-            isra: "27 رجب: اسراء و معراج، مشہور قول کے مطابق؛ تاریخ میں اہلِ علم کا اختلاف ہے (حرمت والا مہینہ)",
-            baraah: "15 شعبان: شبِ برأت (اس کی فضیلت میں اہلِ علم کا اختلاف ہے)",
-            cres: "29 شعبان: رمضان کا چاند دیکھنے کی رات",
-            ram_start: "1 رمضان: روزوں کا آغاز",
-            badr: "17 رمضان: غزوہ بدر (2 ھ)",
-            fath: "20 رمضان: فتح مکہ (8 ھ)",
-            qadr: "27 رمضان: لیلة القدر (آخری عشرے کی طاق راتیں)",
-            f1: "1 شوال: عید الفطر پہلا دن", f2: "2 شوال: عید الفطر دوسرا دن", f3: "3 شوال: عید الفطر تیسرا دن",
-            sq: "ذوالقعدہ: حرمت والا مہینہ",
-            sh: "ذوالحجہ: حرمت والا مہینہ",
-            tar: "8 ذوالحجہ: یوم الترویہ",
-            ara: "9 ذوالحجہ: یوم عرفہ",
-            a1: "10 ذوالحجہ: عید الاضحی (یوم النحر)",
-            a2: "11 ذوالحجہ: ایام تشریق پہلا دن",
-            a3: "12 ذوالحجہ: ایام تشریق دوسرا دن",
-            a4: "13 ذوالحجہ: ایام تشریق تیسرا دن"
-        },
-        footer:"روزانہ اپ ڈیٹ کیا جاتا ہے۔",prayers:["الفجر","طلوع آفتاب","ظهر","عصر","مغرب","عشاء"] 
-    }
-};
-
-const EXTRA = {
-    ar: { language: 'اللغة', refsLabel: 'المراجع', loading: 'جارٍ التحميل…', loadError: 'تعذّر تحميل هذا القسم.', retry: 'إعادة المحاولة', gradeLabel: 'الدرجة', sourceLabel: 'المصدر',
-          schoolStd: 'الجمهور', schoolHanafi: 'الحنفي',
-          close: 'إغلاق والعودة إلى الموسوعة', cityChange: 'تغيير', citySearch: 'ابحث عن مدينة…', deviceTz: 'المنطقة الزمنية للجهاز',
-          cityNone: 'لم يُعثر على المدينة — جرّب كتابة اسمها بالإنجليزية.',
-          creditCities: 'بيانات المدن', creditPrayer: 'حساب مواقيت الصلاة',
-          privacy: 'تُحسَب مواقيت الصلاة على جهازك.\nلا يُرسَل إلى Open-Meteo إلا اسم المدينة محل البحث.' },
-    en: { language: 'Language', refsLabel: 'References', loading: 'Loading…', loadError: "Couldn't load this section.", retry: 'Retry', gradeLabel: 'Grade', sourceLabel: 'Source',
-          schoolStd: 'Standard', schoolHanafi: 'Hanafi',
-          close: 'Close and return to the encyclopedia', cityChange: 'Change', citySearch: 'Search for a city…', deviceTz: 'Device time zone',
-          cityNone: 'No city found — check the spelling.',
-          creditCities: 'City data', creditPrayer: 'Prayer-time calculation',
-          privacy: 'Prayer times are calculated on your device.\nOnly the name of the city being searched is sent to Open-Meteo.' },
-    tr: { language: 'Dil', refsLabel: 'Kaynakça', loading: 'Yükleniyor…', loadError: 'Bu bölüm yüklenemedi.', retry: 'Tekrar dene', gradeLabel: 'Derece', sourceLabel: 'Kaynak',
-          schoolStd: 'Standart', schoolHanafi: 'Hanefi',
-          close: 'Kapat ve ansiklopediye dön', cityChange: 'Değiştir', citySearch: 'Şehir ara…', deviceTz: 'Cihaz saat dilimi',
-          cityNone: 'Şehir bulunamadı — adını İngilizce yazmayı deneyin.',
-          creditCities: 'Şehir verileri', creditPrayer: 'Namaz vakti hesaplaması',
-          privacy: "Namaz vakitleri cihazınızda hesaplanır.\nOpen-Meteo'ya yalnızca aranan şehrin adı gönderilir." },
-    id: { language: 'Bahasa', refsLabel: 'Referensi', loading: 'Memuat…', loadError: 'Bagian ini gagal dimuat.', retry: 'Coba lagi', gradeLabel: 'Derajat', sourceLabel: 'Sumber',
-          schoolStd: 'Standar', schoolHanafi: 'Hanafi',
-          close: 'Tutup dan kembali ke ensiklopedia', cityChange: 'Ubah', citySearch: 'Cari kota…', deviceTz: 'Zona waktu perangkat',
-          cityNone: 'Kota tidak ditemukan — coba ketik namanya dalam bahasa Inggris.',
-          creditCities: 'Data kota', creditPrayer: 'Perhitungan waktu shalat',
-          privacy: 'Waktu shalat dihitung di perangkat Anda.\nHanya nama kota yang dicari yang dikirim ke Open-Meteo.' },
-    ur: { language: 'زبان', refsLabel: 'حوالہ جات', loading: 'لوڈ ہو رہا ہے…', loadError: 'یہ حصہ لوڈ نہیں ہو سکا۔', retry: 'دوبارہ کوشش کریں', gradeLabel: 'درجہ', sourceLabel: 'ماخذ',
-          schoolStd: 'معیاری', schoolHanafi: 'حنفی',
-          close: 'بند کریں اور انسائیکلوپیڈیا پر واپس جائیں', cityChange: 'تبدیل کریں', citySearch: 'شہر تلاش کریں…', deviceTz: 'ڈیوائس کا ٹائم زون',
-          cityNone: 'شہر نہیں ملا — اس کا نام انگریزی میں لکھ کر دیکھیں۔',
-          creditCities: 'شہروں کا ڈیٹا', creditPrayer: 'نماز کے اوقات کا حساب',
-          privacy: 'نماز کے اوقات آپ کے آلے پر ہی نکالے جاتے ہیں۔\nOpen-Meteo کو صرف تلاش کیے گئے شہر کا نام بھیجا جاتا ہے۔' }
-};
-Object.keys(EXTRA).forEach(l => Object.assign(LOCALES[l], EXTRA[l]));
-
-/* The theme and numerals buttons (shared with the Reader and the CSE): icons, labels and tooltips. */
-const NUMERALS_LABEL = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' };   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
-const THEME_ICON = {
-    system: '<svg data-lucide="monitor" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
-    light: '<svg data-lucide="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-    sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
-    dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
-};
-const THEME_TITLES = {
-    ar: { numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)', numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)', numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
-          themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)', themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)', themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)', themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)' },
-    en: { numeralsWestern: 'Numerals: Western 456 (click for Eastern Arabic ٤٥٦)', numeralsArabic: 'Numerals: Eastern Arabic ٤٥٦ (click for Persian/Urdu ۴۵۶)', numeralsPersian: 'Numerals: Persian/Urdu ۴۵۶ (click for Western 456)',
-          themeSystem: 'Theme: follows this device (click for light)', themeLight: 'Theme: light (click for sepia)', themeSepia: 'Theme: sepia (click for dark)', themeDark: 'Theme: dark (click to follow this device)' },
-    tr: { numeralsWestern: 'Rakamlar: Batı 456 (Doğu Arap ٤٥٦ için tıklayın)', numeralsArabic: 'Rakamlar: Doğu Arap ٤٥٦ (Farsça/Urduca ۴۵۶ için tıklayın)', numeralsPersian: 'Rakamlar: Farsça/Urduca ۴۵۶ (Batı 456 için tıklayın)',
-          themeSystem: 'Tema: cihaza göre (açık için tıklayın)', themeLight: 'Tema: açık (sepya için tıklayın)', themeSepia: 'Tema: sepya (koyu için tıklayın)', themeDark: 'Tema: koyu (cihaza göre için tıklayın)' },
-    id: { numeralsWestern: 'Angka: Barat 456 (klik untuk Arab Timur ٤٥٦)', numeralsArabic: 'Angka: Arab Timur ٤٥٦ (klik untuk Persia/Urdu ۴۵۶)', numeralsPersian: 'Angka: Persia/Urdu ۴۵۶ (klik untuk Barat 456)',
-          themeSystem: 'Tema: mengikuti perangkat (klik untuk terang)', themeLight: 'Tema: terang (klik untuk sepia)', themeSepia: 'Tema: sepia (klik untuk gelap)', themeDark: 'Tema: gelap (klik untuk mengikuti perangkat)' },
-    ur: { numeralsWestern: 'اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)', numeralsArabic: 'اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)', numeralsPersian: 'اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)',
-          themeSystem: 'تھیم: آلے کے مطابق (روشن کے لیے کلک کریں)', themeLight: 'تھیم: روشن (سیپیا کے لیے کلک کریں)', themeSepia: 'تھیم: سیپیا (تاریک کے لیے کلک کریں)', themeDark: 'تھیم: تاریک (آلے کے مطابق کے لیے کلک کریں)' }
-};
-Object.keys(THEME_TITLES).forEach(l => { if (LOCALES[l]) Object.assign(LOCALES[l], THEME_TITLES[l]); });
+/* The interface text, in the five languages: src/locales.js (DAY). The theme and numerals
+   buttons' icons (src/page-chrome.js) and labels (the theme loader) are shared by every i360 page. */
 
 /* ---------- Numerals: every number on the page in the shared choice (display only) ---------- */
 const Numerals = {
@@ -633,7 +444,7 @@ const Cols = {
         window.addEventListener('resize', () => this.queue());
         this.queue();
     },
-    queue() { if (this.q) return; this.q = requestAnimationFrame(() => { this.q = 0; this.fit(); }); },
+    queue: oncePerFrame(() => Cols.fit()),
     fit() {
         if (!this.a) return;
         const side = this.a.offsetTop === this.b.offsetTop && this.a.offsetLeft !== this.b.offsetLeft;   // as laid out
@@ -665,19 +476,7 @@ const UI = {
         LangMenu.init();
         document.querySelectorAll('[data-school]').forEach(b => b.addEventListener('click', () => App.setSchool(+b.dataset.school)));
         Picker.init();
-        // In the installed app (Capacitor's bridge is in every page it serves): the ✕ returns home.
-        if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
-            const x = document.getElementById('btn-close');
-            x.hidden = false;
-            x.addEventListener('click', () => {
-                // Opened from the app's home (the usual way): step back, so the history stays
-                // home → this page — iOS's edge swipe and Android's back button follow it too.
-                // Otherwise (opened directly): load home in place of this page.
-                let fromApp = false;
-                try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) { /* no referrer */ }
-                if (fromApp) history.back(); else window.location.replace('/index.html');
-            });
-        }
+        setupClose(document.getElementById('btn-close'));   // in the installed app, ✕ returns home (src/page-chrome.js)
         document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
         i360Theme.onChange(() => this.theme());
         document.getElementById('btn-numerals').addEventListener('click', () => i360Theme.cycleNumerals());
@@ -691,17 +490,15 @@ const UI = {
         document.addEventListener('visibilitychange', () => { if (!document.hidden) App.tick(); });
     },
     numeralsButton() {   // label and tooltip for the shared numerals choice, in the page's language
-        const n = i360Theme.getNumerals(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-numerals');
-        const key = { western: 'numeralsWestern', arabic: 'numeralsArabic', persian: 'numeralsPersian' }[n];
-        btn.textContent = NUMERALS_LABEL[n];
-        btn.title = L[key] || THEME_TITLES.en[key];
+        const n = i360Theme.getNumerals(), btn = document.getElementById('btn-numerals');
+        btn.textContent = i360Theme.NUMERALS_SAMPLE[n];
+        btn.title = i360Theme.numeralsLabel(n, App.lang);
         btn.setAttribute('aria-label', btn.title);
     },
     theme() {   // the theme button: icon and tooltip for the shared choice, in the page's language
-        const c = i360Theme.getChoice(), L = LOCALES[App.lang] || LOCALES.ar, btn = document.getElementById('btn-theme');
-        const T = { system: L.themeSystem, light: L.themeLight, sepia: L.themeSepia, dark: L.themeDark };
-        btn.innerHTML = THEME_ICON[c];
-        btn.title = T[c] || THEME_TITLES.en[{ system: 'themeSystem', light: 'themeLight', sepia: 'themeSepia', dark: 'themeDark' }[c]];
+        const c = i360Theme.getChoice(), btn = document.getElementById('btn-theme');
+        btn.innerHTML = THEME_ICONS[c];
+        btn.title = i360Theme.themeLabel(c, App.lang);
         btn.setAttribute('aria-label', btn.title);
     },
     set(t, v) { if (this.targets[t]) this.targets[t].textContent = v; },

@@ -4,13 +4,12 @@ import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as SearchCore from '../search-core.js';
 import * as CseIndex from '../cse-index.js';
 import * as CseView from '../cse-view.js';
+import { IN_APP, setupClose, THEME_ICONS } from '../page-chrome.js';
+import { CSE as LOCALES } from '../locales.js';
 
 const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
 const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
 const CONFIRM_BATCH = 8;   // candidate pages checked at once
-
-// Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
-const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
 
 const $ = (id) => document.getElementById(id);
 const form = $('search-form'), input = $('q');
@@ -19,38 +18,7 @@ const btnNumerals = $('btn-numerals'), btnTheme = $('btn-theme');
 const statusEl = $('status'), resultsEl = $('results'), aboutEl = $('about');
 const barEl = $('bar-btns');
 
-const ICON = {
-  system: '<svg data-lucide="monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
-  sun: '<svg data-lucide="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
-  sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
-  moon: '<svg data-lucide="moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
-};
-const T = {
-  themeSystem: 'المظهر: حسب الجهاز (انقر للتبديل إلى فاتح)',
-  themeLight: 'المظهر: فاتح (انقر للتبديل إلى ورقي)',
-  themeSepia: 'المظهر: ورقي (انقر للتبديل إلى داكن)',
-  themeDark: 'المظهر: داكن (انقر للتبديل إلى حسب الجهاز)',
-  numeralsWestern: 'الأرقام: غربية 456 (انقر للتبديل إلى العربية المشرقية ٤٥٦)',
-  numeralsArabic: 'الأرقام: عربية مشرقية ٤٥٦ (انقر للتبديل إلى الفارسية/الأردية ۴۵۶)',
-  numeralsPersian: 'الأرقام: فارسية/أردية ۴۵۶ (انقر للتبديل إلى الغربية 456)',
-  tooShort: (n) => `اكتب ${n} أحرف على الأقل.`,
-  loadingIndex: 'جارٍ تحميل الفهرس…',
-  searching: 'جارٍ البحث…',
-  noResults: 'لا نتائج.',
-  noMatches: 'لا توجد نتائج مطابقة',
-  loadError: 'تعذّر تحميل الفهرس. تحقق من الاتصال ثم أعد المحاولة.',
-  searchError: 'تعذّر إكمال البحث. تحقق من الاتصال ثم أعد المحاولة.',
-  retry: 'إعادة المحاولة',
-  summary: (pages, groups, exact) => `الصفحات: ${exact ? '' : '≈ '}${pages} · المجموعات: ${groups}`,
-  approxTitle: 'عدد تقريبي للصفحات؛ يصبح دقيقًا بعد فحص المجموعة',
-  exactTitle: 'عدد الصفحات المطابقة',
-  more: 'المزيد',
-  checking: 'جارٍ الفحص…',
-  spots: (n) => `مواضع: ${n}`,
-  openTitle: 'فتح في المصدر',
-  openReader: 'فتح في القارئ',
-  about: (s, p, d) => `المصادر: ${s} · الصفحات: ${p} · آخر تحديث للفهرس: ${d}`
-};
+const T = LOCALES.ar;
 
 const state = {
   theme: 'system',
@@ -71,8 +39,8 @@ const fmtNum = (n) => fmt(Number(n).toLocaleString('en-US'));
 
 // Re-draws every number on the page in the chosen numerals.
 function applyNumerals() {
-  btnNumerals.textContent = { western: '456', arabic: '٤٥٦', persian: '۴۵۶' }[state.numerals];   // 4–6 differ between ٠١٢٣ and ۰۱۲۳
-  btnNumerals.title = { western: T.numeralsWestern, arabic: T.numeralsArabic, persian: T.numeralsPersian }[state.numerals];
+  btnNumerals.textContent = i360Theme.NUMERALS_SAMPLE[state.numerals];
+  btnNumerals.title = i360Theme.numeralsLabel(state.numerals);
   btnNumerals.setAttribute('aria-label', btnNumerals.title);
   const conv = fmt;
   // The page and the header's name; not what the visitor typed.
@@ -90,8 +58,8 @@ function applyNumerals() {
 // Theme: the shared i360 choice, kept by the built-in theme loader
 // (i360Theme), followed live when it changes in another app or tab.
 function applyTheme() {   // the button shows the choice
-  btnTheme.innerHTML = { system: ICON.system, light: ICON.sun, sepia: ICON.sepia, dark: ICON.moon }[state.theme];
-  btnTheme.title = { system: T.themeSystem, light: T.themeLight, sepia: T.themeSepia, dark: T.themeDark }[state.theme];
+  btnTheme.innerHTML = THEME_ICONS[state.theme];
+  btnTheme.title = i360Theme.themeLabel(state.theme);
   btnTheme.setAttribute('aria-label', btnTheme.title);
 }
 i360Theme.onChange(({ choice }) => {
@@ -517,19 +485,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 function init() {
-  // In the app, ✕ returns to its home: back to it when opened from it (the history stays
-  // home → this page's searches, which the back button and the iOS swipe follow), else
-  // home in place of this page. As in Daily Reflection and the Reader.
-  if (IN_APP) {
-    const x = $('btn-close');
-    x.hidden = false;
-    x.addEventListener('click', () => {
-      let fromApp = false;
-      try { fromApp = history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin; } catch { /* no referrer */ }
-      // Back past this page's own searches, to the page it was opened from.
-      if (fromApp) history.go(-(stepsIn() + 1)); else window.location.replace('/index.html');
-    });
-  }
+  // In the app, ✕ returns to its home (src/page-chrome.js): back past this page's own
+  // searches, to the page it was opened from.
+  setupClose($('btn-close'), () => stepsIn() + 1);
   state.theme = i360Theme.getChoice();
   i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
   state.numerals = i360Theme.getNumerals();

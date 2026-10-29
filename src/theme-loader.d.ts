@@ -15,6 +15,12 @@ declare module '@i360/theme-loader' {
   export const CACHE_KEY: string
   export const CSS_URL: string
 
+  export type ButtonLabels = { theme: Record<ThemeChoice, string>; numerals: Record<Numerals, string> }
+  export const NUMERALS_SAMPLE: Readonly<Record<Numerals, string>>
+  export const LABELS: Readonly<Record<'ar' | 'en' | 'tr' | 'id' | 'ur', ButtonLabels>>
+  export function themeLabel(choice: ThemeChoice, lang?: string): string
+  export function numeralsLabel(numerals: Numerals, lang?: string): string
+
   export function getChoice(): ThemeChoice
   export function getTheme(choice?: ThemeChoice): ThemePalette
   export function setChoice(choice: ThemeChoice): { choice: ThemeChoice; theme: ThemePalette }
