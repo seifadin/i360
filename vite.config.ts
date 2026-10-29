@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
@@ -109,5 +110,11 @@ export default defineConfig({
     // build-time app version instead — see OSRow.tsx for where this is
     // actually used.
     __APP_VERSION__: JSON.stringify(pkg.version),
+  },
+  // npm test (Vitest): the app's own tests only, next to the code they test, in plain Node
+  // (no browser emulation). hub/ has its own tests (node --test, hub/package.json).
+  test: {
+    include: ['src/**/*.test.ts'],
+    environment: 'node',
   },
 })

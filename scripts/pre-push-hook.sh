@@ -353,6 +353,32 @@ if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/
   fi
 fi
 
+# --- App tests (2026-10-30; claude/i360-instructions.md §12.17) — when this push changes the
+# app's code or what its tests run on (src/, vite.config.ts, package.json, package-lock.json,
+# tsconfig*.json) or the change list is unknown: npm test (Vitest, src/**/*.test.ts) before
+# anything is published or deployed; a failure stops the push. The app's packages are
+# installed (npm ci) first if this push changes package-lock.json or Vitest isn't installed.
+if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -qE '^(src/|vite\.config\.ts$|package(-lock)?\.json$|tsconfig[^/]*\.json$)'; then
+  echo "→ App code changed — running the app's tests..."
+  if [ ! -x node_modules/.bin/vitest ] || printf '%s\n' "$CHANGED_FILES" | grep -qx 'package-lock.json'; then
+    echo "  Installing the app's packages (npm ci)..."
+    if ! npm ci --no-audit --no-fund; then
+      echo "✗ The app's packages couldn't be installed — push stopped: nothing was pushed."
+      exit 1
+    fi
+  fi
+  APP_TEST_LOG=$(mktemp)
+  if npm test --silent >"$APP_TEST_LOG" 2>&1; then
+    echo "✓ App tests passed."
+    rm -f "$APP_TEST_LOG"
+  else
+    tail -40 "$APP_TEST_LOG"
+    echo "✗ App tests failed — push stopped: nothing was pushed, published or released."
+    echo "  Full output: $APP_TEST_LOG   (or: npm test)"
+    exit 1
+  fi
+fi
+
 # --- Hub Workers (merge sprint 2, 2026-10-21; claude/i360-hub.md §2) —
 # replaces the hub's two publish workflows (§12.17). When this push
 # changes hub/theme/ or hub/hijri/, that Worker is checked and published
