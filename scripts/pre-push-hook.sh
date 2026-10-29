@@ -1,52 +1,24 @@
 #!/usr/bin/env bash
-# scripts/pre-push-hook.sh — installed as .git/hooks/pre-push (see the
-# fresh-Codespace checklist for the one-time setup command). Fires
-# automatically on every `git push`, no separate command needed.
-#
-#   Only vite does anything (the one permanent branch since 2026-10-20;
-#   main became MS5, the AppGyver archive). Other branches push untouched.
-#   Hub Workers (when this push changes them, before anything else):
-#     hub/theme/ -> colour check, then publish theme.i36o.workers.dev
-#     hub/hijri/ -> Hijri tests, then publish dar-hijri.i36o.workers.dev
-#     a failing check stops the push; a failing publish only warns
-#   Release rule: automatic for what nobody sees, asked for what users
-#   see; checks stop the push, releases only warn.
-#   Firebase Hosting (hosting-relevant changes):
-#     preview channel (pwa-test, 30d expiry) — a check — then ONE prompt
-#     "Release this build to users — web … and phones (OTA)? (y/N)"
-#     (the web only, when the bundle didn't change or the change is native)
-#   Mobile release routing:
-#     web-only changes  -> OTA release (OtaKit) on that same "y", retries
-#                           once, falls back to a store-submission prompt
-#                           if it's still failing
-#     native changes    -> prompts "Submit to stores? (y/n)" right here
-#                           in the terminal — a plain push never silently
-#                           triggers an actual store submission
-#     both in one push  -> native-path logic only (OTA can't deliver
-#                           native changes anyway, and the next Fastlane
-#                           build picks up the current dist/ regardless)
-#
-# Supersedes the earlier GitHub Actions workflows (deploy-preview.yml,
-# deploy-production.yml, Phase 11) — Firebase deployment now runs here
-# instead, using credentials already authenticated in this Codespace
-# rather than duplicating them as GitHub repo secrets. See Section 13
-# rule 17 for the full reasoning on local script vs. CI for this project.
-#
-# Exits 0 in every case (never blocks the actual push) — this hook only
-# adds extra actions around the push, it's not a gatekeeper for it.
+# scripts/pre-push-hook.sh — runs on every `git push` (installed once per clone as a shim,
+# i360-instructions.md §10). Only `vite` does anything; other branches push untouched.
+# In order, each only when this push changes what it covers:
+#   1. hub tests (hub/) and app tests (src/ and the app's config) — a failure stops the push
+#   2. the hub Workers: hub/theme/ → theme.i36o.workers.dev, hub/hijri/ → dar-hijri.i36o.workers.dev
+#      (check first — a failure stops the push; a failed publish only warns)
+#   3. build, preview deploy (a check), then ONE question releasing the same build to the web
+#      and, for a web-only change, to phones by OTA (§15r)
+#   4. native changes: their own store and OTA questions; a plain push never submits to a store
+# Rule: automatic for what nobody sees, asked for what users see; checks stop the push,
+# releases only warn. Runs here rather than in CI (§12.17).
 
 set -e
 
-# One-key y/N answers (2026-10-21, §15r): "y" or "Y", or "غ" — the same key on
-# an Arabic keyboard, so a release isn't skipped just because the keyboard was
-# left on Arabic. Each such read runs with LC_ALL=C.UTF-8, so "غ" is read as one
-# character whatever the Codespace's own locale is.
+# One-key y/N answers: "y", "Y", or "غ" (the same key on an Arabic keyboard), read with
+# LC_ALL=C.UTF-8 so "غ" is one character in any locale (§15r).
 is_yes() { [[ $1 == [Yy] || $1 == 'غ' ]]; }
 
-# pre-push receives pushed ref info on stdin: one line per ref, formatted
-# as "<local ref> <local sha> <remote ref> <remote sha>". We only care
-# about the full commit range being pushed, to catch every changed file
-# across all commits in this push, not just the most recent one.
+# stdin: one line per pushed ref, "<local ref> <local sha> <remote ref> <remote sha>"; the
+# whole pushed range is diffed, so every changed file of every commit counts.
 LOCAL_REF=""
 REMOTE_SHA=""
 LOCAL_SHA=""
@@ -58,52 +30,22 @@ done
 
 BRANCH="${LOCAL_REF#refs/heads/}"
 
-# True only when the changed-file list is genuinely UNKNOWN (as opposed to
-# empty because nothing changed) — see the one branch below that sets it.
-# The hosting gate further down needs to tell those two apart: an empty
-# list from "nothing changed" should skip a deploy, an empty list from
-# "couldn't compute the diff" must not.
+# True only when the changed-file list is UNKNOWN (not merely empty): an empty list skips
+# the deploy, an unknown one must not.
 DIFF_UNKNOWN=false
 
-# New branch / first push — remote_sha is all zeros, nothing to diff
-# against. Treat as "changed everything" to be safe (routes to native
-# path, which just prompts rather than silently doing anything).
-#
-# Also treat an UNKNOWN (non-zero) remote SHA the same way — a real
-# failure hit in practice (2026-08-19): `git diff` against a SHA this
-# clone can't resolve aborts with "fatal: bad object <sha>", which under
-# `set -e` killed the push outright before any of the hook's own logic
-# ran. Root cause wasn't pinned down with certainty — regardless, a hook
-# that can hard-fail on a git-internal object-lookup hiccup is too
-# fragile; falling back to "changed everything" costs nothing (native
-# path just prompts) and can never block a push that would otherwise
-# succeed.
+# The remote SHA can't be resolved (a new branch, or a lookup git can't do here — under
+# set -e a failing `git diff` would kill the push): fall back instead of failing.
 if [ -z "$REMOTE_SHA" ] || [[ "$REMOTE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$REMOTE_SHA^{commit}" 2>/dev/null; then
   echo "→ Remote SHA unresolvable (a new branch, or a git-internal lookup"
   echo "  issue) — falling back to a safe default instead of failing the"
   echo "  push (which default is printed just below)."
-  # Diagnostic (2026-09-07) — added after this branch was confirmed,
-  # twice, to be reached even on a plain, non-force push to an
-  # already-correctly-tracked branch (where REMOTE_SHA should have
-  # resolved cleanly) — genuinely surprising, not the new-branch/stale-
-  # object case this fallback was originally built for. Real values
-  # shown here rather than continuing to guess blind next time this
-  # fires.
+  # Diagnostic: this has fired on plain pushes to tracked branches; show the real values.
   echo "  (diagnostic — local_ref='$LOCAL_REF' local_sha='$LOCAL_SHA'"
   echo "   remote_sha='$REMOTE_SHA')"
-  # LOCAL_SHA guarded too, not just REMOTE_SHA — a real, confirmed
-  # failure (2026-09-07): this exact fallback line crashed with "fatal:
-  # ambiguous argument ''" when LOCAL_SHA was itself unexpectedly empty,
-  # under set -e, killing the push before anything else in the hook
-  # could run — the same class of fragility REMOTE_SHA was already
-  # guarded against, just not this variable too. Falls through rather
-  # than crash — but NOT to "changed everything": with no local SHA there
-  # is nothing to diff, so CHANGED_FILES stays empty and DIFF_UNKNOWN=true.
-  # Only the build + preview deploy honor DIFF_UNKNOWN (they always run);
-  # native submission and OTA release see an empty list and are left to
-  # the developer, with the manual commands printed at the end. Messages
-  # reworded 2026-10-03 to say exactly that (they used to claim
-  # "everything changed"); the behavior itself was kept deliberately.
+  # An empty LOCAL_SHA can't be diffed either: the list is UNKNOWN — the build and preview
+  # still run, but native submission and OTA are left to the developer (manual commands
+  # printed at the end).
   if [ -z "$LOCAL_SHA" ]; then
     echo "  ⚠ local_sha itself came back empty — skipping the diff"
     echo "    entirely rather than risk the same crash from the other"
@@ -126,53 +68,17 @@ echo
 echo "→ Branch: $BRANCH"
 echo "→ Checking what changed in this push..."
 
-# ci_scripts must stay executable in git (§15's silent 100755→100644
-# incident — Xcode Cloud's zsh fallback survived it once, but that's a
-# documented leniency, not a contract). Self-announcing + self-repairing
-# at the moment it matters, matching submit_to_stores()'s
-# verify-don't-trust pattern.
-#
-# Secondary safety net only (2026-09-12) — the primary fix now lives in
-# pre-commit-hook.sh, since a fix here only ever lands in the working
-# directory/index, never the commit already in flight, needing a
-# separate follow-up commit+push every real time this fired. pre-commit
-# runs before the commit object exists, so re-staging there genuinely
-# becomes part of the same commit — this can't do that, structurally,
-# no matter how it's written. Kept here anyway for one real, narrow
-# edge case pre-commit can't reach at all: the bit lost with no new
-# commit made (nothing fires there without one). Harmless overlap in
-# the common case, where pre-commit already fixed it first — this then
-# finds nothing wrong and stays silent.
-#
-# Shared with pre-commit-hook.sh via scripts/fix-ci-scripts-exec-bit.sh
-# (full reasoning, including why the real disk file is checked directly
-# and not just git's index, lives there — not duplicated here).
+# Xcode Cloud's ci_scripts must stay executable (§15c). pre-commit is the primary fix (it
+# can fold the change into the commit); this catches a bit lost without a new commit.
 source "$(git rev-parse --show-toplevel)/scripts/fix-ci-scripts-exec-bit.sh"
 if fix_ci_scripts_exec_bit; then
   echo "  Commit this mode change and include it in a follow-up push."
 fi
 
-# Shared by both store-submission call sites below (the native-change
-# branch and the web-only branch's OTA-failure fallback) — extracted per
-# §12 rule 12 rather than duplicating the sync+guard+submit sequence.
-#
-# Why the sync: deploy_google/deploy_huawei package whatever the LAST
-# manual `cap sync` left in android/'s assets — which may be a stale
-# dist/, or worse, a local test sync that baked "channel": "development"
-# into the compiled capacitor.config.json. That's §12.16c's exact
-# failure class (a real release landing on the dev channel), re-entering
-# via stale sync artifacts instead of a lingering `export`. `env -u`
-# guarantees OTA_CHANNEL can't leak in from the calling shell no matter
-# what it has exported. dist/ is guaranteed fresh here — the shared
-# `npm run build` above already ran (this function is only reachable on
-# vite, the branch that builds).
-#
-# Why the grep guard anyway: verify, don't trust the command alone —
-# the same principle as §12.16c's post-sync `cat | grep` check, just
-# automated at the moment it matters most. Tripping it aborts the
-# submission (and, under set -e, the push — consistent with how a
-# fastlane failure here has always behaved), since a channel key
-# appearing despite env -u means something is genuinely wrong.
+# Store submission, shared by the native path and the OTA-failure fallback (§12 rule 12).
+# Re-syncs with `env -u OTA_CHANNEL` so neither a stale sync nor the calling shell can ship a
+# development channel, then verifies the compiled config has no channel key (§12.16c) — a
+# key there aborts the submission (and the push).
 submit_to_stores() {
   echo "→ Syncing native assets (guaranteed-clean OTA channel)..."
   env -u OTA_CHANNEL npx cap sync android
@@ -183,37 +89,19 @@ submit_to_stores() {
     return 1
   fi
 
-  # What's-new release notes (2026-09-06) — pre-commit-hook.sh's own
-  # prompt saved this into $STATE_FILE alongside the version, if a
-  # native-relevant commit happened this session. Genuinely optional:
-  # this function is also called from the web-only OTA-failure fallback
-  # above, where no such state exists at all (not a native-relevant push
-  # to begin with) — degrades gracefully to whatever each store already
-  # has live, rather than requiring one.
+  # What's-new text saved by pre-commit with the version; optional (the OTA-failure fallback
+  # has none — each store then keeps its current notes). §14o, §14p.
   if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
     local whats_new
     whats_new=$(node -p "try { require('$STATE_FILE').whatsNew || '' } catch { '' }" 2>/dev/null || echo "")
     if [ -n "$whats_new" ]; then
       echo "→ Writing release notes for both stores..."
-      # supply (Google Play) reads from this exact, file-based convention
-      # — confirmed directly, no direct inline parameter exists. "ar"
-      # (bare, no region suffix) is Google Play's own standard locale
-      # code for generic Arabic — worth confirming on the first real
-      # submission, same caution this project applies to every other
-      # untested-on-a-real-device assumption. default.txt specifically
-      # (not a version-code-named file): this project's version codes
-      # (yyyyDDDHH) are always unique, never repeated, so a version-
-      # specific file would never be found anyway — default.txt is
-      # correctly used as the fallback on every single release.
+      # Google Play (supply): the file-based changelog; "ar" = generic Arabic; default.txt,
+      # since version codes (yyyyDDDHH) never repeat.
       mkdir -p android/fastlane/metadata/android/ar/changelogs
       printf '%s' "$whats_new" > android/fastlane/metadata/android/ar/changelogs/default.txt
 
-      # huawei_appgallery_connect_update_app_localization (2026-09-07
-      # revision — see the Fastfile's own comment for the full reasoning)
-      # reads from this exact, directory-based convention instead — the
-      # earlier single-file changelog_path attempt is confirmed, via a
-      # real submission, to not populate what AppGallery Connect's own
-      # pre-submission app-info view actually shows.
+      # Huawei: huawei_appgallery_connect_update_app_localization reads this folder (§14p).
       mkdir -p android/fastlane/metadata/huawei/ar
       printf '%s' "$whats_new" > android/fastlane/metadata/huawei/ar/release_notes
     fi
@@ -224,18 +112,9 @@ submit_to_stores() {
   echo "✓ Submitted to Google Play and Huawei AppGallery."
 }
 
-# Reads the release state file pre-commit-hook.sh wrote and PATCHes
-# i360dbc's Version field in Baserow directly — no manual Baserow-console
-# step needed after a real submission. Uses a separate, write-capable
-# BASEROW_WRITE_KEY, deliberately never the client's own VITE_BASEROW_KEY
-# (confirmed read-only, per the security review documented in
-# i360-instructions.md — this write key must never get a VITE_ prefix or
-# it would bake into the public client bundle).
-#
-# Never aborts the push on failure — a Baserow update failing after a
-# real store submission has already succeeded is a real problem worth
-# surfacing loudly, but not one that should make the script look like the
-# whole release failed. Prints the value for manual entry either way.
+# After a real submission: PATCH i360dbc's Version in Baserow from the release state file,
+# with the write-capable BASEROW_WRITE_KEY (never VITE_-prefixed: it would ship in the
+# bundle; §9). Never aborts the push: a failure prints the value for manual entry.
 update_baserow_version() {
   local baserow_version_string
   baserow_version_string=$(node -p "require('$STATE_FILE').baserowVersionString")
@@ -249,11 +128,7 @@ update_baserow_version() {
   fi
 
   echo "→ Updating i360dbc's Version field in Baserow..."
-  # JSON.stringify via node, not hand-built JSON string — same real bug
-  # already caught and fixed in pre-commit-hook.sh's state-file write:
-  # baserow_version_string contains literal backslashes (the requested
-  # yyyy\mm\dd date format), which aren't valid JSON escapes on their own
-  # and would otherwise produce a malformed request body.
+  # JSON built by node (JSON.stringify), never by hand: the string is free text.
   local payload
   payload=$(node -e 'console.log(JSON.stringify({ Version: process.argv[1] }))' "$baserow_version_string")
   local http_code
@@ -271,63 +146,40 @@ update_baserow_version() {
   fi
 }
 
-# Shared with pre-commit-hook.sh — see scripts/native-pattern.sh for why
-# this is sourced rather than duplicated.
+# NATIVE_PATTERN, shared with pre-commit-hook.sh (scripts/native-pattern.sh).
 source "$(git rev-parse --show-toplevel)/scripts/native-pattern.sh"
 IS_NATIVE=false
 if echo "$CHANGED_FILES" | grep -qE "$NATIVE_PATTERN"; then
   IS_NATIVE=true
 fi
 
-# Does this push change anything that could actually affect the BUILT
-# WEB BUNDLE (dist/)? Real gap caught in practice (2026-08-19): the
-# web-only branch below auto-releases to OtaKit unconditionally — so a
-# pure scripts/ or docs change (this hook file itself, a moment ago)
-# still published a new, distinct OTA release even though dist/ would be
-# byte-identical to the previous one. Harmless (OtaKit just republishes
-# the same content under a new timestamp-derived tag) but pure noise —
-# a fresh Downloaded/Applied event on the dashboard for zero real change.
-# Shared with release-to-otakit.sh (2026-09-04) — see
-# scripts/ota-relevant-pattern.sh for the full reasoning and why it's
-# sourced rather than duplicated.
-#
-# Rewritten 2026-10-03 as EXCLUSION lists (see ota-relevant-pattern.sh for
-# why, and for the superset relationship between the two). Both checks go
-# through any_file_outside(), called inside `if` — a bare call's exit 1
-# would trip `set -e`.
+# Could this push change the built web bundle (dist/)? If not, there is nothing to release
+# by OTA. Exclusion lists shared with release-to-otakit.sh (scripts/ota-relevant-pattern.sh,
+# §15f); any_file_outside() is called inside `if`, as a bare exit 1 would trip set -e.
 source "$(git rev-parse --show-toplevel)/scripts/ota-relevant-pattern.sh"
 OTA_RELEVANT=false
 if any_file_outside "$OTA_UNAFFECTED_PATTERN" "$CHANGED_FILES"; then
   OTA_RELEVANT=true
 fi
 
-# Does this push change anything Firebase Hosting could serve differently?
-# (Hosting gate, 2026-10-03.) A strict superset of OTA_RELEVANT — it also
-# counts firebase.json/.firebaserc, tsconfig*.json and package*.json, which
-# the OTA list deliberately sets aside — so OTA_RELEVANT=true always
-# implies DEPLOY_NEEDED=true, and a skipped build can never leave the OTA
-# path below without a dist/. An unknown diff (DIFF_UNKNOWN) always
-# deploys: the safe direction.
+# Could Firebase Hosting serve anything differently? A strict superset of OTA_RELEVANT (it
+# also counts firebase.json, .firebaserc, tsconfig*.json, package*.json), so an OTA release
+# always has a fresh dist/. An unknown list always deploys (§15f).
 DEPLOY_NEEDED=false
 if [ "$DIFF_UNKNOWN" = true ] || any_file_outside "$HOSTING_UNAFFECTED_PATTERN" "$CHANGED_FILES"; then
   DEPLOY_NEEDED=true
 fi
 
-# --- Only vite goes further (the one permanent branch; main became MS5,
-# the AppGyver archive, 2026-10-20). A push to any other branch is left
-# alone: nothing is published, built, deployed or released. ---
+# --- Only vite goes further (the one permanent branch; MS5 is the AppGyver archive). ---
 if [ "$BRANCH" != "vite" ]; then
   echo
   exit 0
 fi
 
-# --- Hub tests (2026-10-26; claude/i360-instructions.md §12.17) — when this push changes
-# anything in hub/ (or the change list is unknown), the hub's own tests run first, from
-# hub/: the Reader, CSE and Daily Reflection logic, the shared book format and search, the
-# indexer, the theme, the Hijri date, and that every built page's scripts parse. A failure
-# stops the push (exit 1) before anything is published or deployed. ESLint runs first (part
-# of npm test). The hub's packages are installed (npm ci) if hub/node_modules is missing or
-# this push changes hub/package-lock.json. About 25 s.
+# --- Hub tests (§12.17): when hub/ changes (or the list is unknown), `npm test` in hub/ —
+# ESLint, then the tests (Reader, CSE, Daily Reflection, book format, search, indexer,
+# theme, Hijri, built pages parse). A failure stops the push. `npm ci` first if
+# hub/node_modules is missing or hub/package-lock.json changed. About 25 s.
 if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/'; then
   echo "→ hub/ changed — running the hub's tests..."
   if [ ! -d hub/node_modules ] || printf '%s\n' "$CHANGED_FILES" | grep -qx 'hub/package-lock.json'; then
@@ -353,11 +205,9 @@ if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -q '^hub/
   fi
 fi
 
-# --- App tests (2026-10-30; claude/i360-instructions.md §12.17) — when this push changes the
-# app's code or what its tests run on (src/, vite.config.ts, package.json, package-lock.json,
-# tsconfig*.json) or the change list is unknown: npm test (Vitest, src/**/*.test.ts) before
-# anything is published or deployed; a failure stops the push. The app's packages are
-# installed (npm ci) first if this push changes package-lock.json or Vitest isn't installed.
+# --- App tests (§12.17, §15ab): when src/, vite.config.ts, package*.json or tsconfig*.json
+# change (or the list is unknown), `npm test` (Vitest) — a failure stops the push. `npm ci`
+# first if package-lock.json changed or Vitest isn't installed.
 if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -qE '^(src/|vite\.config\.ts$|package(-lock)?\.json$|tsconfig[^/]*\.json$)'; then
   echo "→ App code changed — running the app's tests..."
   if [ ! -x node_modules/.bin/vitest ] || printf '%s\n' "$CHANGED_FILES" | grep -qx 'package-lock.json'; then
@@ -379,23 +229,11 @@ if [ "$DIFF_UNKNOWN" = true ] || printf '%s\n' "$CHANGED_FILES" | grep -qE '^(sr
   fi
 fi
 
-# --- Hub Workers (merge sprint 2, 2026-10-21; claude/i360-hub.md §2) —
-# replaces the hub's two publish workflows (§12.17). When this push
-# changes hub/theme/ or hub/hijri/, that Worker is checked and published
-# from hub/, before any deploy (every page loads theme.css live, so the
-# theme goes first). Each check uses Node alone — no npm ci needed — and
-# the publish is hub/package.json's own publish-* script, so the pinned
-# wrangler version is written in exactly one place (it runs through npx:
-# still no npm ci needed).
-#   - A failing CHECK stops the push (exit 1): nothing is pushed or
-#     published, so the repo and the live Worker can't disagree over a
-#     broken change. Fix, commit, push again.
-#   - A failing PUBLISH (network, token) only warns, with the manual
-#     command: the change itself is fine, only its publication waits.
-# Credentials: CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID in .env, read
-# in a subshell (never VITE_-prefixed). Without them wrangler would try an
-# interactive browser login inside the hook, so a missing token skips the
-# publish with a warning instead.
+# --- Hub Workers (i360-hub.md §2): a changed hub/theme/ or hub/hijri/ is checked, then
+# published from hub/ with its own publish-* script (wrangler pinned there once), before any
+# deploy (pages load theme.css live). A failing CHECK stops the push, so repo and Worker
+# never disagree; a failing PUBLISH only warns. Cloudflare values come from .env in a
+# subshell; without them the publish is skipped (wrangler would start a browser login).
 publish_hub_worker() {   # <name> <hub/package.json publish script> <check command, run in hub/>
   local name="$1" script="$2" check="$3"
   local manual="cd hub && set -a && source ../.env && set +a && npm run $script"
@@ -434,16 +272,9 @@ else
   fi
 fi
 
-# Build once, shared by Firebase deploy below and OTA further down —
-# avoids building dist/ twice for the same push.
-#
-# Gated (2026-10-03): it builds when DEPLOY_NEEDED, or when IS_NATIVE
-# (the native path's submit_to_stores relies on this build having run,
-# even if the preview deploy itself is skipped). A skipped build leaves
-# local dist/ untouched. That is safe because nothing below uses it in
-# that case (OTA_RELEVANT implies DEPLOY_NEEDED), but §15b's rule still
-# holds for MANUAL deploys: always `npm run build` first, never trust
-# whatever dist/ holds.
+# Build once, for the deploys and OTA below — when hosting-relevant, or native (the store
+# path needs dist/). Without a build, nothing below uses dist/; a manual deploy still
+# builds first (§15b).
 BUILT=false
 if [ "$DEPLOY_NEEDED" = true ] || [ "$IS_NATIVE" = true ]; then
   npm run build
@@ -452,27 +283,13 @@ else
   echo "→ No hosting-relevant files changed — skipping build and deploy."
 fi
 
-# --- Releasing to users (2026-10-21, §15r): automatic for what nobody sees,
-# asked for what users see — the same rule for the web and for phones.
-#   - The preview is a CHECK: it deploys automatically, and a failure stops
-#     the push — nothing is released yet, and the question below
-#     would otherwise ask about a build that couldn't be looked at.
-#   - Then ONE question releases this same fresh build (§15b) everywhere it
-#     applies: the web, plus phones by OTA when this is a web-only change
-#     that affects the bundle (OTA-relevant implies hosting-relevant, so a
-#     phones-only form never occurs). One answer for both, so the website
-#     and the app can never silently drift apart.
-#   - A release only WARNS when it fails (the push continues, its manual
-#     command is printed); each release is attempted on its own.
-#   - Native changes keep their own store and OTA prompts further down (a
-#     native change can't reach phones by OTA alone): for them this
-#     question covers the web only.
-# The preview channel is created with --expires 30d (Firebase's maximum)
-# and every deploy renews it, so it can lapse after 30 days with no
-# hosting-relevant push. Deliberately not engineered around: the next
-# relevant push recreates it (the URL's random suffix will change), and a
-# manual refresh is one line:
-#   npm run build && firebase hosting:channel:deploy pwa-test --expires 30d
+# --- Releasing to users (§15r). The preview deploys automatically and is a CHECK (a failure
+# stops the push). Then ONE question releases this same build to the web and, for a
+# web-only change that affects the bundle, to phones by OTA — so the website and the app
+# never drift apart. A failed release only warns; each is attempted on its own. Native
+# changes ask about stores and OTA separately below, so here only the web is named.
+# The preview channel (--expires 30d, Firebase's maximum) lapses after 30 days without a
+# hosting-relevant push; the next one recreates it (new URL suffix).
 OTA_WITH_RELEASE=false
 if [ "$IS_NATIVE" = false ] && [ "$OTA_RELEVANT" = true ]; then
   OTA_WITH_RELEASE=true
@@ -513,43 +330,16 @@ elif [ "$IS_NATIVE" = true ]; then
   echo "→ No hosting-relevant files changed — skipping preview deploy (the build above still ran, for the native path)."
 fi
 
-# Strip PWA-store-only assets (2026-09-12) — screenshots exist solely
-# for the web manifest's own install-prompt/store-listing context
-# (Microsoft Store via PWABuilder); never displayed anywhere in the
-# app's own UI on any platform, unlike the icons (genuinely used
-# in-app via Home.tsx on every platform, so those stay). Both the
-# native apk/aab (via cap sync below) and the OTA bundle (via
-# release-to-otakit.sh, further down) independently reuse this exact
-# dist/ — done here, after the web deploy above already shipped the
-# full dist/ with screenshots intact, but before either downstream
-# path reuses it, so neither one carries image weight no installed
-# native app ever actually needs.
-#
-# Only when THIS push built dist/ (2026-10-03). With the hosting gate a
-# push can skip the build entirely; stripping then would silently modify
-# whatever dist/ is on disk (one built by hand for a local preview or a
-# web zip, say) and announce a native sync/OTA that isn't going to
-# happen. Nothing downstream needs dist/ when no build ran: the native
-# path always builds (IS_NATIVE), and OTA_RELEVANT implies DEPLOY_NEEDED.
+# Screenshots are for the web manifest only (Microsoft Store, §15b): the web already shipped
+# them; the store build and the OTA bundle reuse dist/ without them. Only when this push
+# built dist/ — never touch a dist/ built by hand.
 if [ "$BUILT" = true ] && [ -d dist/assets/screenshots ]; then
   echo "→ Stripping PWA-only screenshots from dist/ before native sync/OTA..."
   rm -rf dist/assets/screenshots
 fi
 
-# otakit is a standalone CLI, not part of Vite's build — it has no
-# awareness of .env at all unless we explicitly load it. Vite itself
-# reads .env internally during npm run build above, but that's a
-# separate mechanism that doesn't export anything to the shell. Runs
-# once here, before either branch below, since both may call otakit —
-# a real bug caught while extracting scripts/release-to-otakit.sh: this
-# used to live only inside the web-only branch, so the native branch's
-# OTA release call had no OTAKIT_TOKEN available at all unless the
-# calling shell happened to already have it from something else.
-#
-# Gated (2026-10-03): every consumer — otakit itself, and submit_to_stores'
-# Baserow update (BASEROW_WRITE_KEY etc.) — sits behind IS_NATIVE or
-# OTA_RELEVANT, so a push that can reach neither no longer sources .env
-# or installs a global CLI it will never use.
+# otakit and the Baserow update need .env's values exported (Vite's own reading of .env
+# exports nothing); only when something below can use them.
 if [ "$IS_NATIVE" = true ] || [ "$OTA_RELEVANT" = true ]; then
   if [ -f .env ]; then
     set -a
@@ -565,18 +355,9 @@ fi
 
 if [ "$IS_NATIVE" = false ]; then
   if [ "$OTA_RELEVANT" = false ]; then
-    # Nothing in this push could change dist/'s actual contents (see
-    # OTA_UNAFFECTED_PATTERN above) — deliberately distinct from "tried and
-    # failed" below: this is "nothing to ship," so no store-submission
-    # fallback offer here, that fallback exists for a genuine failed
-    # release, not a skipped one.
+    # Nothing to ship (not a failure), so no store fallback is offered.
     if [ "$DIFF_UNKNOWN" = true ]; then
-      # Not "nothing changed": the list is unknown (see the fallback at the
-      # top). Same behavior as before — no automatic release — with an
-      # honest message and the hook's own manual commands, reused verbatim.
-      # (The native branch's identical skip line below needs no such case:
-      # it is unreachable with an unknown diff, since an empty list can
-      # never match NATIVE_PATTERN.)
+      # Unknown list: no automatic release; the manual commands instead.
       echo "→ Changed files unknown — native submission and OTA release were not"
       echo "  attempted automatically. If this push needs them, run manually:"
       echo "    npm run build && rm -rf dist/assets/screenshots && env -u OTA_CHANNEL npx cap sync android"
@@ -586,18 +367,13 @@ if [ "$IS_NATIVE" = false ]; then
       echo "→ No web-bundle-relevant files changed — skipping OTA release."
     fi
   elif [ "$RELEASE_TO_USERS" != true ]; then
-    # The one release question above was answered "n": phones stay as they
-    # are, exactly like the web (its manual commands were printed there).
+    # Declined above: phones stay as they are, like the web.
     echo "→ Web and phones not released (declined above)."
   else
     echo "→ Releasing to phones (OTA)..."
 
-    # scripts/release-to-otakit.sh's own non-zero exit (genuine failure
-    # after its internal retry) must not kill this script under set -e: a
-    # failed release only warns, like the web's. This call site also keeps
-    # one fallback the web has no equivalent of — phones have a second
-    # delivery route for the same bundle (a store binary), so a
-    # persistently-failing OTA server can still be worked around.
+    # A failed OTA only warns (set -e must not end the push) and offers the second route for
+    # the same bundle: a store submission.
     if ! I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh; then
       echo "⚠ Phones NOT released by OTA (the push continues)."
       LC_ALL=C.UTF-8 read -p "  Submit to stores instead (Google Play + Huawei AppGallery)? (y/N) " -n 1 -r < /dev/tty
@@ -617,14 +393,8 @@ else
   echo "  (Linux) can never run Xcode/xcodebuild, so iOS is never part of"
   echo "  this automated flow, regardless of what changed."
 
-  # Consumes the state file pre-commit-hook.sh writes when it detects the
-  # same native-relevant condition and prompts for a release version.
-  # Re-validated here, not just trusted — the state file's recorded
-  # version must still match current package.json (a commit could have
-  # been amended/reset since it was written). If invalid or absent
-  # (e.g. hooks bypassed with --no-verify, or the native-relevant commit
-  # predates this feature), gracefully degrades to the fully manual
-  # prompt below rather than failing.
+  # The release state written by pre-commit: used only if its version still matches
+  # package.json (a commit may have been amended or reset); otherwise the manual prompt.
   STATE_FILE="$(git rev-parse --show-toplevel)/.git/i360-pending-release.json"
   HAS_VALID_STATE=false
   if [ -f "$STATE_FILE" ]; then
@@ -641,11 +411,8 @@ else
     fi
   fi
 
-  # Read from /dev/tty explicitly, not stdin — git hooks receive ref info
-  # via stdin (already consumed by the while-read loop above), so a plain
-  # `read` here would hit EOF immediately and fail under set -e, silently
-  # blocking the push. This was a real bug caught in actual use, not
-  # something the earlier file-detection tests could have revealed.
+  # Prompts read /dev/tty: stdin was the pushed refs, already read (a plain `read` would hit
+  # EOF and fail under set -e).
   LC_ALL=C.UTF-8 read -p "  Submit to Google Play + Huawei AppGallery? (y/N) " -n 1 -r < /dev/tty
   echo
   STORE_SUBMISSION_DECLINED=false
@@ -667,35 +434,13 @@ else
     fi
   fi
 
-  # Deliberately a SEPARATE question from store submission above, not
-  # nested inside it — a real bug caught in actual use: OTA release was
-  # originally coupled to the store-submission "y", so declining that
-  # prompt (for any reason — maybe this push has nothing store-relevant
-  # in it) silently skipped shipping the JS/web update too, even though
-  # OTA exists specifically to reach users WITHOUT needing store review
-  # at all. The two are conceptually unrelated risk decisions and must
-  # stay independently answerable.
-  #
-  # Gated behind OTA_RELEVANT (same check the web-only branch already
-  # applies above) — a real gap caught in practice (2026-08-27): a
-  # native-only change (e.g. proguard-rules.pro alone) was still asking
-  # this unconditionally. Answering yes republished dist/ byte-identical
-  # to what was already live, under a new timestamp tag — harmless, but
-  # a confusing no-op release with nothing to actually ship.
+  # OTA is its own question, never tied to the store answer (OTA reaches users without store
+  # review), and only when the bundle changed.
   if [ "$OTA_RELEVANT" = false ]; then
     echo "→ No web-bundle-relevant files changed — skipping OTA release."
   else
-    # Real, confirmed risk (2026-09-06), not a hypothetical: a JS change
-    # tied to a native-side value (e.g. capacitor.config.ts's
-    # appReadyTimeout) can look completely fine here, yet genuinely
-    # misbehave against an older native build's own, different
-    # compiled-in value — a device still on the previous binary would
-    # apply new JS that assumes a native change it was never actually
-    # given. This warning does NOT couple the two questions back
-    # together (that coupling was deliberately removed once already, see
-    # the comment above) — it only makes a real risk visible right
-    # before the same, still-independently-answerable question, for the
-    # one specific combination where it actually applies.
+    # Warn when the stores were declined: JS that relies on a native change must not reach
+    # phones still on the old binary (§14o).
     if [ "$STORE_SUBMISSION_DECLINED" = true ]; then
       echo "  ⚠ Store submission was declined above, but this push also"
       echo "    changes web-bundle-relevant files. If any of those changes"
@@ -707,9 +452,7 @@ else
     echo
     if is_yes "$REPLY"; then
       echo "→ Releasing current bundle to OtaKit (runtimeVersion-tagged)..."
-      # This script has set -e active — the shared script's own non-zero
-      # exit (on genuine failure after its internal retry) must not be
-      # allowed to abort the whole push. || true absorbs that here.
+      # || true: a failed OTA must not end the push under set -e.
       I360_DEFER_TAG_PUSH_UNTIL_PID=$PPID bash scripts/release-to-otakit.sh || true
     else
       echo "  Skipped. Run manually when ready:"
