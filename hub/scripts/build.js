@@ -14,6 +14,7 @@
 //
 // Placeholders, each filled once:
 //   /*@@MAIN@@*/         the page's bundled script
+//   /*@@PAGE_CHROME@@*/  the toolbar buttons every page shares (src/page-chrome.css)
 //   /*@@THEME_FALLBACK@@*/  the shared theme's colours, plain (theme/fallbacks.js),
 //                        used until theme.css arrives and whenever it can't
 //   /*@@THEME_EARLY@@*/  theme/early.js: the saved theme before anything is drawn
@@ -44,6 +45,10 @@ const theme = {
   fallback: fallbackCss(read('theme/site/theme.css')),
   early: read('theme/early.js')
 };
+
+// The toolbar buttons every page shares, inlined into each page's <style>.
+const pageChrome = read('src/page-chrome.css').trim();
+if (/<\/style/i.test(pageChrome)) throw new Error('src/page-chrome.css contains </style');
 
 // One page's script: src/<page>/main.js and what it imports, as one plain script.
 // The theme loader (an ES module, also served as one) finds theme.css and the fonts
@@ -82,6 +87,7 @@ function fill(html, placeholder, value) {
 function buildPage({ src, out, main, connectSrc, fills = [] }) {
   let html = read(src);
   for (const [placeholder, value] of fills) html = fill(html, placeholder, value);
+  html = fill(html, '/*@@PAGE_CHROME@@*/', pageChrome);
   html = fill(html, '/*@@THEME_FALLBACK@@*/', theme.fallback);
   html = fill(html, '/*@@THEME_ORIGIN@@*/', THEME_ORIGIN);
   html = fill(html, '/*@@THEME_EARLY@@*/', theme.early);

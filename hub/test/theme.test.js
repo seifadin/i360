@@ -27,7 +27,8 @@ test('theme.css: light, sepia and dark set the same colours', () => {
   const by = Object.fromEntries(blocks.map(b => [b.selector, b.vars]));
   const light = by[':root, [data-theme="light"]'];
   assert.ok(light && by['[data-theme="sepia"]'] && by['[data-theme="dark"]']);
-  const colours = Object.keys(light).filter(k => !k.startsWith('--i360-font'));
+  // Set once, for every theme (in the light block, which is also :root): the fonts and the toolbars' height.
+  const colours = Object.keys(light).filter(k => !k.startsWith('--i360-font') && k !== '--i360-toolbar-h');
   for (const sel of ['[data-theme="sepia"]', '[data-theme="dark"]']) {
     assert.deepEqual(Object.keys(by[sel]).sort(), colours.slice().sort(), sel);
   }

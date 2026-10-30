@@ -44,6 +44,7 @@
   --i360-page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
   --i360-font: 'Amiri', 'Traditional Arabic', serif;
   --i360-font-quran: 'Amiri Quran', 'Amiri', serif;
+  --i360-toolbar-h: 2.5rem;
 }
 [data-theme="sepia"] {
   color-scheme: light;
@@ -181,7 +182,6 @@
       --page-min: 15rem;            /* narrowest page */
       --text-scale: 1;              /* text size, separate from zoom */
       --container-gap: clamp(0.75rem, 2vw, 1.5rem);
-      --toolbar-h: 3rem;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -199,6 +199,62 @@
     }
 
     /* ---------- Toolbar ---------- */
+    /* The toolbar buttons of the hub pages (the Reader, the i360 CSE, Daily Reflection): one size and
+   shape on every page (i360-hub.md §10 "Toolbars"). scripts/build.js inlines this file into each
+   page's own <style>, before the page's rules, so a page can still adjust a button for itself.
+   Colours stay in each page: they differ from page to page in the sepia and dark themes. */
+:root {
+  --toolbar-h: var(--i360-toolbar-h);   /* the bar: the shared theme's, as the app's */
+  --toolbar-btn-h: 2rem;    /* a button in it */
+}
+
+.toolbar-btn {
+  position: relative;       /* for the tap area below */
+  height: var(--toolbar-btn-h);
+  min-width: var(--toolbar-btn-h);
+  padding: 0 0.4rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: background-color 0.15s, color 0.15s;
+}
+.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
+.toolbar-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
+.toolbar-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* The numerals button shows digits (٣ / 3), the same width whichever are shown. */
+.numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
+
+.tb-title { font-weight: 700; font-size: 1.05rem; }
+
+/* The tap area, not drawn: each button in the bar reaches from the bar's top edge to its bottom, so
+   it stays the bar's full height whatever the two heights above are. Sideways the buttons sit close
+   together, so it stays the button's own width. Not in the Reader's ⋮ menu, whose rows are close together. */
+:is(.toolbar, .topbar) .toolbar-btn::after {
+  content: '';
+  position: absolute;
+  inset: calc((var(--toolbar-btn-h) - var(--toolbar-h)) / 2) 0;
+}
+.more-menu .toolbar-btn::after { content: none; }
     .toolbar {
       position: relative;
       background-color: var(--toolbar-bg);
@@ -237,8 +293,6 @@
     /* The arrows keep their places whatever the language: in an RTL book the left one is "next". */
     #group-nav { direction: ltr; }
     .tb-title {
-      font-weight: 700;
-      font-size: 1.05rem;
       color: var(--heading);
       white-space: nowrap;
       overflow: hidden;
@@ -248,31 +302,13 @@
       flex-shrink: 0;
     }
 
-    .toolbar-btn {
-      background: transparent;
-      border: none;
-      color: var(--icon-color);
-      height: 2rem;
-      min-width: 2rem;
-      padding: 0 0.4rem;
-      border-radius: 0.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-family: inherit;
-      transition: background-color 0.15s, color 0.15s;
-      flex-shrink: 0;
-    }
+    .toolbar-btn { color: var(--icon-color); }
     .toolbar-btn:hover:not(:disabled) { background-color: var(--hover-bg); color: var(--icon-hover); }
-    .toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
-    .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
     .toolbar-btn[aria-pressed="true"] { background-color: var(--active-bg); color: var(--icon-hover); }
 
-    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
-    .toolbar-btn svg, .status-icon svg, .floating-btn svg, .panel-btn svg {
+    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js.
+       The toolbar's own are in src/page-chrome.css. */
+    .status-icon svg, .floating-btn svg, .panel-btn svg {
       width: 1.15rem;
       height: 1.15rem;
       stroke: currentColor;
@@ -287,7 +323,6 @@
 
     .text-size-btn { font-weight: 700; font-size: 1.05rem; font-family: 'Amiri', serif; gap: 0.05rem; }
     .text-size-btn small { font-size: 0.75em; font-weight: 700; }
-    .numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
 
     .divider { width: 1px; height: 1.25rem; background-color: var(--toolbar-border); margin: 0 0.2rem; flex-shrink: 0; }
 

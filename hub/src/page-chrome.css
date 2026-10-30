@@ -1,0 +1,56 @@
+/* The toolbar buttons of the hub pages (the Reader, the i360 CSE, Daily Reflection): one size and
+   shape on every page (i360-hub.md §10 "Toolbars"). scripts/build.js inlines this file into each
+   page's own <style>, before the page's rules, so a page can still adjust a button for itself.
+   Colours stay in each page: they differ from page to page in the sepia and dark themes. */
+:root {
+  --toolbar-h: var(--i360-toolbar-h);   /* the bar: the shared theme's, as the app's */
+  --toolbar-btn-h: 2rem;    /* a button in it */
+}
+
+.toolbar-btn {
+  position: relative;       /* for the tap area below */
+  height: var(--toolbar-btn-h);
+  min-width: var(--toolbar-btn-h);
+  padding: 0 0.4rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: background-color 0.15s, color 0.15s;
+}
+.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
+.toolbar-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
+.toolbar-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* The numerals button shows digits (٣ / 3), the same width whichever are shown. */
+.numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
+
+.tb-title { font-weight: 700; font-size: 1.05rem; }
+
+/* The tap area, not drawn: each button in the bar reaches from the bar's top edge to its bottom, so
+   it stays the bar's full height whatever the two heights above are. Sideways the buttons sit close
+   together, so it stays the button's own width. Not in the Reader's ⋮ menu, whose rows are close together. */
+:is(.toolbar, .topbar) .toolbar-btn::after {
+  content: '';
+  position: absolute;
+  inset: calc((var(--toolbar-btn-h) - var(--toolbar-h)) / 2) 0;
+}
+.more-menu .toolbar-btn::after { content: none; }

@@ -70,11 +70,12 @@
     .scroller:focus { outline: none; }
 
     /* ---------- Toolbar ---------- */
+    /*@@PAGE_CHROME@@*/
     .toolbar {
       flex-shrink: 0;
       background-color: var(--toolbar-bg);
       border-bottom: 1px solid var(--toolbar-border);
-      min-height: 3rem;
+      min-height: var(--toolbar-h);
       padding-top: env(safe-area-inset-top);
       /* iPhone: clear of the rounded corners and the notch in landscape (viewport-fit=cover) */
       padding-left: calc(0.75rem + env(safe-area-inset-left));
@@ -85,33 +86,11 @@
       z-index: 10;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    .brand { flex: 1; min-width: 0; text-align: end; font-weight: 700; font-size: 1rem; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tb-title { flex: 1; min-width: 0; text-align: end; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 
-    .toolbar-btn {
-      background: transparent;
-      border: none;
-      color: var(--icon-color);
-      height: 2rem;
-      min-width: 2rem;
-      padding: 0 0.4rem;
-      border-radius: 0.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-family: inherit;
-      transition: background-color 0.15s, color 0.15s;
-    }
+    .toolbar-btn { color: var(--icon-color); }
     .toolbar-btn:hover { background-color: var(--hover-bg); color: var(--icon-hover); }
-    .toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
-    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
-    .toolbar-btn svg {
-      width: 1.15rem; height: 1.15rem;
-      stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
-    }
-    .numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
 
     /* ---------- Search ---------- */
     main { width: var(--page-w); max-width: 100%; margin: 0 auto; padding: var(--gap) 1rem calc(var(--gap) + env(safe-area-inset-bottom)); }
@@ -237,6 +216,8 @@
     .more-btn:hover { background: var(--hover-bg); }
     .more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
     .more-btn.icon-btn { display: inline-flex; align-items: center; padding: 0.2rem 0.45rem; }
+    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js.
+       The toolbar's own are in src/page-chrome.css. */
     .icon-btn svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
   </style>
 </head>
@@ -250,7 +231,7 @@
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
       <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
     </div>
-    <div class="brand">البحث في <bdi dir="ltr">i360&lrm;إ</bdi></div>
+    <div class="tb-title">البحث في <bdi dir="ltr">i360&lrm;إ</bdi></div>
     <button class="toolbar-btn" id="btn-close" type="button" aria-label="إغلاق" title="إغلاق" hidden><svg data-lucide="x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
   </header>
 

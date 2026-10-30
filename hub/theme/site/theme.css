@@ -1,9 +1,9 @@
 /* i360 shared theme — https://theme.i36o.workers.dev/theme.css
  *
  * The one source of the colours and fonts of the i360 apps (the Reader, the
- * CSE, Daily Reflection, the i360إ app). Variables and fonts only: no layout, no
- * selectors other than the themes. Each app decides which variable colours
- * what.
+ * CSE, Daily Reflection, the i360إ app), and of the one size they share: the
+ * toolbars' height. Variables and fonts only: no layout, no selectors other
+ * than the themes. Each app decides which variable colours what.
  *
  * Themes: light (the i360إ app's look), sepia and dark (the Reader's own).
  * "system" is not a palette: theme-loader.js turns it into light or dark from
@@ -57,6 +57,7 @@
   --i360-page-shadow: 0 4px 6px -1px rgba(0, 16, 207, 0.08), 0 2px 4px -1px rgba(0, 16, 207, 0.05);
   --i360-font: 'Amiri', 'Traditional Arabic', serif;
   --i360-font-quran: 'Amiri Quran', 'Amiri', serif;
+  --i360-toolbar-h: 2.5rem;      /* every toolbar: the pages' and the app's bottom bar (40 px, Seif, 2026-10-30) */
 }
 
 [data-theme="sepia"] {

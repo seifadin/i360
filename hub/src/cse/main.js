@@ -42,7 +42,7 @@ function applyNumerals() {
   btnNumerals.title = i360Theme.numeralsLabel(state.numerals);
   btnNumerals.setAttribute('aria-label', btnNumerals.title);
   // The page and the header's name; not what the visitor typed.
-  for (const root of [document.querySelector('.brand'), document.querySelector('main')]) {
+  for (const root of [document.querySelector('.tb-title'), document.querySelector('main')]) {
     i360Theme.convertNumerals(root, { skip: 'form', numerals: state.numerals });
   }
 }
