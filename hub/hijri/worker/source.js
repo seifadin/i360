@@ -21,6 +21,8 @@
      { anchor: {date, h}, previous: {date, h} | null, offset, checkedAt, error }
    anchor = the last date confirmed from Dar al-Ifta (date = Cairo civil date). */
 
+import { fetchWithTimeout } from '../../src/net.js';
+
 const CAIRO = 'Africa/Cairo';
 const STATE_KEY = 'state';
 const CHECK_FROM_HOUR = 12;          // Cairo hour from which Dar al-Ifta is asked (days 28–2); set from observation
@@ -102,12 +104,8 @@ function cairoHour(now) {
 function createSource({ calc, fetch, kv }) {
   if (!calc || !fetch || !kv) throw new Error('createSource: calc, fetch and kv are required');
 
-  async function get(url, ms) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), ms);
-    try { return await fetch(url, { signal: ctrl.signal, headers: HEADERS, redirect: 'follow' }); }
-    finally { clearTimeout(timer); }
-  }
+  // The passed-in fetch, with a time limit for the answer (src/net.js, shared with the hub pages).
+  const get = (url, ms) => fetchWithTimeout(url, { timeout: ms, fetch, headers: HEADERS, redirect: 'follow' });
 
   // Dar al-Ifta's date as shown now: the site first (it also shows its Gregorian date), then the API.
   async function readDar(cairoToday) {

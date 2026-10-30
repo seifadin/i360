@@ -10,15 +10,16 @@ export const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * @template [T=Response]
  * @param {string} url
- * @param {RequestInit & { timeout?: number }} [init]
+ * @param {RequestInit & { timeout?: number, fetch?: typeof fetch }} [init]  fetch: another fetch to use (a
+ *   test's stand-in, a Worker's own); the browser's by default
  * @param {(response: Response) => T | Promise<T>} [read]
  * @returns {Promise<T>}
  */
-export async function fetchWithTimeout(url, { timeout = 8000, ...options } = {}, read = (response) => /** @type {any} */ (response)) {
+export async function fetchWithTimeout(url, { timeout = 8000, fetch: send = globalThis.fetch, ...options } = {}, read = (response) => /** @type {any} */ (response)) {
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
   const timer = setTimeout(() => { if (controller) controller.abort(); }, timeout);
   try {
-    return await read(await fetch(url, { ...options, signal: controller ? controller.signal : undefined }));
+    return await read(await send(url, { ...options, signal: controller ? controller.signal : undefined }));
   } finally {
     clearTimeout(timer);
   }

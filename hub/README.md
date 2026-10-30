@@ -23,13 +23,18 @@ is deployed.
 
 ## Layout
 ```
-src/reader.src.html + src/reader/main.js   the Reader        → ../public/md/index.html
+src/reader.src.html + src/reader/*.js      the Reader        → ../public/md/index.html
+                      (main.js wires its parts; fold.js: what its toolbar folds, in which order)
 src/cse.src.html + src/cse/main.js         the i360 CSE      → ../public/cse/index.html
 src/day.src.html + src/day/main.js         Daily Reflection «التأمل اليومي» → ../public/day/index.html
 src/locales.js        every page's interface text, one section per page, all its languages
-src/page-chrome.js    shared by the pages: $, in-app check, the ✕ back to the app, theme icons
-src/storage.js        createStore(prefix): settings on the device, as JSON, never throwing
-src/net.js            fetchWithTimeout(), fetchJson() (time limit, bounded retries)
+src/page-chrome.css   every toolbar (the app's too: it imports this file), the pages' base, the keyboard
+                      focus ring, every Lucide icon's style — inlined into each page by the build
+src/page-chrome.js    shared by the pages: $, in-app check, the ✕ back to the app, theme icons, and
+                      fittingToolbar() (a bar that folds and widens its buttons by measurement)
+src/storage.js        createStore(prefix): get / set / remove settings on the device, as JSON, never throwing
+src/net.js            fetchWithTimeout(), fetchJson() (time limit, bounded retries), wait() — also used by
+                      the app (@i360/net), the Hijri Worker, the CSE indexer and scripts/day-cities.js
 src/frame.js          oncePerFrame(): layout work at most once per frame
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites

@@ -16,6 +16,7 @@
 // language (listed at the end of --names). The time-zone database is public domain.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { wait } from '../src/net.js';
 
 const OUT = join(import.meta.dirname, '..', 'src', 'day-cities.json');
 const ZONEINFO = '/usr/share/zoneinfo';
@@ -89,7 +90,7 @@ async function search(name, lang) {
     const r = await fetch(url).catch((e) => ({ ok: false, status: e.message }));
     if (r.ok) return (await r.json()).results || [];
     if (attempt === 4) throw new Error(`Open-Meteo: ${r.status} for ${name} (${lang})`);
-    await new Promise((res) => setTimeout(res, 2000 * attempt));
+    await wait(2000 * attempt);
   }
 }
 
@@ -110,14 +111,14 @@ async function names() {
   let done = 0;
   for (const [tz, z] of todo) {
     const en = await search(SEARCH_AS[tz] || z.n.en, 'en');
-    await new Promise((r) => setTimeout(r, PAUSE_MS));
+    await wait(PAUSE_MS);
     const place = pick(en, tz, z);
     if (!place) { unmatched.push(tz); z.unmatched = true; continue; }
     z.n.en = place.name;
     delete z.unmatched;
     for (const lang of LANGS.slice(1)) {
       const found = (await search(place.name, lang)).find((p) => p.id === place.id);
-      await new Promise((r) => setTimeout(r, PAUSE_MS));
+      await wait(PAUSE_MS);
       z.n[lang] = found ? found.name : place.name;   // Open-Meteo itself gives the English name when it has none
     }
     if (++done % 25 === 0) { save(data); console.log(`  ${done}/${todo.length}`); }

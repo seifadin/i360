@@ -11,6 +11,13 @@
    row spans the bar. Inside it: .tb-start (the settings: ⋮ where there is one · theme · numerals ·
    language), .tb-main (a middle that grows, its groups centred), .tb-title, .tb-end; .tb-group (a
    group of buttons), .divider, and .toolbar-menu (the ⋮ menu that opens from the bar). */
+/* The hub pages' base (<body class="i360-page">): every element sized the same way and with no
+   built-in spacing, and `hidden` always wins. :where() adds no weight, so each page's own rules still
+   win, exactly as when every page wrote these itself; Daily Reflection gets the same from Tailwind's
+   base. The app has no such class, so it never gets them. */
+:where(.i360-page), :where(.i360-page) * { box-sizing: border-box; margin: 0; padding: 0; }
+:where(.i360-page) [hidden] { display: none !important; }
+
 :root {
   /* The theme's values, with the light ones built in for when theme.css hasn't arrived (the pages
      also carry the theme's own copy; the app only these, as with its colours in tailwind.config.ts). */

@@ -21,6 +21,7 @@
 // app's VITE_BASEROW_KEY). Optional: BASEROW_TABLE_SCIENCES (default 193269).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fetchWithTimeout, wait } from '../src/net.js';
 
 const BASEROW_ROWS = 'https://api.baserow.io/api/database/rows/table/';
 const DEFAULT_TABLE = '193269';
@@ -180,20 +181,17 @@ const hostOf = (url) => { try { return new URL(url).host; } catch { return url; 
 async function fetchWithRetry(fetchFn, url, opts = {}) {
   let lastErr;
   for (let attempt = 0; attempt <= RETRIES; attempt++) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
     try {
-      const res = await fetchFn(url, { redirect: 'follow', ...opts, signal: ctrl.signal, headers: { 'User-Agent': USER_AGENT, ...(opts.headers || {}) } });
-      clearTimeout(timer);
+      // A time limit for the answer (src/net.js, shared with the hub pages); the retries are the indexer's own.
+      const res = await fetchWithTimeout(url, { redirect: 'follow', ...opts, timeout: TIMEOUT_MS, fetch: fetchFn, headers: { 'User-Agent': USER_AGENT, ...(opts.headers || {}) } });
       if ((res.status === 429 || res.status >= 500) && attempt < RETRIES) {
-        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+        await wait(1000 * 2 ** attempt);
         continue;
       }
       return res;
     } catch (err) {
-      clearTimeout(timer);
       lastErr = err;
-      if (attempt < RETRIES) await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+      if (attempt < RETRIES) await wait(1000 * 2 ** attempt);
     }
   }
   throw lastErr;

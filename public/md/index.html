@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-ffi/nOcMzH0kNJRPlGmXTczP0XShfBI9XJfg5KJdTl4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-RIEWnbe+8CtfU//udAyri50K9vQoK7qGuPjoau6KFhk='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -151,8 +151,6 @@
       --container-gap: clamp(0.75rem, 2vw, 1.5rem);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    [hidden] { display: none !important; }
 
     body {
       font-family: var(--i360-font);   /* Amiri, from the shared theme */
@@ -179,6 +177,13 @@
    row spans the bar. Inside it: .tb-start (the settings: ⋮ where there is one · theme · numerals ·
    language), .tb-main (a middle that grows, its groups centred), .tb-title, .tb-end; .tb-group (a
    group of buttons), .divider, and .toolbar-menu (the ⋮ menu that opens from the bar). */
+/* The hub pages' base (<body class="i360-page">): every element sized the same way and with no
+   built-in spacing, and `hidden` always wins. :where() adds no weight, so each page's own rules still
+   win, exactly as when every page wrote these itself; Daily Reflection gets the same from Tailwind's
+   base. The app has no such class, so it never gets them. */
+:where(.i360-page), :where(.i360-page) * { box-sizing: border-box; margin: 0; padding: 0; }
+:where(.i360-page) [hidden] { display: none !important; }
+
 :root {
   /* The theme's values, with the light ones built in for when theme.css hasn't arrived (the pages
      also carry the theme's own copy; the app only these, as with its colours in tailwind.config.ts). */
@@ -1453,7 +1458,7 @@ ${body}`;
   }
 
   // src/net.js
-  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => (
+  async function fetchWithTimeout(url, { timeout = 8e3, fetch: send = globalThis.fetch, ...options } = {}, read2 = (response) => (
     /** @type {any} */
     response
   )) {
@@ -1462,7 +1467,7 @@ ${body}`;
       if (controller) controller.abort();
     }, timeout);
     try {
-      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
+      return await read2(await send(url, { ...options, signal: controller ? controller.signal : void 0 }));
     } finally {
       clearTimeout(timer);
     }
