@@ -186,4 +186,4 @@ function splitFootnotes(mdText) {
   return { body: lines.slice(0, sep).join('\n'), notes: out };
 }
 
-export { escapeHtml, toWestern, stripComments, hasVisibleContent, createRenderer, makePage, parseBook, splitFootnotes };
+export { escapeHtml, toWestern, stripComments, hasVisibleContent, createRenderer, parseBook, splitFootnotes };

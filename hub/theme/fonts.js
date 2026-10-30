@@ -8,8 +8,8 @@
 //                                  the Fonts section of theme.css rewritten,
 //                                  the folder before the current one removed
 //
-// npm run push runs the check and, when there's a newer version, the update,
-// the tests and a separate commit before pushing (scripts/push.js).
+// npm run fonts-update runs the check and, when there's a newer version, the update,
+// the tests and a separate commit (scripts/fonts-update.js).
 //
 // Safety check: a new file must have every character its current one has
 // (for Amiri Quran: every Quranic mark), or the update stops.
@@ -212,7 +212,7 @@ async function apply(infos) {
 
 const describe = (i) => `${i.family}: ${i.current || 'none'}${i.newer ? ` → ${i.latest} available` : ' (newest)'}`;
 
-export { PACKAGES, MARK, check, apply, currentVersions, older, fontsSection, rangesFromCss, sectionEntryFromDisk, describe, THEME_CSS, FONTS };
+export { PACKAGES, MARK, check, apply, currentVersions, older, describe, THEME_CSS };
 
 if (process.argv[1] === import.meta.filename) {
   const arg = process.argv[2] || '';
@@ -231,7 +231,7 @@ if (process.argv[1] === import.meta.filename) {
     }
     for (const i of infos) console.log(`Fonts: ${describe(i)}`);
     if (arg === '--strict' && infos.some((i) => i.newer)) {
-      console.log('A newer font is available: run npm run push (or node theme/fonts.js --apply).');
+      console.log('A newer font is available: run npm run fonts-update (or node theme/fonts.js --apply).');
       process.exitCode = 1;
     }
   })().catch((e) => { console.error(`Fonts: update failed — ${e.message}`); process.exitCode = 1; });

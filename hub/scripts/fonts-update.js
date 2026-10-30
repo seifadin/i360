@@ -1,14 +1,11 @@
-// npm run push [-- <git push arguments>]
-//
-// git push, with the fonts kept up to date on the way:
-//   1. ask npm whether Amiri or Amiri Quran has a newer version;
-//   2. if so: download it, safety check, rewrite theme.css (theme/fonts.js),
-//      npm test, and commit it on its own ("Fonts: …"), so it is never mixed
-//      into another change;
-//   3. git push — always, whatever happened in 1–2. Anything that went wrong
-//      there is shown as a warning with its cause, and a half-done font update
-//      is undone first.
-// The push publishes the new fonts too (the pre-push hook publishes the theme Worker).
+// npm run fonts-update — when the monthly fonts check (or npm run fonts-check) reports a
+// newer Amiri or Amiri Quran:
+//   1. ask npm whether either has a newer version;
+//   2. if so: download it, safety check, rewrite theme.css (theme/fonts.js), npm test, and
+//      commit it on its own ("Fonts: …"), so it is never mixed into another change.
+// Anything that goes wrong is shown with its cause, and a half-done update is undone.
+// Nothing is pushed: the next `git push` (from the repo root) carries the commit, and the
+// pre-push hook publishes the theme Worker with the new fonts.
 
 import { execFileSync, spawnSync } from 'child_process';
 import path from 'path';
@@ -18,7 +15,7 @@ const root = path.join(import.meta.dirname, '..');
 const SITE_REL = 'theme/site';
 
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });
-const warn = (msg) => console.log(`\n⚠  ${msg}\n   The push continues without the font update.\n`);
+const fail = (msg) => { console.log(`\n✗  ${msg}\n`); process.exitCode = 1; };
 
 // Undo a font update that didn't finish: theme/site back to the last commit.
 function undo() {
@@ -33,7 +30,7 @@ function undo() {
 async function updateFonts() {
   let infos;
   try { infos = await fonts.check(); } catch (e) {
-    console.log(`Fonts: not checked — ${e.message}`);
+    fail(`Fonts: not checked — ${e.message}`);
     return;
   }
   const newer = infos.filter((i) => i.newer);
@@ -44,7 +41,7 @@ async function updateFonts() {
   console.log(`Fonts: newer version available — ${newer.map((i) => `${i.family} ${i.current} → ${i.latest}`).join(', ')}. Updating…`);
 
   if (git('status', '--porcelain', '--', SITE_REL).trim()) {
-    warn(`Font update not done: ${SITE_REL} has uncommitted changes. Commit or undo them, then run npm run push again.`);
+    fail(`Font update not done: ${SITE_REL} has uncommitted changes. Commit or undo them, then run npm run fonts-update again.`);
     return;
   }
 
@@ -65,12 +62,8 @@ async function updateFonts() {
     console.log(`Fonts: committed "${msg}"`);
   } catch (e) {
     undo();
-    warn(`Font update failed — ${step}${e.message}`);
+    fail(`Font update failed — ${step}${e.message}`);
   }
 }
 
-(async () => {
-  await updateFonts();
-  const r = spawnSync('git', ['push', ...process.argv.slice(2)], { cwd: root, stdio: 'inherit' });
-  process.exitCode = r.status === null ? 1 : r.status;
-})();
+await updateFonts();

@@ -193,20 +193,10 @@ function applyBlockDirs(root, mode, fallback) {
   }
 }
 
-// Show the book's digits in the chosen numerals. Code and real links keep theirs.
+// Show the book's digits in the chosen numerals. Code and real links keep theirs (footnote
+// links are converted). Same length: search positions stay valid.
 function applyNumerals(root) {
-  const conv = (v) => i360Theme.toNumerals(v, state.numerals);
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (n) => (n.parentElement && n.parentElement.closest('pre, code, a:not(.fn-ref):not(.fn-back)'))
-      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
-  });
-  let node;
-  while ((node = walker.nextNode())) {
-    const v = node.nodeValue;
-    if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) continue;
-    const nv = conv(v);
-    if (nv !== v) node.nodeValue = nv;   // same length: search positions stay valid
-  }
+  i360Theme.convertNumerals(root, { skip: 'pre, code, a:not(.fn-ref):not(.fn-back)', numerals: state.numerals });
 }
 
 function wrapQuran(root) {

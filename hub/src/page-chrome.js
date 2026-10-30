@@ -1,7 +1,10 @@
 // What the frame of every hub page shares (Daily Reflection, the Reader, the CSE;
-// claude/i360-hub.md §10 "Toolbars"): whether it runs inside the installed i360إ app,
+// claude/i360-hub.md §10 "Toolbars"): `$`, whether it runs inside the installed i360إ app,
 // the ✕ that returns to the app's home, and the theme button's icons. Bundled into
 // each page by scripts/build.js.
+
+// A page element by its id.
+export const $ = (id) => document.getElementById(id);
 
 // Inside the installed i360إ app: Capacitor's bridge is in every page it serves.
 export const IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());

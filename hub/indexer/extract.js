@@ -306,4 +306,4 @@ async function webPages(fetchFn, src) {
   return { pages: [{ label: '', vol: null, paras: htmlToParas(body) }], title: title ? decodeEntities(title.trim()) : null, fingerprint: res.headers.get('etag') ? `etag:${res.headers.get('etag')}` : null };
 }
 
-export { htmlToParas, decodeEntities, bookPages, wikimediaPages, webPages, archivePages, archiveFingerprint, djvuXmlPages, pageLabels, translatedWiki, translatedWikiPages };
+export { htmlToParas, bookPages, wikimediaPages, webPages, archivePages, archiveFingerprint, pageLabels, translatedWiki, translatedWikiPages };

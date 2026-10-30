@@ -99,4 +99,4 @@ function versionString(buf) {
   return null;
 }
 
-export { readTables, codePoints, versionString };
+export { codePoints, versionString };

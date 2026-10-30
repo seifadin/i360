@@ -1,8 +1,8 @@
 # i360 theme: monthly reminder for newer Amiri / Amiri Quran fonts.
 #
-# npm run push updates the fonts whenever you push; this catches months
-# without a push. The run fails on purpose when a newer version exists (or the
-# check itself fails), so GitHub emails you. It never changes the repo.
+# The run fails on purpose when a newer version exists (or the check itself
+# fails), so GitHub emails you; then run `npm run fonts-update` in hub/ and push.
+# It never changes the repo.
 name: Fonts check
 
 on:
@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Newer font? (fails if so, to send the reminder)
         run: node theme/fonts.js --strict

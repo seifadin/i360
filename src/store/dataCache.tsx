@@ -55,7 +55,7 @@ function cacheFeedbackMailto(sciences: Science[]): void {
 // the app's own Reader page (public/md/, same site and storage): its "copy link" builds the
 // public link from it instead of copying the app's internal address (i360-hub.md §10). The
 // Reader checks the value before using it. Kept when a load lacks it, like the feedback link.
-export const MD_READER_KEY = 'i360.mdReader'
+const MD_READER_KEY = 'i360.mdReader'
 
 function cacheMdReader(resource: Resource | null): void {
   if (resource && typeof resource.MdReader === 'string' && resource.MdReader.trim()) {
@@ -96,13 +96,13 @@ async function resolveCached<T>(
   return fresh
 }
 
-export interface ChangeFlags {
+interface ChangeFlags {
   editionChanged: boolean
   versionChanged: boolean
   revisionChanged: boolean
 }
 
-export interface DataCacheContextType {
+interface DataCacheContextType {
   resource: Resource | null
   sciences: Science[]
   quran: QuranEntry[]

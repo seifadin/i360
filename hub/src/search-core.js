@@ -130,4 +130,4 @@ function snippet(m, chars) {
   };
 }
 
-export { normChar, isDropChar, normalizeQuery, createPage, findMatches, snippet };
+export { isDropChar, normalizeQuery, createPage, findMatches, snippet };

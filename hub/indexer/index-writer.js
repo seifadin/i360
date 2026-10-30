@@ -135,4 +135,4 @@ async function writeBuild({ sources, outDir, buildId, passes = 8, chunkBytes = C
   return { catalog, stats };
 }
 
-export { writeBuild, MAX_FILES, MAX_FILE_BYTES };
+export { writeBuild };

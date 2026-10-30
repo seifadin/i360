@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-GYp8OS2xN2klQEdzl54iRHPefMJVgR4Ti/lSckFBsgo=' 'sha256-cqJhVXmpq41zxh0+ZCxt0YCyjSWCHasJI6Q1bPoOWqI='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-GYp8OS2xN2klQEdzl54iRHPefMJVgR4Ti/lSckFBsgo=' 'sha256-FLnAiB8o+G4ansgDUORTlcm/lHabHexjSxr1doG3ves='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>التأمل اليومي</title>
     <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
@@ -1270,7 +1270,10 @@
       numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
     }
   });
-  var labelsFor = (lang) => LABELS[lang] || LABELS.ar;
+  var labelsFor = (lang) => LABELS[
+    /** @type {keyof typeof LABELS} */
+    lang
+  ] || LABELS.ar;
   function themeLabel(choice, lang = "ar") {
     return labelsFor(lang).theme[choice] || "";
   }
@@ -1338,7 +1341,9 @@
   }
   function onChange(fn) {
     listeners.add(fn);
-    return () => listeners.delete(fn);
+    return () => {
+      listeners.delete(fn);
+    };
   }
   var DIGIT_ZERO = { western: 48, arabic: 1632, persian: 1776 };
   function getNumerals() {
@@ -1375,7 +1380,96 @@
   }
   function onNumeralsChange(fn) {
     numeralListeners.add(fn);
-    return () => numeralListeners.delete(fn);
+    return () => {
+      numeralListeners.delete(fn);
+    };
+  }
+  var ANY_DIGIT = /[0-9\u0660-\u0669\u06F0-\u06F9]/;
+  function convertText(node, skip, numerals) {
+    const parent = node.parentElement;
+    if (!parent || skip && parent.closest(skip)) return;
+    const v = node.nodeValue;
+    if (!v || !ANY_DIGIT.test(v)) return;
+    const next = toNumerals(v, numerals);
+    if (next !== v) node.nodeValue = next;
+  }
+  function convertAttributes(el, attributes, skip, numerals) {
+    if (!attributes.length || skip && el.closest(skip)) return;
+    for (const name of attributes) {
+      const v = el.getAttribute(name);
+      if (v === null || !ANY_DIGIT.test(v)) continue;
+      const next = toNumerals(v, numerals);
+      if (next !== v) el.setAttribute(name, next);
+    }
+  }
+  function convertNumerals(root2, { skip = "", attributes = [], attributeSkip = skip, numerals = getNumerals() } = {}) {
+    if (!root2) return;
+    if (root2.nodeType === Node.TEXT_NODE) {
+      convertText(
+        /** @type {Text} */
+        root2,
+        skip,
+        numerals
+      );
+      return;
+    }
+    if (root2.nodeType !== Node.ELEMENT_NODE) return;
+    convertAttributes(
+      /** @type {Element} */
+      root2,
+      attributes,
+      attributeSkip,
+      numerals
+    );
+    const walker = document.createTreeWalker(root2, attributes.length ? NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT : NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (n.nodeType === Node.TEXT_NODE) convertText(
+        /** @type {Text} */
+        n,
+        skip,
+        numerals
+      );
+      else convertAttributes(
+        /** @type {Element} */
+        n,
+        attributes,
+        attributeSkip,
+        numerals
+      );
+    }
+  }
+  function watchNumerals(root2, options = {}) {
+    const { skip = "", attributes = [], attributeSkip = skip } = options;
+    const observer = new MutationObserver((list) => {
+      for (const m of list) {
+        if (m.type === "characterData") convertText(
+          /** @type {Text} */
+          m.target,
+          skip,
+          getNumerals()
+        );
+        else if (m.type === "attributes") convertAttributes(
+          /** @type {Element} */
+          m.target,
+          attributes,
+          attributeSkip,
+          getNumerals()
+        );
+        else m.addedNodes.forEach((n) => convertNumerals(n, options));
+      }
+    });
+    observer.observe(root2, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+      ...attributes.length ? { attributes: true, attributeFilter: attributes } : {}
+    });
+    convertNumerals(root2, options);
+    const stop = onNumeralsChange(() => convertNumerals(root2, options));
+    return () => {
+      observer.disconnect();
+      stop();
+    };
   }
   function absolutize(css) {
     return css.replace(
@@ -1614,6 +1708,57 @@
       });
       return true;
     };
+  }
+
+  // src/storage.js
+  function createStore(prefix = "") {
+    return {
+      get(key, fallback2) {
+        try {
+          const v = localStorage.getItem(prefix + key);
+          return v ? JSON.parse(v) : fallback2;
+        } catch {
+          return fallback2;
+        }
+      },
+      set(key, value) {
+        try {
+          localStorage.setItem(prefix + key, JSON.stringify(value));
+        } catch {
+        }
+      }
+    };
+  }
+
+  // src/net.js
+  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => response) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (controller) controller.abort();
+    }, timeout);
+    try {
+      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  async function fetchJson(url, { timeout = 6e3, retries = 1, backoff = 800, ...options } = {}) {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await fetchWithTimeout(url, { timeout, ...options }, (r) => {
+          if (!r.ok) {
+            const e = new Error("HTTP " + r.status);
+            e.status = r.status;
+            throw e;
+          }
+          return r.json();
+        });
+      } catch (e) {
+        const permanent = e.status && e.status >= 400 && e.status < 500 && e.status !== 429;
+        if (permanent || attempt >= retries) throw e;
+        await new Promise((resolve) => setTimeout(resolve, backoff * 2 ** attempt));
+      }
+    }
   }
 
   // src/locales.js
@@ -2001,7 +2146,6 @@
     n: { ar: "مكة المكرمة", en: "Makkah", tr: "Mekke", id: "Makkah", ur: "مکہ مکرمہ" }
   };
   var pad = (n) => String(n).padStart(2, "0");
-  var sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   var ymdKey = (o) => `${o.y}-${pad(o.m)}-${pad(o.d)}`;
   var localYMD = (d = /* @__PURE__ */ new Date()) => ({ y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() });
   function minutesNowIn(tz) {
@@ -2025,45 +2169,8 @@
     t.innerHTML = markup;
     return t.content.firstChild;
   }
-  var DataStore = {
-    get: (k, d) => {
-      try {
-        const v = localStorage.getItem(k);
-        return v ? JSON.parse(v) : d;
-      } catch (e) {
-        return d;
-      }
-    },
-    set: (k, v) => {
-      try {
-        localStorage.setItem(k, JSON.stringify(v));
-      } catch (e) {
-      }
-    }
-  };
-  var Net = {
-    async fetch(url, { timeout = 6e3, retries = 1, backoff = 800, ...opts } = {}) {
-      for (let attempt = 0; ; attempt++) {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), timeout);
-        try {
-          const r = await fetch(url, { ...opts, signal: ctrl.signal });
-          if (!r.ok) {
-            const e = new Error("HTTP " + r.status);
-            e.status = r.status;
-            throw e;
-          }
-          return await r.json();
-        } catch (e) {
-          const permanent = e.status && e.status >= 400 && e.status < 500 && e.status !== 429;
-          if (permanent || attempt >= retries) throw e;
-          await sleep(backoff * 2 ** attempt);
-        } finally {
-          clearTimeout(timer);
-        }
-      }
-    }
-  };
+  var DataStore = createStore();
+  var Net = { fetch: fetchJson };
   try {
     localStorage.removeItem("hj-v9");
   } catch (e) {
@@ -2181,36 +2288,7 @@
       }
     }
   };
-  var Numerals = {
-    fix(node) {
-      const v = node.nodeValue;
-      if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) return;
-      const nv = toNumerals(v);
-      if (nv !== v) node.nodeValue = nv;
-    },
-    walk(root2) {
-      if (root2.nodeType === 3) {
-        this.fix(root2);
-        return;
-      }
-      if (root2.nodeType !== 1 || root2.closest("script, style, #btn-numerals")) return;
-      const w = document.createTreeWalker(root2, NodeFilter.SHOW_TEXT, { acceptNode: (n) => n.parentElement && n.parentElement.closest("script, style, #btn-numerals") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
-      for (let n = w.nextNode(); n; n = w.nextNode()) this.fix(n);
-    },
-    all() {
-      this.walk(document.body);
-    },
-    // Text the page draws later (prayer times, countdowns, dates…) is converted as it appears.
-    watch() {
-      new MutationObserver((list) => {
-        for (const m of list) {
-          if (m.type === "characterData") this.fix(m.target);
-          else m.addedNodes.forEach((n) => this.walk(n));
-        }
-      }).observe(document.body, { childList: true, characterData: true, subtree: true });
-      this.all();
-    }
-  };
+  var NUMERALS_SKIP = { skip: "script, style, #btn-numerals" };
   var City = {
     // The default: the main city of the device's time zone (src/day-cities.json); Makkah otherwise.
     auto() {
@@ -2548,9 +2626,8 @@
       document.getElementById("btn-numerals").addEventListener("click", () => cycleNumerals());
       onNumeralsChange(() => {
         this.numeralsButton();
-        Numerals.all();
       });
-      Numerals.watch();
+      watchNumerals(document.body, NUMERALS_SKIP);
       this.theme();
       init();
       Cols.init();

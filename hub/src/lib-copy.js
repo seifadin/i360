@@ -190,4 +190,4 @@ async function open(link, fetchFn, onProgress, onPart) {
   return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join('\n\n') };
 }
 
-export { LIB, archiveId, findSource, isLibBook, ownBook, toBookText, itemBooks, scanLink, open };
+export { LIB, findSource, isLibBook, ownBook, toBookText, itemBooks, scanLink, open };

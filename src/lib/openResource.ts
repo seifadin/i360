@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core'
 import { resolveOpenMethod, matchesWebList } from '@/hooks/usePlatform'
 import { tryOpenNewTab } from '@/lib/openTab'
 
-export interface OpenContext {
+interface OpenContext {
   useWeb: boolean
   uriSchemes: string
   inWebList: string

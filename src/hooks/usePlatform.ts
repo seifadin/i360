@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAppState } from '@/store/appState'
 
-export type OSType = 'android' | 'ios' | 'web'
+type OSType = 'android' | 'ios' | 'web'
 
 export function detectOS(): OSType {
   const ua = navigator.userAgent.toLowerCase()

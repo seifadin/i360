@@ -568,7 +568,7 @@ async function run({ fetchFn = fetch, key, table = DEFAULT_TABLE, outDir, all = 
 const clearProbeCache = () => archiveMeta.clear();
 
 // Also used by the indexer (indexer/build-index.js).
-export { run, clearProbeCache, parseCell, normalizeUrl, fieldText, summary, causeText, readRows, collectSources, probe, fetchWithRetry, ARCHIVE_HELPERS, DEFAULT_TABLE, USER_AGENT };
+export { run, clearProbeCache, parseCell, normalizeUrl, fieldText, summary, causeText, readRows, collectSources, probe, fetchWithRetry, DEFAULT_TABLE };
 
 if (process.argv[1] === import.meta.filename) {
   run({

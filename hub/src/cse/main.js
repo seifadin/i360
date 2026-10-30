@@ -4,14 +4,13 @@ import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as SearchCore from '../search-core.js';
 import * as CseIndex from '../cse-index.js';
 import * as CseView from '../cse-view.js';
-import { IN_APP, setupClose, THEME_ICONS } from '../page-chrome.js';
+import { $, IN_APP, setupClose, THEME_ICONS } from '../page-chrome.js';
 import { CSE as LOCALES } from '../locales.js';
 
 const DEFAULT_DATA = 'https://lib.i36o.workers.dev/';
 const BRAND = '\u2066i360\u200Eإ\u2069';   // kept "i360إ" in Arabic text (left-to-right isolate)
 const CONFIRM_BATCH = 8;   // candidate pages checked at once
 
-const $ = (id) => document.getElementById(id);
 const form = $('search-form'), input = $('q');
 const btnExact = $('opt-exact'), btnWord = $('opt-word');
 const btnNumerals = $('btn-numerals'), btnTheme = $('btn-theme');
@@ -42,15 +41,9 @@ function applyNumerals() {
   btnNumerals.textContent = i360Theme.NUMERALS_SAMPLE[state.numerals];
   btnNumerals.title = i360Theme.numeralsLabel(state.numerals);
   btnNumerals.setAttribute('aria-label', btnNumerals.title);
-  const conv = fmt;
   // The page and the header's name; not what the visitor typed.
   for (const root of [document.querySelector('.brand'), document.querySelector('main')]) {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      if (n.parentElement && n.parentElement.closest('form')) continue;
-      const v = conv(n.nodeValue);
-      if (v !== n.nodeValue) n.nodeValue = v;
-    }
+    i360Theme.convertNumerals(root, { skip: 'form', numerals: state.numerals });
   }
 }
 

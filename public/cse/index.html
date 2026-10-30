@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-cixYRpGACq0Og+T3QpZ/MpJu+3veS5AesQFk8Zf2rBw='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-wbNaytVjwdhOOJ/ncSj4kaZNsIOk+22f7lYwz3NhHgk='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -433,7 +433,10 @@
       numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
     }
   });
-  var labelsFor = (lang) => LABELS[lang] || LABELS.ar;
+  var labelsFor = (lang) => LABELS[
+    /** @type {keyof typeof LABELS} */
+    lang
+  ] || LABELS.ar;
   function themeLabel(choice, lang = "ar") {
     return labelsFor(lang).theme[choice] || "";
   }
@@ -501,7 +504,9 @@
   }
   function onChange(fn) {
     listeners.add(fn);
-    return () => listeners.delete(fn);
+    return () => {
+      listeners.delete(fn);
+    };
   }
   var DIGIT_ZERO = { western: 48, arabic: 1632, persian: 1776 };
   function getNumerals() {
@@ -538,7 +543,63 @@
   }
   function onNumeralsChange(fn) {
     numeralListeners.add(fn);
-    return () => numeralListeners.delete(fn);
+    return () => {
+      numeralListeners.delete(fn);
+    };
+  }
+  var ANY_DIGIT = /[0-9\u0660-\u0669\u06F0-\u06F9]/;
+  function convertText(node, skip, numerals) {
+    const parent = node.parentElement;
+    if (!parent || skip && parent.closest(skip)) return;
+    const v = node.nodeValue;
+    if (!v || !ANY_DIGIT.test(v)) return;
+    const next = toNumerals(v, numerals);
+    if (next !== v) node.nodeValue = next;
+  }
+  function convertAttributes(el, attributes, skip, numerals) {
+    if (!attributes.length || skip && el.closest(skip)) return;
+    for (const name of attributes) {
+      const v = el.getAttribute(name);
+      if (v === null || !ANY_DIGIT.test(v)) continue;
+      const next = toNumerals(v, numerals);
+      if (next !== v) el.setAttribute(name, next);
+    }
+  }
+  function convertNumerals(root2, { skip = "", attributes = [], attributeSkip = skip, numerals = getNumerals() } = {}) {
+    if (!root2) return;
+    if (root2.nodeType === Node.TEXT_NODE) {
+      convertText(
+        /** @type {Text} */
+        root2,
+        skip,
+        numerals
+      );
+      return;
+    }
+    if (root2.nodeType !== Node.ELEMENT_NODE) return;
+    convertAttributes(
+      /** @type {Element} */
+      root2,
+      attributes,
+      attributeSkip,
+      numerals
+    );
+    const walker = document.createTreeWalker(root2, attributes.length ? NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT : NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (n.nodeType === Node.TEXT_NODE) convertText(
+        /** @type {Text} */
+        n,
+        skip,
+        numerals
+      );
+      else convertAttributes(
+        /** @type {Element} */
+        n,
+        attributes,
+        attributeSkip,
+        numerals
+      );
+    }
   }
   function absolutize(css) {
     return css.replace(
@@ -1004,6 +1065,7 @@
   }
 
   // src/page-chrome.js
+  var $ = (id) => document.getElementById(id);
   var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
   function setupClose(button, stepsBack = () => 1) {
     if (!IN_APP) return;
@@ -1052,7 +1114,6 @@
   var DEFAULT_DATA = "https://lib.i36o.workers.dev/";
   var BRAND = "⁦i360‎إ⁩";
   var CONFIRM_BATCH = 8;
-  var $ = (id) => document.getElementById(id);
   var form = $("search-form");
   var input = $("q");
   var btnExact = $("opt-exact");
@@ -1082,14 +1143,8 @@
     btnNumerals.textContent = NUMERALS_SAMPLE[state.numerals];
     btnNumerals.title = numeralsLabel(state.numerals);
     btnNumerals.setAttribute("aria-label", btnNumerals.title);
-    const conv = fmt;
     for (const root2 of [document.querySelector(".brand"), document.querySelector("main")]) {
-      const walker = document.createTreeWalker(root2, NodeFilter.SHOW_TEXT);
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        if (n.parentElement && n.parentElement.closest("form")) continue;
-        const v = conv(n.nodeValue);
-        if (v !== n.nodeValue) n.nodeValue = v;
-      }
+      convertNumerals(root2, { skip: "form", numerals: state.numerals });
     }
   }
   function applyTheme() {

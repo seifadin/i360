@@ -27,7 +27,9 @@ src/reader.src.html + src/reader/main.js   the Reader        → ../public/md/in
 src/cse.src.html + src/cse/main.js         the i360 CSE      → ../public/cse/index.html
 src/day.src.html + src/day/main.js         Daily Reflection «التأمل اليومي» → ../public/day/index.html
 src/locales.js        every page's interface text, one section per page, all its languages
-src/page-chrome.js    shared by the pages: in-app check, the ✕ back to the app, theme icons
+src/page-chrome.js    shared by the pages: $, in-app check, the ✕ back to the app, theme icons
+src/storage.js        createStore(prefix): settings on the device, as JSON, never throwing
+src/net.js            fetchWithTimeout(), fetchJson() (time limit, bounded retries)
 src/frame.js          oncePerFrame(): layout work at most once per frame
 library/books/        our own books     → lib.i36o.workers.dev/books/ (published by the CSE index workflow)
 forward/404.html      fallback for the forwarding sites
@@ -71,14 +73,16 @@ theme/wrangler.jsonc         the theme Worker (files only)
 - **Colours:** after changing a colour that a `color-mix` is made from,
   `node theme/fallbacks.js --write` (`npm test` and the hook's colour check stop while one is stale).
 
-## Pushing: `npm run push`
-Use it instead of `git push` (arguments pass through: `npm run push -- origin main`):
+## Font updates: `npm run fonts-update`
+When the monthly fonts check reports a newer font (or `npm run fonts-check` does), run it here:
 1. asks npm whether Amiri or Amiri Quran has a newer version;
 2. if so: downloads it into a new version folder, checks that every character of the
    current font is still there (every Quranic mark), rewrites the Fonts section of
-   `theme.css`, runs `npm test` and commits it on its own ("Fonts: …");
-3. pushes — always. Anything that went wrong in 1–2 is shown as a warning with its
-   cause, and a half-done font update is undone first.
+   `theme.css`, runs `npm test` and commits it on its own ("Fonts: …"). Anything that goes
+   wrong is shown with its cause, and a half-done update is undone.
+
+Then push as usual (`git push` from the repo root): the pre-push hook publishes the theme
+Worker with the new fonts.
 
 `npm run fonts-check` only reports. `.github/workflows/fonts-check.yml` runs the check on
 the 1st of each month and fails on purpose when a newer font exists (GitHub emails you).

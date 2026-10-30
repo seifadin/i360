@@ -15,7 +15,7 @@
     "deploy-forwarders": "firebase deploy --only hosting:hub,hosting:md,hosting:cse,hosting:day && firebase deploy --only hosting:e --project i360-e",
     "fonts-check": "node theme/fonts.js",
     "icons": "node scripts/icons.js",
-    "push": "node scripts/push.js",
+    "fonts-update": "node scripts/fonts-update.js",
     "search": "node indexer/search.js"
   },
   "devDependencies": {
@@ -25,11 +25,11 @@
     "esbuild": "0.28.2",
     "eslint": "10.12.0",
     "globals": "16.5.0",
-    "lucide-static": "^1.21.0",
+    "lucide-static": "1.59.0",
     "marked": "18.1.0",
     "tailwindcss": "3.4.19"
   },
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=24"
   }
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-UKe0FE7O6D2DkIeoM2cppRnMbTs+TVtpE1cahq8o630='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-lhurqu8N1mjaT7ytHo5OZ9Ce8bTEHFLG3t1Ex4JNkvY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -1041,7 +1041,10 @@
       numerals: { western: "اعداد: مغربی 456 (مشرقی عربی ٤٥٦ کے لیے کلک کریں)", arabic: "اعداد: مشرقی عربی ٤٥٦ (فارسی/اردو ۴۵۶ کے لیے کلک کریں)", persian: "اعداد: فارسی/اردو ۴۵۶ (مغربی 456 کے لیے کلک کریں)" }
     }
   });
-  var labelsFor = (lang2) => LABELS[lang2] || LABELS.ar;
+  var labelsFor = (lang2) => LABELS[
+    /** @type {keyof typeof LABELS} */
+    lang2
+  ] || LABELS.ar;
   function themeLabel(choice, lang2 = "ar") {
     return labelsFor(lang2).theme[choice] || "";
   }
@@ -1109,7 +1112,9 @@
   }
   function onChange(fn2) {
     listeners.add(fn2);
-    return () => listeners.delete(fn2);
+    return () => {
+      listeners.delete(fn2);
+    };
   }
   var DIGIT_ZERO = { western: 48, arabic: 1632, persian: 1776 };
   function getNumerals() {
@@ -1146,7 +1151,63 @@
   }
   function onNumeralsChange(fn2) {
     numeralListeners.add(fn2);
-    return () => numeralListeners.delete(fn2);
+    return () => {
+      numeralListeners.delete(fn2);
+    };
+  }
+  var ANY_DIGIT = /[0-9\u0660-\u0669\u06F0-\u06F9]/;
+  function convertText(node, skip, numerals) {
+    const parent = node.parentElement;
+    if (!parent || skip && parent.closest(skip)) return;
+    const v = node.nodeValue;
+    if (!v || !ANY_DIGIT.test(v)) return;
+    const next = toNumerals(v, numerals);
+    if (next !== v) node.nodeValue = next;
+  }
+  function convertAttributes(el, attributes, skip, numerals) {
+    if (!attributes.length || skip && el.closest(skip)) return;
+    for (const name of attributes) {
+      const v = el.getAttribute(name);
+      if (v === null || !ANY_DIGIT.test(v)) continue;
+      const next = toNumerals(v, numerals);
+      if (next !== v) el.setAttribute(name, next);
+    }
+  }
+  function convertNumerals(root2, { skip = "", attributes = [], attributeSkip = skip, numerals = getNumerals() } = {}) {
+    if (!root2) return;
+    if (root2.nodeType === Node.TEXT_NODE) {
+      convertText(
+        /** @type {Text} */
+        root2,
+        skip,
+        numerals
+      );
+      return;
+    }
+    if (root2.nodeType !== Node.ELEMENT_NODE) return;
+    convertAttributes(
+      /** @type {Element} */
+      root2,
+      attributes,
+      attributeSkip,
+      numerals
+    );
+    const walker = document.createTreeWalker(root2, attributes.length ? NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT : NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (n.nodeType === Node.TEXT_NODE) convertText(
+        /** @type {Text} */
+        n,
+        skip,
+        numerals
+      );
+      else convertAttributes(
+        /** @type {Element} */
+        n,
+        attributes,
+        attributeSkip,
+        numerals
+      );
+    }
   }
   function absolutize(css) {
     return css.replace(
@@ -1344,6 +1405,7 @@ ${body}`;
   }
 
   // src/page-chrome.js
+  var $ = (id) => document.getElementById(id);
   var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
   function setupClose(button, stepsBack = () => 1) {
     if (!IN_APP) return;
@@ -1537,7 +1599,6 @@ ${body}`;
     createRenderer: () => createRenderer,
     escapeHtml: () => escapeHtml,
     hasVisibleContent: () => hasVisibleContent,
-    makePage: () => makePage,
     parseBook: () => parseBook,
     splitFootnotes: () => splitFootnotes,
     stripComments: () => stripComments,
@@ -1670,6 +1731,39 @@ ${body}`;
     return { body: lines.slice(0, sep).join("\n"), notes: out };
   }
 
+  // src/storage.js
+  function createStore(prefix = "") {
+    return {
+      get(key, fallback) {
+        try {
+          const v = localStorage.getItem(prefix + key);
+          return v ? JSON.parse(v) : fallback;
+        } catch {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        try {
+          localStorage.setItem(prefix + key, JSON.stringify(value));
+        } catch {
+        }
+      }
+    };
+  }
+
+  // src/net.js
+  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => response) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (controller) controller.abort();
+    }, timeout);
+    try {
+      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // src/reader/state.js
   var state = {
     format: "ocr",
@@ -1714,7 +1808,6 @@ ${body}`;
     // whole word only
     listOpen: false
   };
-  var $ = (id) => document.getElementById(id);
   var toolbar = $("toolbar");
   var tbStart = toolbar.querySelector(".tb-start");
   var tbMain = toolbar.querySelector(".tb-main");
@@ -1781,14 +1874,9 @@ ${body}`;
   var connectionCheck = null;
   function checkConnection() {
     if (connectionCheck) return connectionCheck;
-    const ctl = typeof AbortController === "function" ? new AbortController() : null;
-    const timer = setTimeout(() => {
-      if (ctl) ctl.abort();
-    }, CONNECTION_TIMEOUT_MS);
-    connectionCheck = fetch(`${LIB}latest.json`, { cache: "no-store", signal: ctl ? ctl.signal : void 0 }).then(() => true, () => false).then((ok) => {
+    connectionCheck = fetchWithTimeout(`${LIB}latest.json`, { timeout: CONNECTION_TIMEOUT_MS, cache: "no-store" }).then(() => true, () => false).then((ok) => {
       online = ok;
     }).finally(() => {
-      clearTimeout(timer);
       connectionCheck = null;
       updateConnection();
     });
@@ -1803,21 +1891,7 @@ ${body}`;
   }
   var { toWestern: toWestern2, stripComments: stripComments2, hasVisibleContent: hasVisibleContent2, parseBook: parseBook2, splitFootnotes: splitFootnotes2 } = book_format_exports;
   var nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
-  var STORE_PREFIX = "i360reader.";
-  function storeGet(key, fallback) {
-    try {
-      const v = localStorage.getItem(STORE_PREFIX + key);
-      return v == null ? fallback : JSON.parse(v);
-    } catch {
-      return fallback;
-    }
-  }
-  function storeSet(key, value) {
-    try {
-      localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value));
-    } catch {
-    }
-  }
+  var { get: storeGet, set: storeSet } = createStore("i360reader.");
   function fmtNum(s) {
     return toNumerals(String(s), state.numerals);
   }
@@ -4708,17 +4782,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
     }
   }
   function applyNumerals2(root2) {
-    const conv = (v) => toNumerals(v, state.numerals);
-    const walker = document.createTreeWalker(root2, NodeFilter.SHOW_TEXT, {
-      acceptNode: (n) => n.parentElement && n.parentElement.closest("pre, code, a:not(.fn-ref):not(.fn-back)") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
-    });
-    let node;
-    while (node = walker.nextNode()) {
-      const v = node.nodeValue;
-      if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) continue;
-      const nv = conv(v);
-      if (nv !== v) node.nodeValue = nv;
-    }
+    convertNumerals(root2, { skip: "pre, code, a:not(.fn-ref):not(.fn-back)", numerals: state.numerals });
   }
   function wrapQuran(root2) {
     for (const block of leafBlocks(root2)) {

@@ -4,6 +4,9 @@ import { READER as LOCALES } from '../locales.js';
 import * as LibCopy from '../lib-copy.js';
 import * as BookFormat from '../book-format.js';
 import * as i360Theme from '../../theme/site/theme-loader.js';
+import { $ } from '../page-chrome.js';
+import { createStore } from '../storage.js';
+import { fetchWithTimeout } from '../net.js';
 import { ICON } from './text.js';
 
 /* ================================================================
@@ -37,7 +40,6 @@ const search = {
   listOpen: false
 };
 
-const $ = (id) => document.getElementById(id);
 const toolbar = $('toolbar');
 const tbStart = toolbar.querySelector('.tb-start');
 const tbMain = toolbar.querySelector('.tb-main');
@@ -115,12 +117,10 @@ let connectionCheck = null;
 
 function checkConnection() {
   if (connectionCheck) return connectionCheck;
-  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
-  const timer = setTimeout(() => { if (ctl) ctl.abort(); }, CONNECTION_TIMEOUT_MS);
-  connectionCheck = fetch(`${LibCopy.LIB}latest.json`, { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+  connectionCheck = fetchWithTimeout(`${LibCopy.LIB}latest.json`, { timeout: CONNECTION_TIMEOUT_MS, cache: 'no-store' })
     .then(() => true, () => false)   // any answer means the network works
     .then((ok) => { online = ok; })
-    .finally(() => { clearTimeout(timer); connectionCheck = null; updateConnection(); });
+    .finally(() => { connectionCheck = null; updateConnection(); });
   return connectionCheck;
 }
 
@@ -141,18 +141,9 @@ const { toWestern, stripComments, hasVisibleContent, parseBook, splitFootnotes }
 
 const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 
-// Settings and positions live in this browser only. Storage can be missing
-// (private mode, blocked site data): the reader then just doesn't remember.
-const STORE_PREFIX = 'i360reader.';
-function storeGet(key, fallback) {
-  try {
-    const v = localStorage.getItem(STORE_PREFIX + key);
-    return v == null ? fallback : JSON.parse(v);
-  } catch { return fallback; }
-}
-function storeSet(key, value) {
-  try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); } catch { /* not remembered */ }
-}
+// Settings and positions live in this browser only (src/storage.js: when storage is off, the
+// reader just doesn't remember).
+const { get: storeGet, set: storeSet } = createStore('i360reader.');
 
 // Digits as the reader shows them; the file itself is never changed.
 function fmtNum(s) {

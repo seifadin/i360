@@ -10,6 +10,8 @@ import * as HijriClient from '../../hijri/client.js';
 import DAY_CITIES from '../day-cities.json';
 import { setupClose, THEME_ICONS } from '../page-chrome.js';
 import { oncePerFrame } from '../frame.js';
+import { createStore } from '../storage.js';
+import { fetchJson } from '../net.js';
 import { DAY as LOCALES } from '../locales.js';
 
 // Tailwind's dark: styles follow the "dark" class (set in the page's <head> from the saved theme).
@@ -67,7 +69,6 @@ const MAKKAH = { cc: 'SA', lat: 21.4225, lng: 39.8262, tz: 'Asia/Riyadh',
 
 /* ---------- Small helpers ---------- */
 const pad = n => String(n).padStart(2, '0');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const ymdKey = o => `${o.y}-${pad(o.m)}-${pad(o.d)}`;
 const localYMD = (d = new Date()) => ({ y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() });
 function minutesNowIn(tz) {
@@ -90,29 +91,10 @@ function svgIcon(markup) {
     return t.content.firstChild;
 }
 
-const DataStore = {
-    get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode / quota: ignore */ } }
-};
+const DataStore = createStore();   // src/storage.js — keys as they are (CONFIG.S)
 
-/* ---------- Network: timeout, no retry on 4xx, bounded retries on network/5xx ---------- */
-const Net = {
-    async fetch(url, { timeout = 6000, retries = 1, backoff = 800, ...opts } = {}) {
-        for (let attempt = 0; ; attempt++) {
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), timeout);
-            try {
-                const r = await fetch(url, { ...opts, signal: ctrl.signal });
-                if (!r.ok) { const e = new Error('HTTP ' + r.status); e.status = r.status; throw e; }
-                return await r.json();
-            } catch (e) {
-                const permanent = e.status && e.status >= 400 && e.status < 500 && e.status !== 429;
-                if (permanent || attempt >= retries) throw e;
-                await sleep(backoff * 2 ** attempt);
-            } finally { clearTimeout(timer); }
-        }
-    }
-};
+/* ---------- Network: timeout, no retry on 4xx, bounded retries on network/5xx (src/net.js) ---------- */
+const Net = { fetch: fetchJson };
 
 /* ---------- Hijri date: the shared files (hijri/calc.js, hijri/client.js; i360-hub.md §8) ----------
    The date comes from the dar-hijri Worker (Dar al-Ifta's), or is calculated here when the Worker
@@ -203,32 +185,9 @@ const HE = {
 /* The interface text, in the five languages: src/locales.js (DAY). The theme and numerals
    buttons' icons (src/page-chrome.js) and labels (the theme loader) are shared by every i360 page. */
 
-/* ---------- Numerals: every number on the page in the shared choice (display only) ---------- */
-const Numerals = {
-    fix(node) {
-        const v = node.nodeValue;
-        if (!/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(v)) return;
-        const nv = i360Theme.toNumerals(v);
-        if (nv !== v) node.nodeValue = nv;
-    },
-    walk(root) {
-        if (root.nodeType === 3) { this.fix(root); return; }
-        if (root.nodeType !== 1 || root.closest('script, style, #btn-numerals')) return;
-        const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest('script, style, #btn-numerals')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
-        for (let n = w.nextNode(); n; n = w.nextNode()) this.fix(n);
-    },
-    all() { this.walk(document.body); },
-    // Text the page draws later (prayer times, countdowns, dates…) is converted as it appears.
-    watch() {
-        new MutationObserver((list) => {
-            for (const m of list) {
-                if (m.type === 'characterData') this.fix(m.target);
-                else m.addedNodes.forEach((n) => this.walk(n));
-            }
-        }).observe(document.body, { childList: true, characterData: true, subtree: true });
-        this.all();
-    }
-};
+/* ---------- Numerals: every number on the page in the shared choice (display only) ----------
+   The loader's watchNumerals(): text drawn later (prayer times, countdowns, dates…) too. */
+const NUMERALS_SKIP = { skip: 'script, style, #btn-numerals' };
 
 /* ---------- The city: the device time zone's, or one picked by name ---------- */
 const City = {
@@ -480,8 +439,8 @@ const UI = {
         document.getElementById('btn-theme').addEventListener('click', () => i360Theme.cycle());
         i360Theme.onChange(() => this.theme());
         document.getElementById('btn-numerals').addEventListener('click', () => i360Theme.cycleNumerals());
-        i360Theme.onNumeralsChange(() => { this.numeralsButton(); Numerals.all(); });
-        Numerals.watch();
+        i360Theme.onNumeralsChange(() => { this.numeralsButton(); });
+        i360Theme.watchNumerals(document.body, NUMERALS_SKIP);   // converts the page now and on every change, after the button
         this.theme();
         i360Theme.init();   // fresh theme.css in the background; the saved copy is already shown
         Cols.init();

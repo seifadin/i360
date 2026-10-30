@@ -152,7 +152,7 @@ function fallbackCss(css) {
   }).join('\n');
 }
 
-export { mixOklab, parseColor, toHex, check, fallbackCss, themeBlocks, derivedRules, THEME_CSS };
+export { mixOklab, check, fallbackCss, themeBlocks, THEME_CSS };
 
 if (process.argv[1] === import.meta.filename) {
   const arg = process.argv[2] || '--check';

@@ -321,7 +321,7 @@ async function runIn({ fetchFn, key, table, refresh, archivePages, passes, log, 
   return { catalog, report, changed: true };
 }
 
-export { run, EXTRACTOR_VERSION, cacheKey, catalogSignature, plannedSignature, LIB_HEADERS };
+export { run, cacheKey };
 
 if (process.argv[1] === import.meta.filename) {
   const args = process.argv.slice(2);

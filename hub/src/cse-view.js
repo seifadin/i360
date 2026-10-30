@@ -161,4 +161,4 @@ function writeAddress({ q, exact, word, data }) {
   return s ? `?${s}` : '';
 }
 
-export { LIB_HOST, READER, RESULTS_PER_STEP, archiveParts, itemFileCounts, cleanFileName, sourceName, pageLabel, resultLink, candidateGroups, readAddress, writeAddress };
+export { LIB_HOST, READER, RESULTS_PER_STEP, itemFileCounts, sourceName, pageLabel, resultLink, candidateGroups, readAddress, writeAddress };

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, JSX } from 'react'
 
-export interface AppState {
+interface AppState {
   // Platform
   useWeb: boolean
   isChina: boolean
@@ -12,7 +12,7 @@ export interface AppState {
   simIOS: boolean
 }
 
-export interface AppStateContextType {
+interface AppStateContextType {
   state: AppState
   setState: (updates: Partial<AppState>) => void
 }
