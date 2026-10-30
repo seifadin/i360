@@ -29,14 +29,6 @@ const AppDeveloper = '© 2013 سيف الدين س. إبراهيم'
 // and icons as the hub pages (claude/i360-hub.md §3), stored per site, so the
 // app and its merged pages share them. Their text (the numerals sample and both
 // tooltips) comes from the shared theme loader, like the hub pages'.
-// A bigger tap area for the bar's small buttons, not drawn: the button fills the row's
-// height (self-stretch, its icon or digits still centred) and an empty ::after reaches
-// through the row's padding (py-1.5) and halfway into the gap beside it (gap-3), so it
-// spans the whole bar (min-h-toolbar, the shared toolbar height).
-// The icon buttons (ICON_BTN) are w-5 wide, so with that reach their tap area is 2rem
-// wide: the hub pages' toolbar buttons' width (hub/src/page-chrome.css).
-const TAP_AREA = "relative self-stretch after:absolute after:-inset-y-1.5 after:-inset-x-1.5 after:content-['']"
-const ICON_BTN = `w-5 flex items-center justify-center ${TAP_AREA}`
 
 const THEME_ICON: Record<ThemeChoice, typeof Monitor> = { system: Monitor, light: Sun, sepia: Coffee, dark: Moon }
 
@@ -231,27 +223,27 @@ export default function OSRow() {
   }
 
   return (
-    <div className={`flex items-center justify-between gap-3 px-4 py-1.5 min-h-toolbar border-b border-brand-border ${
-      isSimulating ? 'bg-brand-highlight' : 'bg-brand-ivory'
-    }`}>
+    <div className={`toolbar toolbar-bottom justify-between${isSimulating ? ' bg-brand-highlight' : ''}`}>
 
       {/* Right group: VersionMenu — rightmost (first in HTML for RTL) — then
           the shared theme's theme and numerals buttons, the order of every i360
           page (§15t; i360-hub.md §10 "Toolbars"). Both buttons'
           labels show digits on purpose, so they're kept as written
-          (data-i360-digits="keep", lib/theme.ts). All three get a
-          bigger tap area, not drawn (TAP_AREA). */}
-      <div className="flex items-center gap-3 self-stretch">
+          (data-i360-digits="keep", lib/theme.ts). The bar and its buttons are
+          every i360 toolbar's (hub/src/page-chrome.css, imported by index.css):
+          height, widths, tap areas, colours, focus ring; the simulator keeps
+          its own highlight. */}
+      <div className="tb-start">
         <button
           onClick={() => setVersionOpen(true)}
-          className={`text-brand-blue ${ICON_BTN}`}
+          className="toolbar-btn"
           aria-label="معلومات الإصدار"
         >
           <EllipsisVertical size={18} />
         </button>
         <button
           onClick={() => { i360Theme.cycle() }}
-          className={`text-brand-blue ${ICON_BTN}`}
+          className="toolbar-btn"
           aria-label={i360Theme.themeLabel(choice)}
           title={i360Theme.themeLabel(choice)}
         >
@@ -259,7 +251,7 @@ export default function OSRow() {
         </button>
         <button
           onClick={() => { i360Theme.cycleNumerals() }}
-          className={`min-w-[2.25rem] text-base font-bold leading-none text-brand-blue ${TAP_AREA}`}
+          className="toolbar-btn numerals-btn"
           aria-label={i360Theme.numeralsLabel(numerals)}
           title={i360Theme.numeralsLabel(numerals)}
           data-i360-digits="keep"

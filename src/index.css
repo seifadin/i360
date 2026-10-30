@@ -1,3 +1,7 @@
+/* Every i360 toolbar's bar and buttons — the hub pages' file itself (OSRow; claude/i360-hub.md
+   §10 "Toolbars"). First, so the app's own Tailwind classes on them win where they differ. */
+@import '../hub/src/page-chrome.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -29,11 +29,6 @@ export default {
           'on-accent': 'var(--i360-on-accent, #FAF7F2)', // text and knobs on blue/green
         },
       },
-      // Every i360 toolbar's height, from the shared theme too (the hub pages read the
-      // same variable): OSRow's bar.
-      minHeight: {
-        toolbar: 'var(--i360-toolbar-h, 2.5rem)',
-      },
     },
   },
   plugins: [],

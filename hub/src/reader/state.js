@@ -41,8 +41,6 @@ const search = {
 };
 
 const toolbar = $('toolbar');
-const tbStart = toolbar.querySelector('.tb-start');
-const tbMain = toolbar.querySelector('.tb-main');
 const tbEnd = toolbar.querySelector('.tb-end');
 const pagesWrapper = $('pages-wrapper');
 const viewerContainer = $('viewer-container');
@@ -177,4 +175,4 @@ function wireState() {
   setInterval(() => { if (!document.hidden) void checkConnection(); }, CONNECTION_CHECK_MS);
 }
 
-export { $, btnBookmark, btnClose, btnCopyLink, btnDirToggle, btnExitReading, btnFitPage, btnFitWidth, btnMore, btnNavLeft, btnNavRight, btnNumerals, btnOpenFile, btnPanel, btnPanelClose, btnReading, btnScan, btnSearchClose, btnSearchList, btnSearchNext, btnSearchPrev, btnSearchToggle, btnTextLarger, btnTextSmaller, btnTheme, btnZoomIn, btnZoomOut, checkConnection, detectDirection, emptyState, fileInput, fmtNum, hasVisibleContent, hashText, lang, lblOf, missingPagesBanner, missingPagesText, moreMenu, nextFrame, optDiacritics, optWord, pageNumInput, pagePos, pagesWrapper, panelBody, parseBook, progressEl, progressFill, progressText, search, searchCount, searchInput, searchPopup, searchResults, setTitle, sidePanel, splitFootnotes, state, statusIcon, storeGet, storeSet, stripComments, t, tabBookmarks, tabContents, tbEnd, tbMain, tbStart, tbTitle, toWestern, toastEl, toolbar, totalPagesLabel, updateConnection, viewerContainer, volSelect, wireState };
+export { $, btnBookmark, btnClose, btnCopyLink, btnDirToggle, btnExitReading, btnFitPage, btnFitWidth, btnMore, btnNavLeft, btnNavRight, btnNumerals, btnOpenFile, btnPanel, btnPanelClose, btnReading, btnScan, btnSearchClose, btnSearchList, btnSearchNext, btnSearchPrev, btnSearchToggle, btnTextLarger, btnTextSmaller, btnTheme, btnZoomIn, btnZoomOut, checkConnection, detectDirection, emptyState, fileInput, fmtNum, hasVisibleContent, hashText, lang, lblOf, missingPagesBanner, missingPagesText, moreMenu, nextFrame, optDiacritics, optWord, pageNumInput, pagePos, pagesWrapper, panelBody, parseBook, progressEl, progressFill, progressText, search, searchCount, searchInput, searchPopup, searchResults, setTitle, sidePanel, splitFootnotes, state, statusIcon, storeGet, storeSet, stripComments, t, tabBookmarks, tabContents, tbEnd, tbTitle, toWestern, toastEl, toolbar, totalPagesLabel, updateConnection, viewerContainer, volSelect, wireState };

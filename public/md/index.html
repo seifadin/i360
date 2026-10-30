@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-lhurqu8N1mjaT7ytHo5OZ9Ce8bTEHFLG3t1Ex4JNkvY='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-Em7x2Uh+W3x7fw8WSFygBo4cVm6VttmKwELSOk39K+s='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -199,34 +199,112 @@
     }
 
     /* ---------- Toolbar ---------- */
-    /* The toolbar buttons of the hub pages (the Reader, the i360 CSE, Daily Reflection): one size and
-   shape on every page (i360-hub.md §10 "Toolbars"). scripts/build.js inlines this file into each
-   page's own <style>, before the page's rules, so a page can still adjust a button for itself.
-   Colours stay in each page: they differ from page to page in the sepia and dark themes. */
+    /* Every i360 toolbar: the hub pages' (the Reader, the i360 CSE, Daily Reflection) and the app's
+   bottom bar (i360-hub.md §10 "Toolbars"). scripts/build.js inlines this file into each page's own
+   <style>, before the page's rules; the app imports it (src/index.css). A page only places its bar
+   in the page (z-index, and its own content such as the Reader's page number); how a bar folds and
+   widens its buttons by measurement is fittingToolbar() in src/page-chrome.js.
+
+   A bar is class="toolbar", plus, where needed (modifiers, combined freely):
+     toolbar-bottom   at the bottom of the screen (no status bar to clear) — the app's
+     toolbar-sticky   stays at the top while the page scrolls — Daily Reflection's
+   and, as a value, --toolbar-row-w: the width its row lines up with (a page column); by default the
+   row spans the bar. Inside it: .tb-start (the settings: ⋮ where there is one · theme · numerals ·
+   language), .tb-main (a middle that grows, its groups centred), .tb-title, .tb-end; .tb-group (a
+   group of buttons), .divider, and .toolbar-menu (the ⋮ menu that opens from the bar). */
 :root {
-  --toolbar-h: var(--i360-toolbar-h);   /* the bar: the shared theme's, as the app's */
-  --toolbar-btn-h: 2rem;    /* a button in it */
+  /* The theme's values, with the light ones built in for when theme.css hasn't arrived (the pages
+     also carry the theme's own copy; the app only these, as with its colours in tailwind.config.ts). */
+  --toolbar-h: var(--i360-toolbar-h, 2.5rem);
+  --toolbar-bg: var(--i360-toolbar, #FAF7F2);
+  --toolbar-line: var(--i360-border, #CBD5E1);
+  --toolbar-icon: var(--i360-icon, #0010CF);
+  --toolbar-icon-hover: var(--i360-icon-hover, #0010CF);
+  --toolbar-hover: var(--i360-hover, #EEF2FF);
+  --toolbar-active: var(--i360-active, #EEF2FF);
+  --toolbar-title: var(--toolbar-icon);   /* one colour for a bar's text and icons, in every theme */
+  --toolbar-menu-bg: var(--i360-surface, #FAF7F2);
+  --toolbar-focus: var(--i360-focus, #0010CF);
+
+  --toolbar-btn-h: 2rem;    /* a button in the bar */
+  --toolbar-text: 1rem;     /* the text on every button: numerals, a language, a label */
+  --toolbar-btn-min: var(--toolbar-btn-h);   /* its narrowest width */
+  /* A button's width in a bar: as wide as the bar is high, unless fittingToolbar() sets less on the
+     bar (between --toolbar-btn-min and this, by the room the bar has). A button showing text is
+     never narrower than its text. */
+  --toolbar-btn-w: var(--toolbar-h);
 }
 
+/* ---------- The bar ---------- */
+/* One row; at the top of a page, clear of the status bar and, on an iPhone in landscape, of the
+   rounded corners and the notch (viewport-fit=cover). */
+.toolbar {
+  --toolbar-inset: env(safe-area-inset-top);
+  --toolbar-pad: 0.5rem;
+  --toolbar-row-w: 100%;
+  position: relative;
+  box-sizing: border-box;
+  align-self: stretch;
+  min-height: calc(var(--toolbar-h) + var(--toolbar-inset));
+  padding-top: var(--toolbar-inset);
+  /* Its row: the page column's width where one is given, never closer to the edges than its padding. */
+  padding-left: max(calc(var(--toolbar-pad) + env(safe-area-inset-left)), calc((100% - var(--toolbar-row-w)) / 2 + var(--toolbar-pad)));
+  padding-right: max(calc(var(--toolbar-pad) + env(safe-area-inset-right)), calc((100% - var(--toolbar-row-w)) / 2 + var(--toolbar-pad)));
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  user-select: none;
+  background-color: var(--toolbar-bg);
+  border-bottom: 1px solid var(--toolbar-line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.toolbar-bottom { --toolbar-inset: 0px; }
+.toolbar-sticky { position: sticky; top: 0; }
+
+.tb-start, .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+.tb-main { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 0.2rem; }
+.tb-group { display: flex; align-items: center; gap: 0.15rem; }
+.tb-main > .tb-group { padding: 0 0.2rem; }
+/* A thin line between two groups side by side in the middle (drawn at the end of the first, in its
+   own direction: a group may run left to right in a right-to-left bar, as the Reader's page arrows
+   do), and wherever a page puts .divider. Browsers without :has() (before 2022) draw no line. */
+.tb-main > .tb-group:has(+ .tb-group)::after,
+.toolbar .divider { content: ''; width: 1px; height: 1.25rem; background-color: var(--toolbar-line); flex-shrink: 0; }
+.tb-main > .tb-group:has(+ .tb-group)::after { margin-inline-start: 0.35rem; }
+.toolbar .divider { margin: 0 0.2rem; }
+/* The title: where it grows (a bar without a middle), it takes the free room and sits at the end. Its
+   line is tall enough for Amiri's marks above and below the letters (the hamza of «أ»): the «…» needs
+   overflow: hidden, which would otherwise cut them off. */
+.tb-title { font-weight: 700; font-size: 1.05rem; line-height: 2; color: var(--toolbar-title); padding: 0 0.35rem; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toolbar > .tb-title { flex: 1; text-align: end; }
+
+/* ---------- Its buttons ---------- */
 .toolbar-btn {
   position: relative;       /* for the tap area below */
+  box-sizing: border-box;
   height: var(--toolbar-btn-h);
-  min-width: var(--toolbar-btn-h);
+  min-width: var(--toolbar-btn-min);
   padding: 0 0.4rem;
   border: none;
   border-radius: 0.25rem;
   background: transparent;
+  color: var(--toolbar-icon);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
   flex-shrink: 0;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: var(--toolbar-text);
   font-family: inherit;
   transition: background-color 0.15s, color 0.15s;
 }
-.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
+.toolbar .toolbar-btn { min-width: var(--toolbar-btn-w); }
+.toolbar-menu .toolbar-btn { min-width: var(--toolbar-btn-min); }
+.toolbar-btn:hover:not(:disabled), .toolbar-btn[aria-expanded="true"] { background-color: var(--toolbar-hover); color: var(--toolbar-icon-hover); }
+.toolbar-btn[aria-pressed="true"] { background-color: var(--toolbar-active); color: var(--toolbar-icon-hover); }
+.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
@@ -241,70 +319,60 @@
   flex-shrink: 0;
 }
 
-/* The numerals button shows digits (٣ / 3), the same width whichever are shown. */
-.numerals-btn { font-weight: 700; font-size: 0.82rem; min-width: 2.4rem; font-variant-numeric: tabular-nums; }
-
-.tb-title { font-weight: 700; font-size: 1.05rem; }
+/* The numerals button shows digits (٣ / 3). */
+.numerals-btn { font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* The tap area, not drawn: each button in the bar reaches from the bar's top edge to its bottom, so
-   it stays the bar's full height whatever the two heights above are. Sideways the buttons sit close
-   together, so it stays the button's own width. Not in the Reader's ⋮ menu, whose rows are close together. */
-:is(.toolbar, .topbar) .toolbar-btn::after {
+   it stays the bar's full height whatever the two heights above are. Sideways it is the button's
+   own width (the buttons sit close together). Not in the menu, whose rows are close together. */
+.toolbar .toolbar-btn::after {
   content: '';
   position: absolute;
   inset: calc((var(--toolbar-btn-h) - var(--toolbar-h)) / 2) 0;
 }
-.more-menu .toolbar-btn::after { content: none; }
-    .toolbar {
-      position: relative;
-      background-color: var(--toolbar-bg);
-      border-bottom: 1px solid var(--toolbar-border);
-      min-height: var(--toolbar-h);
-      padding-top: env(safe-area-inset-top);
-      /* iPhone: clear of the rounded corners and the notch in landscape (viewport-fit=cover) */
-      padding-left: calc(0.5rem + env(safe-area-inset-left));
-      padding-right: calc(0.5rem + env(safe-area-inset-right));
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      user-select: none;
-      z-index: 100;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-    .tb-start, .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
-    .tb-main {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.2rem;
-    }
-    .tb-group { display: flex; align-items: center; gap: 0.15rem; }
-    .tb-main > .tb-group:not(#group-nav) { padding: 0 0.2rem; }
-    /* On a wide bar, thin dividers between the groups: text size | zoom | the page arrows | copy link
-       and bookmark | «الصفحة الأصلية» and reading mode (the same pairs as ⋮'s boxes). Each comes and goes with its group, and is part of it when the bar is measured. */
-    .tb-main > #group-text::after, .tb-main > #group-zoom::after, .tb-main > #group-acts::before {
-      content: ''; width: 1px; height: 1.25rem; background-color: var(--toolbar-border); flex-shrink: 0; margin-inline-start: 0.35rem;
-    }
-    .tb-main > #group-acts::before { margin-inline-start: 0; margin-inline-end: 0.35rem; }
-    .tb-main > .divider { margin: 0; display: none; }
-    body.acts-out .tb-main > .divider { display: block; }
-    /* The arrows keep their places whatever the language: in an RTL book the left one is "next". */
-    #group-nav { direction: ltr; }
-    .tb-title {
-      color: var(--heading);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 14rem;
-      padding: 0 0.35rem;
-      flex-shrink: 0;
-    }
+.toolbar-menu .toolbar-btn::after { content: none; }
 
-    .toolbar-btn { color: var(--icon-color); }
-    .toolbar-btn:hover:not(:disabled) { background-color: var(--hover-bg); color: var(--icon-hover); }
-    .toolbar-btn[aria-pressed="true"] { background-color: var(--active-bg); color: var(--icon-hover); }
+/* ---------- The ⋮ menu: under the bar, its groups boxed; what folds out of the bar goes here ---------- */
+.toolbar-menu {
+  position: absolute;
+  top: 100%;
+  left: calc(var(--toolbar-pad) + env(safe-area-inset-left));
+  right: calc(var(--toolbar-pad) + env(safe-area-inset-right));
+  margin-top: 0.35rem;
+  background: var(--toolbar-menu-bg);
+  border: 1px solid var(--toolbar-line);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.5rem;
+  z-index: 3;
+}
+.toolbar-menu[hidden] { display: none; }
+.toolbar-menu .tb-group { padding: 0.15rem; border: 1px solid var(--toolbar-line); border-radius: 0.375rem; }
+
+/* ---------- A bar's last levels, when nothing more can fold (fittingToolbar()) ---------- */
+/* Closer together, then the narrowest buttons and the least padding, with no divider. */
+.toolbar-dense { --toolbar-btn-min: 1.85rem; gap: 0.1rem; }
+.toolbar-dense :is(.tb-start, .tb-end, .tb-main) { gap: 0.05rem; }
+.toolbar-dense .tb-start > .divider { margin: 0 0.05rem; }
+.toolbar-dense .toolbar-btn { padding: 0 0.25rem; }
+.toolbar-densest { --toolbar-btn-min: 1.6rem; --toolbar-pad: 0.15rem; }
+.toolbar-densest .toolbar-btn { padding: 0 0.1rem; }
+.toolbar-densest .tb-start > .divider { display: none; }
+    /* The bar and everything in it: src/page-chrome.css. Here: its place among the Reader's layers,
+       and its own content — the page arrows and number, the connection icon, «فتح ملف». */
+    .toolbar { z-index: 100; }
+    /* The page arrows: no padding of their own (the page number box has it); they keep their places
+       whatever the language: in an RTL book the left one is "next". */
+    #group-nav { direction: ltr; }
+    .tb-main > #group-nav { padding: 0; }
+    /* The line before copy link, while the page actions are on the bar. */
+    .tb-main > .divider { margin: 0; }
+    .toolbar.acts-folded .tb-main > .divider { display: none; }
+    .tb-end > .tb-title { max-width: 14rem; flex-shrink: 0; }
 
     /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js.
        The toolbar's own are in src/page-chrome.css. */
@@ -321,10 +389,9 @@
     #btn-bookmark[aria-pressed="true"] svg { fill: var(--ribbon); stroke: var(--ribbon); }
     #btn-bookmark[aria-pressed="true"] { background-color: transparent; }
 
-    .text-size-btn { font-weight: 700; font-size: 1.05rem; font-family: 'Amiri', serif; gap: 0.05rem; }
+    .text-size-btn { font-weight: 700; font-family: 'Amiri', serif; gap: 0.05rem; }
     .text-size-btn small { font-size: 0.75em; font-weight: 700; }
 
-    .divider { width: 1px; height: 1.25rem; background-color: var(--toolbar-border); margin: 0 0.2rem; flex-shrink: 0; }
 
     .page-counter {
       display: flex;
@@ -355,8 +422,8 @@
     .status-icon { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.25rem; color: var(--quran); font-size: 0.85rem; }
     .status-icon.offline { color: var(--offline); }
     .status-text { display: none; }
-    .more-menu .status-icon { height: 2rem; padding: 0 0.4rem; }
-    .more-menu .status-text { display: inline; }
+    .toolbar-menu .status-icon { height: 2rem; padding: 0 0.4rem; }
+    .toolbar-menu .status-text { display: inline; }
     .btn-open-file {
       background-color: var(--input-bg);
       border: 1px solid var(--toolbar-border);
@@ -392,48 +459,22 @@
     @keyframes progress-slide-rtl { from { transform: translateX(100%); } to { transform: translateX(-334%); } }
     @media (prefers-reduced-motion: reduce) { .progress.indeterminate .progress-fill { animation: none; width: 100%; opacity: 0.4; } }
 
-    /* The ⋮ menu: zoom, text size and the view buttons; on narrow screens also search,
-       «فتح ملف», the connection icon and, last, the volume menu. */
-    .more-menu {
-      position: absolute;
-      top: 100%;
-      left: calc(0.5rem + env(safe-area-inset-left));
-      right: calc(0.5rem + env(safe-area-inset-right));
-      margin-top: 0.35rem;
-      background: var(--panel-bg);
-      border: 1px solid var(--toolbar-border);
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-      padding: 0.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.35rem 0.5rem;
-      z-index: 103;
-    }
-    .more-menu .tb-group { padding: 0.15rem; border: 1px solid var(--toolbar-border); border-radius: 0.375rem; }
+    /* The ⋮ menu's first row (search, «فتح ملف», the connection icon) shows once they fold into it. */
+    .toolbar:not(.folded) #group-fold { display: none; }
 
-    /* Levels chosen by measurement (fitToolbar): no title; then search, «فتح ملف» and the
-       connection icon in ⋮; no file position; tighter spacing; no "of N"; volume menu in ⋮. */
-    body.notitle .tb-title { display: none; }
-    body.folded .page-input { width: 2.8rem; }
-    body.tight .toolbar { gap: 0.1rem; }
-    body.tight .tb-start, body.tight .tb-end, body.tight .tb-main { gap: 0.05rem; }
-    body.tight .tb-start > .divider { margin: 0 0.05rem; }
-    body.tight .toolbar-btn { min-width: 1.85rem; padding: 0 0.25rem; }
-    body.tight .page-counter { gap: 0.2rem; font-size: 0.82rem; }
-    body.tight .page-input { width: 2.4rem; }
-    body.tight .vol-select { max-width: 3.6rem; }
-    body.tighter #lbl-of, body.tighter #total-pages { display: none; }
-    /* Last resort (very narrow screens with large text): the smallest buttons, no divider */
-    body.tightest .toolbar { padding-left: calc(0.15rem + env(safe-area-inset-left)); padding-right: calc(0.15rem + env(safe-area-inset-right)); }
-    body.tightest .toolbar-btn { min-width: 1.6rem; padding: 0 0.1rem; }
-    body.tightest .tb-start > .divider { display: none; }
-    body.tightest .page-input { width: 2rem; }
+    /* What the Reader's own folding levels do to its own content (fitToolbar, src/reader/panel.js;
+       the buttons' spacing and narrowest widths at the last levels: src/page-chrome.css). */
+    .toolbar.notitle .tb-title { display: none; }
+    .toolbar.folded .page-input { width: 2.8rem; }
+    .toolbar.toolbar-dense .page-counter { gap: 0.2rem; font-size: 0.82rem; }
+    .toolbar.toolbar-dense .page-input { width: 2.4rem; }
+    .toolbar.toolbar-dense .vol-select { max-width: 3.6rem; }
+    .toolbar.no-total #lbl-of, .toolbar.no-total #total-pages { display: none; }
+    .toolbar.toolbar-densest .page-input { width: 2rem; }
     /* Position in the file, next to the printed page number (as Acrobat shows page labels) */
     .page-pos { color: var(--muted); font-size: 0.8em; }
-    body.nopos .page-pos { display: none; }
-    .more-menu .vol-select { max-width: none; height: 2rem; }
+    .toolbar.nopos .page-pos { display: none; }
+    .toolbar-menu .vol-select { max-width: none; height: 2rem; }
 
     /* ---------- Notices banner ---------- */
     .missing-pages-banner {
@@ -901,6 +942,24 @@
     </div>
 
     <div class="tb-main">
+      <div class="tb-group" id="group-text">
+        <button class="toolbar-btn text-size-btn" id="btn-text-smaller" type="button" dir="ltr"></button>
+        <button class="toolbar-btn text-size-btn" id="btn-text-larger" type="button" dir="ltr"></button>
+      </div>
+      <div class="tb-group" id="group-zoom">
+        <button class="toolbar-btn" id="btn-zoom-out" type="button">
+          <svg data-lucide="minus" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-zoom-in" type="button">
+          <svg data-lucide="plus" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-fit-width" type="button">
+          <svg data-lucide="move-horizontal" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4"></path><path d="M2 12h20"></path><path d="m6 8-4 4 4 4"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-fit-page" type="button">
+          <svg data-lucide="move-vertical" viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m8 18 4 4 4-4"></path><path d="m8 6 4-4 4 4"></path></svg>
+        </button>
+      </div>
       <div class="tb-group" id="group-nav">
         <button class="toolbar-btn" id="btn-nav-left" type="button">
           <svg data-lucide="chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
@@ -920,6 +979,20 @@
       <button class="toolbar-btn" id="btn-copy-link" type="button" hidden>
         <svg data-lucide="link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
       </button>
+      <div class="tb-group" id="group-mark">
+        <template data-slot="copy-link"></template>
+        <button class="toolbar-btn" id="btn-bookmark" type="button" aria-pressed="false">
+          <svg data-lucide="bookmark" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"></path></svg>
+        </button>
+      </div>
+      <div class="tb-group" id="group-acts">
+        <button class="toolbar-btn" id="btn-scan" type="button" hidden>
+          <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
+        </button>
+        <button class="toolbar-btn" id="btn-reading" type="button">
+          <svg data-lucide="maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+        </button>
+      </div>
     </div>
 
     <div class="tb-end">
@@ -935,39 +1008,13 @@
       </button>
     </div>
 
-    <div class="more-menu" id="more-menu" hidden>
-      <div class="tb-group" id="group-fold" hidden></div>
-      <div class="tb-group" id="group-zoom">
-        <button class="toolbar-btn" id="btn-zoom-out" type="button">
-          <svg data-lucide="minus" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg>
-        </button>
-        <button class="toolbar-btn" id="btn-zoom-in" type="button">
-          <svg data-lucide="plus" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-        </button>
-        <button class="toolbar-btn" id="btn-fit-width" type="button">
-          <svg data-lucide="move-horizontal" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4"></path><path d="M2 12h20"></path><path d="m6 8-4 4 4 4"></path></svg>
-        </button>
-        <button class="toolbar-btn" id="btn-fit-page" type="button">
-          <svg data-lucide="move-vertical" viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m8 18 4 4 4-4"></path><path d="m8 6 4-4 4 4"></path></svg>
-        </button>
-      </div>
-      <div class="tb-group" id="group-text">
-        <button class="toolbar-btn text-size-btn" id="btn-text-smaller" type="button" dir="ltr"></button>
-        <button class="toolbar-btn text-size-btn" id="btn-text-larger" type="button" dir="ltr"></button>
-      </div>
-      <div class="tb-group" id="group-mark">
-        <button class="toolbar-btn" id="btn-bookmark" type="button" aria-pressed="false">
-          <svg data-lucide="bookmark" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"></path></svg>
-        </button>
-      </div>
-      <div class="tb-group" id="group-acts">
-        <button class="toolbar-btn" id="btn-scan" type="button" hidden>
-          <svg data-lucide="scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
-        </button>
-        <button class="toolbar-btn" id="btn-reading" type="button">
-          <svg data-lucide="maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-        </button>
-      </div>
+    <!-- The ⋮ menu: what doesn't fit on the bar folds into its slots (fittingToolbar, src/page-chrome.js). -->
+    <div class="toolbar-menu" id="more-menu" hidden>
+      <template data-slot="volume"></template>
+      <div class="tb-group" id="group-fold"><template data-slot="fold-row"></template></div>
+      <template data-slot="zoom"></template>
+      <template data-slot="text"></template>
+      <template data-slot="actions"></template>
       <div class="tb-group" id="group-view">
         <button class="toolbar-btn" id="btn-dir-toggle" type="button"></button>
       </div>
@@ -1461,6 +1508,83 @@ ${body}`;
     sepia: '<svg data-lucide="coffee" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg>',
     dark: '<svg data-lucide="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>'
   });
+  function inRow(el) {
+    if (el.hidden) return false;
+    const cs = getComputedStyle(el);
+    return cs.display !== "none" && cs.position !== "absolute" && cs.position !== "fixed";
+  }
+  function fittingToolbar({ bar, fold = [] }) {
+    const DENSE = ["toolbar-dense", "toolbar-densest"];
+    const levels = fold.map(({ items = [], to, flag, dense }) => {
+      const changes = [];
+      if (items.length) {
+        const slot = bar.querySelector(`template[data-slot="${to}"]`);
+        if (!slot) throw new Error(`toolbar: no slot "${to}"`);
+        for (const id of items) {
+          const el = document.getElementById(id);
+          const home = document.createComment(id);
+          el.parentNode.insertBefore(home, el);
+          changes.push((folded) => {
+            if (folded) {
+              if (el.nextSibling !== slot) slot.parentNode.insertBefore(el, slot);
+            } else if (home.nextSibling !== el) home.parentNode.insertBefore(el, home.nextSibling);
+          });
+        }
+      }
+      if (flag) changes.push((folded) => bar.classList.toggle(flag, folded));
+      if (dense) changes.push((folded) => bar.classList.toggle(DENSE[dense - 1], folded));
+      return changes;
+    });
+    const done = levels.map(() => null);
+    const setLevel = (level) => levels.forEach((changes, i) => {
+      const folded = i < level;
+      if (done[i] === folded) return;
+      done[i] = folded;
+      for (const change of changes) change(folded);
+    });
+    const roomLeft = () => {
+      const cs = getComputedStyle(bar);
+      const parts = [...bar.children].filter(inRow);
+      let need = (parseFloat(cs.columnGap) || 0) * Math.max(0, parts.length - 1);
+      for (const part of parts) {
+        const ps = getComputedStyle(part);
+        if (parseFloat(ps.flexGrow) > 0) {
+          const range = document.createRange();
+          range.selectNodeContents(part);
+          need += range.getBoundingClientRect().width + parseFloat(ps.paddingLeft) + parseFloat(ps.paddingRight);
+        } else need += part.getBoundingClientRect().width;
+      }
+      return bar.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - need;
+    };
+    const setWidth = (value) => bar.style.setProperty("--toolbar-btn-w", value);
+    const widen = (room) => {
+      const buttons = [...bar.querySelectorAll(".toolbar-btn")].filter((b) => b.offsetParent && !b.closest(".toolbar-menu"));
+      if (!buttons.length || room <= 0) return;
+      const narrow = buttons.map((b) => b.getBoundingClientRect().width).sort((a, b) => a - b);
+      setWidth("var(--toolbar-h)");
+      const widest = Math.min(...buttons.map((b) => b.getBoundingClientRect().width));
+      let width = widest, sum = 0;
+      for (let k2 = 0; k2 < narrow.length; k2++) {
+        sum += narrow[k2];
+        const even = (room + sum) / (k2 + 1);
+        if (k2 + 1 === narrow.length || even <= narrow[k2 + 1]) {
+          width = Math.min(widest, even);
+          break;
+        }
+      }
+      setWidth(`${Math.floor(width * 10) / 10}px`);
+    };
+    return function fit2() {
+      setWidth("var(--toolbar-btn-min)");
+      let room = 0;
+      for (let level = 0; level <= levels.length; level++) {
+        setLevel(level);
+        room = roomLeft();
+        if (room >= 0) break;
+      }
+      widen(room);
+    };
+  }
 
   // src/reader/text.js
   var ICON = {
@@ -1844,8 +1968,6 @@ ${body}`;
     listOpen: false
   };
   var toolbar = $("toolbar");
-  var tbStart = toolbar.querySelector(".tb-start");
-  var tbMain = toolbar.querySelector(".tb-main");
   var tbEnd = toolbar.querySelector(".tb-end");
   var pagesWrapper = $("pages-wrapper");
   var viewerContainer = $("viewer-container");
@@ -3817,75 +3939,35 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {
     });
   }
-  var groupFold = $("group-fold");
-  var FOLD = [[statusIcon, 5], [btnOpenFile, 5], [btnSearchToggle, 5], [btnCopyLink, 11, $("group-mark")]].map(([el, at2, into]) => {
-    const home = document.createComment(el.id);
-    el.parentNode.insertBefore(home, el);
-    return { el, home, at: at2, into };
+  var fit = fittingToolbar({
+    bar: toolbar,
+    fold: [
+      /* 1 */
+      { items: ["group-text"], to: "text" },
+      /* 2 */
+      { items: ["group-zoom"], to: "zoom" },
+      /* 3 */
+      { items: ["group-mark", "group-acts"], to: "actions", flag: "acts-folded" },
+      /* 4 */
+      { flag: "notitle" },
+      /* 5 */
+      { items: ["status-icon", "btn-open-file", "btn-search-toggle"], to: "fold-row", flag: "folded" },
+      /* 6 */
+      { flag: "nopos" },
+      /* 7 */
+      { dense: 1 },
+      /* 8 */
+      { flag: "no-total" },
+      /* 9 */
+      { items: ["vol-select"], to: "volume" },
+      /* 10 */
+      { dense: 2 },
+      /* 11 */
+      { items: ["btn-copy-link"], to: "copy-link" }
+    ]
   });
-  var groupNav = $("group-nav");
-  var OUT = [["group-text", 1, "before"], ["group-zoom", 2, "before"], ["group-mark", 3, "after"], ["group-acts", 3, "after"]].map(([id, out, side]) => {
-    const el = $(id);
-    const home = document.createComment(id);
-    el.parentNode.insertBefore(home, el);
-    return { el, home, out, side };
-  });
-  var toolbarLevel = -1;
-  var TOOLBAR_LEVELS = 11;
-  function setToolbarLevel(level) {
-    if (level === toolbarLevel) return;
-    toolbarLevel = level;
-    for (const g of OUT) {
-      if (level < g.out) {
-        if (g.side === "before") tbMain.insertBefore(g.el, groupNav);
-        else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
-      } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
-    }
-    document.body.classList.toggle("acts-out", level < 3);
-    document.body.classList.toggle("notitle", level >= 4);
-    const folded = level >= 5;
-    document.body.classList.toggle("folded", folded);
-    document.body.classList.toggle("nopos", level >= 6);
-    document.body.classList.toggle("tight", level >= 7);
-    document.body.classList.toggle("tighter", level >= 8);
-    document.body.classList.toggle("tightest", level >= 10);
-    for (const f of FOLD) {
-      if (level >= f.at) {
-        if (f.into) {
-          if (f.into.firstElementChild !== f.el) f.into.insertBefore(f.el, f.into.firstChild);
-        } else if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el);
-      } else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
-    }
-    groupFold.hidden = !folded;
-    const counter = toolbar.querySelector(".page-counter");
-    if (level >= 9) {
-      if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild);
-    } else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
-  }
-  function rowWidth(el) {
-    const cs = getComputedStyle(el);
-    const gap = parseFloat(cs.columnGap) || 0;
-    let w = 0, n = 0;
-    for (const c of el.children) {
-      if (c.hidden || c.classList.contains("more-menu") || getComputedStyle(c).display === "none") continue;
-      w += c.getBoundingClientRect().width;
-      n++;
-    }
-    return w + gap * Math.max(0, n - 1);
-  }
-  function toolbarFits() {
-    const cs = getComputedStyle(toolbar);
-    const inner = toolbar.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    const gap = parseFloat(cs.columnGap) || 0;
-    const need = tbStart.getBoundingClientRect().width + rowWidth(tbMain) + tbEnd.getBoundingClientRect().width + gap * 2;
-    return need <= inner;
-  }
   function fitToolbar() {
-    if (document.body.classList.contains("reading")) return;
-    for (let level = 0; level <= TOOLBAR_LEVELS; level++) {
-      setToolbarLevel(level);
-      if (toolbarFits()) return;
-    }
+    if (!document.body.classList.contains("reading")) fit();
   }
   var queueFitToolbar = oncePerFrame(() => fitToolbar());
   function closeMore() {

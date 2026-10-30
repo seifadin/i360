@@ -1,8 +1,9 @@
 // The Reader: the side panel (contents, bookmarks), reading mode, the toolbar's layout by
 // measurement, and keyboard shortcuts.
 import { oncePerFrame } from '../frame.js';
+import { fittingToolbar } from '../page-chrome.js';
 import { ICON, PANEL_COVERS, ZOOM_STEP } from './text.js';
-import { $, btnCopyLink, btnExitReading, btnMore, btnOpenFile, btnPanel, btnPanelClose, btnReading, btnSearchToggle, fmtNum, moreMenu, nextFrame, panelBody, searchPopup, setTitle, sidePanel, state, statusIcon, t, tabBookmarks, tabContents, tbEnd, tbMain, tbStart, toolbar, viewerContainer, volSelect } from './state.js';
+import { btnCopyLink, btnExitReading, btnMore, btnPanel, btnPanelClose, btnReading, fmtNum, moreMenu, nextFrame, panelBody, searchPopup, setTitle, sidePanel, state, t, tabBookmarks, tabContents, tbEnd, toolbar, viewerContainer } from './state.js';
 import { isBuilding, pageLabelText } from './pages.js';
 import { bookmarkedSet, copyPageLink, removeBookmarkAt } from './position.js';
 import { captureAnchor, remPx, restoreAnchor, setZoom } from './view.js';
@@ -157,86 +158,27 @@ function exitReading() {
      screens with large text   11: last resort — copy link into ⋮ too (bookmark's box)
    The page arrows always stay; direction always lives in ⋮.
    ================================================================ */
-const groupFold = $('group-fold');
-// Moved into ⋮'s first row at their level, in this order; each returns to its own place.
-// Copy link's last resort is bookmark's box, first — the pair stays together in ⋮ too.
-const FOLD = [[statusIcon, 5], [btnOpenFile, 5], [btnSearchToggle, 5], [btnCopyLink, 11, $('group-mark')]].map(([el, at, into]) => {
-  const home = document.createComment(el.id);
-  el.parentNode.insertBefore(home, el);
-  return { el, home, at, into };
+// What folds away, in order (fittingToolbar, src/page-chrome.js; the slots are in the Reader's HTML).
+const fit = fittingToolbar({
+  bar: toolbar,
+  fold: [
+    /* 1 */ { items: ['group-text'], to: 'text' },
+    /* 2 */ { items: ['group-zoom'], to: 'zoom' },
+    /* 3 */ { items: ['group-mark', 'group-acts'], to: 'actions', flag: 'acts-folded' },
+    /* 4 */ { flag: 'notitle' },
+    /* 5 */ { items: ['status-icon', 'btn-open-file', 'btn-search-toggle'], to: 'fold-row', flag: 'folded' },
+    /* 6 */ { flag: 'nopos' },
+    /* 7 */ { dense: 1 },
+    /* 8 */ { flag: 'no-total' },
+    /* 9 */ { items: ['vol-select'], to: 'volume' },
+    /* 10 */ { dense: 2 },
+    /* 11 */ { items: ['btn-copy-link'], to: 'copy-link' }
+  ]
 });
-// ⋮'s groups that come out onto the bar while level < out: each has its place in ⋮
-// and its place on the bar (text size and zoom before the page arrows; after copy link, bookmark,
-// then «الصفحة الأصلية» and reading mode).
-const groupNav = $('group-nav');
-const OUT = [['group-text', 1, 'before'], ['group-zoom', 2, 'before'], ['group-mark', 3, 'after'], ['group-acts', 3, 'after']].map(([id, out, side]) => {
-  const el = $(id);
-  const home = document.createComment(id);
-  el.parentNode.insertBefore(home, el);
-  return { el, home, out, side };
-});
-let toolbarLevel = -1;
-const TOOLBAR_LEVELS = 11;
-
-function setToolbarLevel(level) {
-  if (level === toolbarLevel) return;
-  toolbarLevel = level;
-  // On the bar, in order: text size, zoom, the page arrows, copy link, bookmark … reading mode.
-  for (const g of OUT) {
-    if (level < g.out) {
-      // Text size, then zoom, each placed just before the arrows: they end up in that order.
-      if (g.side === 'before') tbMain.insertBefore(g.el, groupNav);
-      else if (g.el.parentElement !== tbMain) tbMain.appendChild(g.el);
-    } else if (g.el.previousSibling !== g.home) g.home.parentNode.insertBefore(g.el, g.home.nextSibling);
-  }
-  document.body.classList.toggle('acts-out', level < 3);   // the divider before the page actions
-  document.body.classList.toggle('notitle', level >= 4);
-  const folded = level >= 5;
-  document.body.classList.toggle('folded', folded);
-  document.body.classList.toggle('nopos', level >= 6);
-  document.body.classList.toggle('tight', level >= 7);
-  document.body.classList.toggle('tighter', level >= 8);
-  document.body.classList.toggle('tightest', level >= 10);
-  for (const f of FOLD) {
-    if (level >= f.at) {
-      if (f.into) { if (f.into.firstElementChild !== f.el) f.into.insertBefore(f.el, f.into.firstChild); }
-      else if (f.el.parentElement !== groupFold) groupFold.appendChild(f.el);
-    }
-    else if (f.el.previousSibling !== f.home) f.home.parentNode.insertBefore(f.el, f.home.nextSibling);
-  }
-  groupFold.hidden = !folded;
-  const counter = toolbar.querySelector('.page-counter');
-  if (level >= 9) { if (volSelect.parentElement !== moreMenu) moreMenu.insertBefore(volSelect, moreMenu.firstChild); }
-  else if (volSelect.parentElement !== counter) counter.insertBefore(volSelect, counter.firstChild);
-}
-
-function rowWidth(el) {
-  const cs = getComputedStyle(el);
-  const gap = parseFloat(cs.columnGap) || 0;
-  let w = 0, n = 0;
-  for (const c of el.children) {
-    if (c.hidden || c.classList.contains('more-menu') || getComputedStyle(c).display === 'none') continue;
-    w += c.getBoundingClientRect().width;
-    n++;
-  }
-  return w + gap * Math.max(0, n - 1);
-}
-
-function toolbarFits() {
-  const cs = getComputedStyle(toolbar);
-  const inner = toolbar.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const gap = parseFloat(cs.columnGap) || 0;
-  const need = tbStart.getBoundingClientRect().width + rowWidth(tbMain) + tbEnd.getBoundingClientRect().width + gap * 2;
-  return need <= inner;
-}
 
 // Measured before the browser paints, so the switch is never seen.
 function fitToolbar() {
-  if (document.body.classList.contains('reading')) return;
-  for (let level = 0; level <= TOOLBAR_LEVELS; level++) {
-    setToolbarLevel(level);
-    if (toolbarFits()) return;
-  }
+  if (!document.body.classList.contains('reading')) fit();
 }
 
 const queueFitToolbar = oncePerFrame(() => fitToolbar());

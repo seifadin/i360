@@ -71,26 +71,8 @@
 
     /* ---------- Toolbar ---------- */
     /*@@PAGE_CHROME@@*/
-    .toolbar {
-      flex-shrink: 0;
-      background-color: var(--toolbar-bg);
-      border-bottom: 1px solid var(--toolbar-border);
-      min-height: var(--toolbar-h);
-      padding-top: env(safe-area-inset-top);
-      /* iPhone: clear of the rounded corners and the notch in landscape (viewport-fit=cover) */
-      padding-left: calc(0.75rem + env(safe-area-inset-left));
-      padding-right: calc(0.75rem + env(safe-area-inset-right));
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      z-index: 10;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-    .tb-title { flex: 1; min-width: 0; text-align: end; color: var(--heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tb-end { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
-
-    .toolbar-btn { color: var(--icon-color); }
-    .toolbar-btn:hover { background-color: var(--hover-bg); color: var(--icon-hover); }
+    /* The bar and everything in it: src/page-chrome.css. Here: its place in the page. */
+    .toolbar { flex-shrink: 0; z-index: 10; }
 
     /* ---------- Search ---------- */
     main { width: var(--page-w); max-width: 100%; margin: 0 auto; padding: var(--gap) 1rem calc(var(--gap) + env(safe-area-inset-bottom)); }
@@ -227,7 +209,7 @@
          the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
          mark before the إ keeps it there with Eastern digits ("i٣٦٠إ"). -->
     <!-- In Arabic from the right: theme · numerals … title · ✕ (i360-hub.md §10 "Toolbars"; ✕ only inside the app). -->
-    <div class="tb-end">
+    <div class="tb-start">
       <button class="toolbar-btn" id="btn-theme" type="button"></button>
       <button class="toolbar-btn numerals-btn" id="btn-numerals" type="button"></button>
     </div>
