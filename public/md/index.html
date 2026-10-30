@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-Em7x2Uh+W3x7fw8WSFygBo4cVm6VttmKwELSOk39K+s='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-qjvf2Cg3PIEBxRquiVal+NUEPtXdclu2lP4XA7Xrv1Y='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -141,41 +141,8 @@
   <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
 
   <style>
-    /* ---------- Colours ----------
-       From the shared i360 theme (light = the i360إ app's look; sepia and
-       dark = the Reader's own); the theme is <html data-theme="…">. The names
-       below are the Reader's own, kept so the rest of this file is unchanged.
-       The desk behind the pages is the theme's frame colour. */
-    :root {
-      --bg-color: var(--i360-frame);
-      --toolbar-bg: var(--i360-toolbar);
-      --toolbar-border: var(--i360-border);
-      --panel-bg: var(--i360-surface);
-      --text-color: var(--i360-text);
-      --heading: var(--i360-heading);
-      --muted: var(--i360-muted);
-      --icon-color: var(--i360-icon);
-      --icon-hover: var(--i360-icon-hover);
-      --hover-bg: var(--i360-hover);
-      --active-bg: var(--i360-active);
-      --link: var(--i360-link);
-      --page-bg: var(--i360-bg);
-      --page-shadow: var(--i360-page-shadow);
-      --rule: var(--i360-rule);
-      --note-text: var(--i360-note);
-      --quran: var(--i360-quran);
-      --code-bg: var(--i360-code);
-      --quote-bg: var(--i360-quote);
-      --input-bg: var(--i360-input);
-      --focus: var(--i360-focus);
-      --banner-bg: var(--i360-banner-bg);
-      --banner-border: var(--i360-banner-border);
-      --banner-text: var(--i360-banner-text);
-      --highlight-bg: var(--i360-highlight);
-      --active-highlight-bg: var(--i360-highlight-active);
-      --ribbon: var(--i360-ribbon);
-    }
-
+    /* Colours: the shared theme's own variables (--i360-…, hub/theme/site/theme.css), used directly;
+       the theme is <html data-theme="…">. The desk behind the pages: --i360-frame. */
     :root {
       --page-w: 50rem;              /* set from JS: min(--page-max, available width), in px */
       --page-max: 50rem;            /* widest page: about an A4 sheet at the reader's own font size */
@@ -189,8 +156,8 @@
 
     body {
       font-family: var(--i360-font);   /* Amiri, from the shared theme */
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      background-color: var(--i360-frame);
+      color: var(--i360-text);
       height: 100vh;
       height: 100dvh;
       display: flex;
@@ -307,10 +274,11 @@
 .toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
-.toolbar-btn svg {
-  width: 1.15rem;
-  height: 1.15rem;
+/* Icons: Lucide (lucide.dev, ISC licence), drawn inline and tagged data-lucide on every page;
+   checked by scripts/icons.js. Their drawing style, for every icon on every page (each page sets
+   only their sizes); a toolbar button's icon size. The app's icons come from lucide-react, which
+   draws them in the same style itself. */
+svg[data-lucide] {
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
@@ -318,6 +286,7 @@
   fill: none;
   flex-shrink: 0;
 }
+.toolbar-btn svg { width: 1.15rem; height: 1.15rem; }
 
 /* The numerals button shows digits (٣ / 3). */
 .numerals-btn { font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -374,59 +343,49 @@
     .toolbar.acts-folded .tb-main > .divider { display: none; }
     .tb-end > .tb-title { max-width: 14rem; flex-shrink: 0; }
 
-    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js.
-       The toolbar's own are in src/page-chrome.css. */
-    .status-icon svg, .floating-btn svg, .panel-btn svg {
-      width: 1.15rem;
-      height: 1.15rem;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      flex-shrink: 0;
-    }
-    #btn-bookmark[aria-pressed="true"] svg { fill: var(--ribbon); stroke: var(--ribbon); }
+    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. Their
+       sizes here; their drawing style for every page: src/page-chrome.css. */
+    .status-icon svg, .floating-btn svg, .panel-btn svg { width: 1.15rem; height: 1.15rem; }
+    #btn-bookmark[aria-pressed="true"] svg { fill: var(--i360-ribbon); stroke: var(--i360-ribbon); }
     #btn-bookmark[aria-pressed="true"] { background-color: transparent; }
 
     .text-size-btn { font-weight: 700; font-family: 'Amiri', serif; gap: 0.05rem; }
     .text-size-btn small { font-size: 0.75em; font-weight: 700; }
-
 
     .page-counter {
       display: flex;
       align-items: center;
       gap: 0.35rem;
       font-size: 0.88rem;
-      color: var(--text-color);
+      color: var(--i360-text);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
     .page-input, .vol-select {
       height: 1.75rem;
-      border: 1px solid var(--toolbar-border);
+      border: 1px solid var(--i360-border);
       border-radius: 0.25rem;
       font-size: 0.88rem;
       font-family: inherit;
-      color: var(--text-color);
+      color: var(--i360-text);
       outline: none;
-      background-color: var(--input-bg);
+      background-color: var(--i360-input);
     }
     .page-input { width: 3.4rem; text-align: center; }
     .vol-select { padding: 0 0.2rem; max-width: 5.5rem; }
-    .page-input:focus, .vol-select:focus { border-color: var(--focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus) 25%, transparent); }
+    .page-input:focus, .vol-select:focus { border-color: var(--i360-focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--i360-focus) 25%, transparent); }
 
     /* Connection: green online (the theme's Quran green, in every theme), red offline (live). Its words show only inside the ⋮ menu. */
     :root { --offline: #b91c1c; }
     :root[data-theme="dark"] { --offline: #f87171; }
-    .status-icon { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.25rem; color: var(--quran); font-size: 0.85rem; }
+    .status-icon { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.25rem; color: var(--i360-quran); font-size: 0.85rem; }
     .status-icon.offline { color: var(--offline); }
     .status-text { display: none; }
     .toolbar-menu .status-icon { height: 2rem; padding: 0 0.4rem; }
     .toolbar-menu .status-text { display: inline; }
     .btn-open-file {
-      background-color: var(--input-bg);
-      border: 1px solid var(--toolbar-border);
+      background-color: var(--i360-input);
+      border: 1px solid var(--i360-border);
       font-weight: 700;
     }
 
@@ -439,15 +398,15 @@
       align-items: center;
       gap: 0.6rem;
       padding: 0.3rem calc(0.75rem + env(safe-area-inset-right)) 0.3rem calc(0.75rem + env(safe-area-inset-left));
-      background: var(--toolbar-bg);
-      border-bottom: 1px solid var(--toolbar-border);
+      background: var(--i360-toolbar);
+      border-bottom: 1px solid var(--i360-border);
       font-size: 0.8rem;
       line-height: 1.2;
-      color: var(--text-color);
+      color: var(--i360-text);
     }
     body.reading .progress { display: none; }
     .progress-text { white-space: nowrap; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-    .progress-track { display: block; flex: 1; min-width: 3rem; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+    .progress-track { display: block; flex: 1; min-width: 3rem; height: 4px; background: var(--i360-rule); border-radius: 2px; overflow: hidden; }
     .progress-fill { display: block; height: 100%; width: 0; background: var(--i360-accent); transition: width 0.2s linear; }
     /* The moving stripe slides by transform, which the browser draws on its own track: it keeps
        moving even while the page is busy (a margin animation froze with it, and looked stuck). */
@@ -472,7 +431,7 @@
     .toolbar.no-total #lbl-of, .toolbar.no-total #total-pages { display: none; }
     .toolbar.toolbar-densest .page-input { width: 2rem; }
     /* Position in the file, next to the printed page number (as Acrobat shows page labels) */
-    .page-pos { color: var(--muted); font-size: 0.8em; }
+    .page-pos { color: var(--i360-muted); font-size: 0.8em; }
     .toolbar.nopos .page-pos { display: none; }
     .toolbar-menu .vol-select { max-width: none; height: 2rem; }
 
@@ -481,9 +440,9 @@
       width: var(--page-w);
       max-width: 100%;
       margin: 0 auto var(--container-gap);
-      background-color: var(--banner-bg);
-      border: 1px solid var(--banner-border);
-      color: var(--banner-text);
+      background-color: var(--i360-banner-bg);
+      border: 1px solid var(--i360-banner-border);
+      color: var(--i360-banner-text);
       padding: 0.75rem 1.25rem;
       border-radius: 0.375rem;
       font-size: 0.88rem;
@@ -502,7 +461,7 @@
       margin: 18vh auto 0;
       max-width: 22rem;
       text-align: center;
-      color: var(--muted);
+      color: var(--i360-muted);
       font-size: 1rem;
       line-height: 1.8;
     }
@@ -530,12 +489,12 @@
     }
 
     .page-sheet {
-      background-color: var(--page-bg);
-      color: var(--text-color);
+      background-color: var(--i360-bg);
+      color: var(--i360-text);
       width: 100%;
       min-height: calc(var(--page-w) * 1.4142);
       padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 3.5vw, 3rem) clamp(1rem, 2vw, 1.5rem);
-      box-shadow: var(--page-shadow);
+      box-shadow: var(--i360-page-shadow);
       border-radius: 2px;
       position: relative;
       overflow-wrap: break-word;
@@ -558,7 +517,7 @@
       inset-inline-end: 1.5rem;
       width: 0.9rem;
       height: 1.6rem;
-      background: var(--ribbon);
+      background: var(--i360-ribbon);
       clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
     }
 
@@ -573,13 +532,13 @@
       margin-bottom: 0.55em;
       font-weight: 700;
       line-height: 1.5;
-      color: var(--heading);
+      color: var(--i360-heading);
       text-align: start;
       scroll-margin-top: 1rem;
     }
     .page-sheet .markdown-body > :first-child { margin-top: 0; }
-    .page-sheet h1 { font-size: 1.75em; border-bottom: 2px solid var(--rule); padding-bottom: 0.25em; }
-    .page-sheet h2 { font-size: 1.45em; border-bottom: 1px solid var(--rule); padding-bottom: 0.15em; }
+    .page-sheet h1 { font-size: 1.75em; border-bottom: 2px solid var(--i360-rule); padding-bottom: 0.25em; }
+    .page-sheet h2 { font-size: 1.45em; border-bottom: 1px solid var(--i360-rule); padding-bottom: 0.15em; }
     .page-sheet h3 { font-size: 1.25em; }
     .page-sheet h4 { font-size: 1.12em; }
     .page-sheet h5, .page-sheet h6 { font-size: 1em; }
@@ -599,7 +558,7 @@
       font-size: 1em;
       margin: 0.35em 0 0.2em;
       padding-inline-start: 1.4em;
-      border-inline-start: 1px solid var(--rule);
+      border-inline-start: 1px solid var(--i360-rule);
       margin-inline-start: 0.2em;
     }
     .page-sheet .sublist > li { position: relative; margin-bottom: 0.25em; }
@@ -611,8 +570,8 @@
     .page-sheet blockquote {
       text-align: justify;
       text-justify: inter-word;
-      border-inline-start: 4px solid var(--link);
-      background-color: var(--quote-bg);
+      border-inline-start: 4px solid var(--i360-link);
+      background-color: var(--i360-quote);
       padding: 0.75rem 1rem;
       margin: 1.2em 0;
     }
@@ -624,15 +583,15 @@
     .page-sheet .table-wrap { overflow-x: auto; margin: 1.2em 0; max-width: 100%; }
     .page-sheet table { width: 100%; border-collapse: collapse; font-size: 1em; }
     .page-sheet th, .page-sheet td {
-      border: 1px solid var(--rule);
+      border: 1px solid var(--i360-rule);
       padding: 0.45em 0.7em;
       text-align: start;
       vertical-align: top;
       line-height: 1.7;
       min-width: 3.5em;
     }
-    .page-sheet th { background-color: var(--code-bg); font-weight: 700; }
-    .page-sheet tbody tr:nth-child(even) td { background-color: color-mix(in srgb, var(--code-bg) 45%, transparent); }
+    .page-sheet th { background-color: var(--i360-code); font-weight: 700; }
+    .page-sheet tbody tr:nth-child(even) td { background-color: color-mix(in srgb, var(--i360-code) 45%, transparent); }
     .page-sheet table.no-head thead { display: none; }
 
     /* "[شكل]" / "[شكل: caption]": a figure in the book that the text can't show */
@@ -641,14 +600,14 @@
       text-align: start;
       font-family: 'Amiri', serif;
       font-size: 0.95em;
-      color: var(--muted);
-      border: 1px dashed var(--rule);
+      color: var(--i360-muted);
+      border: 1px dashed var(--i360-rule);
       border-radius: 0.375rem;
       padding: 0.2em 0.75em;
       margin-bottom: 0.5em;
     }
 
-    .page-sheet code { background-color: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
+    .page-sheet code { background-color: var(--i360-code); padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
     .page-sheet pre {
       background-color: #0f172a;
       color: #f8fafc;
@@ -660,14 +619,14 @@
       text-align: left;
     }
     .page-sheet pre code { background-color: transparent; padding: 0; color: inherit; }
-    .page-sheet hr { border: 0; height: 1px; background: var(--rule); margin: 1.5em 0; }
-    .page-sheet a { color: var(--link); }
+    .page-sheet hr { border: 0; height: 1px; background: var(--i360-rule); margin: 1.5em 0; }
+    .page-sheet a { color: var(--i360-link); }
 
     /* Quran quotations: Amiri Quran, from the shared theme. */
     .quran {
       font-family: var(--i360-font-quran);
       font-size: 1.05em;
-      color: var(--quran);
+      color: var(--i360-quran);
     }
 
     .footnotes { margin-top: auto; padding-top: 1rem; }
@@ -676,27 +635,27 @@
       display: block;
       width: 35%;
       min-width: 8rem;
-      border-top: 1px solid var(--muted);
+      border-top: 1px solid var(--i360-muted);
       margin-bottom: 0.5rem;
     }
-    .footnotes-list { font-size: 0.92em; line-height: 1.8; color: var(--note-text); }
+    .footnotes-list { font-size: 0.92em; line-height: 1.8; color: var(--i360-note); }
     .fn-note { margin-bottom: 0.3em; text-align: justify; text-justify: inter-word; }
-    .fn-back, .fn-ref { color: var(--link); text-decoration: none; }
+    .fn-back, .fn-ref { color: var(--i360-link); text-decoration: none; }
     .fn-back:hover, .fn-ref:hover { text-decoration: underline; }
     .fn-back { margin-inline-end: 0.3em; }
     .fn-ref { font-size: 0.78em; vertical-align: super; line-height: 0; }
     .flash { animation: flash 1.6s ease-out; border-radius: 3px; }
-    @keyframes flash { 0%, 40% { background-color: var(--highlight-bg); } 100% { background-color: transparent; } }
+    @keyframes flash { 0%, 40% { background-color: var(--i360-highlight); } 100% { background-color: transparent; } }
 
     .page-placeholder {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: var(--i360-muted);
       font-family: 'Amiri', serif;
       font-size: 0.95rem;
-      border: 1px dashed var(--rule);
+      border: 1px dashed var(--i360-rule);
       border-radius: 4px;
       padding: 2rem 1rem;
       text-align: center;
@@ -705,10 +664,10 @@
     .page-number-footer {
       text-align: center;
       font-size: 0.85rem;
-      color: var(--muted);
+      color: var(--i360-muted);
       padding-top: 0.75rem;
       margin-top: 1rem;
-      border-top: 1px dashed var(--rule);
+      border-top: 1px dashed var(--i360-rule);
       font-family: 'Amiri', serif;
       font-variant-numeric: tabular-nums;
     }
@@ -719,8 +678,8 @@
       top: calc(var(--toolbar-h) + 0.5rem + env(safe-area-inset-top));
       inset-inline-end: 1rem;
       width: min(26rem, calc(100vw - 1.5rem));
-      background-color: var(--panel-bg);
-      border: 1px solid var(--toolbar-border);
+      background-color: var(--i360-surface);
+      border: 1px solid var(--i360-border);
       border-radius: 0.5rem;
       padding: 0.5rem 0.6rem;
       display: none;
@@ -734,34 +693,34 @@
     .search-input {
       flex: 1;
       min-width: 0;
-      border: 1px solid var(--toolbar-border);
+      border: 1px solid var(--i360-border);
       border-radius: 0.25rem;
       padding: 0.3rem 0.5rem;
       font-size: 0.95rem;
       font-family: inherit;
-      background: var(--input-bg);
-      color: var(--text-color);
+      background: var(--i360-input);
+      color: var(--i360-text);
       outline: none;
     }
-    .search-input:focus { border-color: var(--focus); }
-    .search-count { font-size: 0.75rem; color: var(--muted); min-width: 3.6rem; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .search-input:focus { border-color: var(--i360-focus); }
+    .search-count { font-size: 0.75rem; color: var(--i360-muted); min-width: 3.6rem; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
     .opt-btn {
-      border: 1px solid var(--toolbar-border);
+      border: 1px solid var(--i360-border);
       background: transparent;
-      color: var(--icon-color);
+      color: var(--i360-icon);
       border-radius: 999px;
       padding: 0.15rem 0.7rem;
       font-size: 0.8rem;
       font-family: inherit;
       cursor: pointer;
     }
-    .opt-btn[aria-pressed="true"] { background: var(--active-bg); color: var(--icon-hover); border-color: var(--focus); }
-    .opt-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+    .opt-btn[aria-pressed="true"] { background: var(--i360-active); color: var(--i360-icon-hover); border-color: var(--i360-focus); }
+    .opt-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .search-results {
       list-style: none;
       max-height: min(45vh, 22rem);
       overflow-y: auto;
-      border-top: 1px solid var(--toolbar-border);
+      border-top: 1px solid var(--i360-border);
       margin: 0 -0.6rem -0.5rem;
       padding: 0.25rem 0;
     }
@@ -771,20 +730,20 @@
       text-align: start;
       background: transparent;
       border: none;
-      color: var(--text-color);
+      color: var(--i360-text);
       padding: 0.4rem 0.75rem;
       font-family: 'Amiri', serif;
       font-size: 0.95rem;
       line-height: 1.6;
       cursor: pointer;
     }
-    .search-results button:hover, .search-results li.active button { background: var(--hover-bg); }
-    .search-results .res-page { display: block; font-family: 'Amiri', serif; font-size: 0.72rem; color: var(--muted); }
-    .search-results mark { background: var(--highlight-bg); color: inherit; border-radius: 2px; }
-    .search-results .res-more { padding: 0.4rem 0.75rem; font-size: 0.8rem; color: var(--muted); }
+    .search-results button:hover, .search-results li.active button { background: var(--i360-hover); }
+    .search-results .res-page { display: block; font-family: 'Amiri', serif; font-size: 0.72rem; color: var(--i360-muted); }
+    .search-results mark { background: var(--i360-highlight); color: inherit; border-radius: 2px; }
+    .search-results .res-more { padding: 0.4rem 0.75rem; font-size: 0.8rem; color: var(--i360-muted); }
 
-    ::highlight(search) { background-color: var(--highlight-bg); color: inherit; }
-    ::highlight(search-active) { background-color: var(--active-highlight-bg); color: inherit; }
+    ::highlight(search) { background-color: var(--i360-highlight); color: inherit; }
+    ::highlight(search-active) { background-color: var(--i360-highlight-active); color: inherit; }
 
     /* ---------- Side panel: contents and bookmarks ---------- */
     .side-panel {
@@ -793,8 +752,8 @@
       bottom: 0;
       inset-inline-start: 0;
       width: min(20rem, 88vw);
-      background: var(--panel-bg);
-      border-inline-end: 1px solid var(--toolbar-border);
+      background: var(--i360-surface);
+      border-inline-end: 1px solid var(--i360-border);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.18);
       z-index: 99;
       display: flex;
@@ -810,13 +769,13 @@
       align-items: center;
       gap: 0.25rem;
       padding: 0.5rem;
-      border-bottom: 1px solid var(--toolbar-border);
+      border-bottom: 1px solid var(--i360-border);
     }
     .panel-tab {
       flex: 1;
       border: none;
       background: transparent;
-      color: var(--muted);
+      color: var(--i360-muted);
       font-family: inherit;
       font-size: 0.9rem;
       font-weight: 700;
@@ -824,11 +783,11 @@
       border-radius: 0.375rem;
       cursor: pointer;
     }
-    .panel-tab[aria-selected="true"] { background: var(--active-bg); color: var(--heading); }
+    .panel-tab[aria-selected="true"] { background: var(--i360-active); color: var(--i360-heading); }
     .panel-btn {
       border: none;
       background: transparent;
-      color: var(--icon-color);
+      color: var(--i360-icon);
       width: 2rem;
       height: 2rem;
       border-radius: 0.25rem;
@@ -838,7 +797,7 @@
       cursor: pointer;
       flex-shrink: 0;
     }
-    .panel-btn:hover { background: var(--hover-bg); color: var(--icon-hover); }
+    .panel-btn:hover { background: var(--i360-hover); color: var(--i360-icon-hover); }
     .panel-body { flex: 1; overflow-y: auto; padding: 0.35rem 0; }
     .panel-list { list-style: none; }
     .panel-item {
@@ -849,22 +808,22 @@
       text-align: start;
       background: transparent;
       border: none;
-      color: var(--text-color);
+      color: var(--i360-text);
       padding: 0.45rem 0.85rem;
       font-family: 'Amiri', serif;
       font-size: 1rem;
       line-height: 1.5;
       cursor: pointer;
     }
-    .panel-item:hover, .panel-item.current { background: var(--hover-bg); }
+    .panel-item:hover, .panel-item.current { background: var(--i360-hover); }
     .panel-item .item-text { flex: 1; min-width: 0; }
-    .panel-item .item-page { font-family: 'Amiri', serif; font-size: 0.75rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .panel-item .item-page { font-family: 'Amiri', serif; font-size: 0.75rem; color: var(--i360-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
     .panel-item.lvl-1, .panel-item.lvl-2 { font-weight: 700; }
     .panel-item.lvl-3 { padding-inline-start: 1.6rem; }
     .panel-item.lvl-4 { padding-inline-start: 2.4rem; font-size: 0.95rem; }
     .bm-row { display: flex; align-items: center; }
     .bm-row .panel-item { flex: 1; }
-    .panel-empty { padding: 1rem; color: var(--muted); font-size: 0.9rem; line-height: 1.7; text-align: center; }
+    .panel-empty { padding: 1rem; color: var(--i360-muted); font-size: 0.9rem; line-height: 1.7; text-align: center; }
 
     /* ---------- Reading mode ---------- */
     .floating-btn {
@@ -875,9 +834,9 @@
       width: 2.5rem;
       height: 2.5rem;
       border-radius: 999px;
-      border: 1px solid var(--toolbar-border);
-      background: color-mix(in srgb, var(--toolbar-bg) 85%, transparent);
-      color: var(--icon-color);
+      border: 1px solid var(--i360-border);
+      background: color-mix(in srgb, var(--i360-toolbar) 85%, transparent);
+      color: var(--i360-icon);
       display: none;
       align-items: center;
       justify-content: center;
@@ -922,13 +881,12 @@
 </head>
 <body>
 
-  <!-- Toolbar (i360-hub.md §10 "Toolbars"). It follows the UI language: in Arabic its start is
-       on the right. Start: ⋮, theme, numerals, then the connection icon and «فتح ملف»; middle:
-       the page arrows and number, with copy link after them; end: search, contents, the title
-       and ✕ (in the app only). Where there is room (measured, not by screen width), text size
-       and zoom come out before the page arrows, and bookmark, «الصفحة الأصلية» and reading mode
-       after copy link; they go back into ⋮ first when space runs out, then the title, then
-       search, «فتح ملف» and the connection icon (fitToolbar). Direction always lives in ⋮. -->
+  <!-- Toolbar (i360-hub.md §10 "Toolbars"), everything on it as on a wide screen; it follows the UI
+       language (in Arabic its start is on the right). Start: ⋮, theme, numerals, the connection
+       icon, «فتح ملف»; middle: text size, zoom, the page arrows and number, copy link, bookmark,
+       «الصفحة الأصلية» and reading mode; end: search, contents, the title, ✕ (in the app only).
+       What folds into ⋮ (its <template data-slot> places), in which order: READER_FOLD,
+       src/reader/panel.js. -->
   <header class="toolbar" id="toolbar">
     <div class="tb-start">
       <button class="toolbar-btn" id="btn-more" type="button" aria-controls="more-menu" aria-expanded="false">
@@ -3457,6 +3415,32 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     };
   }
 
+  // src/reader/fold.js
+  var READER_FOLD = [
+    { items: ["group-text"], to: "text" },
+    // 1: text size into ⋮
+    { items: ["group-zoom"], to: "zoom" },
+    // 2: zoom into ⋮
+    { items: ["group-mark", "group-acts"], to: "actions", flag: "acts-folded" },
+    // 3: bookmark … reading mode
+    { flag: "notitle" },
+    // 4: the title hidden
+    { items: ["status-icon", "btn-open-file", "btn-search-toggle"], to: "fold-row", flag: "folded" },
+    // 5: ⋮'s first row
+    { flag: "nopos" },
+    // 6: the file position "(12/70)" hidden (still in the box's tooltip)
+    { dense: 1 },
+    // 7: tighter spacing
+    { flag: "no-total" },
+    // 8: the "of N" total hidden
+    { items: ["vol-select"], to: "volume" },
+    // 9: the volume menu into ⋮
+    { dense: 2 },
+    // 10: the narrowest buttons (very narrow screens, large text)
+    { items: ["btn-copy-link"], to: "copy-link" }
+    // 11: last resort, copy link into bookmark's box
+  ];
+
   // src/search-core.js
   var DROP_RE = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640\u200B-\u200F\u061C]/;
   var INVISIBLE_RE = /[\u0640\u200B-\u200F\u061C]/;
@@ -3939,33 +3923,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {
     });
   }
-  var fit = fittingToolbar({
-    bar: toolbar,
-    fold: [
-      /* 1 */
-      { items: ["group-text"], to: "text" },
-      /* 2 */
-      { items: ["group-zoom"], to: "zoom" },
-      /* 3 */
-      { items: ["group-mark", "group-acts"], to: "actions", flag: "acts-folded" },
-      /* 4 */
-      { flag: "notitle" },
-      /* 5 */
-      { items: ["status-icon", "btn-open-file", "btn-search-toggle"], to: "fold-row", flag: "folded" },
-      /* 6 */
-      { flag: "nopos" },
-      /* 7 */
-      { dense: 1 },
-      /* 8 */
-      { flag: "no-total" },
-      /* 9 */
-      { items: ["vol-select"], to: "volume" },
-      /* 10 */
-      { dense: 2 },
-      /* 11 */
-      { items: ["btn-copy-link"], to: "copy-link" }
-    ]
-  });
+  var fit = fittingToolbar({ bar: toolbar, fold: READER_FOLD });
   function fitToolbar() {
     if (!document.body.classList.contains("reading")) fit();
   }

@@ -106,10 +106,11 @@
 .toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
-.toolbar-btn svg {
-  width: 1.15rem;
-  height: 1.15rem;
+/* Icons: Lucide (lucide.dev, ISC licence), drawn inline and tagged data-lucide on every page;
+   checked by scripts/icons.js. Their drawing style, for every icon on every page (each page sets
+   only their sizes); a toolbar button's icon size. The app's icons come from lucide-react, which
+   draws them in the same style itself. */
+svg[data-lucide] {
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
@@ -117,6 +118,7 @@
   fill: none;
   flex-shrink: 0;
 }
+.toolbar-btn svg { width: 1.15rem; height: 1.15rem; }
 
 /* The numerals button shows digits (٣ / 3). */
 .numerals-btn { font-weight: 700; font-variant-numeric: tabular-nums; }

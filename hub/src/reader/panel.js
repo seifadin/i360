@@ -2,6 +2,7 @@
 // measurement, and keyboard shortcuts.
 import { oncePerFrame } from '../frame.js';
 import { fittingToolbar } from '../page-chrome.js';
+import { READER_FOLD } from './fold.js';
 import { ICON, PANEL_COVERS, ZOOM_STEP } from './text.js';
 import { btnCopyLink, btnExitReading, btnMore, btnPanel, btnPanelClose, btnReading, fmtNum, moreMenu, nextFrame, panelBody, searchPopup, setTitle, sidePanel, state, t, tabBookmarks, tabContents, tbEnd, toolbar, viewerContainer } from './state.js';
 import { isBuilding, pageLabelText } from './pages.js';
@@ -145,36 +146,9 @@ function exitReading() {
 }
 
 /* ================================================================
-   Toolbar layout by measurement (no fixed screen widths)
-   The first level whose row really fits is used, so it follows the language, labels,
-   digits, fonts and the browser's text size. On a wide screen, groups of the ⋮ menu come
-   out onto the bar; they go back first when space runs out:
-     0: text size, zoom, and bookmark · «الصفحة الأصلية» · reading mode all on the bar
-     1: text size back in ⋮    2: zoom back in ⋮    3: bookmark … reading mode back in ⋮
-     4: the title is hidden    5: search, «فتح ملف» and the connection icon move into ⋮
-     6: the file position "(12/70)" is hidden (it stays in the page box's tooltip)
-     7: tighter spacing        8: the "of N" total is hidden
-     9: the volume menu moves into ⋮ too    10: the smallest buttons, for very narrow
-     screens with large text   11: last resort — copy link into ⋮ too (bookmark's box)
-   The page arrows always stay; direction always lives in ⋮.
+   Toolbar layout by measurement: the levels are READER_FOLD (./fold.js)
    ================================================================ */
-// What folds away, in order (fittingToolbar, src/page-chrome.js; the slots are in the Reader's HTML).
-const fit = fittingToolbar({
-  bar: toolbar,
-  fold: [
-    /* 1 */ { items: ['group-text'], to: 'text' },
-    /* 2 */ { items: ['group-zoom'], to: 'zoom' },
-    /* 3 */ { items: ['group-mark', 'group-acts'], to: 'actions', flag: 'acts-folded' },
-    /* 4 */ { flag: 'notitle' },
-    /* 5 */ { items: ['status-icon', 'btn-open-file', 'btn-search-toggle'], to: 'fold-row', flag: 'folded' },
-    /* 6 */ { flag: 'nopos' },
-    /* 7 */ { dense: 1 },
-    /* 8 */ { flag: 'no-total' },
-    /* 9 */ { items: ['vol-select'], to: 'volume' },
-    /* 10 */ { dense: 2 },
-    /* 11 */ { items: ['btn-copy-link'], to: 'copy-link' }
-  ]
-});
+const fit = fittingToolbar({ bar: toolbar, fold: READER_FOLD });
 
 // Measured before the browser paints, so the switch is never seen.
 function fitToolbar() {

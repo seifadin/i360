@@ -127,3 +127,16 @@ test('numerals: any digits to 0123, ٠١٢٣ or ۰۱۲۳; the cycle order; the b
   const built = fs.readFileSync(path.join(import.meta.dirname, '..', '..', 'public', 'md', 'index.html'), 'utf8');
   for (const k of ['getNumerals', 'setNumerals', 'cycleNumerals', 'onNumeralsChange', 'toNumerals']) assert.ok(built.includes(k), k);
 });
+
+// src/page-chrome.css builds the light values in as fallbacks (var(--i360-…, #hex)) for the app's first
+// launch, before theme.css arrives: they must stay the theme's own light values.
+test('page-chrome.css: its built-in fallbacks are the theme\'s light values', () => {
+  const chrome = fs.readFileSync(path.join(import.meta.dirname, '..', 'src', 'page-chrome.css'), 'utf8');
+  const light = themeBlocks(css).find((b) => b.selector === ':root, [data-theme="light"]').vars;
+  const fallbacks = [...chrome.matchAll(/var\((--i360-[a-z0-9-]+),\s*([^)]+)\)/g)];
+  assert.ok(fallbacks.length >= 5);
+  for (const [, name, value] of fallbacks) {
+    assert.ok(name in light, `${name} is not in theme.css`);
+    assert.equal(value.trim().toLowerCase(), light[name].trim().toLowerCase(), `${name}: ${value} in page-chrome.css, ${light[name]} in theme.css`);
+  }
+});
