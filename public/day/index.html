@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-GYp8OS2xN2klQEdzl54iRHPefMJVgR4Ti/lSckFBsgo=' 'sha256-FLnAiB8o+G4ansgDUORTlcm/lHabHexjSxr1doG3ves='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>التأمل اليومي</title>
-    <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
-         scripts/build.js: built-in colours, the saved theme before anything is drawn (the
-         loader is bundled into the page's script). Tailwind's dark: styles follow the "dark" class, set
-         here from the shared theme (sepia uses the light ones on sepia colours). -->
-    <style id="i360-fallback">:root, [data-theme="light"] {
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-pL4z1czs9xp04pHNO2G/SFFmQwfxxMVqlBnQHVg7SeE=' 'sha256-FLnAiB8o+G4ansgDUORTlcm/lHabHexjSxr1doG3ves='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://api.alquran.cloud https://hadeethenc.com https://geocoding-api.open-meteo.com https://dar-hijri.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>التأمل اليومي</title>
+  <!-- Shared i360 theme (theme/ in this repo; https://theme.i36o.workers.dev), filled in by
+     scripts/build.js: built-in colours, the saved theme before anything is drawn (the
+     loader is bundled into the page's script). Tailwind's dark: styles follow the "dark" class, set
+     here from the shared theme (sepia uses the light ones on sepia colours). -->
+  <style id="i360-fallback">:root, [data-theme="light"] {
   color-scheme: light;
   --i360-bg: #FAF7F2;
   --i360-frame: #F2EFEA;
@@ -107,7 +107,7 @@
   --i360-ribbon: #f87171;
   --i360-page-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }</style>
-    <script>// i360 theme, early part: inlined in each app's <head> (not served), after the
+  <script>// i360 theme, early part: inlined in each app's <head> (not served), after the
 // app's fallback colours and before anything is drawn. It shows the saved
 // theme and the saved copy of theme.css at once, so a repeat visit has no
 // flash of the wrong colours. theme-loader.js does the rest.
@@ -135,208 +135,208 @@
   } catch (e) { /* no copy yet: the page's own colours */ }
 })();
 </script>
-    <script>
-        document.documentElement.classList.toggle('dark', document.documentElement.getAttribute('data-theme') === 'dark');
-    </script>
-    <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
-    <style>
-        /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
-           the frame colour (as behind the Reader's pages); cards: the page colour. */
-        :root {
-            --bg-primary: var(--i360-frame); --card-bg: var(--i360-bg); --text-primary: var(--i360-text); --text-secondary: var(--i360-muted);
-            --accent: var(--i360-accent); --on-accent: var(--i360-on-accent); --bg-inset: var(--i360-quote); --border-inset: var(--i360-rule);
-        }
-        /* Fonts from the shared theme: Amiri for every language, Amiri Quran for the verse. */
-        body { font-family: var(--i360-font); background-color: var(--bg-primary); color: var(--text-primary); transition: all 0.3s ease; margin: 0; padding: 0; overflow-x: hidden; }
-        .arabic-script, .hadith-text-style { font-family: var(--i360-font); line-height: 2.0 !important; }
-        .arabic-script.quran-verse { font-family: var(--i360-font-quran); }
-        .text-quran { color: var(--i360-quran); }
-        .bg-quran-soft { background-color: var(--i360-hover); }
-        @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
-        .text-accent { color: var(--i360-accent); }
-        /* Readability with Amiri, a book face with short letters (Seif, 2026-10-17):
-           - small sizes go up: 8 → 12 px, 10 → 14 px, 12 → 15 px, 14 → 16 px (headings and body text
-             stay as they are);
-           - Amiri has only regular (400) and bold (700): "medium" and "semibold" (500/600) would fall
-             back to regular, so they are drawn bold;
-           - no extra letter spacing in Arabic script (it pulls joined letters apart). */
-        .text-\[8px\] { font-size: 0.75rem !important; }
-        .text-\[10px\] { font-size: 0.875rem !important; line-height: 1.4rem !important; }
-        .text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; }
-        .text-sm { font-size: 1rem !important; line-height: 1.6rem !important; }
-        @media (min-width: 640px) { .sm\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } }
-        @media (min-width: 768px) { .md\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } .md\:text-sm { font-size: 1rem !important; line-height: 1.6rem !important; } }
-        .font-medium, .font-semibold { font-weight: 700 !important; }
-        [dir="rtl"] .tracking-widest { letter-spacing: normal !important; }
-        .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
-        /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
-        svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
-        svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
-        svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
-        .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
-        .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
-        .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
-        .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
-        [dir="ltr"] .arabic-script { direction: rtl; }
-        .text-custom-secondary { color: var(--text-secondary); }
-        /* The top bar (i360-hub.md §10 "Toolbars"): fixed at the top, as on every i360 page; in Arabic from
-           the right: theme · numerals · language … title · ✕ (the ✕ in the installed app only); it mirrors in
-           left-to-right languages. Its background spans the screen, its contents line up with the page column.
-           iPhone: padded below the status bar and clear of the rounded corners (viewport-fit=cover). */
-        .topbar { position: sticky; top: 0; z-index: 30; width: 100%; background-color: var(--card-bg); border-bottom: 1px solid var(--border-inset);
-                  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); box-sizing: border-box; }
-        .topbar-in { max-width: 42rem; margin: 0 auto; height: 3.5rem; padding: 0 0.5rem; display: flex; align-items: center; gap: 0.125rem; }
-        .tb-btn { min-width: 2.75rem; height: 2.75rem; padding: 0 0.375rem; border: 0; border-radius: 0.75rem; background: transparent; color: var(--text-primary);
-                  display: flex; align-items: center; justify-content: center; gap: 0.125rem; flex-shrink: 0; font: 700 1.0625rem/1 var(--i360-font); cursor: pointer; }
-        .tb-btn:hover, .tb-btn[aria-expanded="true"] { background-color: var(--i360-hover); }
-        .tb-btn:focus-visible, .lang-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-        .tb-btn svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-        .tb-btn .tb-caret { width: 0.875rem; height: 0.875rem; }
-        .tb-title { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0 0.375rem; text-align: end; font-size: 1.25rem; font-weight: 700; line-height: 1.3;
-                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lang-wrap { position: relative; flex-shrink: 0; }
-        .lang-list { position: absolute; top: calc(100% + 0.25rem); inset-inline-start: 0; z-index: 40; min-width: 11rem; padding: 0.375rem; border-radius: 1rem;
-                     background-color: var(--card-bg); border: 1px solid var(--border-inset); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.125rem; }
-        .lang-list[hidden] { display: none; }
-        .lang-item { border: 0; background: transparent; color: var(--text-primary); text-align: start; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font: 1rem/1.5 var(--i360-font); cursor: pointer; }
-        .lang-item:hover { background-color: var(--i360-hover); }
-        .lang-item.active-btn { background-color: var(--accent); }
-        .page { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
-                padding: 1rem calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left)); }
-        @media (min-width: 768px) { .page { padding-top: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); } }
-        /* The page column (--col, as before) and the cards (Seif 2026-10-26): one column, in this order,
-           wherever two don't fit; where two columns of at least --col-min fit, the verse and hadith on
-           one side and prayer times above the events on the other. Which one it is follows the space
-           itself (CSS grid, auto-fit); Cols.fit() then measures it and gives the second column the first's
-           height when its own content is taller (the events list scrolls within it; never less than its
-           first three events), otherwise its own height. */
-        :root { --col: 42rem; --col-min: 26rem; --col-gap: 2rem; }
-        .layout-stable { width: 100%; max-width: var(--col); margin: 0 auto; transition: transform 0.3s ease; }
-        .cards { width: 100%; max-width: calc(2 * var(--col) + var(--col-gap)); margin: 0 auto; display: grid; gap: var(--col-gap);
-                 grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min)), 1fr)); align-items: start; }
-        .cards-col { width: 100%; max-width: var(--col); justify-self: center; min-width: 0; display: flex; flex-direction: column; gap: var(--col-gap); }
-        body.two-cols .topbar-in { max-width: calc(2 * var(--col) + var(--col-gap)); }
-        body.two-cols #events-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-        body.two-cols #events-card [data-target="events-list"] { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
-    </style>
-    <style id="tailwind">*,::backdrop,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#3b82f680;--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:initial}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:initial;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:initial}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.mx-auto{margin-left:auto;margin-right:auto}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.me-1{margin-inline-end:.25rem}.ms-2{margin-inline-start:.5rem}.ms-4{margin-inline-start:1rem}.mt-1{margin-top:.25rem}.mt-16{margin-top:4rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.translate-y-4{--tw-translate-y:1rem}.transform,.translate-y-4{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.whitespace-pre-line{white-space:pre-line}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-t{border-top-width:1px}.border-current{border-color:currentColor}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255/var(--tw-bg-opacity,1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255/var(--tw-bg-opacity,1))}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.bg-transparent{background-color:initial}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.pb-10{padding-bottom:2.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-justify{text-align:justify}.text-start{text-align:start}.text-\[10px\]{font-size:10px}.text-\[8px\]{font-size:8px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tracking-widest{letter-spacing:.1em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.opacity-0{opacity:0}.outline{outline-style:solid}.sepia{--tw-sepia:sepia(100%)}.filter,.sepia{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-500{transition-duration:.5s}.dark\:border-slate-700\/50:is(.dark *){border-color:#33415580}.dark\:bg-amber-900\/30:is(.dark *){background-color:#78350f4d}.dark\:bg-blue-900\/30:is(.dark *){background-color:#1e3a8a4d}.dark\:bg-purple-900\/10:is(.dark *){background-color:#581c871a}.dark\:bg-purple-900\/30:is(.dark *){background-color:#581c874d}.dark\:text-amber-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.dark\:text-amber-500:is(.dark *){--tw-text-opacity:1;color:rgb(245 158 11/var(--tw-text-opacity,1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250/var(--tw-text-opacity,1))}.dark\:text-purple-400:is(.dark *){--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.md\:p-10{padding:2.5rem}.md\:p-8{padding:2rem}.md\:text-end{text-align:end}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:.75rem;line-height:1rem}}</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
+  <script>
+    document.documentElement.classList.toggle('dark', document.documentElement.getAttribute('data-theme') === 'dark');
+  </script>
+  <link rel="preconnect" href="https://theme.i36o.workers.dev" crossorigin>
+  <style>
+    /* Colours from the shared i360 theme; the names are Daily Reflection's own. Behind the cards:
+       the frame colour (as behind the Reader's pages); cards: the page colour. */
+    :root {
+      --bg-primary: var(--i360-frame); --card-bg: var(--i360-bg); --text-primary: var(--i360-text); --text-secondary: var(--i360-muted);
+      --accent: var(--i360-accent); --on-accent: var(--i360-on-accent); --bg-inset: var(--i360-quote); --border-inset: var(--i360-rule);
+    }
+    /* Fonts from the shared theme: Amiri for every language, Amiri Quran for the verse. */
+    body { font-family: var(--i360-font); background-color: var(--bg-primary); color: var(--text-primary); transition: all 0.3s ease; margin: 0; padding: 0; overflow-x: hidden; }
+    .arabic-script, .hadith-text-style { font-family: var(--i360-font); line-height: 2.0 !important; }
+    .arabic-script.quran-verse { font-family: var(--i360-font-quran); }
+    .text-quran { color: var(--i360-quran); }
+    .bg-quran-soft { background-color: var(--i360-hover); }
+    @supports (color: color-mix(in oklab, red, red)) { .bg-quran-soft { background-color: color-mix(in oklab, var(--i360-quran) 14%, transparent); } }
+    .text-accent { color: var(--i360-accent); }
+    /* Readability with Amiri, a book face with short letters (Seif, 2026-10-17):
+       - small sizes go up: 8 → 12 px, 10 → 14 px, 12 → 15 px, 14 → 16 px (headings and body text
+       stay as they are);
+       - Amiri has only regular (400) and bold (700): "medium" and "semibold" (500/600) would fall
+       back to regular, so they are drawn bold;
+       - no extra letter spacing in Arabic script (it pulls joined letters apart). */
+    .text-\[8px\] { font-size: 0.75rem !important; }
+    .text-\[10px\] { font-size: 0.875rem !important; line-height: 1.4rem !important; }
+    .text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; }
+    .text-sm { font-size: 1rem !important; line-height: 1.6rem !important; }
+    @media (min-width: 640px) { .sm\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } }
+    @media (min-width: 768px) { .md\:text-xs { font-size: 0.9375rem !important; line-height: 1.5rem !important; } .md\:text-sm { font-size: 1rem !important; line-height: 1.6rem !important; } }
+    .font-medium, .font-semibold { font-weight: 700 !important; }
+    [dir="rtl"] .tracking-widest { letter-spacing: normal !important; }
+    .numerals-btn { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+    /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. */
+    svg.icon, svg.icon-inline { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
+    svg.icon { width: 1.25rem; height: 1.25rem; display: block; }
+    svg.icon-inline { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; }
+    .glass-card { background-color: var(--card-bg); border: 1px solid rgba(150, 150, 150, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+    .inset-item { background-color: var(--bg-inset); border: 1px solid var(--border-inset); border-radius: 1rem; }
+    .active-btn { background-color: var(--accent); color: var(--on-accent) !important; }
+    .next-prayer-highlight { border: 2px solid var(--accent) !important; background-color: var(--i360-hover); transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.12); border-radius: 1rem; }
+    [dir="ltr"] .arabic-script { direction: rtl; }
+    .text-custom-secondary { color: var(--text-secondary); }
+    /* The top bar (i360-hub.md §10 "Toolbars"): fixed at the top, as on every i360 page; in Arabic from
+       the right: theme · numerals · language … title · ✕ (the ✕ in the installed app only); it mirrors in
+       left-to-right languages. Its background spans the screen, its contents line up with the page column.
+       iPhone: padded below the status bar and clear of the rounded corners (viewport-fit=cover). */
+    .topbar { position: sticky; top: 0; z-index: 30; width: 100%; background-color: var(--card-bg); border-bottom: 1px solid var(--border-inset);
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); box-sizing: border-box; }
+    .topbar-in { max-width: 42rem; margin: 0 auto; height: 3.5rem; padding: 0 0.5rem; display: flex; align-items: center; gap: 0.125rem; }
+    .tb-btn { min-width: 2.75rem; height: 2.75rem; padding: 0 0.375rem; border: 0; border-radius: 0.75rem; background: transparent; color: var(--text-primary);
+          display: flex; align-items: center; justify-content: center; gap: 0.125rem; flex-shrink: 0; font: 700 1.0625rem/1 var(--i360-font); cursor: pointer; }
+    .tb-btn:hover, .tb-btn[aria-expanded="true"] { background-color: var(--i360-hover); }
+    .tb-btn:focus-visible, .lang-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .tb-btn svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .tb-btn .tb-caret { width: 0.875rem; height: 0.875rem; }
+    .tb-title { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0 0.375rem; text-align: end; font-size: 1.25rem; font-weight: 700; line-height: 1.3;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lang-wrap { position: relative; flex-shrink: 0; }
+    .lang-list { position: absolute; top: calc(100% + 0.25rem); inset-inline-start: 0; z-index: 40; min-width: 11rem; padding: 0.375rem; border-radius: 1rem;
+           background-color: var(--card-bg); border: 1px solid var(--border-inset); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.125rem; }
+    .lang-list[hidden] { display: none; }
+    .lang-item { border: 0; background: transparent; color: var(--text-primary); text-align: start; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font: 1rem/1.5 var(--i360-font); cursor: pointer; }
+    .lang-item:hover { background-color: var(--i360-hover); }
+    .lang-item.active-btn { background-color: var(--accent); }
+    .page { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+        padding: 1rem calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left)); }
+    @media (min-width: 768px) { .page { padding-top: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); } }
+    /* The page column (--col, as before) and the cards (Seif 2026-10-26): one column, in this order,
+       wherever two don't fit; where two columns of at least --col-min fit, the verse and hadith on
+       one side and prayer times above the events on the other. Which one it is follows the space
+       itself (CSS grid, auto-fit); Cols.fit() then measures it and gives the second column the first's
+       height when its own content is taller (the events list scrolls within it; never less than its
+       first three events), otherwise its own height. */
+    :root { --col: 42rem; --col-min: 26rem; --col-gap: 2rem; }
+    .layout-stable { width: 100%; max-width: var(--col); margin: 0 auto; transition: transform 0.3s ease; }
+    .cards { width: 100%; max-width: calc(2 * var(--col) + var(--col-gap)); margin: 0 auto; display: grid; gap: var(--col-gap);
+         grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min)), 1fr)); align-items: start; }
+    .cards-col { width: 100%; max-width: var(--col); justify-self: center; min-width: 0; display: flex; flex-direction: column; gap: var(--col-gap); }
+    body.two-cols .topbar-in { max-width: calc(2 * var(--col) + var(--col-gap)); }
+    body.two-cols #events-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    body.two-cols #events-card [data-target="events-list"] { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  </style>
+  <style id="tailwind">*,::backdrop,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#3b82f680;--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:initial}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:initial;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:initial}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.mx-auto{margin-left:auto;margin-right:auto}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.me-1{margin-inline-end:.25rem}.ms-2{margin-inline-start:.5rem}.ms-4{margin-inline-start:1rem}.mt-1{margin-top:.25rem}.mt-16{margin-top:4rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.block{display:block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.translate-y-4{--tw-translate-y:1rem}.transform,.translate-y-4{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.whitespace-pre-line{white-space:pre-line}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-t{border-top-width:1px}.border-current{border-color:currentColor}.border-purple-500{--tw-border-opacity:1;border-color:rgb(168 85 247/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255/var(--tw-bg-opacity,1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255/var(--tw-bg-opacity,1))}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247/var(--tw-bg-opacity,1))}.bg-transparent{background-color:initial}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.pb-10{padding-bottom:2.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-justify{text-align:justify}.text-start{text-align:start}.text-\[10px\]{font-size:10px}.text-\[8px\]{font-size:8px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tracking-widest{letter-spacing:.1em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.opacity-0{opacity:0}.outline{outline-style:solid}.sepia{--tw-sepia:sepia(100%)}.filter,.sepia{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-500{transition-duration:.5s}.dark\:border-slate-700\/50:is(.dark *){border-color:#33415580}.dark\:bg-amber-900\/30:is(.dark *){background-color:#78350f4d}.dark\:bg-blue-900\/30:is(.dark *){background-color:#1e3a8a4d}.dark\:bg-purple-900\/10:is(.dark *){background-color:#581c871a}.dark\:bg-purple-900\/30:is(.dark *){background-color:#581c874d}.dark\:text-amber-400:is(.dark *){--tw-text-opacity:1;color:rgb(251 191 36/var(--tw-text-opacity,1))}.dark\:text-amber-500:is(.dark *){--tw-text-opacity:1;color:rgb(245 158 11/var(--tw-text-opacity,1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250/var(--tw-text-opacity,1))}.dark\:text-purple-400:is(.dark *){--tw-text-opacity:1;color:rgb(192 132 252/var(--tw-text-opacity,1))}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.md\:p-10{padding:2.5rem}.md\:p-8{padding:2rem}.md\:text-end{text-align:end}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:.75rem;line-height:1rem}}</style>   <!-- built from src/day.tailwind.js (scripts/build.js) -->
 </head>
 <body class="min-h-screen flex flex-col items-center">
-    <header class="topbar">
-        <div class="topbar-in">
-            <!-- The shared theme and numerals (the same order on every i360 page), then the language. -->
-            <button id="btn-theme" type="button" class="tb-btn"></button>
-            <button id="btn-numerals" type="button" class="tb-btn numerals-btn"></button>
-            <div class="lang-wrap">
-                <button id="btn-lang" type="button" class="tb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-list"><span id="lang-short"></span><svg data-lucide="chevron-down" class="tb-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
-                <!-- dir="rtl" keeps the list in a fixed order; each language is written in its own language. -->
-                <div id="lang-list" class="lang-list" dir="rtl" role="group" aria-labelledby="btn-lang" hidden>
-                    <button type="button" data-lang="ar" id="lang-ar" lang="ar" class="lang-item">العربية</button>
-                    <button type="button" data-lang="ur" id="lang-ur" lang="ur" class="lang-item">اردو</button>
-                    <button type="button" data-lang="id" id="lang-id" lang="id" dir="ltr" class="lang-item">Bahasa Indonesia</button>
-                    <button type="button" data-lang="tr" id="lang-tr" lang="tr" dir="ltr" class="lang-item">Türkçe</button>
-                    <button type="button" data-lang="en" id="lang-en" lang="en" dir="ltr" class="lang-item">English</button>
-                </div>
-            </div>
-            <h1 data-i18n="title" class="tb-title">Daily Reflection</h1>
-            <!-- Inside the installed i360إ app only: back to its home; last, so at the far end in either direction. -->
-            <button id="btn-close" type="button" class="tb-btn" hidden><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+  <header class="topbar">
+    <div class="topbar-in">
+      <!-- The shared theme and numerals (the same order on every i360 page), then the language. -->
+      <button id="btn-theme" type="button" class="tb-btn"></button>
+      <button id="btn-numerals" type="button" class="tb-btn numerals-btn"></button>
+      <div class="lang-wrap">
+        <button id="btn-lang" type="button" class="tb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-list"><span id="lang-short"></span><svg data-lucide="chevron-down" class="tb-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+        <!-- dir="rtl" keeps the list in a fixed order; each language is written in its own language. -->
+        <div id="lang-list" class="lang-list" dir="rtl" role="group" aria-labelledby="btn-lang" hidden>
+          <button type="button" data-lang="ar" id="lang-ar" lang="ar" class="lang-item">العربية</button>
+          <button type="button" data-lang="ur" id="lang-ur" lang="ur" class="lang-item">اردو</button>
+          <button type="button" data-lang="id" id="lang-id" lang="id" dir="ltr" class="lang-item">Bahasa Indonesia</button>
+          <button type="button" data-lang="tr" id="lang-tr" lang="tr" dir="ltr" class="lang-item">Türkçe</button>
+          <button type="button" data-lang="en" id="lang-en" lang="en" dir="ltr" class="lang-item">English</button>
         </div>
-    </header>
-
-    <div class="page">
-    <div class="layout-stable flex flex-col gap-1 mb-8 text-center">
-        <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
-        <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
-        <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
-    </div>
-
-    <main id="cards" class="cards">
-      <div class="cards-col" id="col-a">
-        <section id="quran-card" class="glass-card rounded-3xl p-5 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="bg-quran-soft text-quran p-2 rounded-lg"><svg data-lucide="moon-star" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5h4"></path><path d="M20 3v4"></path><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg></span>
-                <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-quran">Quranic Verse</h2>
-            </div>
-            <div class="space-y-6">
-                <p data-target="quran-arabic" class="arabic-script quran-verse text-xl md:text-2xl font-bold text-justify mb-4"></p>
-                <p data-target="quran-translation" class="text-base md:text-lg font-light italic text-custom-secondary text-justify"></p>
-                <p data-target="quran-ref" class="text-sm font-semibold text-quran border-t border-slate-100 dark:border-slate-700/50 pt-4"></p>
-            </div>
-            <div data-status="quran" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
-        </section>
-
-        <section id="hadith-card" class="glass-card rounded-3xl p-5 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg"><svg data-lucide="book-open" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg></span>
-                <h2 data-i18n="hadithLabel" class="text-sm font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Hadith</h2>
-            </div>
-            <div class="space-y-6">
-                <p data-target="hadith-title" class="text-sm font-bold text-custom-secondary"></p>
-                <div class="space-y-2">
-                    <p data-target="hadith-narrator" class="hidden hadith-text-style text-base md:text-lg text-amber-700 dark:text-amber-500 font-bold"></p>
-                    <p data-target="hadith-text" class="hadith-text-style text-lg md:text-xl text-custom-secondary font-medium text-justify"></p>
-                </div>
-                <div class="border-t border-slate-100 dark:border-slate-700/50 pt-4 space-y-1 text-sm font-bold text-amber-600 dark:text-amber-500">
-                    <p data-target="hadith-grade"></p>
-                    <details id="hadith-refs" class="hidden font-medium text-xs">
-                        <summary data-i18n="refsLabel" class="cursor-pointer font-bold text-sm">References</summary>
-                        <p data-target="hadith-ref" class="mt-2 font-medium whitespace-pre-line"></p>
-                    </details>
-                    <p class="font-medium text-xs"><span data-i18n="sourceLabel">Source</span>: <a data-target="hadith-link" href="https://hadeethenc.com/" target="_blank" rel="noopener noreferrer" class="underline">HadeethEnc.com</a></p>
-                </div>
-            </div>
-            <div data-status="hadith" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
-        </section>
-
       </div>
-      <div class="cards-col" id="col-b">
-        <section id="prayer-card" class="glass-card rounded-3xl p-5 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><svg data-lucide="clock" class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
-                <h2 data-i18n="prayerLabel" class="text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Prayer Times</h2>
-            </div>
-            <div data-target="prayer-grid" class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6"></div>
-            <div data-status="prayer" class="hidden items-center gap-3 text-xs text-custom-secondary mb-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] md:text-xs text-custom-secondary inset-item p-4">
-                <div class="flex flex-col gap-1">
-                    <p><span class="font-bold" data-i18n="methodLabel">Method:</span> <span data-target="meta-method">...</span></p>
-                    <p class="flex flex-wrap items-center gap-1"><span class="font-bold" data-i18n="madhabLabel">Madhab:</span>
-                        <button type="button" id="school-0" data-school="0" data-i18n="schoolStd" class="px-2 py-0.5 rounded-lg font-medium"></button>
-                        <button type="button" id="school-1" data-school="1" data-i18n="schoolHanafi" class="px-2 py-0.5 rounded-lg font-medium"></button>
-                    </p>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <p class="flex flex-wrap items-center gap-1"><span class="font-bold" data-i18n="locLabel">Location:</span> <span data-target="meta-location">...</span>
-                        <button type="button" id="city-change" data-i18n="cityChange" aria-expanded="false" aria-controls="city-picker" class="px-2 py-0.5 rounded-lg font-medium underline"></button></p>
-                    <p><span class="font-bold" data-i18n="tzLabel">Timezone:</span> <span data-target="meta-timezone">...</span></p>
-                </div>
-            </div>
-            <!-- The city picker: Open-Meteo's place search (GeoNames data), asked only from here. -->
-            <div id="city-picker" class="hidden mt-4 inset-item p-4 flex-col gap-2">
-                <input id="city-search" type="search" autocomplete="off" spellcheck="false" class="w-full rounded-xl px-3 py-2 text-sm bg-transparent border border-current text-custom-secondary">
-                <p data-target="city-status" class="text-xs text-custom-secondary" role="status" aria-live="polite"></p>
-                <div data-target="city-results" class="flex flex-col gap-1" role="listbox"></div>
-            </div>
-        </section>
-
-        <section id="events-card" class="glass-card rounded-3xl p-5 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><svg data-lucide="calendar-check" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="m9 15 2 2 4-4"></path></svg></span>
-                <h2 data-i18n="eventsLabel" class="text-sm font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Upcoming Events</h2>
-            </div>
-            <div data-target="events-list" class="space-y-4"></div>
-        </section>
-      </div>
-    </main>
+      <h1 data-i18n="title" class="tb-title">Daily Reflection</h1>
+      <!-- Inside the installed i360إ app only: back to its home; last, so at the far end in either direction. -->
+      <button id="btn-close" type="button" class="tb-btn" hidden><svg data-lucide="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
     </div>
-    <footer class="mt-16 text-center text-custom-secondary text-xs pb-10">
-        <p data-i18n="footer">Updated daily.</p>
-        <p data-i18n="privacy" class="mt-2 max-w-md mx-auto whitespace-pre-line"></p>
-        <p data-target="credits" class="mt-2 max-w-md mx-auto"></p>
-    </footer>
+  </header>
 
-    <script>/*! adhan-js 4.4.6 | MIT License | Copyright (c) Batoul Apps | https://github.com/batoulapps/adhan-js */
+  <div class="page">
+  <div class="layout-stable flex flex-col gap-1 mb-8 text-center">
+    <p class="text-custom-secondary text-sm md:text-base font-medium" data-target="current-date"></p>
+    <p class="text-accent text-xs md:text-sm font-bold" data-target="hijri-date"></p>
+    <p class="text-custom-secondary text-[10px]" data-target="hijri-source"></p>
+  </div>
+
+  <main id="cards" class="cards">
+    <div class="cards-col" id="col-a">
+    <section id="quran-card" class="glass-card rounded-3xl p-5 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-quran-soft text-quran p-2 rounded-lg"><svg data-lucide="moon-star" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5h4"></path><path d="M20 3v4"></path><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg></span>
+        <h2 data-i18n="quranLabel" class="text-sm font-bold uppercase tracking-widest text-quran">Quranic Verse</h2>
+      </div>
+      <div class="space-y-6">
+        <p data-target="quran-arabic" class="arabic-script quran-verse text-xl md:text-2xl font-bold text-justify mb-4"></p>
+        <p data-target="quran-translation" class="text-base md:text-lg font-light italic text-custom-secondary text-justify"></p>
+        <p data-target="quran-ref" class="text-sm font-semibold text-quran border-t border-slate-100 dark:border-slate-700/50 pt-4"></p>
+      </div>
+      <div data-status="quran" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+    </section>
+
+    <section id="hadith-card" class="glass-card rounded-3xl p-5 md:p-10 opacity-0 translate-y-4 transition-all duration-500">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg"><svg data-lucide="book-open" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg></span>
+        <h2 data-i18n="hadithLabel" class="text-sm font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Hadith</h2>
+      </div>
+      <div class="space-y-6">
+        <p data-target="hadith-title" class="text-sm font-bold text-custom-secondary"></p>
+        <div class="space-y-2">
+          <p data-target="hadith-narrator" class="hidden hadith-text-style text-base md:text-lg text-amber-700 dark:text-amber-500 font-bold"></p>
+          <p data-target="hadith-text" class="hadith-text-style text-lg md:text-xl text-custom-secondary font-medium text-justify"></p>
+        </div>
+        <div class="border-t border-slate-100 dark:border-slate-700/50 pt-4 space-y-1 text-sm font-bold text-amber-600 dark:text-amber-500">
+          <p data-target="hadith-grade"></p>
+          <details id="hadith-refs" class="hidden font-medium text-xs">
+            <summary data-i18n="refsLabel" class="cursor-pointer font-bold text-sm">References</summary>
+            <p data-target="hadith-ref" class="mt-2 font-medium whitespace-pre-line"></p>
+          </details>
+          <p class="font-medium text-xs"><span data-i18n="sourceLabel">Source</span>: <a data-target="hadith-link" href="https://hadeethenc.com/" target="_blank" rel="noopener noreferrer" class="underline">HadeethEnc.com</a></p>
+        </div>
+      </div>
+      <div data-status="hadith" class="hidden items-center gap-3 text-xs text-custom-secondary mt-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+    </section>
+
+    </div>
+    <div class="cards-col" id="col-b">
+    <section id="prayer-card" class="glass-card rounded-3xl p-5 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><svg data-lucide="clock" class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
+        <h2 data-i18n="prayerLabel" class="text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Prayer Times</h2>
+      </div>
+      <div data-target="prayer-grid" class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6"></div>
+      <div data-status="prayer" class="hidden items-center gap-3 text-xs text-custom-secondary mb-4"><span data-status-text></span><button data-retry type="button" class="underline font-bold"></button></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] md:text-xs text-custom-secondary inset-item p-4">
+        <div class="flex flex-col gap-1">
+          <p><span class="font-bold" data-i18n="methodLabel">Method:</span> <span data-target="meta-method">...</span></p>
+          <p class="flex flex-wrap items-center gap-1"><span class="font-bold" data-i18n="madhabLabel">Madhab:</span>
+            <button type="button" id="school-0" data-school="0" data-i18n="schoolStd" class="px-2 py-0.5 rounded-lg font-medium"></button>
+            <button type="button" id="school-1" data-school="1" data-i18n="schoolHanafi" class="px-2 py-0.5 rounded-lg font-medium"></button>
+          </p>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="flex flex-wrap items-center gap-1"><span class="font-bold" data-i18n="locLabel">Location:</span> <span data-target="meta-location">...</span>
+            <button type="button" id="city-change" data-i18n="cityChange" aria-expanded="false" aria-controls="city-picker" class="px-2 py-0.5 rounded-lg font-medium underline"></button></p>
+          <p><span class="font-bold" data-i18n="tzLabel">Timezone:</span> <span data-target="meta-timezone">...</span></p>
+        </div>
+      </div>
+      <!-- The city picker: Open-Meteo's place search (GeoNames data), asked only from here. -->
+      <div id="city-picker" class="hidden mt-4 inset-item p-4 flex-col gap-2">
+        <input id="city-search" type="search" autocomplete="off" spellcheck="false" class="w-full rounded-xl px-3 py-2 text-sm bg-transparent border border-current text-custom-secondary">
+        <p data-target="city-status" class="text-xs text-custom-secondary" role="status" aria-live="polite"></p>
+        <div data-target="city-results" class="flex flex-col gap-1" role="listbox"></div>
+      </div>
+    </section>
+
+    <section id="events-card" class="glass-card rounded-3xl p-5 md:p-8 opacity-0 translate-y-4 transition-all duration-500">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><svg data-lucide="calendar-check" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="m9 15 2 2 4-4"></path></svg></span>
+        <h2 data-i18n="eventsLabel" class="text-sm font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">Upcoming Events</h2>
+      </div>
+      <div data-target="events-list" class="space-y-4"></div>
+    </section>
+    </div>
+  </main>
+  </div>
+  <footer class="mt-16 text-center text-custom-secondary text-xs pb-10">
+    <p data-i18n="footer">Updated daily.</p>
+    <p data-i18n="privacy" class="mt-2 max-w-md mx-auto whitespace-pre-line"></p>
+    <p data-target="credits" class="mt-2 max-w-md mx-auto"></p>
+  </footer>
+
+  <script>/*! adhan-js 4.4.6 | MIT License | Copyright (c) Batoul Apps | https://github.com/batoulapps/adhan-js */
 "use strict";
 (() => {
   var __defProp = Object.defineProperty;
