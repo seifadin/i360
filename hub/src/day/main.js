@@ -101,8 +101,6 @@ const Net = { fetch: fetchJson };
    can't be reached; the label says which. The browser keeps the Worker's answer (its cache headers),
    so the page saves nothing itself. k = the day shift between the calculator and that date, used
    to project the events. */
-try { localStorage.removeItem('hj-v9'); } catch (e) { /* the page's own saved copy until 2026-10; no longer used */ }
-try { localStorage.removeItem('sc-v8'); } catch (e) { /* the GPS position saved until 2026-10-22: the page no longer asks for it */ }
 const Hijri = {
   today: () => HijriCalc.todayIn(Intl.DateTimeFormat().resolvedOptions().timeZone),
   make(date, h, source, provisional) {
@@ -205,7 +203,7 @@ const City = {
     return (c && typeof c.lat === 'number' && typeof c.lng === 'number' && c.tz && c.cc) ? c : this.auto();
   },
   picked() { return !!DataStore.get(CONFIG.S.CITY, null); },
-  set(c) { if (c) DataStore.set(CONFIG.S.CITY, c); else { try { localStorage.removeItem(CONFIG.S.CITY); } catch (e) { /* ignore */ } } },
+  set(c) { if (c) DataStore.set(CONFIG.S.CITY, c); else DataStore.remove(CONFIG.S.CITY); },
   // The name in the page's language: the table has all five; a picked city keeps the name it was picked by.
   name(c, lang) { return (c.n && (c.n[lang] || c.n.en)) || c.name || '—'; },
   // Letters written more than one way, so a search finds the place whichever was typed:

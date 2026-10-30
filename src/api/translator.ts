@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from '@i360/net'
+
 const TRANSLATOR_URL_DEFAULT = import.meta.env.VITE_TRANSLATOR_URL
 const TRANSLATOR_KEY = import.meta.env.VITE_TRANSLATOR_KEY
 
@@ -24,26 +26,23 @@ export async function translateToArabic(text: string, translatorUrl?: string): P
   if (isArabic(text)) return text
   const url = translatorUrl || `${TRANSLATOR_URL_DEFAULT}?api-version=3.0&to=ar`
 
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), TRANSLATE_TIMEOUT_MS)
-  try {
-    const res = await fetch(
-      url,
-      {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
-          'Ocp-Apim-Subscription-Region': 'global',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([{ text }]),
-      }
-    )
-    if (!res.ok) throw new Error(`translateToArabic failed: ${res.status}`)
-    const data = await res.json()
-    return data[0]?.translations?.[0]?.text ?? text
-  } finally {
-    clearTimeout(timer)
-  }
+  // The limit covers reading the answer too (hub/src/net.js, shared with the hub pages).
+  return fetchWithTimeout(
+    url,
+    {
+      method: 'POST',
+      timeout: TRANSLATE_TIMEOUT_MS,
+      headers: {
+        'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
+        'Ocp-Apim-Subscription-Region': 'global',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([{ text }]),
+    },
+    async (res): Promise<string> => {
+      if (!res.ok) throw new Error(`translateToArabic failed: ${res.status}`)
+      const data = await res.json()
+      return data[0]?.translations?.[0]?.text ?? text
+    },
+  )
 }

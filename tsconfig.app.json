@@ -26,6 +26,9 @@
       ],
       "@i360/theme-loader": [
         "./hub/theme/site/theme-loader.js"
+      ],
+      "@i360/net": [
+        "./hub/src/net.js"
       ]
     },
     "noImplicitReturns": true,

@@ -1,6 +1,7 @@
 // The Reader: the toast, the reading position kept per book, links to a page (#p=…), and
 // page bookmarks.
 import { IN_APP } from '../page-chrome.js';
+import { createStore } from '../storage.js';
 import { POSITIONS_MAX, SAVE_DEBOUNCE_MS, TOAST_MS } from './text.js';
 import { btnBookmark, sidePanel, state, storeGet, storeSet, t, toWestern, toastEl } from './state.js';
 import { captureAnchor, restoreAnchor } from './view.js';
@@ -101,10 +102,10 @@ function updateHash() {
    https address ending in "file="; then the book's own address and the page are added.
    Without it: on the web, this page's own address (already a public link); inside the
    app, nothing — the app's internal address must never be copied (the button hides). */
-const MD_READER_KEY = 'i360.mdReader';
+const MD_READER_KEY = 'i360.mdReader';   // written by the app as JSON, like every setting (src/storage.js)
+const appStore = createStore();
 function readerBase() {
-  let v;
-  try { v = localStorage.getItem(MD_READER_KEY); } catch { return null; }
+  const v = appStore.get(MD_READER_KEY, null);
   if (typeof v !== 'string' || !/[?&]file=$/.test(v)) return null;
   try {
     const u = new URL(v);

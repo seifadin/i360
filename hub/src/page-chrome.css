@@ -103,7 +103,16 @@
 .toolbar-menu .toolbar-btn { min-width: var(--toolbar-btn-min); }
 .toolbar-btn:hover:not(:disabled), .toolbar-btn[aria-expanded="true"] { background-color: var(--toolbar-hover); color: var(--toolbar-icon-hover); }
 .toolbar-btn[aria-pressed="true"] { background-color: var(--toolbar-active); color: var(--toolbar-icon-hover); }
-.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
+/* Keyboard focus: one ring, shown only when a control is reached by keyboard — a thin gap in the
+   page colour, then the focus colour, so it shows on a filled button too (a ring, not an outline:
+   some WebViews draw outlines square on rounded buttons). On every toolbar button, and on every
+   control of the hub pages (<body class="i360-page">; text boxes keep their own focus border).
+   The app's other controls keep their own rings (Tailwind's). */
+.toolbar-btn:focus-visible,
+.i360-page :is(button, a, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--i360-bg, #FAF7F2), 0 0 0 4px var(--toolbar-focus);
+}
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* Icons: Lucide (lucide.dev, ISC licence), drawn inline and tagged data-lucide on every page;

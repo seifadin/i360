@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-can7HWxd6BNNwWrLtvF2tcOAJuCItdeoaIi3EZ1mzOE='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-iKbVjtwgr4PfQL6K1qywbsWDGhRW1B7EhrtxTEEO1+E='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev http://localhost:* http://127.0.0.1:*; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>البحث في &#x2066;i360إ&#x2069;</title>
   <meta name="description" content="ابحث في نصوص الكتب والمقالات المرتبطة بالموسوعة الإسلامية i360إ، مرتبةً حسب العلوم الشرعية.">
@@ -273,7 +273,16 @@
 .toolbar-menu .toolbar-btn { min-width: var(--toolbar-btn-min); }
 .toolbar-btn:hover:not(:disabled), .toolbar-btn[aria-expanded="true"] { background-color: var(--toolbar-hover); color: var(--toolbar-icon-hover); }
 .toolbar-btn[aria-pressed="true"] { background-color: var(--toolbar-active); color: var(--toolbar-icon-hover); }
-.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
+/* Keyboard focus: one ring, shown only when a control is reached by keyboard — a thin gap in the
+   page colour, then the focus colour, so it shows on a filled button too (a ring, not an outline:
+   some WebViews draw outlines square on rounded buttons). On every toolbar button, and on every
+   control of the hub pages (<body class="i360-page">; text boxes keep their own focus border).
+   The app's other controls keep their own rings (Tailwind's). */
+.toolbar-btn:focus-visible,
+.i360-page :is(button, a, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--i360-bg, #FAF7F2), 0 0 0 4px var(--toolbar-focus);
+}
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* Icons: Lucide (lucide.dev, ISC licence), drawn inline and tagged data-lucide on every page;
@@ -366,7 +375,6 @@ svg[data-lucide] {
       font-weight: 700;
       cursor: pointer;
     }
-    .search-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--i360-focus) 40%, transparent); }
 
     .options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
     .chip {
@@ -384,7 +392,6 @@ svg[data-lucide] {
       cursor: pointer;
     }
     .chip[aria-pressed="true"] { background: var(--i360-active); border-color: var(--i360-focus); color: var(--i360-heading); font-weight: 700; }
-    .chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .chip-box { width: 0.9rem; height: 0.9rem; border: 1.5px solid currentColor; border-radius: 0.2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1; }
     .chip[aria-pressed="true"] .chip-box::after { content: '✓'; }
 
@@ -421,13 +428,13 @@ svg[data-lucide] {
       font-weight: 700;
       color: var(--i360-heading);
       user-select: none;
+      border-radius: 0.5rem;   /* the keyboard focus ring follows the box's corners */
     }
     details.major > summary { font-size: 1.2rem; }
     details.major > summary:hover, details.inter > summary:hover { background: var(--i360-hover); border-radius: 0.5rem; }
     details > summary::-webkit-details-marker { display: none; }
     details.major > summary::before, details.inter > summary::before { content: '◂'; color: var(--i360-muted); font-size: 0.8rem; transition: transform 0.15s; }
     details.major[open] > summary::before, details.inter[open] > summary::before { transform: rotate(-90deg); }
-    details.major > summary:focus-visible, details.inter > summary:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--i360-focus); border-radius: 0.5rem; }
     .major-body { padding: 0 0.85rem 0.75rem; }
     .inter-body { padding: 0 0.85rem 0.75rem; }
 
@@ -439,7 +446,6 @@ svg[data-lucide] {
 
     .hit { display: block; margin-top: 0.35rem; padding: 0.35rem 0.5rem; border-radius: 0.375rem; color: inherit; text-decoration: none; }
     .hit:hover { background: var(--i360-hover); }
-    .hit:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .hit-meta { display: flex; gap: 0.6rem; font-size: 0.8rem; color: var(--i360-link); font-weight: 700; }
     .hit-meta .more-spots { color: var(--i360-muted); font-weight: 400; }
     .hit-text { font-family: 'Amiri', serif; font-size: 1.08rem; line-height: 1.9; }
@@ -458,14 +464,13 @@ svg[data-lucide] {
       cursor: pointer;
     }
     .more-btn:hover { background: var(--i360-hover); }
-    .more-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .more-btn.icon-btn { display: inline-flex; align-items: center; padding: 0.2rem 0.45rem; }
     /* Icons: Lucide (lucide.dev, ISC licence), drawn inline; checked by scripts/icons.js. Their
        sizes here; their drawing style for every page: src/page-chrome.css. */
     .icon-btn svg { width: 1.15rem; height: 1.15rem; }
   </style>
 </head>
-<body>
+<body class="i360-page">
   <header class="toolbar">
     <!-- The name stays "i360إ" in Arabic text: a left-to-right isolate keeps
          the إ after "i360" (otherwise it shows as "إi360"), and a left-to-right
@@ -1165,6 +1170,22 @@ svg[data-lucide] {
     return s ? `?${s}` : "";
   }
 
+  // src/net.js
+  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => (
+    /** @type {any} */
+    response
+  )) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (controller) controller.abort();
+    }, timeout);
+    try {
+      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // src/page-chrome.js
   var $ = (id) => document.getElementById(id);
   var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
@@ -1274,7 +1295,7 @@ svg[data-lucide] {
   var BuildGone = class extends Error {
   };
   async function fetchData(path, kind) {
-    const res = await fetch(state.dataBase + path, path === "latest.json" ? { cache: "no-cache" } : {});
+    const res = await fetchWithTimeout(state.dataBase + path, path === "latest.json" ? { cache: "no-cache" } : {});
     if (res.status === 404 && path.startsWith("b/")) throw new BuildGone(path);
     if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
     return kind === "bin" ? res.arrayBuffer() : res.json();

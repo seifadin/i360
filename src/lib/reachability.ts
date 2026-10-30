@@ -1,4 +1,5 @@
 import { CapacitorHttp } from '@capacitor/core'
+import { wait } from '@i360/net'
 
 // One status probe via CapacitorHttp — shared by the resource pre-check
 // (ScienceGrid) and the OTA safety net (startupHealth). Native: no CORS, a
@@ -29,7 +30,7 @@ const PAGE_RETRY_BACKOFF_MS = 800 // one retry: 2 tries in total
 // and network failures do not.
 export async function checkPageReachable(url: string): Promise<boolean> {
   for (let attempt = 0; attempt < 2; attempt++) {
-    if (attempt > 0) await new Promise(resolve => setTimeout(resolve, PAGE_RETRY_BACKOFF_MS))
+    if (attempt > 0) await wait(PAGE_RETRY_BACKOFF_MS)
     const status = await probeStatus(url, PAGE_TIMEOUT_MS, 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
     if (status !== null) return (status >= 200 && status < 400) || status === 403
   }

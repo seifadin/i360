@@ -101,6 +101,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '@i360/theme-loader': THEME_LOADER,
+      '@i360/net': fileURLToPath(new URL('./hub/src/net.js', import.meta.url)),
     },
   },
   define: {

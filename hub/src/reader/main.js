@@ -4,6 +4,7 @@
 // defines its own functions; this file opens files, starts the Reader, and hooks the parts up in order.
 import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as LibCopy from '../lib-copy.js';
+import { fetchWithTimeout } from '../net.js';
 import { setupClose } from '../page-chrome.js';
 import { TEXT_SCALES } from './text.js';
 import { btnClose, btnOpenFile, btnSearchList, checkConnection, fileInput, hashText, optDiacritics, optWord, parseBook, search, state, storeGet, wireState } from './state.js';
@@ -58,7 +59,8 @@ async function initApp() {
     if (own) {
       try {
         setProgress('downloading', 0, 0);
-        const response = await fetch(own);
+        // The limit covers waiting for the answer only, so a big book is never cut off mid-download.
+        const response = await fetchWithTimeout(own);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const text = await response.text();
         state.bookLink = own;
@@ -78,7 +80,7 @@ async function initApp() {
     // book at the end (the same shared parseBook; the same pages — test/lib-copy.test.js).
     const parts = [];
     try {
-      copy = await LibCopy.open(link, fetch, (done, total) => setProgress('downloading', done, total), (c, text) => { parts[c] = parseBook(text); });
+      copy = await LibCopy.open(link, fetchWithTimeout, (done, total) => setProgress('downloading', done, total), (c, text) => { parts[c] = parseBook(text); });
     } catch {
       renderEmpty([{ type: 'unverified' }]);   // the lib site couldn't be asked
       void checkConnection();

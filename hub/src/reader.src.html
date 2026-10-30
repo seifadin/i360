@@ -426,7 +426,6 @@
       cursor: pointer;
     }
     .opt-btn[aria-pressed="true"] { background: var(--i360-active); color: var(--i360-icon-hover); border-color: var(--i360-focus); }
-    .opt-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .search-results {
       list-style: none;
       max-height: min(45vh, 22rem);
@@ -590,7 +589,7 @@
     }
   </style>
 </head>
-<body>
+<body class="i360-page">
 
   <!-- Toolbar (i360-hub.md §10 "Toolbars"), everything on it as on a wide screen; it follows the UI
        language (in Arabic its start is on the right). Start: ⋮, theme, numerals, the connection

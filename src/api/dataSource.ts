@@ -6,6 +6,8 @@ const TABLE_SCIENCES = import.meta.env.VITE_BASEROW_TABLE_SCIENCES
 const TABLE_RESOURCES = import.meta.env.VITE_BASEROW_TABLE_RESOURCES
 const TABLE_QURAN = import.meta.env.VITE_BASEROW_TABLE_QURAN
 
+import { fetchWithTimeout, wait } from '@i360/net'
+
 const headers = {
   Authorization: `Token ${API_KEY}`,
   'Content-Type': 'application/json',
@@ -86,20 +88,14 @@ async function fetchWithRetry(url: string): Promise<Response> {
   let lastError: unknown
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      await new Promise(resolve => setTimeout(resolve, RETRY_BACKOFF_MS[attempt - 1]))
-    }
-
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+    if (attempt > 0) await wait(RETRY_BACKOFF_MS[attempt - 1] ?? 0)
 
     try {
-      const res = await fetch(url, { headers, signal: controller.signal })
-      clearTimeout(timeoutId)
+      // The limit covers waiting for the answer (hub/src/net.js, shared with the hub pages).
+      const res = await fetchWithTimeout(url, { headers, timeout: FETCH_TIMEOUT_MS })
       if (!res.ok) throw new Error(`Baserow fetch failed: ${res.status}`)
       return res
     } catch (err) {
-      clearTimeout(timeoutId)
       lastError = err
       // loop continues to the next attempt, unless this was the last one
     }

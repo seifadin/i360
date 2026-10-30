@@ -11,6 +11,9 @@ export function createStore(prefix = '') {
     },
     set(key, value) {
       try { localStorage.setItem(prefix + key, JSON.stringify(value)); } catch { /* not remembered */ }
+    },
+    remove(key) {
+      try { localStorage.removeItem(prefix + key); } catch { /* nothing to forget */ }
     }
   };
 }

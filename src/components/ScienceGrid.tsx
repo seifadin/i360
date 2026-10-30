@@ -7,6 +7,7 @@ import { Science } from '@/api/dataSource'
 import { computeIsGMSorApple, computeUseHuawei, resolveEffectiveOS } from '@/hooks/usePlatform'
 import { groupSciences } from '@/lib/groupSciences'
 import { checkPageReachable } from '@/lib/reachability'
+import { wait } from '@i360/net'
 import { openResource, ownPagePath } from '@/lib/openResource'
 import { loadIcon } from '@/lib/iconLoader'
 import { REPORT_SUBJECTS } from '@/lib/feedbackReport'
@@ -215,7 +216,7 @@ export default function ScienceGrid() {
           return
         }
         setCheckFlash(true)
-        await new Promise(resolve => setTimeout(resolve, CHECK_FLASH_MS))
+        await wait(CHECK_FLASH_MS)
         setCheckFlash(false)
       }
       await openOrOffer(url)

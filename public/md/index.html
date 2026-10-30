@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-qjvf2Cg3PIEBxRquiVal+NUEPtXdclu2lP4XA7Xrv1Y='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WkPY6ipCQu6E5+yVzO0EVmPK/xn6yA9yZ7BueOW/ZZk=' 'sha256-ffi/nOcMzH0kNJRPlGmXTczP0XShfBI9XJfg5KJdTl4='; style-src 'unsafe-inline'; font-src https://theme.i36o.workers.dev; connect-src https://theme.i36o.workers.dev https://lib.i36o.workers.dev; img-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>قارئ الماركداون</title>
 
@@ -271,7 +271,16 @@
 .toolbar-menu .toolbar-btn { min-width: var(--toolbar-btn-min); }
 .toolbar-btn:hover:not(:disabled), .toolbar-btn[aria-expanded="true"] { background-color: var(--toolbar-hover); color: var(--toolbar-icon-hover); }
 .toolbar-btn[aria-pressed="true"] { background-color: var(--toolbar-active); color: var(--toolbar-icon-hover); }
-.toolbar-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--toolbar-focus); }
+/* Keyboard focus: one ring, shown only when a control is reached by keyboard — a thin gap in the
+   page colour, then the focus colour, so it shows on a filled button too (a ring, not an outline:
+   some WebViews draw outlines square on rounded buttons). On every toolbar button, and on every
+   control of the hub pages (<body class="i360-page">; text boxes keep their own focus border).
+   The app's other controls keep their own rings (Tailwind's). */
+.toolbar-btn:focus-visible,
+.i360-page :is(button, a, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--i360-bg, #FAF7F2), 0 0 0 4px var(--toolbar-focus);
+}
 .toolbar-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* Icons: Lucide (lucide.dev, ISC licence), drawn inline and tagged data-lucide on every page;
@@ -715,7 +724,6 @@ svg[data-lucide] {
       cursor: pointer;
     }
     .opt-btn[aria-pressed="true"] { background: var(--i360-active); color: var(--i360-icon-hover); border-color: var(--i360-focus); }
-    .opt-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--i360-focus); }
     .search-results {
       list-style: none;
       max-height: min(45vh, 22rem);
@@ -879,7 +887,7 @@ svg[data-lucide] {
     }
   </style>
 </head>
-<body>
+<body class="i360-page">
 
   <!-- Toolbar (i360-hub.md §10 "Toolbars"), everything on it as on a wide screen; it follows the UI
        language (in Arabic its start is on the right). Start: ⋮, theme, numerals, the connection
@@ -1444,6 +1452,22 @@ ${body}`;
     return { source, books: itemBooks(catalog, source), text: texts.filter(Boolean).join("\n\n") };
   }
 
+  // src/net.js
+  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => (
+    /** @type {any} */
+    response
+  )) {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (controller) controller.abort();
+    }, timeout);
+    try {
+      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // src/page-chrome.js
   var $ = (id) => document.getElementById(id);
   var IN_APP = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
@@ -1864,21 +1888,14 @@ ${body}`;
           localStorage.setItem(prefix + key, JSON.stringify(value));
         } catch {
         }
+      },
+      remove(key) {
+        try {
+          localStorage.removeItem(prefix + key);
+        } catch {
+        }
       }
     };
-  }
-
-  // src/net.js
-  async function fetchWithTimeout(url, { timeout = 8e3, ...options } = {}, read2 = (response) => response) {
-    const controller = typeof AbortController === "function" ? new AbortController() : null;
-    const timer = setTimeout(() => {
-      if (controller) controller.abort();
-    }, timeout);
-    try {
-      return await read2(await fetch(url, { ...options, signal: controller ? controller.signal : void 0 }));
-    } finally {
-      clearTimeout(timer);
-    }
   }
 
   // src/reader/state.js
@@ -4563,13 +4580,9 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
     }
   }
   var MD_READER_KEY = "i360.mdReader";
+  var appStore = createStore();
   function readerBase() {
-    let v;
-    try {
-      v = localStorage.getItem(MD_READER_KEY);
-    } catch {
-      return null;
-    }
+    const v = appStore.get(MD_READER_KEY, null);
     if (typeof v !== "string" || !/[?&]file=$/.test(v)) return null;
     try {
       const u = new URL(v);
@@ -5259,7 +5272,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
       if (own) {
         try {
           setProgress("downloading", 0, 0);
-          const response = await fetch(own);
+          const response = await fetchWithTimeout(own);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const text = await response.text();
           state.bookLink = own;
@@ -5283,7 +5296,7 @@ ${fmtNum(t().position(idx + 1, state.pages.length))}`);
       let copy;
       const parts = [];
       try {
-        copy = await open(link, fetch, (done, total) => setProgress("downloading", done, total), (c, text) => {
+        copy = await open(link, fetchWithTimeout, (done, total) => setProgress("downloading", done, total), (c, text) => {
           parts[c] = parseBook2(text);
         });
       } catch {

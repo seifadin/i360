@@ -55,11 +55,13 @@ function cacheFeedbackMailto(sciences: Science[]): void {
 // the app's own Reader page (public/md/, same site and storage): its "copy link" builds the
 // public link from it instead of copying the app's internal address (i360-hub.md §10). The
 // Reader checks the value before using it. Kept when a load lacks it, like the feedback link.
+// Stored as JSON, the format the hub pages' settings use (hub/src/storage.js): the Reader reads it
+// through the same helper.
 const MD_READER_KEY = 'i360.mdReader'
 
 function cacheMdReader(resource: Resource | null): void {
   if (resource && typeof resource.MdReader === 'string' && resource.MdReader.trim()) {
-    setStoredItem(MD_READER_KEY, resource.MdReader.trim())
+    setStoredItem(MD_READER_KEY, JSON.stringify(resource.MdReader.trim()))
   }
 }
 

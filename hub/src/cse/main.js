@@ -4,6 +4,7 @@ import * as i360Theme from '../../theme/site/theme-loader.js';
 import * as SearchCore from '../search-core.js';
 import * as CseIndex from '../cse-index.js';
 import * as CseView from '../cse-view.js';
+import { fetchWithTimeout } from '../net.js';
 import { $, IN_APP, setupClose, THEME_ICONS } from '../page-chrome.js';
 import { CSE as LOCALES } from '../locales.js';
 
@@ -78,7 +79,8 @@ function setStatus(text, { error = false, retry = null } = {}) {
 class BuildGone extends Error {}
 
 async function fetchData(path, kind) {
-  const res = await fetch(state.dataBase + path, path === 'latest.json' ? { cache: 'no-cache' } : {});
+  // The limit covers waiting for the answer only (src/net.js), not reading a big part of the index.
+  const res = await fetchWithTimeout(state.dataBase + path, path === 'latest.json' ? { cache: 'no-cache' } : {});
   if (res.status === 404 && path.startsWith('b/')) throw new BuildGone(path);
   if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
   return kind === 'bin' ? res.arrayBuffer() : res.json();
